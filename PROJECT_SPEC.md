@@ -133,6 +133,7 @@ To mitigate this responsibility, onboarding generates recovery codes (BIP39-styl
 - We never integrate third-party tracking pixels in the app
 - We never show ads
 - We never share data with authorities without a valid legal warrant, and even then we can only share encrypted blobs that we ourselves cannot read
+- We never process your data outside the European Union when using cloud synthesis on paid tiers
 
 ### Verifiability
 
