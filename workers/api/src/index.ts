@@ -1,5 +1,5 @@
 export interface Env {
-  sonabrief_db: D1Database;
+  DB: D1Database;
   RESEND_API_KEY: string;
   APP_URL: string;
 }
@@ -34,18 +34,18 @@ async function handleAuthRequest(request: Request, env: Env, cors: Record<string
   if (!email) return new Response('Email required', { status: 400, headers: cors });
 
   const userId = crypto.randomUUID();
-  await env.sonabrief_db.prepare(
+  await env.DB.prepare(
     `INSERT OR IGNORE INTO users (id, email, created_at) VALUES (?, ?, ?)`
   ).bind(userId, email, Date.now()).run();
 
-  const user = await env.sonabrief_db.prepare(
+  const user = await env.DB.prepare(
     `SELECT id FROM users WHERE email = ?`
   ).bind(email).first<{ id: string }>();
 
   const token = crypto.randomUUID();
   const expiresAt = Date.now() + 1000 * 60 * 15; // 15 minuti
 
-  await env.sonabrief_db.prepare(
+  await env.DB.prepare(
     `INSERT INTO magic_tokens (token, user_id, expires_at) VALUES (?, ?, ?)`
   ).bind(token, user!.id, expiresAt).run();
 
@@ -75,7 +75,7 @@ async function handleAuthVerify(request: Request, env: Env, cors: Record<string,
   const token = url.searchParams.get('token');
   if (!token) return new Response('Token required', { status: 400, headers: cors });
 
-  const record = await env.sonabrief_db.prepare(
+  const record = await env.DB.prepare(
     `SELECT * FROM magic_tokens WHERE token = ? AND used = 0 AND expires_at > ?`
   ).bind(token, Date.now()).first<{ user_id: string }>();
 
@@ -84,7 +84,7 @@ async function handleAuthVerify(request: Request, env: Env, cors: Record<string,
     headers: { ...cors, 'Content-Type': 'application/json' },
   });
 
-  await env.sonabrief_db.prepare(
+  await env.DB.prepare(
     `UPDATE magic_tokens SET used = 1 WHERE token = ?`
   ).bind(token).run();
 
