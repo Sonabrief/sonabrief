@@ -1,5 +1,6 @@
 import type { Env } from "../lib/env";
 import { corsHeaders } from "../lib/cors";
+import { createSession, destroySession, getUserFromSession } from "../lib/sessions";
 
 export async function handleAuthRequest(request: Request, env: Env): Promise<Response> {
   const cors = corsHeaders(request, env);
@@ -22,7 +23,7 @@ export async function handleAuthRequest(request: Request, env: Env): Promise<Res
     .first<{ id: string }>();
 
   const token = crypto.randomUUID();
-  const expiresAt = Date.now() + 1000 * 60 * 15; // 15 minuti
+  const expiresAt = Date.now() + 1000 * 60 * 15;
 
   await env.DB.prepare(
     `INSERT INTO magic_tokens (token, user_id, expires_at) VALUES (?, ?, ?)`
@@ -80,7 +81,50 @@ export async function handleAuthVerify(request: Request, env: Env): Promise<Resp
     .bind(token)
     .run();
 
+  const { cookieHeader } = await createSession(env, record.user_id, request);
+
   return new Response(JSON.stringify({ ok: true, userId: record.user_id }), {
+    headers: {
+      ...cors,
+      "Content-Type": "application/json",
+      "Set-Cookie": cookieHeader,
+    },
+  });
+}
+
+export async function handleAuthLogout(request: Request, env: Env): Promise<Response> {
+  const cors = corsHeaders(request, env);
+  const user = await getUserFromSession(request, env);
+
+  if (!user) {
+    return new Response(JSON.stringify({ ok: true }), {
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }
+
+  const clearCookieHeader = await destroySession(env, user.sessionId);
+
+  return new Response(JSON.stringify({ ok: true }), {
+    headers: {
+      ...cors,
+      "Content-Type": "application/json",
+      "Set-Cookie": clearCookieHeader,
+    },
+  });
+}
+
+export async function handleAuthMe(request: Request, env: Env): Promise<Response> {
+  const cors = corsHeaders(request, env);
+  const user = await getUserFromSession(request, env);
+
+  if (!user) {
+    return new Response(JSON.stringify({ ok: false }), {
+      status: 401,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }
+
+  return new Response(JSON.stringify({ ok: true, userId: user.userId }), {
     headers: { ...cors, "Content-Type": "application/json" },
   });
 }

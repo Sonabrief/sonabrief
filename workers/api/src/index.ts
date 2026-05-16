@@ -1,6 +1,11 @@
 import type { Env } from "./lib/env";
 import { handleCorsPreflightRequest } from "./lib/cors";
-import { handleAuthRequest, handleAuthVerify } from "./routes/auth";
+import {
+  handleAuthRequest,
+  handleAuthVerify,
+  handleAuthLogout,
+  handleAuthMe,
+} from "./routes/auth";
 
 export type { Env };
 
@@ -18,6 +23,12 @@ export default {
     }
     if (url.pathname === "/auth/verify" && request.method === "GET") {
       return handleAuthVerify(request, env);
+    }
+    if (url.pathname === "/auth/logout" && request.method === "POST") {
+      return handleAuthLogout(request, env);
+    }
+    if (url.pathname === "/auth/me" && request.method === "GET") {
+      return handleAuthMe(request, env);
     }
 
     return new Response("Not found", { status: 404 });
