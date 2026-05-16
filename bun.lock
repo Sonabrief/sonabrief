@@ -46,6 +46,9 @@
     },
     "workers/api": {
       "name": "api",
+      "dependencies": {
+        "zod": "^4.4.3",
+      },
       "devDependencies": {
         "@cloudflare/workers-types": "^4.20260515.1",
         "@types/bun": "latest",
