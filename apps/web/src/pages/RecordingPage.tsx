@@ -4,11 +4,13 @@ import { useAudioRecorder } from '../hooks/useAudioRecorder'
 import { whisper } from '../lib/whisper'
 import { Button } from '../components/ui/button'
 import { API_URL } from '../config'
+import { SynthesisEditor } from '../components/SynthesisEditor'
 
 const SYSTEM_PROMPT =
   'Sei un assistente esperto nella redazione di verbali aziendali. ' +
-  'Analizza la trascrizione del meeting e produci un verbale sintetico in italiano strutturato in: ' +
-  'riepilogo esecutivo, punti chiave discussi, decisioni prese, prossimi passi con eventuali responsabili.'
+  'Analizza la trascrizione del meeting e produci un verbale sintetico strutturato in: ' +
+  'riepilogo esecutivo, punti chiave discussi, decisioni prese, prossimi passi con eventuali responsabili. ' +
+  'Rileva automaticamente la lingua parlata nel meeting dalla trascrizione e scrivi il verbale nella stessa lingua.'
 
 function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
@@ -24,6 +26,7 @@ export default function RecordingPage() {
   const [transcript, setTranscript] = useState<string>('')
   const [synthesisState, setSynthesisState] = useState<'idle' | 'streaming' | 'done' | 'error'>('idle')
   const [synthesis, setSynthesis] = useState<string>('')
+  const [language, setLanguage] = useState<'it' | 'en' | 'fr' | 'es' | 'de'>('it')
 
   useEffect(() => {
     whisper.init()
@@ -54,7 +57,7 @@ export default function RecordingPage() {
 
   useEffect(() => {
     if (audioData && whisperState === 'ready') {
-      whisper.transcribe(audioData)
+      whisper.transcribe(audioData, language)
     }
   }, [audioData, whisperState])
 
@@ -70,7 +73,7 @@ export default function RecordingPage() {
         body: JSON.stringify({
           transcript,
           meeting_id: crypto.randomUUID(),
-          language: 'it',
+          language,
           system_prompt: SYSTEM_PROMPT,
           audio_minutes: Math.ceil(duration / 60),
         }),
@@ -162,15 +165,35 @@ export default function RecordingPage() {
 
       {/* Risultato sintesi */}
       {(synthesisState === 'streaming' || synthesisState === 'done') && (
-        <div className="w-full max-w-xl bg-teal-50 rounded-lg p-4 text-sm text-gray-700 whitespace-pre-wrap">
+        <div className="w-full max-w-xl">
           <p className="text-xs font-medium text-teal-700 mb-2 uppercase tracking-wide">Sintesi</p>
-          {synthesis}
-          {synthesisState === 'streaming' && <span className="animate-pulse">▍</span>}
+          <SynthesisEditor content={synthesis} />
+          {synthesisState === 'streaming' && (
+            <span className="mt-1 block text-sm text-gray-400 animate-pulse">▍</span>
+          )}
         </div>
       )}
 
       {synthesisState === 'error' && (
         <p className="text-sm text-red-500">Errore durante la sintesi. Riprova.</p>
+      )}
+
+      {/* Selettore lingua */}
+      {state === 'idle' && whisperState === 'ready' && (
+        <div className="flex flex-col gap-1 w-full max-w-xs">
+          <label className="text-xs text-gray-400">Lingua del meeting</label>
+          <select
+            value={language}
+            onChange={e => setLanguage(e.target.value as typeof language)}
+            className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
+          >
+            <option value="it">Italiano</option>
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="es">Español</option>
+            <option value="de">Deutsch</option>
+          </select>
+        </div>
       )}
 
       {/* Controlli */}

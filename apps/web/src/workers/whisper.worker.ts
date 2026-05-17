@@ -34,6 +34,7 @@ async function transcribe(audio: Float32Array, language?: string) {
   self.postMessage({ type: 'transcribing' } satisfies WhisperStatus)
   const result = await transcriber(audio, {
     return_timestamps: true,
+    ...(language ? { language } : {}),
   })
   const output = Array.isArray(result) ? result[0] : result
   self.postMessage({
