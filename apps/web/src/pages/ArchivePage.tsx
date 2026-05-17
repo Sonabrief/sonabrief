@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, type Meeting, type Note } from '../lib/db'
 import { SynthesisEditor } from '../components/SynthesisEditor'
+import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
 
 const LANG_LABEL: Record<string, string> = {
   it: 'Italiano',
@@ -30,6 +31,7 @@ export default function ArchivePage() {
   const [search, setSearch] = useState('')
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null)
   const [selectedNote, setSelectedNote] = useState<Note | null>(null)
+  const [copyDone, setCopyDone] = useState(false)
 
   const meetings = useLiveQuery(
     () => db.meetings.orderBy('startedAt').reverse().toArray(),
@@ -44,6 +46,16 @@ export default function ArchivePage() {
     setSelectedMeeting(meeting)
     const note = await db.notes.where('meetingId').equals(meeting.id).first()
     setSelectedNote(note ?? null)
+  }
+
+  function buildExportData() {
+    return {
+      title: selectedMeeting!.title,
+      date: formatDate(selectedMeeting!.startedAt),
+      duration: formatMinutes(selectedMeeting!.durationSeconds),
+      lang: LANG_LABEL[selectedMeeting!.lang ?? 'it'] ?? selectedMeeting!.lang ?? 'IT',
+      content: selectedNote!.content,
+    }
   }
 
   return (
@@ -100,12 +112,39 @@ export default function ArchivePage() {
       </div>
 
       {selectedMeeting && (
-        <div className="w-full max-w-2xl flex flex-col gap-2">
+        <div className="w-full max-w-2xl flex flex-col gap-4">
           <p className="text-xs font-medium text-teal-700 uppercase tracking-wide">
             Sintesi — {selectedMeeting.title}
           </p>
           {selectedNote ? (
-            <SynthesisEditor content={selectedNote.content} readonly />
+            <>
+              <SynthesisEditor content={selectedNote.content} readonly />
+
+              <div className="flex flex-wrap gap-2 pt-2">
+                {[
+                  { label: 'Markdown', action: () => exportMarkdown(buildExportData()) },
+                  { label: 'PDF', action: () => exportPDF(buildExportData()) },
+                  { label: 'Word', action: () => exportWord(buildExportData()) },
+                  { label: 'Email', action: () => exportEmail(buildExportData()) },
+                  {
+                    label: copyDone ? 'Copiato ✓' : 'Copia testo',
+                    action: async () => {
+                      await copyFormatted(buildExportData())
+                      setCopyDone(true)
+                      setTimeout(() => setCopyDone(false), 2000)
+                    },
+                  },
+                ].map(btn => (
+                  <button
+                    key={btn.label}
+                    onClick={btn.action}
+                    className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:border-teal-600 hover:text-teal-700 transition-colors"
+                  >
+                    {btn.label}
+                  </button>
+                ))}
+              </div>
+            </>
           ) : (
             <p className="text-sm text-gray-400">Nessuna sintesi disponibile.</p>
           )}

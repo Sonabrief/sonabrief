@@ -9,7 +9,12 @@ import { db } from '../lib/db'
 import { synthesizeWithOllama } from '../lib/ollama'
 import { syncMeetingNow } from '../lib/sync'
 import { isUnlocked } from '../lib/keystore'
- 
+import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
+
+const LANG_LABEL: Record<string, string> = {
+  it: 'Italiano', en: 'English', fr: 'Français', es: 'Español', de: 'Deutsch',
+}
+
 const SYSTEM_PROMPT =
   'Sei un assistente esperto nella redazione di verbali aziendali. ' +
   'Analizza la trascrizione del meeting e produci un verbale sintetico strutturato in: ' +
@@ -137,7 +142,23 @@ export default function RecordingPage() {
   const [mode, setMode] = useState<'standard' | 'local'>('standard')
   const [highlights, setHighlights] = useState<Highlight[]>([])
   const [notesOpen, setNotesOpen] = useState(false)
+  const [copyDone, setCopyDone] = useState(false)
   const meetingIdRef = useRef('')
+
+  function buildExportData() {
+    const now = Date.now()
+    const date = new Date(now).toLocaleString('it-IT', {
+      day: 'numeric', month: 'long', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    })
+    return {
+      title: `Meeting — ${date}`,
+      date,
+      duration: duration > 0 ? `${Math.ceil(duration / 60)} min` : '—',
+      lang: LANG_LABEL[language] ?? language,
+      content: synthesis,
+    }
+  }
  
   // ── Whisper init
   useEffect(() => {
@@ -217,7 +238,7 @@ export default function RecordingPage() {
     setSynthesisState('streaming')
     setSynthesis('')
 
-    const notes = localStorage.getItem('sonabrief_recording_notes') ?? undefined
+    const notes = localStorage.getItem('sonabrief_recording_notes')?.trim() || undefined
 
     if (mode === 'local') {
       await synthesizeWithOllama(
@@ -353,6 +374,32 @@ export default function RecordingPage() {
           <SynthesisEditor content={synthesis} />
           {synthesisState === 'streaming' && (
             <span className="mt-1 block text-sm text-gray-400 animate-pulse">▍</span>
+          )}
+          {synthesisState === 'done' && (
+            <div className="flex flex-wrap gap-2 pt-3">
+              {[
+                { label: 'Markdown', action: () => exportMarkdown(buildExportData()) },
+                { label: 'PDF', action: () => exportPDF(buildExportData()) },
+                { label: 'Word', action: () => exportWord(buildExportData()) },
+                { label: 'Email', action: () => exportEmail(buildExportData()) },
+                {
+                  label: copyDone ? 'Copiato ✓' : 'Copia testo',
+                  action: async () => {
+                    await copyFormatted(buildExportData())
+                    setCopyDone(true)
+                    setTimeout(() => setCopyDone(false), 2000)
+                  },
+                },
+              ].map(btn => (
+                <button
+                  key={btn.label}
+                  onClick={btn.action}
+                  className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:border-teal-600 hover:text-teal-700 transition-colors"
+                >
+                  {btn.label}
+                </button>
+              ))}
+            </div>
           )}
         </div>
       )}
