@@ -1,0 +1,150 @@
+import _sodium from 'libsodium-wrappers-sumo'
+await _sodium.ready
+const sodium = _sodium
+
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { unlockWithPassphrase, unlockWithRecoveryPhrase, persistKeyToSession } from '../lib/keystore'
+import { Button } from '../components/ui/button'
+
+export default function SyncUnlockPage() {
+  const navigate = useNavigate()
+
+  const [passphrase, setPassphrase] = useState('')
+  const [passphraseError, setPassphraseError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  const [showRecovery, setShowRecovery] = useState(false)
+  const [recoveryWords, setRecoveryWords] = useState<string[]>(Array(12).fill(''))
+  const [recoveryError, setRecoveryError] = useState('')
+  const [recoverySubmitting, setRecoverySubmitting] = useState(false)
+
+  async function handleUnlock() {
+    if (!passphrase) return
+    setSubmitting(true)
+    setPassphraseError('')
+    try {
+      const saltB64 = localStorage.getItem('sonabrief_sync_salt')
+      if (!saltB64) throw new Error('Salt non trovato')
+      const salt = sodium.from_base64(saltB64)
+      await unlockWithPassphrase(passphrase, salt)
+      await persistKeyToSession()
+      navigate('/dashboard')
+    } catch {
+      setPassphraseError('Passphrase errata')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  async function handleRecoveryUnlock() {
+    setRecoverySubmitting(true)
+    setRecoveryError('')
+    try {
+      unlockWithRecoveryPhrase(recoveryWords)
+      await persistKeyToSession()
+      navigate('/dashboard')
+    } catch {
+      setRecoveryError('Recovery phrase non valida')
+    } finally {
+      setRecoverySubmitting(false)
+    }
+  }
+
+  function updateWord(i: number, value: string) {
+    setRecoveryWords(prev => {
+      const next = [...prev]
+      next[i] = value.trim()
+      return next
+    })
+  }
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-white px-4">
+      <div className="w-full max-w-sm py-12 space-y-6">
+        {!showRecovery ? (
+          <>
+            <div className="space-y-1">
+              <h1 className="text-2xl font-semibold text-[#1A4D52]">
+                Sblocca il tuo archivio cifrato
+              </h1>
+              <p className="text-sm text-gray-500">
+                Inserisci la tua passphrase per accedere ai meeting sincronizzati
+              </p>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-700">Passphrase</label>
+              <input
+                type="password"
+                value={passphrase}
+                onChange={e => setPassphrase(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handleUnlock() }}
+                className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1A4D52]/40"
+                autoFocus
+              />
+              {passphraseError && (
+                <p className="text-xs text-red-600">{passphraseError}</p>
+              )}
+            </div>
+            <Button
+              className="w-full bg-[#1A4D52] hover:bg-[#1A4D52]/90 text-white"
+              onClick={handleUnlock}
+              disabled={!passphrase || submitting}
+            >
+              {submitting ? 'Sblocco in corso…' : 'Sblocca'}
+            </Button>
+            <button
+              onClick={() => setShowRecovery(true)}
+              className="w-full text-center text-sm text-[#1A4D52] underline underline-offset-4"
+            >
+              Ho perso la passphrase → usa recovery phrase
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="space-y-1">
+              <h1 className="text-2xl font-semibold text-[#1A4D52]">Recovery phrase</h1>
+              <p className="text-sm text-gray-500">
+                Inserisci le 12 parole nell'ordine corretto
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {recoveryWords.map((word, i) => (
+                <div key={i} className="flex items-center gap-1.5">
+                  <span className="w-5 shrink-0 text-right font-mono text-xs text-gray-400">
+                    {i + 1}.
+                  </span>
+                  <input
+                    type="text"
+                    value={word}
+                    onChange={e => updateWord(i, e.target.value)}
+                    className="min-w-0 flex-1 rounded border px-2 py-1 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[#1A4D52]/40"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                  />
+                </div>
+              ))}
+            </div>
+            {recoveryError && (
+              <p className="text-xs text-red-600">{recoveryError}</p>
+            )}
+            <Button
+              className="w-full bg-[#1A4D52] hover:bg-[#1A4D52]/90 text-white"
+              onClick={handleRecoveryUnlock}
+              disabled={recoveryWords.some(w => !w) || recoverySubmitting}
+            >
+              {recoverySubmitting ? 'Ripristino in corso…' : 'Ripristina accesso'}
+            </Button>
+            <button
+              onClick={() => setShowRecovery(false)}
+              className="w-full text-center text-sm text-gray-400 underline underline-offset-4"
+            >
+              Torna alla passphrase
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}

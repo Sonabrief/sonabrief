@@ -7,6 +7,8 @@ import { API_URL } from '../config'
 import { SynthesisEditor } from '../components/SynthesisEditor'
 import { db } from '../lib/db'
 import { synthesizeWithOllama } from '../lib/ollama'
+import { syncMeetingNow } from '../lib/sync'
+import { isUnlocked } from '../lib/keystore'
  
 const SYSTEM_PROMPT =
   'Sei un assistente esperto nella redazione di verbali aziendali. ' +
@@ -181,6 +183,10 @@ export default function RecordingPage() {
         id: crypto.randomUUID(), meetingId: id, content: synthesis,
         generatedAt: now, createdAt: now, updatedAt: now,
       })
+    }).then(() => {
+      if (localStorage.getItem('sonabrief_sync_enabled') === 'true' && isUnlocked()) {
+        syncMeetingNow(id)
+      }
     }).catch(err => console.error('[db] salvataggio meeting fallito:', err))
   }, [synthesisState])
  

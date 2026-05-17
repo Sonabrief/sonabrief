@@ -8,6 +8,7 @@ import {
 } from "./routes/auth";
 import { handleSynthesize } from "./routes/synthesize";
 import { handleTemplates } from "./routes/templates";
+import { handleSyncUpload, handleSyncDownload } from "./routes/sync";
 
 export type { Env };
 
@@ -33,6 +34,10 @@ export default {
       response = await handleSynthesize(request, env);
     } else if (url.pathname.startsWith("/v1/templates")) {
       response = await handleTemplates(request, env);
+    } else if (url.pathname === "/v1/sync/upload" && request.method === "POST") {
+      response = await handleSyncUpload(request, env);
+    } else if (url.pathname === "/v1/sync/download" && request.method === "POST") {
+      response = await handleSyncDownload(request, env);
     } else {
       response = new Response("Not found", { status: 404 });
     }

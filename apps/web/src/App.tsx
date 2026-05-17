@@ -4,7 +4,10 @@ import VerifyPage from './pages/VerifyPage';
 import DashboardPage from './pages/DashboardPage';
 import RecordingPage from './pages/RecordingPage';
 import ArchivePage from './pages/ArchivePage';
+import SyncSetupPage from './pages/SyncSetupPage';
+import SyncUnlockPage from './pages/SyncUnlockPage';
 import RequireAuth from './components/RequireAuth';
+import SyncGate from './components/SyncGate';
 
 export default function App() {
   return (
@@ -14,17 +17,33 @@ export default function App() {
         <Route path="/auth/verify" element={<VerifyPage />} />
         <Route path="/dashboard" element={
           <RequireAuth>
-            <DashboardPage />
+            <SyncGate>
+              <DashboardPage />
+            </SyncGate>
           </RequireAuth>
         } />
         <Route path="/recording" element={
           <RequireAuth>
-            <RecordingPage />
+            <SyncGate>
+              <RecordingPage />
+            </SyncGate>
           </RequireAuth>
         } />
         <Route path="/archive" element={
           <RequireAuth>
-            <ArchivePage />
+            <SyncGate>
+              <ArchivePage />
+            </SyncGate>
+          </RequireAuth>
+        } />
+        <Route path="/sync/setup" element={
+          <RequireAuth>
+            <SyncSetupPage />
+          </RequireAuth>
+        } />
+        <Route path="/sync/unlock" element={
+          <RequireAuth>
+            <SyncUnlockPage />
           </RequireAuth>
         } />
       </Routes>

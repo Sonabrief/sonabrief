@@ -5,6 +5,9 @@ export interface Env {
   // D1
   DB: D1Database;
 
+  // R2
+  BLOBS: R2Bucket;
+
   // Secrets
   RESEND_API_KEY: string;
   GROQ_API_KEY: string;

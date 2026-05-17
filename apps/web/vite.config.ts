@@ -13,6 +13,9 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['@huggingface/transformers'],
   },
+  define: {
+    global: 'globalThis',
+  },
   worker: {
     format: 'es',
   },
