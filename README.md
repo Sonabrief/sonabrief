@@ -36,6 +36,20 @@ Sonabrief is released under the [GNU Affero General Public License v3.0](./LICEN
 
 The Sonabrief name, logo, brand visual identity, and commercially curated content are protected separately and not covered by the open source license.
 
+## Contributing
+
+Contributions are welcome — bug reports, feature requests, documentation
+improvements, and pull requests. Please open an issue first for any
+significant change to discuss the approach.
+
+Sonabrief is dual-licensed (AGPL v3 + commercial). To accept external
+contributions while preserving this flexibility, we ask all contributors
+to sign the Contributor License Agreement ([CLA.md](./CLA.md)).
+
+Signing is automatic: when you open a Pull Request, the CLA Assistant
+bot will ask you to confirm by commenting on the PR. Once signed, it
+applies to all your future contributions to the project.
+
 ## Contact
 
 - Website: [sonabrief.com](https://sonabrief.com)
