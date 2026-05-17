@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAudioRecorder } from '../hooks/useAudioRecorder'
 import { whisper } from '../lib/whisper'
@@ -6,63 +6,153 @@ import { Button } from '../components/ui/button'
 import { API_URL } from '../config'
 import { SynthesisEditor } from '../components/SynthesisEditor'
 import { db } from '../lib/db'
-
+ 
 const SYSTEM_PROMPT =
   'Sei un assistente esperto nella redazione di verbali aziendali. ' +
   'Analizza la trascrizione del meeting e produci un verbale sintetico strutturato in: ' +
   'riepilogo esecutivo, punti chiave discussi, decisioni prese, prossimi passi con eventuali responsabili. ' +
   'Rileva automaticamente la lingua parlata nel meeting dalla trascrizione e scrivi il verbale nella stessa lingua.'
-
+ 
 function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
   const s = (seconds % 60).toString().padStart(2, '0')
   return `${m}:${s}`
 }
-
+ 
+// ─── Waveform ────────────────────────────────────────────────────────────────
+ 
+function Waveform({ stream }: { stream: MediaStream | null }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const rafRef = useRef<number>(0)
+  const analyserRef = useRef<AnalyserNode | null>(null)
+  const ctxRef = useRef<AudioContext | null>(null)
+ 
+  useEffect(() => {
+    if (!stream) return
+    const audioCtx = new AudioContext()
+    const analyser = audioCtx.createAnalyser()
+    analyser.fftSize = 64
+    audioCtx.createMediaStreamSource(stream).connect(analyser)
+    analyserRef.current = analyser
+    ctxRef.current = audioCtx
+ 
+    const data = new Uint8Array(analyser.frequencyBinCount)
+    const canvas = canvasRef.current!
+    const ctx = canvas.getContext('2d')!
+    const BAR_COUNT = 20
+    const GAP = 3
+ 
+    function draw() {
+      analyser.getByteFrequencyData(data)
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      const barW = (canvas.width - GAP * (BAR_COUNT - 1)) / BAR_COUNT
+      for (let i = 0; i < BAR_COUNT; i++) {
+        const val = data[Math.floor(i * data.length / BAR_COUNT)] / 255
+        const h = Math.max(3, val * canvas.height)
+        const x = i * (barW + GAP)
+        const y = (canvas.height - h) / 2
+        ctx.fillStyle = `rgba(26, 77, 82, ${0.4 + val * 0.6})`
+        ctx.beginPath()
+        ctx.roundRect(x, y, barW, h, 2)
+        ctx.fill()
+      }
+      rafRef.current = requestAnimationFrame(draw)
+    }
+    draw()
+ 
+    return () => {
+      cancelAnimationFrame(rafRef.current)
+      audioCtx.close()
+    }
+  }, [stream])
+ 
+  return (
+    <canvas
+      ref={canvasRef}
+      width={200}
+      height={40}
+      className="opacity-80"
+    />
+  )
+}
+ 
+// ─── Highlights ──────────────────────────────────────────────────────────────
+ 
+interface Highlight {
+  ts: number   // secondi dall'inizio registrazione
+  label: string
+}
+ 
+// ─── Note panel ──────────────────────────────────────────────────────────────
+ 
+const NOTES_KEY = 'sonabrief_recording_notes'
+ 
+function NotesPanel({ visible }: { visible: boolean }) {
+  const [text, setText] = useState(() => localStorage.getItem(NOTES_KEY) ?? '')
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+ 
+  function handleChange(val: string) {
+    setText(val)
+    if (saveTimer.current) clearTimeout(saveTimer.current)
+    saveTimer.current = setTimeout(() => {
+      localStorage.setItem(NOTES_KEY, val)
+    }, 800)
+  }
+ 
+  useEffect(() => () => { if (saveTimer.current) clearTimeout(saveTimer.current) }, [])
+ 
+  if (!visible) return null
+ 
+  return (
+    <div className="fixed right-4 top-4 bottom-4 w-64 flex flex-col bg-white border border-gray-200 rounded-xl shadow-lg z-50">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
+        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Note</span>
+        <span className="text-[10px] text-gray-300">autosalvataggio</span>
+      </div>
+      <textarea
+        className="flex-1 resize-none p-3 text-sm text-gray-700 placeholder-gray-300 focus:outline-none rounded-b-xl"
+        placeholder="Scrivi note durante il meeting…"
+        value={text}
+        onChange={e => handleChange(e.target.value)}
+      />
+    </div>
+  )
+}
+ 
+// ─── Page ────────────────────────────────────────────────────────────────────
+ 
 export default function RecordingPage() {
   const navigate = useNavigate()
-  const { state, duration, error, start, stop, audioData, reset } = useAudioRecorder()
+  const { state, duration, error, start, stop, audioData, reset, stream } = useAudioRecorder()
   const [whisperState, setWhisperState] = useState<'loading' | 'ready' | 'transcribing' | 'done' | 'error'>('loading')
   const [whisperProgress, setWhisperProgress] = useState(0)
-  const [transcript, setTranscript] = useState<string>('')
+  const [transcript, setTranscript] = useState('')
   const [synthesisState, setSynthesisState] = useState<'idle' | 'streaming' | 'done' | 'error'>('idle')
-  const [synthesis, setSynthesis] = useState<string>('')
+  const [synthesis, setSynthesis] = useState('')
   const [language, setLanguage] = useState<'it' | 'en' | 'fr' | 'es' | 'de'>('it')
+  const [highlights, setHighlights] = useState<Highlight[]>([])
+  const [notesOpen, setNotesOpen] = useState(false)
   const meetingIdRef = useRef('')
-
+ 
+  // ── Whisper init
   useEffect(() => {
     whisper.init()
     const unsub = whisper.on((event) => {
-      if (event.type === 'loading') {
-        setWhisperProgress(event.progress)
-      }
-      if (event.type === 'ready') {
-        setWhisperState('ready')
-      }
-      if (event.type === 'transcribing') {
-        setWhisperState('transcribing')
-      }
-      if (event.type === 'result') {
-        setTranscript(event.text)
-        setWhisperState('done')
-      }
-      if (event.type === 'error') {
-        setWhisperState('error')
-      }
+      if (event.type === 'loading') setWhisperProgress(event.progress)
+      if (event.type === 'ready') setWhisperState('ready')
+      if (event.type === 'transcribing') setWhisperState('transcribing')
+      if (event.type === 'result') { setTranscript(event.text); setWhisperState('done') }
+      if (event.type === 'error') setWhisperState('error')
     })
     whisper.load('Xenova/whisper-base')
-    return () => {
-      unsub()
-      whisper.destroy()
-    }
+    return () => { unsub(); whisper.destroy() }
   }, [])
-
+ 
   useEffect(() => {
-    if (audioData && whisperState === 'ready') {
-      whisper.transcribe(audioData, language)
-    }
+    if (audioData && whisperState === 'ready') whisper.transcribe(audioData, language)
   }, [audioData, whisperState])
-
+ 
+  // ── Salvataggio DB
   useEffect(() => {
     if (synthesisState !== 'done') return
     const id = meetingIdRef.current
@@ -74,8 +164,7 @@ export default function RecordingPage() {
     })
     db.transaction('rw', [db.meetings, db.transcripts, db.notes], async () => {
       await db.meetings.add({
-        id,
-        title,
+        id, title,
         startedAt: now - duration * 1000,
         endedAt: now,
         durationSeconds: duration,
@@ -84,28 +173,40 @@ export default function RecordingPage() {
         createdAt: now,
         updatedAt: now,
       })
-      await db.transcripts.add({
-        id: crypto.randomUUID(),
-        meetingId: id,
-        text: transcript,
-        createdAt: now,
-      })
+      await db.transcripts.add({ id: crypto.randomUUID(), meetingId: id, text: transcript, createdAt: now })
       await db.notes.add({
-        id: crypto.randomUUID(),
-        meetingId: id,
-        content: synthesis,
-        generatedAt: now,
-        createdAt: now,
-        updatedAt: now,
+        id: crypto.randomUUID(), meetingId: id, content: synthesis,
+        generatedAt: now, createdAt: now, updatedAt: now,
       })
     }).catch(err => console.error('[db] salvataggio meeting fallito:', err))
   }, [synthesisState])
-
+ 
+  // ── Highlight hotkey
+  const addHighlight = useCallback(() => {
+    if (state !== 'recording') return
+    setHighlights(prev => [...prev, { ts: duration, label: `Highlight ${prev.length + 1}` }])
+  }, [state, duration])
+ 
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'h' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        addHighlight()
+      }
+      if (e.key === 'n' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        if (state === 'recording') setNotesOpen(o => !o)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [addHighlight, state])
+ 
+  // ── Sintesi
   async function generateSynthesis() {
     meetingIdRef.current = crypto.randomUUID()
     setSynthesisState('streaming')
     setSynthesis('')
-
     try {
       const response = await fetch(`${API_URL}/v1/synthesize`, {
         method: 'POST',
@@ -119,16 +220,10 @@ export default function RecordingPage() {
           audio_minutes: Math.ceil(duration / 60),
         }),
       })
-
-      if (!response.ok || !response.body) {
-        setSynthesisState('error')
-        return
-      }
-
+      if (!response.ok || !response.body) { setSynthesisState('error'); return }
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
       let buffer = ''
-
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
@@ -142,20 +237,16 @@ export default function RecordingPage() {
             if (event.type === 'chunk') setSynthesis(prev => prev + event.text)
             if (event.type === 'done') setSynthesisState('done')
             if (event.type === 'error') setSynthesisState('error')
-          } catch {
-            // ignora righe SSE malformate
-          }
+          } catch { /* ignora righe SSE malformate */ }
         }
       }
-    } catch {
-      setSynthesisState('error')
-    }
+    } catch { setSynthesisState('error') }
   }
-
+ 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-8 p-8">
       <h1 className="text-2xl font-semibold">Nuovo meeting</h1>
-
+ 
       {/* Stato Whisper */}
       {whisperState === 'loading' && (
         <div className="flex flex-col items-center gap-2 w-full max-w-xs">
@@ -173,12 +264,11 @@ export default function RecordingPage() {
           <p className="text-xs text-gray-300">Solo al primo utilizzo (~140MB)</p>
         </div>
       )}
-
-      {/* Timer */}
-      <div className="text-center space-y-1">
-        <p className="text-5xl font-mono tracking-widest">
-          {formatDuration(duration)}
-        </p>
+ 
+      {/* Timer + waveform */}
+      <div className="text-center space-y-3">
+        <p className="text-5xl font-mono tracking-widest">{formatDuration(duration)}</p>
+        {state === 'recording' && <Waveform stream={stream ?? null} />}
         <p className="text-sm text-gray-400">
           {state === 'idle' && whisperState === 'ready' && 'Scegli la sorgente audio e avvia'}
           {state === 'idle' && whisperState === 'loading' && 'Attendi il caricamento del modello...'}
@@ -189,22 +279,47 @@ export default function RecordingPage() {
           {state === 'error' && `Errore: ${error}`}
         </p>
       </div>
-
-      {/* Risultato trascrizione */}
+ 
+      {/* Highlights durante registrazione */}
+      {state === 'recording' && (
+        <div className="flex flex-col items-center gap-2">
+          <div className="flex gap-2 flex-wrap justify-center max-w-xs">
+            {highlights.map((h, i) => (
+              <span key={i} className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                ★ {formatDuration(h.ts)}
+              </span>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={addHighlight}
+              className="text-xs text-amber-600 border border-amber-300 rounded-full px-3 py-1 hover:bg-amber-50 transition-colors"
+            >
+              ★ Segna momento <span className="text-gray-400 ml-1">⌘H</span>
+            </button>
+            <button
+              onClick={() => setNotesOpen(o => !o)}
+              className="text-xs text-teal-600 border border-teal-200 rounded-full px-3 py-1 hover:bg-teal-50 transition-colors"
+            >
+              📝 Note <span className="text-gray-400 ml-1">⌘N</span>
+            </button>
+          </div>
+        </div>
+      )}
+ 
+      {/* Trascrizione */}
       {transcript && (
         <div className="w-full max-w-xl bg-gray-50 rounded-lg p-4 text-sm text-gray-700 whitespace-pre-wrap">
           {transcript}
         </div>
       )}
-
+ 
       {/* Bottone sintesi */}
       {whisperState === 'done' && transcript && synthesisState === 'idle' && (
-        <Button onClick={generateSynthesis}>
-          Genera sintesi
-        </Button>
+        <Button onClick={generateSynthesis}>Genera sintesi</Button>
       )}
-
-      {/* Risultato sintesi */}
+ 
+      {/* Sintesi */}
       {(synthesisState === 'streaming' || synthesisState === 'done') && (
         <div className="w-full max-w-xl">
           <p className="text-xs font-medium text-teal-700 mb-2 uppercase tracking-wide">Sintesi</p>
@@ -214,11 +329,11 @@ export default function RecordingPage() {
           )}
         </div>
       )}
-
+ 
       {synthesisState === 'error' && (
         <p className="text-sm text-red-500">Errore durante la sintesi. Riprova.</p>
       )}
-
+ 
       {/* Selettore lingua */}
       {state === 'idle' && whisperState === 'ready' && (
         <div className="flex flex-col gap-1 w-full max-w-xs">
@@ -236,55 +351,36 @@ export default function RecordingPage() {
           </select>
         </div>
       )}
-
-      {/* Controlli */}
+ 
+      {/* Controlli avvio */}
       {state === 'idle' && whisperState === 'ready' && (
         <div className="flex flex-col gap-3 w-full max-w-xs">
-          <Button onClick={() => start('microphone')}>
-            🎙 Solo microfono
-          </Button>
-          <Button variant="outline" onClick={() => start('tab')}>
-            🖥 Audio scheda browser
-          </Button>
-          <Button variant="outline" onClick={() => start('both')}>
-            🎙 + 🖥 Microfono e scheda
-          </Button>
+          <Button onClick={() => start('microphone')}>🎙 Solo microfono</Button>
+          <Button variant="outline" onClick={() => start('tab')}>🖥 Audio scheda browser</Button>
+          <Button variant="outline" onClick={() => start('both')}>🎙 + 🖥 Microfono e scheda</Button>
         </div>
       )}
-
+ 
       {state === 'recording' && (
-        <Button variant="destructive" onClick={stop}>
-          ⏹ Ferma registrazione
-        </Button>
+        <Button variant="destructive" onClick={stop}>⏹ Ferma registrazione</Button>
       )}
-
+ 
       {(whisperState === 'done' || state === 'error') && (
         <div className="flex gap-3">
-          <Button variant="outline" onClick={reset}>
-            Nuova registrazione
-          </Button>
-          <Button variant="outline" onClick={() => navigate('/dashboard')}>
-            Torna alla dashboard
-          </Button>
+          <Button variant="outline" onClick={reset}>Nuova registrazione</Button>
+          <Button variant="outline" onClick={() => navigate('/dashboard')}>Torna alla dashboard</Button>
         </div>
       )}
-
+ 
       {state === 'idle' && (
         <div className="flex gap-4">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="text-sm text-gray-400 underline"
-          >
-            Annulla
-          </button>
-          <button
-            onClick={() => navigate('/archive')}
-            className="text-sm text-gray-400 underline"
-          >
-            Archivio
-          </button>
+          <button onClick={() => navigate('/dashboard')} className="text-sm text-gray-400 underline">Annulla</button>
+          <button onClick={() => navigate('/archive')} className="text-sm text-gray-400 underline">Archivio</button>
         </div>
       )}
+ 
+      {/* Pannello note (overlay laterale) */}
+      <NotesPanel visible={notesOpen} />
     </div>
   )
 }

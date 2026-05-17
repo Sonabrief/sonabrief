@@ -24,6 +24,7 @@ export interface UseAudioRecorderReturn {
   stop: () => void
   audioData: Float32Array | null
   reset: () => void
+  stream: MediaStream | null
 }
 
 export function useAudioRecorder(): UseAudioRecorderReturn {
@@ -31,6 +32,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
   const [duration, setDuration] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [audioData, setAudioData] = useState<Float32Array | null>(null)
+  const [stream, setStream] = useState<MediaStream | null>(null)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
@@ -46,6 +48,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     audioContextRef.current = null
     mediaRecorderRef.current = null
     chunksRef.current = []
+    setStream(null)
   }, [])
 
   const start = useCallback(async (source: AudioSource) => {
@@ -84,6 +87,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
         ? 'audio/ogg;codecs=opus'
         : ''
 
+      setStream(recordStream)
       const recorder = new MediaRecorder(recordStream, mimeType ? { mimeType } : undefined)
       mediaRecorderRef.current = recorder
 
@@ -132,5 +136,5 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     setAudioData(null)
   }, [cleanup])
 
-  return { state, duration, error, start, stop, audioData, reset }
+  return { state, duration, error, start, stop, audioData, reset, stream }
 }
