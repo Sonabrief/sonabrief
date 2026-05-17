@@ -189,11 +189,11 @@ export default function RecordingPage() {
  
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'h' && (e.metaKey || e.ctrlKey)) {
+      if (e.key === 'e' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
         addHighlight()
       }
-      if (e.key === 'n' && (e.metaKey || e.ctrlKey)) {
+      if (e.key === 'm' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
         if (state === 'recording') setNotesOpen(o => !o)
       }
@@ -295,13 +295,13 @@ export default function RecordingPage() {
               onClick={addHighlight}
               className="text-xs text-amber-600 border border-amber-300 rounded-full px-3 py-1 hover:bg-amber-50 transition-colors"
             >
-              ★ Segna momento <span className="text-gray-400 ml-1">⌘H</span>
+              ★ Segna momento <span className="text-gray-400 ml-1">⌘E</span>
             </button>
             <button
               onClick={() => setNotesOpen(o => !o)}
               className="text-xs text-teal-600 border border-teal-200 rounded-full px-3 py-1 hover:bg-teal-50 transition-colors"
             >
-              📝 Note <span className="text-gray-400 ml-1">⌘N</span>
+              📝 Note <span className="text-gray-400 ml-1">⌘M</span>
             </button>
           </div>
         </div>
