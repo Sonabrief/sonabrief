@@ -6,6 +6,7 @@ import { Button } from '../components/ui/button'
 import { API_URL } from '../config'
 import { SynthesisEditor } from '../components/SynthesisEditor'
 import { db } from '../lib/db'
+import { synthesizeWithOllama } from '../lib/ollama'
  
 const SYSTEM_PROMPT =
   'Sei un assistente esperto nella redazione di verbali aziendali. ' +
@@ -209,6 +210,22 @@ export default function RecordingPage() {
     meetingIdRef.current = crypto.randomUUID()
     setSynthesisState('streaming')
     setSynthesis('')
+
+    const notes = localStorage.getItem('sonabrief_recording_notes') ?? undefined
+
+    if (mode === 'local') {
+      await synthesizeWithOllama(
+        transcript,
+        language,
+        notes,
+        SYSTEM_PROMPT,
+        (text) => setSynthesis(prev => prev + text),
+        () => setSynthesisState('done'),
+        () => setSynthesisState('error'),
+      )
+      return
+    }
+
     try {
       const response = await fetch(`${API_URL}/v1/synthesize`, {
         method: 'POST',
@@ -221,7 +238,7 @@ export default function RecordingPage() {
           mode,
           system_prompt: SYSTEM_PROMPT,
           audio_minutes: Math.ceil(duration / 60),
-          notes: localStorage.getItem('sonabrief_recording_notes') ?? undefined,
+          notes,
         }),
       })
       if (!response.ok || !response.body) { setSynthesisState('error'); return }
