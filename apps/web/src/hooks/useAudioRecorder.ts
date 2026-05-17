@@ -78,7 +78,6 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
         recordStream = (micStream ?? tabStream)!
       }
 
-      // Scegliamo il mimeType supportato dal browser
       const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
         ? 'audio/webm;codecs=opus'
         : MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')
@@ -97,9 +96,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
         const chunks = [...chunksRef.current]
         cleanup()
         try {
-          console.log('chunks:', chunks.length, chunks.map(c => c.size))
           const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' })
-          console.log('blob size:', blob.size, 'type:', blob.type)
           const float32 = await blobToFloat32Array(blob)
           setAudioData(float32)
           setState('done')

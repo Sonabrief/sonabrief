@@ -1,5 +1,5 @@
 import type { Env } from "./lib/env";
-import { handleCorsPreflightRequest } from "./lib/cors";
+import { handleCorsPreflightRequest, withCors } from "./lib/cors";
 import {
   handleAuthRequest,
   handleAuthVerify,
@@ -19,25 +19,24 @@ export default {
       return handleCorsPreflightRequest(request, env);
     }
 
+    let response: Response;
+
     if (url.pathname === "/auth/request" && request.method === "POST") {
-      return handleAuthRequest(request, env);
-    }
-    if (url.pathname === "/auth/verify" && request.method === "GET") {
-      return handleAuthVerify(request, env);
-    }
-    if (url.pathname === "/auth/logout" && request.method === "POST") {
-      return handleAuthLogout(request, env);
-    }
-    if (url.pathname === "/auth/me" && request.method === "GET") {
-      return handleAuthMe(request, env);
-    }
-    if (url.pathname === "/v1/synthesize" && request.method === "POST") {
-      return handleSynthesize(request, env);
-    }
-    if (url.pathname.startsWith("/v1/templates")) {
-      return handleTemplates(request, env);
+      response = await handleAuthRequest(request, env);
+    } else if (url.pathname === "/auth/verify" && request.method === "GET") {
+      response = await handleAuthVerify(request, env);
+    } else if (url.pathname === "/auth/logout" && request.method === "POST") {
+      response = await handleAuthLogout(request, env);
+    } else if (url.pathname === "/auth/me" && request.method === "GET") {
+      response = await handleAuthMe(request, env);
+    } else if (url.pathname === "/v1/synthesize" && request.method === "POST") {
+      response = await handleSynthesize(request, env);
+    } else if (url.pathname.startsWith("/v1/templates")) {
+      response = await handleTemplates(request, env);
+    } else {
+      response = new Response("Not found", { status: 404 });
     }
 
-    return new Response("Not found", { status: 404 });
+    return withCors(response, request, env);
   },
 };

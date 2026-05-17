@@ -82,23 +82,28 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
       await write({ type: "done", meeting_id: body.meeting_id });
 
       // 6. Log + aggiorna budget
-      await logSynthesisAndUpdateBudget(
-        env.DB,
-        {
-          userId: session.userId,
-          templateId: body.template_id ?? "none",
-          provider: result.providerUsed,
-          model: result.modelUsed,
-          audioMinutes: body.audio_minutes,
-          inputTokens: result.usage.inputTokens,
-          outputTokens: result.usage.outputTokens,
-          costUsd: result.usage.estimatedCostUsd,
-          fellBack: result.fellBackToSecondary,
-          language: body.language,
-        },
-        BUDGET_CAP_USD
-      );
+      try {
+        await logSynthesisAndUpdateBudget(
+          env.DB,
+          {
+            userId: session.userId,
+            templateId: body.template_id ?? "none",
+            provider: result.providerUsed,
+            model: result.modelUsed,
+            audioMinutes: body.audio_minutes,
+            inputTokens: result.usage.inputTokens,
+            outputTokens: result.usage.outputTokens,
+            costUsd: result.usage.estimatedCostUsd,
+            fellBack: result.fellBackToSecondary,
+            language: body.language,
+          },
+          BUDGET_CAP_USD
+        );
+      } catch (logErr) {
+        console.error('[synthesize] logging failed (synthesis already delivered):', logErr)
+      }
     } catch (err) {
+      console.error('[synthesize] error:', err)
       await write({ type: "error", message: "synthesis_failed" });
     } finally {
       await writer.close();
