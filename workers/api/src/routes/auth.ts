@@ -33,7 +33,7 @@ export async function handleAuthRequest(request: Request, env: Env): Promise<Res
 
   const magicLink = `${env.APP_URL}/auth/verify?token=${token}`;
 
-  await fetch("https://api.resend.com/emails", {
+  const resendRes = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${env.RESEND_API_KEY}`,
@@ -46,6 +46,8 @@ export async function handleAuthRequest(request: Request, env: Env): Promise<Res
       html: `<p>Clicca il link per accedere. Scade tra 15 minuti.</p><a href="${magicLink}">${magicLink}</a>`,
     }),
   });
+  const resendBody = await resendRes.json();
+  console.log("Resend status:", resendRes.status, JSON.stringify(resendBody));
 
   return new Response(JSON.stringify({ ok: true }), {
     headers: { ...cors, "Content-Type": "application/json" },

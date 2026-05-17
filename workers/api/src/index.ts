@@ -6,6 +6,8 @@ import {
   handleAuthLogout,
   handleAuthMe,
 } from "./routes/auth";
+import { handleSynthesize } from "./routes/synthesize";
+import { handleTemplates } from "./routes/templates";
 
 export type { Env };
 
@@ -17,7 +19,6 @@ export default {
       return handleCorsPreflightRequest(request, env);
     }
 
-    // Auth
     if (url.pathname === "/auth/request" && request.method === "POST") {
       return handleAuthRequest(request, env);
     }
@@ -29,6 +30,12 @@ export default {
     }
     if (url.pathname === "/auth/me" && request.method === "GET") {
       return handleAuthMe(request, env);
+    }
+    if (url.pathname === "/v1/synthesize" && request.method === "POST") {
+      return handleSynthesize(request, env);
+    }
+    if (url.pathname.startsWith("/v1/templates")) {
+      return handleTemplates(request, env);
     }
 
     return new Response("Not found", { status: 404 });
