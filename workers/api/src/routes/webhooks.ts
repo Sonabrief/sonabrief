@@ -130,38 +130,46 @@ async function processEvent(payload: LSWebhookPayload, env: Env): Promise<void> 
       const endsAt = attrs.ends_at ? new Date(attrs.ends_at as string).getTime() : null
       const status = String(attrs.status ?? 'active')
 
-      // Upsert: una sola licenza attiva per user_id
+      const now = Date.now()
       await env.DB
         .prepare(`
           INSERT INTO licenses (
-            user_id, tier, billing_cycle, status,
+            id, user_id, tier, status,
             ls_subscription_id, ls_customer_id, ls_variant_id, ls_order_id,
-            renews_at, ends_at, cancelled_at, updated_at,
-            period_start, period_end
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?)
+            renews_at, ends_at, cancelled_at,
+            period_start, period_end,
+            billing_cycle,
+            created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?, ?)
           ON CONFLICT(user_id) DO UPDATE SET
             tier = excluded.tier,
-            billing_cycle = excluded.billing_cycle,
             status = excluded.status,
             ls_subscription_id = excluded.ls_subscription_id,
             ls_customer_id = excluded.ls_customer_id,
             ls_variant_id = excluded.ls_variant_id,
+            ls_order_id = excluded.ls_order_id,
             renews_at = excluded.renews_at,
             ends_at = excluded.ends_at,
             cancelled_at = NULL,
+            period_end = excluded.period_end,
+            billing_cycle = excluded.billing_cycle,
             updated_at = excluded.updated_at
         `)
         .bind(
-          userId, plan.tier, plan.cycle, status,
+          crypto.randomUUID(),
+          userId,
+          plan.tier,
+          status,
           String(payload.data.id),
           String(attrs.customer_id ?? ''),
           variantId,
           String(attrs.order_id ?? ''),
           renewsAt,
           endsAt,
-          Date.now(),
-          Date.now(),
           renewsAt,
+          plan.cycle,
+          now,
+          now,
         )
         .run()
       break

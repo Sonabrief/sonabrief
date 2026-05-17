@@ -6,6 +6,7 @@ import RecordingPage from './pages/RecordingPage';
 import ArchivePage from './pages/ArchivePage';
 import SyncSetupPage from './pages/SyncSetupPage';
 import SyncUnlockPage from './pages/SyncUnlockPage';
+import PricingPage from './pages/PricingPage';
 import RequireAuth from './components/RequireAuth';
 import SyncGate from './components/SyncGate';
 
@@ -44,6 +45,11 @@ export default function App() {
         <Route path="/sync/unlock" element={
           <RequireAuth>
             <SyncUnlockPage />
+          </RequireAuth>
+        } />
+        <Route path="/pricing" element={
+          <RequireAuth>
+            <PricingPage />
           </RequireAuth>
         } />
       </Routes>

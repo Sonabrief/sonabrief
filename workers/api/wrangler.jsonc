@@ -16,7 +16,6 @@
     }
   ],
   "vars": {
-    "APP_URL": "https://sonabrief.com",
     "LEMONSQUEEZY_STORE_ID": "378856",
     "LEMONSQUEEZY_VARIANT_PRO_MONTHLY": "1668288",
     "LEMONSQUEEZY_VARIANT_PRO_ANNUAL": "1668282",
