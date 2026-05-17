@@ -6,6 +6,17 @@ import type { Env } from "../lib/env";
 
 const BUDGET_CAP_USD = 50; // fase 1-2, dal PSD
 
+const QUOTA_CAP: Record<"free" | "pro" | "unlimited", number | null> = {
+  free: 300,
+  pro: 3000,
+  unlimited: null,
+};
+
+function currentMonth(): string {
+  const d = new Date();
+  return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0');
+}
+
 const SynthesizeSchema = z.object({
   transcript: z.string().min(10).max(100_000),
   template_id: z.string().uuid().optional(),
@@ -41,7 +52,33 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
     });
   }
 
-  // 4. Quota + budget check
+  // 4. Quota mensile per tier (solo cloud)
+  if (body.mode !== 'local') {
+    const cap = QUOTA_CAP[tier];
+    if (cap !== null) {
+      const month = currentMonth();
+      const quotaRow = await env.DB
+        .prepare('SELECT synthesis_minutes FROM quota WHERE user_id = ? AND month = ?')
+        .bind(session.userId, month)
+        .first<{ synthesis_minutes: number }>();
+      const consumed = quotaRow?.synthesis_minutes ?? 0;
+      if (consumed + body.audio_minutes > cap) {
+        return new Response(
+          JSON.stringify({
+            error: 'quota_exceeded',
+            tier,
+            consumed,
+            cap,
+            audio_minutes: body.audio_minutes,
+            message: 'Hai raggiunto il limite mensile di sintesi cloud. Passa a Pro o usa la modalità Local Only.',
+          }),
+          { status: 429, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+  }
+
+  // 5. Quota + budget check
   const check = await checkQuotaAndBudget(
     env.DB,
     session.userId,
@@ -116,6 +153,22 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
         );
       } catch (logErr) {
         console.error('[synthesize] logging failed (synthesis already delivered):', logErr)
+      }
+
+      try {
+        await env.DB
+          .prepare(`
+            INSERT INTO quota (id, user_id, month, synthesis_minutes, synthesis_count, storage_bytes, updated_at)
+            VALUES (?, ?, ?, ?, 1, 0, ?)
+            ON CONFLICT(user_id, month) DO UPDATE SET
+              synthesis_minutes = synthesis_minutes + excluded.synthesis_minutes,
+              synthesis_count = synthesis_count + 1,
+              updated_at = excluded.updated_at
+          `)
+          .bind(crypto.randomUUID(), session.userId, currentMonth(), body.audio_minutes, Date.now())
+          .run();
+      } catch (quotaErr) {
+        console.error('[synthesize] quota update failed:', quotaErr);
       }
     } catch (err) {
       console.error('[synthesize] error:', err)

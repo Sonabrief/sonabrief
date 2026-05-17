@@ -9,6 +9,8 @@ import {
 import { handleSynthesize } from "./routes/synthesize";
 import { handleTemplates } from "./routes/templates";
 import { handleSyncUpload, handleSyncDownload } from "./routes/sync";
+import { handleCheckout } from "./routes/checkout";
+import { handleLemonsqueezyWebhook } from "./routes/webhooks";
 
 export type { Env };
 
@@ -38,6 +40,10 @@ export default {
       response = await handleSyncUpload(request, env);
     } else if (url.pathname === "/v1/sync/download" && request.method === "POST") {
       response = await handleSyncDownload(request, env);
+    } else if (url.pathname === "/v1/checkout" && request.method === "POST") {
+      response = await handleCheckout(request, env);
+    } else if (url.pathname === "/v1/webhooks/lemonsqueezy" && request.method === "POST") {
+      response = await handleLemonsqueezyWebhook(request, env);
     } else {
       response = new Response("Not found", { status: 404 });
     }
