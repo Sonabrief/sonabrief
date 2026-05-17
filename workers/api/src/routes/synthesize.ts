@@ -13,6 +13,7 @@ const SynthesizeSchema = z.object({
   meeting_id: z.string().uuid(),
   system_prompt: z.string().min(10).max(10_000),
   audio_minutes: z.number().min(0).default(0),
+  notes: z.string().max(10_000).optional(),
 });
 
 export async function handleSynthesize(req: Request, env: Env): Promise<Response> {
@@ -72,6 +73,7 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
           systemPrompt: body.system_prompt,
           transcript: body.transcript,
           language: body.language,
+          notes: body.notes || undefined,
         },
         env,
         (chunk) => {

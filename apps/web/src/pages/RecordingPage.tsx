@@ -11,7 +11,8 @@ const SYSTEM_PROMPT =
   'Sei un assistente esperto nella redazione di verbali aziendali. ' +
   'Analizza la trascrizione del meeting e produci un verbale sintetico strutturato in: ' +
   'riepilogo esecutivo, punti chiave discussi, decisioni prese, prossimi passi con eventuali responsabili. ' +
-  'Rileva automaticamente la lingua parlata nel meeting dalla trascrizione e scrivi il verbale nella stessa lingua.'
+  'Rileva automaticamente la lingua parlata nel meeting dalla trascrizione e scrivi il verbale nella stessa lingua. ' +
+  'Se sono presenti note manuali del partecipante, integrале nel verbale come contesto aggiuntivo, segnalando che provengono dalle note personali.'
  
 function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
@@ -218,6 +219,7 @@ export default function RecordingPage() {
           language,
           system_prompt: SYSTEM_PROMPT,
           audio_minutes: Math.ceil(duration / 60),
+          notes: localStorage.getItem('sonabrief_recording_notes') ?? undefined,
         }),
       })
       if (!response.ok || !response.body) { setSynthesisState('error'); return }

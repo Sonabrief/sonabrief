@@ -29,7 +29,12 @@ export function createGroqProvider(apiKey: string): LLMProvider {
           stream: true,
           messages: [
             { role: "system", content: req.systemPrompt },
-            { role: "user", content: req.transcript },
+            {
+              role: "user",
+              content: req.notes
+                ? `${req.transcript}\n\nNote manuali del partecipante:\n${req.notes}`
+                : req.transcript,
+            },
           ],
         }),
       });

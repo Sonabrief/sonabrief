@@ -11,6 +11,8 @@ export interface SynthesisRequest {
   transcript: string;
   /** Lingua della sintesi attesa (it, en, fr, es, de) */
   language: string;
+  /** Note manuali del partecipante (opzionale) */
+  notes?: string;
 }
 
 export interface SynthesisChunk {
