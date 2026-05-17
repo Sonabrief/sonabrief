@@ -2,6 +2,7 @@ import { pipeline, env } from '@huggingface/transformers'
 
 env.allowLocalModels = false
 env.useBrowserCache = true
+env.backends.onnx.wasm.numThreads = 1
 
 type WhisperStatus =
   | { type: 'loading'; progress: number; file: string }
@@ -14,6 +15,7 @@ let transcriber: Awaited<ReturnType<typeof pipeline>> | null = null
 
 async function loadModel(model: string) {
   transcriber = await pipeline('automatic-speech-recognition', model, {
+    dtype: 'fp32',
     progress_callback: (p: { status: string; progress?: number; file?: string }) => {
       if (p.status === 'downloading' || p.status === 'loading') {
         self.postMessage({
@@ -29,27 +31,20 @@ async function loadModel(model: string) {
 
 async function transcribe(audio: Float32Array, language?: string) {
   if (!transcriber) throw new Error('Model not loaded')
-
   self.postMessage({ type: 'transcribing' } satisfies WhisperStatus)
-
   const result = await transcriber(audio, {
-    language: language ?? null,
-    task: 'transcribe',
     return_timestamps: true,
   })
-
   const output = Array.isArray(result) ? result[0] : result
-
   self.postMessage({
     type: 'result',
-    text: output.text ?? '',
+    text: (output as { text?: string }).text ?? '',
     segments: (output as { chunks?: unknown[] }).chunks ?? [],
   } satisfies WhisperStatus)
 }
 
 self.onmessage = async (e: MessageEvent) => {
   const { action, payload } = e.data
-
   try {
     if (action === 'load') await loadModel(payload.model)
     if (action === 'transcribe') await transcribe(payload.audio, payload.language)

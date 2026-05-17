@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import VerifyPage from './pages/VerifyPage';
 import DashboardPage from './pages/DashboardPage';
+import RecordingPage from './pages/RecordingPage';
 import RequireAuth from './components/RequireAuth';
 
 export default function App() {
@@ -13,6 +14,11 @@ export default function App() {
         <Route path="/dashboard" element={
           <RequireAuth>
             <DashboardPage />
+          </RequireAuth>
+        } />
+        <Route path="/recording" element={
+          <RequireAuth>
+            <RecordingPage />
           </RequireAuth>
         } />
       </Routes>

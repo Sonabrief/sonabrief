@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMe, logout } from '../lib/api';
+import { Button } from '../components/ui/button';
 
 export default function DashboardPage() {
   const [email, setEmail] = useState('');
@@ -22,6 +23,10 @@ export default function DashboardPage() {
       <div className="text-center space-y-4">
         <h1 className="text-2xl font-semibold">Benvenuto su Sonabrief</h1>
         {email && <p className="text-gray-500 text-sm">{email}</p>}
+        <Button onClick={() => navigate('/recording')}>
+          + Nuovo meeting
+        </Button>
+        <br />
         <button
           onClick={handleLogout}
           className="text-sm text-gray-400 underline"
