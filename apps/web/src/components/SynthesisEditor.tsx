@@ -7,12 +7,14 @@ import { Markdown } from 'tiptap-markdown'
 
 interface Props {
   content: string
+  readonly?: boolean
 }
 
-export function SynthesisEditor({ content }: Props) {
+export function SynthesisEditor({ content, readonly = false }: Props) {
   const editor = useEditor({
     extensions: [StarterKit, Typography, Markdown],
     content,
+    editable: !readonly,
     editorProps: {
       attributes: {
         class: 'outline-none min-h-48 leading-7 focus:outline-none',

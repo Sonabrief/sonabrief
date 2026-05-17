@@ -5,6 +5,7 @@ import { whisper } from '../lib/whisper'
 import { Button } from '../components/ui/button'
 import { API_URL } from '../config'
 import { SynthesisEditor } from '../components/SynthesisEditor'
+import { db } from '../lib/db'
 
 const SYSTEM_PROMPT =
   'Sei un assistente esperto nella redazione di verbali aziendali. ' +
@@ -27,6 +28,7 @@ export default function RecordingPage() {
   const [synthesisState, setSynthesisState] = useState<'idle' | 'streaming' | 'done' | 'error'>('idle')
   const [synthesis, setSynthesis] = useState<string>('')
   const [language, setLanguage] = useState<'it' | 'en' | 'fr' | 'es' | 'de'>('it')
+  const meetingIdRef = useRef('')
 
   useEffect(() => {
     whisper.init()
@@ -61,7 +63,46 @@ export default function RecordingPage() {
     }
   }, [audioData, whisperState])
 
+  useEffect(() => {
+    if (synthesisState !== 'done') return
+    const id = meetingIdRef.current
+    if (!id) return
+    const now = Date.now()
+    const title = new Date(now).toLocaleString(language, {
+      day: 'numeric', month: 'long', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    })
+    db.transaction('rw', [db.meetings, db.transcripts, db.notes], async () => {
+      await db.meetings.add({
+        id,
+        title,
+        startedAt: now - duration * 1000,
+        endedAt: now,
+        durationSeconds: duration,
+        mode: 'standard',
+        lang: language,
+        createdAt: now,
+        updatedAt: now,
+      })
+      await db.transcripts.add({
+        id: crypto.randomUUID(),
+        meetingId: id,
+        text: transcript,
+        createdAt: now,
+      })
+      await db.notes.add({
+        id: crypto.randomUUID(),
+        meetingId: id,
+        content: synthesis,
+        generatedAt: now,
+        createdAt: now,
+        updatedAt: now,
+      })
+    }).catch(err => console.error('[db] salvataggio meeting fallito:', err))
+  }, [synthesisState])
+
   async function generateSynthesis() {
+    meetingIdRef.current = crypto.randomUUID()
     setSynthesisState('streaming')
     setSynthesis('')
 
@@ -72,7 +113,7 @@ export default function RecordingPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           transcript,
-          meeting_id: crypto.randomUUID(),
+          meeting_id: meetingIdRef.current,
           language,
           system_prompt: SYSTEM_PROMPT,
           audio_minutes: Math.ceil(duration / 60),
@@ -229,12 +270,20 @@ export default function RecordingPage() {
       )}
 
       {state === 'idle' && (
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="text-sm text-gray-400 underline"
-        >
-          Annulla
-        </button>
+        <div className="flex gap-4">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="text-sm text-gray-400 underline"
+          >
+            Annulla
+          </button>
+          <button
+            onClick={() => navigate('/archive')}
+            className="text-sm text-gray-400 underline"
+          >
+            Archivio
+          </button>
+        </div>
       )}
     </div>
   )

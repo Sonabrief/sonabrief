@@ -3,6 +3,7 @@ import LoginPage from './pages/LoginPage';
 import VerifyPage from './pages/VerifyPage';
 import DashboardPage from './pages/DashboardPage';
 import RecordingPage from './pages/RecordingPage';
+import ArchivePage from './pages/ArchivePage';
 import RequireAuth from './components/RequireAuth';
 
 export default function App() {
@@ -19,6 +20,11 @@ export default function App() {
         <Route path="/recording" element={
           <RequireAuth>
             <RecordingPage />
+          </RequireAuth>
+        } />
+        <Route path="/archive" element={
+          <RequireAuth>
+            <ArchivePage />
           </RequireAuth>
         } />
       </Routes>
