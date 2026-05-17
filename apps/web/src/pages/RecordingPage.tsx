@@ -89,7 +89,7 @@ interface Highlight {
 const NOTES_KEY = 'sonabrief_recording_notes'
  
 function NotesPanel({ visible }: { visible: boolean }) {
-  const [text, setText] = useState(() => localStorage.getItem(NOTES_KEY) ?? '')
+  const [text, setText] = useState('')
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
  
   function handleChange(val: string) {
@@ -131,6 +131,7 @@ export default function RecordingPage() {
   const [synthesisState, setSynthesisState] = useState<'idle' | 'streaming' | 'done' | 'error'>('idle')
   const [synthesis, setSynthesis] = useState('')
   const [language, setLanguage] = useState<'it' | 'en' | 'fr' | 'es' | 'de'>('it')
+  const [mode, setMode] = useState<'standard' | 'local'>('standard')
   const [highlights, setHighlights] = useState<Highlight[]>([])
   const [notesOpen, setNotesOpen] = useState(false)
   const meetingIdRef = useRef('')
@@ -217,6 +218,7 @@ export default function RecordingPage() {
           transcript,
           meeting_id: meetingIdRef.current,
           language,
+          mode,
           system_prompt: SYSTEM_PROMPT,
           audio_minutes: Math.ceil(duration / 60),
           notes: localStorage.getItem('sonabrief_recording_notes') ?? undefined,
@@ -336,30 +338,50 @@ export default function RecordingPage() {
         <p className="text-sm text-red-500">Errore durante la sintesi. Riprova.</p>
       )}
  
-      {/* Selettore lingua */}
+      {/* Selettore lingua e modalità */}
       {state === 'idle' && whisperState === 'ready' && (
-        <div className="flex flex-col gap-1 w-full max-w-xs">
-          <label className="text-xs text-gray-400">Lingua del meeting</label>
-          <select
-            value={language}
-            onChange={e => setLanguage(e.target.value as typeof language)}
-            className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
-          >
-            <option value="it">Italiano</option>
-            <option value="en">English</option>
-            <option value="fr">Français</option>
-            <option value="es">Español</option>
-            <option value="de">Deutsch</option>
-          </select>
+        <div className="flex flex-col gap-3 w-full max-w-xs">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-gray-400">Lingua del meeting</label>
+            <select
+              value={language}
+              onChange={e => setLanguage(e.target.value as typeof language)}
+              className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
+            >
+              <option value="it">Italiano</option>
+              <option value="en">English</option>
+              <option value="fr">Français</option>
+              <option value="es">Español</option>
+              <option value="de">Deutsch</option>
+            </select>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-gray-400">Modalità sintesi</label>
+            <div className="flex gap-2">
+              {(['standard', 'local'] as const).map(m => (
+                <button
+                  key={m}
+                  onClick={() => setMode(m)}
+                  className={`flex-1 rounded-md border px-3 py-2 text-sm transition-colors ${
+                    mode === m
+                      ? 'border-teal-600 bg-teal-50 text-teal-700'
+                      : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+                  }`}
+                >
+                  {m === 'standard' ? '☁️ Standard' : '🔒 Local Only'}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
  
       {/* Controlli avvio */}
       {state === 'idle' && whisperState === 'ready' && (
         <div className="flex flex-col gap-3 w-full max-w-xs">
-          <Button onClick={() => start('microphone')}>🎙 Solo microfono</Button>
-          <Button variant="outline" onClick={() => start('tab')}>🖥 Audio scheda browser</Button>
-          <Button variant="outline" onClick={() => start('both')}>🎙 + 🖥 Microfono e scheda</Button>
+          <Button onClick={() => { localStorage.removeItem(NOTES_KEY); start('microphone') }}>🎙 Solo microfono</Button>
+          <Button variant="outline" onClick={() => { localStorage.removeItem(NOTES_KEY); start('tab') }}>🖥 Audio scheda browser</Button>
+          <Button variant="outline" onClick={() => { localStorage.removeItem(NOTES_KEY); start('both') }}>🎙 + 🖥 Microfono e scheda</Button>
         </div>
       )}
  

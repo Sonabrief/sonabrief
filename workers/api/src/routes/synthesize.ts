@@ -14,6 +14,7 @@ const SynthesizeSchema = z.object({
   system_prompt: z.string().min(10).max(10_000),
   audio_minutes: z.number().min(0).default(0),
   notes: z.string().max(10_000).optional(),
+  mode: z.enum(['standard', 'local']).default('standard'),
 });
 
 export async function handleSynthesize(req: Request, env: Env): Promise<Response> {
@@ -57,7 +58,19 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
     );
   }
 
-  // 5. SSE streaming
+  // 5. Local Only placeholder
+  if (body.mode === 'local') {
+    const msg = JSON.stringify({ type: 'error', message: 'Local Only non ancora disponibile in questa versione. Installa Ollama e riprova.' });
+    return new Response(`data: ${msg}\n\n`, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
+  }
+
+  // 6. SSE streaming (standard)
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
   const encoder = new TextEncoder();
