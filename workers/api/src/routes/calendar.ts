@@ -6,16 +6,20 @@ const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const GOOGLE_CALENDAR_URL = 'https://www.googleapis.com/calendar/v3'
 const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
 
-function getAppUrl(req: Request): string {
-  const origin = req.headers.get('Origin')
-  if (origin && (origin.includes('localhost') || origin.endsWith('sonabrief.com'))) {
-    return origin
+function getRedirectUri(req: Request): string {
+  const host = req.headers.get('Host') ?? 'sonabrief-api.sonabrief-app.workers.dev'
+  if (host.includes('localhost')) {
+    return `http://${host}/auth/google/callback`
   }
-  return 'https://sonabrief.com'
+  return 'https://sonabrief-api.sonabrief-app.workers.dev/auth/google/callback'
 }
 
-function getRedirectUri(req: Request): string {
-  return `${getAppUrl(req)}/auth/google/callback`
+function getAppUrl(req: Request): string {
+  const host = req.headers.get('Host') ?? ''
+  if (host.includes('localhost')) {
+    return 'http://localhost:5173'
+  }
+  return 'https://sonabrief.com'
 }
 
 export async function handleGoogleStart(req: Request, env: Env): Promise<Response> {
@@ -222,7 +226,11 @@ const MS_CALENDAR_URL = 'https://graph.microsoft.com/v1.0/me/calendarView'
 const MS_SCOPES = 'offline_access Calendars.Read'
 
 function getMsRedirectUri(req: Request): string {
-  return `${getAppUrl(req)}/auth/microsoft/callback`
+  const host = req.headers.get('Host') ?? 'sonabrief-api.sonabrief-app.workers.dev'
+  if (host.includes('localhost')) {
+    return `http://${host}/auth/microsoft/callback`
+  }
+  return 'https://sonabrief-api.sonabrief-app.workers.dev/auth/microsoft/callback'
 }
 
 export async function handleMicrosoftStart(req: Request, env: Env): Promise<Response> {
