@@ -8,6 +8,7 @@ import { SynthesisEditor } from '../components/SynthesisEditor'
 import { db } from '../lib/db'
 import { synthesizeWithOllama } from '../lib/ollama'
 import { syncMeetingNow } from '../lib/sync'
+import { saveActionItemsFromNote } from '../lib/actionItems'
 import { isUnlocked } from '../lib/keystore'
 import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
 
@@ -216,6 +217,7 @@ export default function RecordingPage() {
       if (localStorage.getItem('sonabrief_sync_enabled') === 'true' && isUnlocked()) {
         syncMeetingNow(id)
       }
+      saveActionItemsFromNote(id, synthesis)
     }).catch(err => console.error('[db] salvataggio meeting fallito:', err))
   }, [synthesisState])
  

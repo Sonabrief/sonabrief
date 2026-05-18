@@ -32,10 +32,22 @@ export interface Note {
   updatedAt: number
 }
 
+export interface ActionItem {
+  id: string
+  meetingId: string
+  meetingTitle: string
+  meetingDate: number
+  text: string
+  completed: boolean
+  dueDate?: number
+  createdAt: number
+}
+
 class SonabriefDB extends Dexie {
   meetings!: Table<Meeting>
   transcripts!: Table<Transcript>
   notes!: Table<Note>
+  action_items!: Table<ActionItem>
 
   constructor() {
     super('sonabrief')
@@ -43,6 +55,12 @@ class SonabriefDB extends Dexie {
       meetings:    '&id, startedAt, mode',
       transcripts: '&id, meetingId',
       notes:       '&id, meetingId',
+    })
+    this.version(2).stores({
+      meetings:     '&id, startedAt, mode',
+      transcripts:  '&id, meetingId',
+      notes:        '&id, meetingId',
+      action_items: '&id, meetingId, completed, createdAt',
     })
   }
 }

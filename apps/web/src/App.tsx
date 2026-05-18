@@ -11,6 +11,7 @@ import BillingSuccessPage from './pages/BillingSuccessPage';
 import AdminPage from './pages/AdminPage';
 import OnboardingPage from './pages/OnboardingPage';
 import CalendarPage from './pages/CalendarPage';
+import ActionItemsPage from './pages/ActionItemsPage';
 import RequireAuth from './components/RequireAuth';
 import SyncGate from './components/SyncGate';
 
@@ -49,6 +50,13 @@ export default function App() {
         <Route path="/calendar" element={
           <RequireAuth>
             <CalendarPage />
+          </RequireAuth>
+        } />
+        <Route path="/actions" element={
+          <RequireAuth>
+            <SyncGate>
+              <ActionItemsPage />
+            </SyncGate>
           </RequireAuth>
         } />
         <Route path="/sync/setup" element={
