@@ -31,9 +31,10 @@ export async function createSession(
     .bind(sessionId, userId, now, expiresAt, now, ipHash, userAgent)
     .run();
 
+  const isDev = new URL(request.url).hostname === "localhost";
   return {
     sessionId,
-    cookieHeader: buildCookie(sessionId, expiresAt, env),
+    cookieHeader: buildCookie(sessionId, expiresAt, isDev),
   };
 }
 
@@ -76,10 +77,12 @@ export async function getUserFromSession(
 /** Invalida una sessione specifica (logout) */
 export async function destroySession(
   env: Env,
-  sessionId: string
+  sessionId: string,
+  request: Request
 ): Promise<string> {
   await env.DB.prepare(`DELETE FROM sessions WHERE id = ?`).bind(sessionId).run();
-  return clearCookie(env);
+  const isDev = new URL(request.url).hostname === "localhost";
+  return clearCookie(isDev);
 }
 
 /** Invalida tutte le sessioni dell'utente (logout from all devices) */
@@ -92,8 +95,7 @@ export async function destroyAllUserSessions(
 
 // --- Cookie helpers ---
 
-function buildCookie(sessionId: string, expiresAt: number, env: Env): string {
-  const isDev = env.APP_URL.includes("localhost");
+function buildCookie(sessionId: string, expiresAt: number, isDev: boolean): string {
   const parts = [
     `${SESSION_COOKIE}=${sessionId}`,
     `Path=/`,
@@ -105,8 +107,7 @@ function buildCookie(sessionId: string, expiresAt: number, env: Env): string {
   return parts.join("; ");
 }
 
-function clearCookie(env: Env): string {
-  const isDev = env.APP_URL.includes("localhost");
+function clearCookie(isDev: boolean): string {
   const parts = [
     `${SESSION_COOKIE}=`,
     `Path=/`,

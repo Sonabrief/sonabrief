@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { getUserFromSession } from "../lib/sessions";
-import { checkQuotaAndBudget, logSynthesisAndUpdateBudget } from "../quota";
+import { checkQuotaAndBudget, logSynthesisAndUpdateBudget, checkBudgetCap } from "../quota";
 import { synthesizeWithRouting } from "../providers";
+import { checkUnlimitedThresholds } from "../lib/unlimited-thresholds";
 import type { Env } from "../lib/env";
 
 const BUDGET_CAP_USD = 50; // fase 1-2, dal PSD
@@ -52,7 +53,23 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
     });
   }
 
-  // 4. Quota mensile per tier (solo cloud)
+  // 4. Budget cap globale (solo free, solo cloud)
+  if (tier === 'free' && body.mode !== 'local') {
+    const budget = await checkBudgetCap(env)
+    if (!budget.ok) {
+      return new Response(JSON.stringify({
+        error: 'budget_cap_reached',
+        message: 'Il budget mensile gratuito è esaurito. Passa a Pro per accesso illimitato o usa la modalità Local Only (gira sul tuo computer, sempre disponibile).',
+        cost_usd: budget.cost_usd,
+        cap_usd: budget.cap_usd,
+      }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+  }
+
+  // 5. Quota mensile per tier (solo cloud)
   if (body.mode !== 'local') {
     const cap = QUOTA_CAP[tier];
     if (cap !== null) {
@@ -95,7 +112,14 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
     );
   }
 
-  // 5. Local Only placeholder
+  // 6. Flag check (soft enforcement)
+  const signupRow = await env.DB
+    .prepare('SELECT flagged FROM signup_signals WHERE user_id = ?')
+    .bind(session.userId)
+    .first<{ flagged: number }>()
+  const isFlagged = signupRow?.flagged === 1
+
+  // 7. Local Only placeholder
   if (body.mode === 'local') {
     const msg = JSON.stringify({ type: 'error', message: 'Local Only non ancora disponibile in questa versione. Installa Ollama e riprova.' });
     return new Response(`data: ${msg}\n\n`, {
@@ -117,6 +141,13 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
 
   (async () => {
     try {
+      // Soft enforcement: account flagged at signup get artificial latency.
+      // Visible-failure-free, makes the service feel slow without alerting the user. PSD section E.
+      if (isFlagged && body.mode !== 'local') {
+        const delayMs = 8000 + Math.floor(Math.random() * 7000)
+        await new Promise(resolve => setTimeout(resolve, delayMs))
+      }
+
       const result = await synthesizeWithRouting(
         tier,
         {
@@ -139,7 +170,7 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
           env.DB,
           {
             userId: session.userId,
-            templateId: body.template_id ?? "none",
+            templateId: body.template_id ?? null,
             provider: result.providerUsed,
             model: result.modelUsed,
             audioMinutes: body.audio_minutes,
@@ -148,6 +179,8 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
             costUsd: result.usage.estimatedCostUsd,
             fellBack: result.fellBackToSecondary,
             language: body.language,
+            tier,
+            mode: body.mode,
           },
           BUDGET_CAP_USD
         );
@@ -170,6 +203,27 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
       } catch (quotaErr) {
         console.error('[synthesize] quota update failed:', quotaErr);
       }
+
+      // Fire-and-forget: check unlimited thresholds after quota is updated
+      ;(async () => {
+        try {
+          const updatedQuota = await env.DB
+            .prepare('SELECT synthesis_minutes FROM quota WHERE user_id = ? AND month = ?')
+            .bind(session.userId, currentMonth())
+            .first<{ synthesis_minutes: number }>()
+
+          const userRow = await env.DB
+            .prepare('SELECT email FROM users WHERE id = ?')
+            .bind(session.userId)
+            .first<{ email: string }>()
+
+          if (updatedQuota && userRow) {
+            await checkUnlimitedThresholds(env, session.userId, userRow.email, tier, updatedQuota.synthesis_minutes)
+          }
+        } catch (thresholdErr) {
+          console.error('[synthesize] unlimited threshold check failed:', thresholdErr)
+        }
+      })()
     } catch (err) {
       console.error('[synthesize] error:', err)
       await write({ type: "error", message: "synthesis_failed" });

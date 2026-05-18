@@ -1,4 +1,7 @@
 import type { ModelTier } from "./providers/types";
+import type { Env } from "./lib/env";
+
+const BUDGET_CAP_USD_PHASE1 = 50
 
 // Limiti per tier (minuti di audio al mese)
 const TIER_QUOTA_MINUTES: Record<ModelTier, number> = {
@@ -87,9 +90,36 @@ export async function checkQuotaAndBudget(
   };
 }
 
+function currentMonthStr(): string {
+  const d = new Date()
+  return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0')
+}
+
+export async function checkBudgetCap(env: Env): Promise<{ ok: true } | { ok: false; cost_usd: number; cap_usd: number }> {
+  const month = currentMonthStr()
+  const row = await env.DB
+    .prepare('SELECT cost_usd, cap_usd FROM budget_usage WHERE month = ?')
+    .bind(month)
+    .first<{ cost_usd: number; cap_usd: number }>()
+
+  if (!row) {
+    await env.DB
+      .prepare('INSERT INTO budget_usage (month, cost_usd, cap_usd, updated_at) VALUES (?, 0, ?, ?) ON CONFLICT(month) DO NOTHING')
+      .bind(month, BUDGET_CAP_USD_PHASE1, Date.now())
+      .run()
+    return { ok: true }
+  }
+
+  if (row.cost_usd >= row.cap_usd) {
+    return { ok: false, cost_usd: row.cost_usd, cap_usd: row.cap_usd }
+  }
+
+  return { ok: true }
+}
+
 export interface LogSynthesisInput {
   userId: string;
-  templateId: string;
+  templateId: string | null;
   provider: string;
   model: string;
   audioMinutes: number;
@@ -98,6 +128,8 @@ export interface LogSynthesisInput {
   costUsd: number;
   fellBack: boolean;
   language: string;
+  tier: string;
+  mode: string;
 }
 
 /**
@@ -118,13 +150,14 @@ export async function logSynthesisAndUpdateBudget(
       .prepare(
         `INSERT INTO synthesis_log
          (id, user_id, template_id, provider, model, audio_minutes,
-          input_tokens, output_tokens, cost_usd, fell_back, language, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          input_tokens, output_tokens, cost_usd, fell_back, language, created_at,
+          tier, mode)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .bind(
         id,
         input.userId,
-        input.templateId,
+        input.templateId || null,
         input.provider,
         input.model,
         input.audioMinutes,
@@ -133,7 +166,9 @@ export async function logSynthesisAndUpdateBudget(
         input.costUsd,
         input.fellBack ? 1 : 0,
         input.language,
-        now
+        now,
+        input.tier,
+        input.mode,
       ),
     db
       .prepare(

@@ -58,9 +58,9 @@ export async function handleCheckout(req: Request, env: Env): Promise<Response> 
             },
           },
           product_options: {
-            redirect_url: `${env.APP_URL}/billing/success`,
+            redirect_url: "https://sonabrief.com/billing/success",
             receipt_button_text: "Return to Sonabrief",
-            receipt_link_url: env.APP_URL,
+            receipt_link_url: "https://sonabrief.com",
           },
           checkout_options: {
             embed: false,

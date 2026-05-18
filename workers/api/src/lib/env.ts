@@ -22,6 +22,4 @@ export interface Env {
   LEMONSQUEEZY_VARIANT_UNLIMITED_MONTHLY: string;
   LEMONSQUEEZY_VARIANT_UNLIMITED_ANNUAL: string;
 
-  // Vars
-  APP_URL: string;
 }

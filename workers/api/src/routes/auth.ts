@@ -1,26 +1,99 @@
 import type { Env } from "../lib/env";
 import { corsHeaders } from "../lib/cors";
 import { createSession, destroySession, getUserFromSession } from "../lib/sessions";
+import {
+  hashIP,
+  isDisposableEmail,
+  isDatacenterIP,
+  fingerprint,
+  checkAndUpdateIPThrottle,
+  recordSignupSignals,
+} from "../lib/antiabuse";
+
+interface AuthRequestBody {
+  email?: string;
+  timezone?: string;
+  screen_resolution?: string;
+}
+
+function getMagicLinkBase(request: Request): string {
+  const origin = request.headers.get("Origin");
+  if (origin && (origin.includes("localhost") || origin.endsWith("sonabrief.com"))) {
+    return origin;
+  }
+  return "https://sonabrief.com";
+}
 
 export async function handleAuthRequest(request: Request, env: Env): Promise<Response> {
   const cors = corsHeaders(request, env);
-  const body = (await request.json().catch(() => null)) as { email?: string } | null;
-  const email = body?.email;
+  const body = (await request.json().catch(() => null)) as AuthRequestBody | null;
+  const email = body?.email?.trim().toLowerCase();
 
   if (!email) {
-    return new Response("Email required", { status: 400, headers: cors });
+    return new Response(JSON.stringify({ ok: false, error: "email_required" }), {
+      status: 400,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
   }
 
-  const userId = crypto.randomUUID();
-  await env.DB.prepare(
-    `INSERT OR IGNORE INTO users (id, email, created_at) VALUES (?, ?, ?)`
-  )
-    .bind(userId, email, Date.now())
-    .run();
+  // Check 1: disposable email
+  if (isDisposableEmail(email)) {
+    return new Response(JSON.stringify({ ok: false, error: "disposable_email" }), {
+      status: 400,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }
 
-  const user = await env.DB.prepare(`SELECT id FROM users WHERE email = ?`)
+  // Estrai segnali HTTP
+  const ip = request.headers.get("CF-Connecting-IP") ?? request.headers.get("X-Forwarded-For")?.split(",")[0]?.trim() ?? "0.0.0.0";
+  const userAgent = request.headers.get("User-Agent");
+  const acceptLanguage = request.headers.get("Accept-Language");
+
+  // Check 2: IP datacenter blocco hard solo se NON è un'email già esistente
+  // (utenti legittimi che si rilogganno da rete aziendale potrebbero passare per IP datacenter)
+  const existingUser = await env.DB.prepare(`SELECT id FROM users WHERE email = ?`)
     .bind(email)
     .first<{ id: string }>();
+
+  if (!existingUser && isDatacenterIP(ip)) {
+    return new Response(JSON.stringify({ ok: false, error: "datacenter_ip_blocked" }), {
+      status: 403,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }
+
+  const ipHash = await hashIP(ip);
+
+  // Check 3: IP throttling — solo per nuovi signup, non per re-login
+  if (!existingUser) {
+    const throttle = await checkAndUpdateIPThrottle(ipHash, env);
+    if (!throttle.allowed) {
+      return new Response(JSON.stringify({ ok: false, error: "rate_limited", reason: throttle.reason }), {
+        status: 429,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
+    }
+  }
+
+  // Create user se nuovo
+  const userId = existingUser?.id ?? crypto.randomUUID();
+  if (!existingUser) {
+    await env.DB.prepare(
+      `INSERT INTO users (id, email, created_at) VALUES (?, ?, ?)`
+    )
+      .bind(userId, email, Date.now())
+      .run();
+
+    // Record signup signals + fingerprint check
+    const signals = {
+      user_agent: userAgent,
+      accept_language: acceptLanguage,
+      timezone: body?.timezone ?? null,
+      screen_resolution: body?.screen_resolution ?? null,
+    };
+    const fingerprintHash = await fingerprint(signals);
+    await recordSignupSignals(userId, ipHash, signals, fingerprintHash, env);
+  }
 
   const token = crypto.randomUUID();
   const expiresAt = Date.now() + 1000 * 60 * 15;
@@ -28,10 +101,11 @@ export async function handleAuthRequest(request: Request, env: Env): Promise<Res
   await env.DB.prepare(
     `INSERT INTO magic_tokens (token, user_id, expires_at) VALUES (?, ?, ?)`
   )
-    .bind(token, user!.id, expiresAt)
+    .bind(token, userId, expiresAt)
     .run();
 
-  const magicLink = `${env.APP_URL}/auth/verify?token=${token}`;
+  const baseUrl = getMagicLinkBase(request);
+  const magicLink = `${baseUrl}/auth/verify?token=${token}`;
 
   const resendRes = await fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -46,8 +120,14 @@ export async function handleAuthRequest(request: Request, env: Env): Promise<Res
       html: `<p>Clicca il link per accedere. Scade tra 15 minuti.</p><a href="${magicLink}">${magicLink}</a>`,
     }),
   });
-  const resendBody = await resendRes.json();
-  console.log("Resend status:", resendRes.status, JSON.stringify(resendBody));
+
+  if (!resendRes.ok) {
+    console.error("[auth] resend failed:", resendRes.status);
+    return new Response(JSON.stringify({ ok: false, error: "email_send_failed" }), {
+      status: 502,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
+  }
 
   return new Response(JSON.stringify({ ok: true }), {
     headers: { ...cors, "Content-Type": "application/json" },
@@ -104,7 +184,7 @@ export async function handleAuthLogout(request: Request, env: Env): Promise<Resp
     });
   }
 
-  const clearCookieHeader = await destroySession(env, user.sessionId);
+  const clearCookieHeader = await destroySession(env, user.sessionId, request);
 
   return new Response(JSON.stringify({ ok: true }), {
     headers: {
