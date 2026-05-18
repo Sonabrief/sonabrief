@@ -143,6 +143,8 @@ export default function RecordingPage() {
   const [highlights, setHighlights] = useState<Highlight[]>([])
   const [notesOpen, setNotesOpen] = useState(false)
   const [copyDone, setCopyDone] = useState(false)
+  const [templates, setTemplates] = useState<{ id: string; name: string }[]>([])
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('sys_generic_it_v2')
   const meetingIdRef = useRef('')
 
   function buildExportData() {
@@ -171,6 +173,12 @@ export default function RecordingPage() {
       if (event.type === 'error') setWhisperState('error')
     })
     whisper.load('Xenova/whisper-base')
+    fetch(`${API_URL}/v1/templates`, { credentials: 'include' })
+      .then(r => r.ok ? r.json() : { templates: [] })
+      .then((data: { templates: { id: string; name: string }[] }) => {
+        if (data.templates?.length) setTemplates(data.templates)
+      })
+      .catch(() => {})
     return () => { unsub(); whisper.destroy() }
   }, [])
  
@@ -264,6 +272,7 @@ export default function RecordingPage() {
           language,
           mode,
           system_prompt: SYSTEM_PROMPT,
+          template_id: selectedTemplate,
           audio_minutes: Math.ceil(duration / 60),
           notes,
         }),
@@ -301,6 +310,7 @@ export default function RecordingPage() {
     setCopyDone(false)
     meetingIdRef.current = ''
     localStorage.removeItem(NOTES_KEY)
+    setSelectedTemplate('sys_generic_it_v2')
     if (whisperState === 'error') setWhisperState('ready')
   }
 
@@ -375,9 +385,25 @@ export default function RecordingPage() {
         </div>
       )}
  
-      {/* Bottone sintesi */}
+      {/* Selettore template + bottone sintesi */}
       {whisperState === 'done' && transcript && synthesisState === 'idle' && (
-        <Button onClick={generateSynthesis}>Genera sintesi</Button>
+        <div className="flex flex-col gap-3 w-full max-w-xl">
+          {templates.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-gray-400">Tipo di meeting</label>
+              <select
+                value={selectedTemplate}
+                onChange={e => setSelectedTemplate(e.target.value)}
+                className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
+              >
+                {templates.map(t => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          <Button onClick={generateSynthesis}>Genera sintesi</Button>
+        </div>
       )}
  
       {/* Sintesi */}

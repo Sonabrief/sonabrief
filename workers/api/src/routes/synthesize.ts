@@ -20,7 +20,7 @@ function currentMonth(): string {
 
 const SynthesizeSchema = z.object({
   transcript: z.string().min(10).max(100_000),
-  template_id: z.string().uuid().optional(),
+  template_id: z.string().optional(),
   language: z.enum(["it", "en", "fr", "es", "de"]).default("it"),
   meeting_id: z.string().uuid(),
   system_prompt: z.string().min(10).max(10_000),
