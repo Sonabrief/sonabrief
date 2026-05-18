@@ -40,6 +40,42 @@ export async function getBillingPortalUrl(): Promise<string | null> {
   }
 }
 
+export interface UserPreferences {
+  language: string
+  profession: string | null
+  profession_category: string | null
+  context_note: string | null
+  meeting_duration: string | null
+  client_volume: string | null
+  synthesis_mode: string
+  sync_enabled: number
+  onboarded: number
+}
+
+export async function getPreferences(): Promise<UserPreferences | null> {
+  try {
+    const res = await fetch(`${API_URL}/v1/preferences`, { credentials: 'include' })
+    if (!res.ok) return null
+    return res.json()
+  } catch {
+    return null
+  }
+}
+
+export async function savePreferences(prefs: Partial<UserPreferences>): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_URL}/v1/preferences`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(prefs),
+    })
+    return res.ok
+  } catch {
+    return false
+  }
+}
+
 export async function logout(): Promise<void> {
   await fetch(`${API_URL}/auth/logout`, {
     method: 'POST',

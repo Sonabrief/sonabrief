@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getMe, logout, getBillingStatus, getBillingPortalUrl, type BillingStatus } from '../lib/api'
+import { getMe, logout, getBillingStatus, getBillingPortalUrl, getPreferences, type BillingStatus } from '../lib/api'
 import { Button } from '../components/ui/button'
 
 const TIER_LABEL: Record<string, string> = {
@@ -26,6 +26,7 @@ function formatMinutes(minutes: number): string {
 export default function DashboardPage() {
   const [email, setEmail] = useState('')
   const [billing, setBilling] = useState<BillingStatus | null>(null)
+  const [onboarded, setOnboarded] = useState<boolean | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -34,6 +35,13 @@ export default function DashboardPage() {
     })
     getBillingStatus().then(b => {
       if (b) setBilling(b)
+    })
+    getPreferences().then(prefs => {
+      if (prefs && prefs.onboarded === 0) {
+        navigate('/onboarding')
+      } else {
+        setOnboarded(true)
+      }
     })
   }, [])
 
@@ -45,6 +53,14 @@ export default function DashboardPage() {
   async function handleLogout() {
     await logout()
     navigate('/', { replace: true })
+  }
+
+  if (onboarded === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#FAF7F0]">
+        <p className="text-sm text-gray-400">Caricamento...</p>
+      </div>
+    )
   }
 
   const tier = billing?.tier ?? 'free'

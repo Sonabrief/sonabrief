@@ -13,6 +13,7 @@ import { handleCheckout } from "./routes/checkout";
 import { handleLemonsqueezyWebhook } from "./routes/webhooks";
 import { handleBillingStatus, handleBillingPortal } from "./routes/billing";
 import { handleAdminStats } from "./routes/admin";
+import { handleGetPreferences, handleSavePreferences } from "./routes/preferences";
 
 export type { Env };
 
@@ -52,6 +53,10 @@ export default {
       response = await handleLemonsqueezyWebhook(request, env);
     } else if (url.pathname === "/admin/stats" && request.method === "GET") {
       response = await handleAdminStats(request, env);
+    } else if (url.pathname === '/v1/preferences' && request.method === 'GET') {
+      response = await handleGetPreferences(request, env)
+    } else if (url.pathname === '/v1/preferences' && request.method === 'POST') {
+      response = await handleSavePreferences(request, env)
     } else {
       response = new Response("Not found", { status: 404 });
     }

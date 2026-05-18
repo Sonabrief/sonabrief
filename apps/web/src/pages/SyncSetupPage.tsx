@@ -54,6 +54,7 @@ export default function SyncSetupPage() {
   // Step 4
   const [checkIndices, setCheckIndices] = useState<[number, number, number]>([3, 6, 10])
   const [checkInputs, setCheckInputs] = useState<[string, string, string]>(['', '', ''])
+  const [step4Attempted, setStep4Attempted] = useState(false)
 
   useEffect(() => {
     setPhrase(generateRecoveryPhrase())
@@ -241,21 +242,48 @@ export default function SyncSetupPage() {
                         return next
                       })
                     }
-                    className="w-full border rounded px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[#1A4D52]/40"
+                    className={`w-full border rounded px-3 py-2 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-[#1A4D52]/40 ${
+                      step4Attempted && checkInputs[i].trim().toLowerCase() !== phrase[idx]?.toLowerCase()
+                        ? 'border-red-400 bg-red-50'
+                        : ''
+                    }`}
                     autoComplete="off"
                     autoCorrect="off"
                     spellCheck={false}
                   />
+                  {step4Attempted && checkInputs[i].trim().toLowerCase() !== phrase[idx]?.toLowerCase() && (
+                    <p className="text-xs text-red-600">Parola non corretta</p>
+                  )}
                 </div>
               ))}
             </div>
+
+            {step4Attempted && !step4Valid && (
+              <p className="text-sm text-red-600 text-center">
+                Alcune parole non corrispondono. Torna indietro per ricontrollare la tua recovery phrase.
+              </p>
+            )}
+
             <Button
               className="w-full bg-[#1A4D52] hover:bg-[#1A4D52]/90 text-white"
-              onClick={handleActivate}
-              disabled={!step4Valid}
+              onClick={() => {
+                setStep4Attempted(true)
+                if (step4Valid) handleActivate()
+              }}
             >
               Attiva sync
             </Button>
+
+            <button
+              onClick={() => {
+                setStep4Attempted(false)
+                setCheckInputs(['', '', ''])
+                setStep(3)
+              }}
+              className="w-full text-sm text-gray-400 hover:text-gray-600 underline"
+            >
+              ← Torna alla recovery phrase
+            </button>
           </div>
         )}
       </div>
