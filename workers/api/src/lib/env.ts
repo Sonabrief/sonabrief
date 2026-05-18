@@ -13,6 +13,14 @@ export interface Env {
   GROQ_API_KEY: string;
   MISTRAL_API_KEY: string;
 
+  // Google OAuth
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+
+  // Microsoft OAuth
+  MICROSOFT_CLIENT_ID: string;
+  MICROSOFT_CLIENT_SECRET: string;
+
   // Lemon Squeezy
   LEMONSQUEEZY_API_KEY: string;
   LEMONSQUEEZY_WEBHOOK_SECRET: string;

@@ -14,6 +14,7 @@ import { handleLemonsqueezyWebhook } from "./routes/webhooks";
 import { handleBillingStatus, handleBillingPortal } from "./routes/billing";
 import { handleAdminStats } from "./routes/admin";
 import { handleGetPreferences, handleSavePreferences } from "./routes/preferences";
+import { handleGoogleStart, handleGoogleCallback, handleCalendarEvents, handleCalendarDisconnect, handleMicrosoftStart, handleMicrosoftCallback, handleMicrosoftCalendarEvents, handleMicrosoftDisconnect } from "./routes/calendar";
 
 export type { Env };
 
@@ -57,6 +58,22 @@ export default {
       response = await handleGetPreferences(request, env)
     } else if (url.pathname === '/v1/preferences' && request.method === 'POST') {
       response = await handleSavePreferences(request, env)
+    } else if (url.pathname === '/auth/google/start' && request.method === 'GET') {
+      response = await handleGoogleStart(request, env)
+    } else if (url.pathname === '/auth/google/callback' && request.method === 'GET') {
+      response = await handleGoogleCallback(request, env)
+    } else if (url.pathname === '/v1/calendar/events' && request.method === 'GET') {
+      response = await handleCalendarEvents(request, env)
+    } else if (url.pathname === '/v1/calendar/disconnect' && request.method === 'POST') {
+      response = await handleCalendarDisconnect(request, env)
+    } else if (url.pathname === '/auth/microsoft/start' && request.method === 'GET') {
+      response = await handleMicrosoftStart(request, env)
+    } else if (url.pathname === '/auth/microsoft/callback' && request.method === 'GET') {
+      response = await handleMicrosoftCallback(request, env)
+    } else if (url.pathname === '/v1/calendar/microsoft/events' && request.method === 'GET') {
+      response = await handleMicrosoftCalendarEvents(request, env)
+    } else if (url.pathname === '/v1/calendar/microsoft/disconnect' && request.method === 'POST') {
+      response = await handleMicrosoftDisconnect(request, env)
     } else {
       response = new Response("Not found", { status: 404 });
     }

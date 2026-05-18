@@ -10,6 +10,7 @@ import PricingPage from './pages/PricingPage';
 import BillingSuccessPage from './pages/BillingSuccessPage';
 import AdminPage from './pages/AdminPage';
 import OnboardingPage from './pages/OnboardingPage';
+import CalendarPage from './pages/CalendarPage';
 import RequireAuth from './components/RequireAuth';
 import SyncGate from './components/SyncGate';
 
@@ -43,6 +44,11 @@ export default function App() {
         <Route path="/onboarding" element={
           <RequireAuth>
             <OnboardingPage />
+          </RequireAuth>
+        } />
+        <Route path="/calendar" element={
+          <RequireAuth>
+            <CalendarPage />
           </RequireAuth>
         } />
         <Route path="/sync/setup" element={
