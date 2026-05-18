@@ -8,6 +8,7 @@ import SyncSetupPage from './pages/SyncSetupPage';
 import SyncUnlockPage from './pages/SyncUnlockPage';
 import PricingPage from './pages/PricingPage';
 import BillingSuccessPage from './pages/BillingSuccessPage';
+import AdminPage from './pages/AdminPage';
 import RequireAuth from './components/RequireAuth';
 import SyncGate from './components/SyncGate';
 
@@ -56,6 +57,11 @@ export default function App() {
         <Route path="/billing/success" element={
           <RequireAuth>
             <BillingSuccessPage />
+          </RequireAuth>
+        } />
+        <Route path="/admin" element={
+          <RequireAuth>
+            <AdminPage />
           </RequireAuth>
         } />
       </Routes>

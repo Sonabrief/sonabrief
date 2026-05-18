@@ -12,6 +12,7 @@ import { handleSyncUpload, handleSyncDownload } from "./routes/sync";
 import { handleCheckout } from "./routes/checkout";
 import { handleLemonsqueezyWebhook } from "./routes/webhooks";
 import { handleBillingStatus, handleBillingPortal } from "./routes/billing";
+import { handleAdminStats } from "./routes/admin";
 
 export type { Env };
 
@@ -49,6 +50,8 @@ export default {
       response = await handleBillingPortal(request, env);
     } else if (url.pathname === "/v1/webhooks/lemonsqueezy" && request.method === "POST") {
       response = await handleLemonsqueezyWebhook(request, env);
+    } else if (url.pathname === "/admin/stats" && request.method === "GET") {
+      response = await handleAdminStats(request, env);
     } else {
       response = new Response("Not found", { status: 404 });
     }
