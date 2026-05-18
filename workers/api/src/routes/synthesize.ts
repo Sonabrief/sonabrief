@@ -29,6 +29,32 @@ const SynthesizeSchema = z.object({
   mode: z.enum(['standard', 'local']).default('standard'),
 });
 
+function buildSystemPrompt(base: string, prefs: {
+  profession: string | null
+  profession_category: string | null
+  context_note: string | null
+  meeting_duration: string | null
+} | null): string {
+  if (!prefs || (!prefs.profession && !prefs.context_note)) return base
+
+  const lines: string[] = []
+
+  if (prefs.profession) {
+    lines.push(`L'utente è un/una ${prefs.profession}.`)
+  }
+  if (prefs.context_note) {
+    lines.push(`Contesto professionale: ${prefs.context_note}`)
+  }
+  if (prefs.meeting_duration === 'short') {
+    lines.push('I meeting sono tipicamente brevi (< 30 minuti): produci una sintesi molto compatta.')
+  } else if (prefs.meeting_duration === 'very_long') {
+    lines.push('I meeting sono tipicamente lunghi (> 2 ore): struttura la sintesi in sezioni ben definite.')
+  }
+
+  const contextPrefix = lines.join(' ')
+  return `${contextPrefix}\n\n${base}`
+}
+
 export async function handleSynthesize(req: Request, env: Env): Promise<Response> {
   // 1. Auth
   const session = await getUserFromSession(req, env);
@@ -42,6 +68,17 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
     .first<{ tier: string }>();
   const tier = (licenseRow?.tier ?? "free") as "free" | "pro" | "unlimited";
 
+  const userPrefs = await env.DB
+    .prepare('SELECT profession, profession_category, context_note, meeting_duration, synthesis_mode FROM user_preferences WHERE user_id = ?')
+    .bind(session.userId)
+    .first<{
+      profession: string | null
+      profession_category: string | null
+      context_note: string | null
+      meeting_duration: string | null
+      synthesis_mode: string | null
+    }>()
+
   // 3. Zod validation
   let body: z.infer<typeof SynthesizeSchema>;
   try {
@@ -52,6 +89,8 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  const finalSystemPrompt = buildSystemPrompt(body.system_prompt ?? '', userPrefs)
 
   // 4. Budget cap globale (solo free, solo cloud)
   if (tier === 'free' && body.mode !== 'local') {
@@ -151,7 +190,7 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
       const result = await synthesizeWithRouting(
         tier,
         {
-          systemPrompt: body.system_prompt,
+          systemPrompt: finalSystemPrompt,
           transcript: body.transcript,
           language: body.language,
           notes: body.notes || undefined,

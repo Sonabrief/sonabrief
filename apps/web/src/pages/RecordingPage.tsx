@@ -291,6 +291,19 @@ export default function RecordingPage() {
     } catch { setSynthesisState('error') }
   }
  
+  function handleNewRecording() {
+    reset()
+    setTranscript('')
+    setSynthesis('')
+    setSynthesisState('idle')
+    setHighlights([])
+    setNotesOpen(false)
+    setCopyDone(false)
+    meetingIdRef.current = ''
+    localStorage.removeItem(NOTES_KEY)
+    if (whisperState === 'error') setWhisperState('ready')
+  }
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-8 p-8">
       <h1 className="text-2xl font-semibold">Nuovo meeting</h1>
@@ -461,7 +474,7 @@ export default function RecordingPage() {
  
       {(whisperState === 'done' || state === 'error') && (
         <div className="flex gap-3">
-          <Button variant="outline" onClick={reset}>Nuova registrazione</Button>
+          <Button variant="outline" onClick={handleNewRecording}>Nuova registrazione</Button>
           <Button variant="outline" onClick={() => navigate('/dashboard')}>Torna alla dashboard</Button>
         </div>
       )}
