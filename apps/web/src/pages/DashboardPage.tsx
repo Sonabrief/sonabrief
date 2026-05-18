@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getMe, logout, getBillingStatus, type BillingStatus } from '../lib/api'
+import { getMe, logout, getBillingStatus, getBillingPortalUrl, type BillingStatus } from '../lib/api'
 import { Button } from '../components/ui/button'
 
 const TIER_LABEL: Record<string, string> = {
@@ -36,6 +36,11 @@ export default function DashboardPage() {
       if (b) setBilling(b)
     })
   }, [])
+
+  async function handleManageSubscription() {
+    const url = await getBillingPortalUrl()
+    if (url) window.open(url, '_blank')
+  }
 
   async function handleLogout() {
     await logout()
@@ -132,7 +137,7 @@ export default function DashboardPage() {
 
           {tier !== 'free' && (
             <button
-              onClick={() => navigate('/pricing')}
+              onClick={handleManageSubscription}
               className="text-xs text-gray-400 underline"
             >
               Gestisci abbonamento

@@ -29,6 +29,17 @@ export async function getBillingStatus(): Promise<BillingStatus | null> {
   }
 }
 
+export async function getBillingPortalUrl(): Promise<string | null> {
+  try {
+    const res = await fetch(`${API_URL}/v1/billing/portal`, { credentials: 'include' })
+    if (!res.ok) return null
+    const data = await res.json() as { url: string }
+    return data.url
+  } catch {
+    return null
+  }
+}
+
 export async function logout(): Promise<void> {
   await fetch(`${API_URL}/auth/logout`, {
     method: 'POST',

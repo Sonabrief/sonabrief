@@ -59,3 +59,43 @@ export async function handleBillingStatus(req: Request, env: Env): Promise<Respo
     headers: { 'Content-Type': 'application/json' },
   })
 }
+
+export async function handleBillingPortal(req: Request, env: Env): Promise<Response> {
+  const session = await getUserFromSession(req, env)
+  if (!session) {
+    return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401 })
+  }
+
+  const license = await env.DB
+    .prepare('SELECT ls_subscription_id FROM licenses WHERE user_id = ? AND status != ?')
+    .bind(session.userId, 'free')
+    .first<{ ls_subscription_id: string }>()
+
+  if (!license?.ls_subscription_id) {
+    return new Response(JSON.stringify({ error: 'no_active_subscription' }), { status: 404 })
+  }
+
+  const lsRes = await fetch(
+    `https://api.lemonsqueezy.com/v1/subscriptions/${license.ls_subscription_id}`,
+    {
+      headers: {
+        'Accept': 'application/vnd.api+json',
+        'Authorization': `Bearer ${env.LEMONSQUEEZY_API_KEY}`,
+      },
+    }
+  )
+
+  if (!lsRes.ok) {
+    return new Response(JSON.stringify({ error: 'portal_fetch_failed' }), { status: 502 })
+  }
+
+  const data = await lsRes.json() as {
+    data: { attributes: { urls: { customer_portal: string } } }
+  }
+  const portalUrl = data.data.attributes.urls.customer_portal
+
+  return new Response(JSON.stringify({ url: portalUrl }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
