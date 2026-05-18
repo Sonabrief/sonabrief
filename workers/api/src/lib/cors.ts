@@ -1,18 +1,15 @@
-// CORS con allowlist di origini consentite.
-
 import type { Env } from "./env";
 
-const ALLOWED_ORIGINS_PROD = ["https://sonabrief.com", "https://www.sonabrief.com"];
-const ALLOWED_ORIGINS_DEV = ["http://localhost:5173", "http://localhost:1420"];
+const ALLOWED_ORIGINS = [
+  "https://sonabrief.com",
+  "https://www.sonabrief.com",
+  "http://localhost:5173",
+  "http://localhost:1420",
+];
 
-export function corsHeaders(request: Request, env: Env): Record<string, string> {
+export function corsHeaders(request: Request, _env: Env): Record<string, string> {
   const origin = request.headers.get("Origin") ?? "";
-  const isDev = env.APP_URL.includes("localhost");
-  const allowed = isDev
-    ? [...ALLOWED_ORIGINS_PROD, ...ALLOWED_ORIGINS_DEV]
-    : ALLOWED_ORIGINS_PROD;
-
-  const allowOrigin = allowed.includes(origin) ? origin : allowed[0]!;
+  const allowOrigin = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0]!;
 
   return {
     "Access-Control-Allow-Origin": allowOrigin,
@@ -23,13 +20,13 @@ export function corsHeaders(request: Request, env: Env): Record<string, string> 
   };
 }
 
-export function handleCorsPreflightRequest(request: Request, env: Env): Response {
-  return new Response(null, { headers: corsHeaders(request, env) });
+export function handleCorsPreflightRequest(request: Request, _env: Env): Response {
+  return new Response(null, { headers: corsHeaders(request, _env) });
 }
 
-export function withCors(response: Response, request: Request, env: Env): Response {
+export function withCors(response: Response, request: Request, _env: Env): Response {
   const headers = new Headers(response.headers);
-  for (const [key, value] of Object.entries(corsHeaders(request, env))) {
+  for (const [key, value] of Object.entries(corsHeaders(request, _env))) {
     headers.set(key, value);
   }
   return new Response(response.body, {

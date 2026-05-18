@@ -11,6 +11,7 @@ import { handleTemplates } from "./routes/templates";
 import { handleSyncUpload, handleSyncDownload } from "./routes/sync";
 import { handleCheckout } from "./routes/checkout";
 import { handleLemonsqueezyWebhook } from "./routes/webhooks";
+import { handleBillingStatus } from "./routes/billing";
 
 export type { Env };
 
@@ -42,6 +43,8 @@ export default {
       response = await handleSyncDownload(request, env);
     } else if (url.pathname === "/v1/checkout" && request.method === "POST") {
       response = await handleCheckout(request, env);
+    } else if (url.pathname === "/v1/billing/status" && request.method === "GET") {
+      response = await handleBillingStatus(request, env);
     } else if (url.pathname === "/v1/webhooks/lemonsqueezy" && request.method === "POST") {
       response = await handleLemonsqueezyWebhook(request, env);
     } else {
