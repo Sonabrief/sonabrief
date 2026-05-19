@@ -9,6 +9,7 @@ interface Template {
   language: string
   system_prompt: string
   is_system: number
+  parent_id?: string
 }
 
 const LANG_LABEL: Record<string, string> = {

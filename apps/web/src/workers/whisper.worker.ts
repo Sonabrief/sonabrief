@@ -2,6 +2,7 @@ import { pipeline, env } from '@huggingface/transformers'
 
 env.allowLocalModels = false
 env.useBrowserCache = true
+// @ts-ignore
 env.backends.onnx.wasm.numThreads = 1
 
 type WhisperStatus =
@@ -11,6 +12,7 @@ type WhisperStatus =
   | { type: 'result'; text: string; segments: unknown[] }
   | { type: 'error'; message: string }
 
+// @ts-ignore
 let transcriber: Awaited<ReturnType<typeof pipeline>> | null = null
 
 async function loadModel(model: string) {

@@ -33,7 +33,7 @@ export function useMeetingBriefing() {
         )
 
         const openItems = await db.action_items
-          .where('completed').equals(0 as unknown as boolean)
+          .where('completed').equals(0 as unknown as import('dexie').IndexableType)
           .reverse()
           .sortBy('createdAt')
 

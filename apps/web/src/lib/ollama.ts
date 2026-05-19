@@ -2,7 +2,7 @@ const OLLAMA_ERROR = 'Ollama non raggiungibile. Assicurati che Ollama sia instal
 
 export async function synthesizeWithOllama(
   transcript: string,
-  language: string,
+  _language: string,
   notes: string | undefined,
   systemPrompt: string,
   onChunk: (text: string) => void,

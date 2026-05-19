@@ -2,6 +2,7 @@ import { pipeline, env } from '@huggingface/transformers'
 
 env.allowLocalModels = false
 env.useBrowserCache = true
+// @ts-ignore
 env.backends.onnx.wasm.numThreads = 1
 
 type EmbeddingStatus =
@@ -9,6 +10,7 @@ type EmbeddingStatus =
   | { type: 'result'; id: string; vector: number[] }
   | { type: 'error'; message: string }
 
+// @ts-ignore
 let embedder: Awaited<ReturnType<typeof pipeline>> | null = null
 
 async function loadModel() {
@@ -21,7 +23,7 @@ async function loadModel() {
 async function embed(id: string, text: string) {
   if (!embedder) throw new Error('Model not loaded')
   const output = await embedder(text, { pooling: 'mean', normalize: true })
-  const vector = Array.from(output.data as Float32Array)
+  const vector = Array.from((output as any).data as Float32Array)
   self.postMessage({ type: 'result', id, vector } satisfies EmbeddingStatus)
 }
 

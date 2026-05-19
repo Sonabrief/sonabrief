@@ -27,7 +27,7 @@ export async function uploadMeeting(meetingId: string): Promise<{ ok: true; size
 
   const formData = new FormData()
   formData.append('meeting_id', meetingId)
-  formData.append('blob', new Blob([encrypted], { type: 'application/octet-stream' }))
+  formData.append('blob', new Blob([encrypted as unknown as BlobPart], { type: 'application/octet-stream' }))
 
   const response = await fetch(`${API_URL}/v1/sync/upload`, {
     method: 'POST',
