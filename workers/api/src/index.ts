@@ -11,6 +11,8 @@ import { handleTemplates } from "./routes/templates";
 import { handleSyncUpload, handleSyncDownload } from "./routes/sync";
 import { handleCheckout } from "./routes/checkout";
 import { handleLemonsqueezyWebhook } from "./routes/webhooks";
+import { handlePolarCheckout } from "./routes/checkout-polar";
+import { handlePolarWebhook } from "./routes/webhooks-polar";
 import { handleBillingStatus, handleBillingPortal } from "./routes/billing";
 import { handleAdminStats } from "./routes/admin";
 import { handleGetPreferences, handleSavePreferences } from "./routes/preferences";
@@ -52,6 +54,10 @@ export default {
       response = await handleBillingPortal(request, env);
     } else if (url.pathname === "/v1/webhooks/lemonsqueezy" && request.method === "POST") {
       response = await handleLemonsqueezyWebhook(request, env);
+    } else if (url.pathname === "/v1/checkout/polar" && request.method === "POST") {
+      response = await handlePolarCheckout(request, env);
+    } else if (url.pathname === "/v1/webhooks/polar" && request.method === "POST") {
+      response = await handlePolarWebhook(request, env);
     } else if (url.pathname === "/admin/stats" && request.method === "GET") {
       response = await handleAdminStats(request, env);
     } else if (url.pathname === '/v1/preferences' && request.method === 'GET') {

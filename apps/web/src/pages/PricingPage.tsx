@@ -27,11 +27,11 @@ export default function PricingPage() {
       cycle: 'forever',
       description: 'Per provare Sonabrief senza impegno.',
       features: [
-        '5 ore di sintesi cloud / mese',
+        '3 ore di sintesi cloud / mese',
         'Modalità Local Only illimitata',
-        'Sync E2E fino a 500 MB',
+        'Sync E2E fino a 100 MB',
         'Archivio illimitato',
-        'Export Markdown / PDF / Word',
+        'Export solo Markdown',
       ],
       tier: null,
     },
@@ -41,8 +41,8 @@ export default function PricingPage() {
       cycle: billing === 'monthly' ? '/ mese' : '/ anno',
       description: 'Per il professionista che lavora ogni giorno con i clienti.',
       features: [
-        '50 ore di sintesi cloud / mese',
-        'Mistral Small 3.1 (EU-hosted)',
+        '30 ore di sintesi cloud / mese',
+        'Mistral Large 3 (EU-hosted)',
         'Sync E2E fino a 5 GB',
         'Dashboard action items',
         'Briefing pre-meeting',
@@ -74,7 +74,7 @@ export default function PricingPage() {
     setLoading(tier)
     setError(null)
     try {
-      const res = await fetch(`${API_URL}/v1/checkout`, {
+      const res = await fetch(`${API_URL}/v1/checkout/polar`, {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -219,7 +219,7 @@ export default function PricingPage() {
         </div>
 
         <p className="mt-12 text-center text-xs text-gray-500">
-          Pagamenti gestiti da Lemon Squeezy (Merchant of Record). IVA inclusa automaticamente.
+          Pagamenti gestiti da Polar (Merchant of Record). IVA inclusa automaticamente.
         </p>
       </div>
     </div>
