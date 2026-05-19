@@ -10,7 +10,6 @@ export interface Env {
 
   // Secrets
   RESEND_API_KEY: string;
-  GROQ_API_KEY: string;
   MISTRAL_API_KEY: string;
 
   // Google OAuth

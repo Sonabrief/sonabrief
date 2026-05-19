@@ -7,17 +7,14 @@ import type {
   SynthesisResult,
 } from "./types";
 import { TIER_ROUTING } from "./types";
-import { createGroqProvider } from "./groq";
 import { createMistralProvider } from "./mistral";
 
 export interface ProviderEnv {
-  GROQ_API_KEY: string;
   MISTRAL_API_KEY: string;
 }
 
 export function buildProviders(env: ProviderEnv): Record<ProviderId, LLMProvider> {
   return {
-    groq: createGroqProvider(env.GROQ_API_KEY),
     mistral: createMistralProvider(env.MISTRAL_API_KEY),
   };
 }

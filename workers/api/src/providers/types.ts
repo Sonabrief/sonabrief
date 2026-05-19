@@ -1,6 +1,6 @@
 // Comune a tutti i provider LLM (Groq, Mistral, ...)
 
-export type ProviderId = "groq" | "mistral";
+export type ProviderId = "mistral";
 
 export type ModelTier = "free" | "pro" | "unlimited";
 
@@ -54,14 +54,12 @@ export interface TierRouting {
 
 export const TIER_ROUTING: Record<ModelTier, TierRouting> = {
   free: {
-    primary: { provider: "groq", model: "llama-3.3-70b-versatile" },
+    primary: { provider: "mistral", model: "mistral-small-latest" },
   },
   pro: {
     primary: { provider: "mistral", model: "mistral-small-latest" },
-    fallback: { provider: "groq", model: "llama-3.3-70b-versatile" },
   },
   unlimited: {
-    primary: { provider: "mistral", model: "mistral-large-latest" },
-    fallback: { provider: "groq", model: "llama-3.3-70b-versatile" },
+    primary: { provider: "mistral", model: "mistral-small-latest" },
   },
 };
