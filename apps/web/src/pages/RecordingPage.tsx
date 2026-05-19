@@ -16,13 +16,6 @@ const LANG_LABEL: Record<string, string> = {
   it: 'Italiano', en: 'English', fr: 'Français', es: 'Español', de: 'Deutsch',
 }
 
-const SYSTEM_PROMPT =
-  'Sei un assistente esperto nella redazione di verbali aziendali. ' +
-  'Analizza la trascrizione del meeting e produci un verbale sintetico strutturato in: ' +
-  'riepilogo esecutivo, punti chiave discussi, decisioni prese, prossimi passi con eventuali responsabili. ' +
-  'Rileva automaticamente la lingua parlata nel meeting dalla trascrizione e scrivi il verbale nella stessa lingua. ' +
-  'Se sono presenti note manuali del partecipante, integrале nel verbale come contesto aggiuntivo, segnalando che provengono dalle note personali.'
- 
 function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
   const s = (seconds % 60).toString().padStart(2, '0')
@@ -144,8 +137,9 @@ export default function RecordingPage() {
   const [highlights, setHighlights] = useState<Highlight[]>([])
   const [notesOpen, setNotesOpen] = useState(false)
   const [copyDone, setCopyDone] = useState(false)
-  const [templates, setTemplates] = useState<{ id: string; name: string }[]>([])
+  const [templates, setTemplates] = useState<{ id: string; name: string; system_prompt: string }[]>([])
   const [selectedTemplate, setSelectedTemplate] = useState<string>('sys_generic_it_v2')
+  const [templatePrompt, setTemplatePrompt] = useState<string>('')
   const meetingIdRef = useRef('')
 
   function buildExportData() {
@@ -173,16 +167,25 @@ export default function RecordingPage() {
       if (event.type === 'result') { setTranscript(event.text); setWhisperState('done') }
       if (event.type === 'error') setWhisperState('error')
     })
-    whisper.load('Xenova/whisper-base')
+    whisper.load('Xenova/whisper-small')
     fetch(`${API_URL}/v1/templates`, { credentials: 'include' })
-      .then(r => r.ok ? r.json() : { templates: [] })
-      .then((data: { templates: { id: string; name: string }[] }) => {
-        if (data.templates?.length) setTemplates(data.templates)
+      .then(r => r.ok ? r.json() : [])
+      .then((data: { id: string; name: string; system_prompt: string }[]) => {
+        if (Array.isArray(data) && data.length) {
+          setTemplates(data)
+          const defaultTpl = data.find(t => t.id === 'sys_generic_it_v2') ?? data[0]
+          if (defaultTpl) setTemplatePrompt(defaultTpl.system_prompt)
+        }
       })
       .catch(() => {})
     return () => { unsub(); whisper.destroy() }
   }, [])
  
+  useEffect(() => {
+    const tpl = templates.find(t => t.id === selectedTemplate)
+    if (tpl) setTemplatePrompt(tpl.system_prompt)
+  }, [selectedTemplate, templates])
+
   useEffect(() => {
     if (audioData && whisperState === 'ready') whisper.transcribe(audioData, language)
   }, [audioData, whisperState])
@@ -255,7 +258,7 @@ export default function RecordingPage() {
         transcript,
         language,
         notes,
-        SYSTEM_PROMPT,
+        templatePrompt,
         (text) => setSynthesis(prev => prev + text),
         () => setSynthesisState('done'),
         () => setSynthesisState('error'),
@@ -273,7 +276,7 @@ export default function RecordingPage() {
           meeting_id: meetingIdRef.current,
           language,
           mode,
-          system_prompt: SYSTEM_PROMPT,
+          system_prompt: templatePrompt,
           template_id: selectedTemplate,
           audio_minutes: Math.ceil(duration / 60),
           notes,
@@ -313,7 +316,7 @@ export default function RecordingPage() {
     meetingIdRef.current = ''
     localStorage.removeItem(NOTES_KEY)
     setSelectedTemplate('sys_generic_it_v2')
-    if (whisperState === 'error') setWhisperState('ready')
+    setWhisperState('ready')
   }
 
   return (
@@ -412,7 +415,7 @@ export default function RecordingPage() {
       {(synthesisState === 'streaming' || synthesisState === 'done') && (
         <div className="w-full max-w-xl">
           <p className="text-xs font-medium text-teal-700 mb-2 uppercase tracking-wide">Sintesi</p>
-          <SynthesisEditor content={synthesis} />
+          <SynthesisEditor content={synthesis} isStreaming={synthesisState === 'streaming'} />
           {synthesisState === 'streaming' && (
             <span className="mt-1 block text-sm text-gray-400 animate-pulse">▍</span>
           )}
