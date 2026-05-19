@@ -5,11 +5,16 @@ import { whisper } from '../lib/whisper'
 import { Button } from '../components/ui/button'
 import { API_URL } from '../config'
 import { SynthesisEditor } from '../components/SynthesisEditor'
+import { TranscriptViewer } from '../components/TranscriptViewer'
+import type { WhisperSegment } from '../lib/speakers'
 import { db } from '../lib/db'
 import { synthesizeWithOllama } from '../lib/ollama'
 import { syncMeetingNow } from '../lib/sync'
 import { saveActionItemsFromNote } from '../lib/actionItems'
+import { saveEmbeddingForMeeting } from '../lib/semanticSearch'
+import { embeddingsService } from '../lib/embeddings'
 import { isUnlocked } from '../lib/keystore'
+import { MeetingBriefing } from '../components/MeetingBriefing'
 import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
 
 const LANG_LABEL: Record<string, string> = {
@@ -130,6 +135,7 @@ export default function RecordingPage() {
   const [whisperState, setWhisperState] = useState<'loading' | 'ready' | 'transcribing' | 'done' | 'error'>('loading')
   const [whisperProgress, setWhisperProgress] = useState(0)
   const [transcript, setTranscript] = useState('')
+  const [segments, setSegments] = useState<WhisperSegment[]>([])
   const [synthesisState, setSynthesisState] = useState<'idle' | 'streaming' | 'done' | 'error'>('idle')
   const [synthesis, setSynthesis] = useState('')
   const [language, setLanguage] = useState<'it' | 'en' | 'fr' | 'es' | 'de'>('it')
@@ -160,11 +166,12 @@ export default function RecordingPage() {
   // ── Whisper init
   useEffect(() => {
     whisper.init()
+    embeddingsService.init()
     const unsub = whisper.on((event) => {
       if (event.type === 'loading') setWhisperProgress(event.progress)
       if (event.type === 'ready') setWhisperState('ready')
       if (event.type === 'transcribing') setWhisperState('transcribing')
-      if (event.type === 'result') { setTranscript(event.text); setWhisperState('done') }
+      if (event.type === 'result') { setTranscript(event.text); setSegments((event.segments as WhisperSegment[]) ?? []); setWhisperState('done') }
       if (event.type === 'error') setWhisperState('error')
     })
     whisper.load('Xenova/whisper-small')
@@ -211,7 +218,7 @@ export default function RecordingPage() {
         createdAt: now,
         updatedAt: now,
       })
-      await db.transcripts.add({ id: crypto.randomUUID(), meetingId: id, text: transcript, createdAt: now })
+      await db.transcripts.add({ id: crypto.randomUUID(), meetingId: id, text: transcript, segments: JSON.stringify(segments), createdAt: now })
       await db.notes.add({
         id: crypto.randomUUID(), meetingId: id, content: synthesis,
         generatedAt: now, createdAt: now, updatedAt: now,
@@ -221,6 +228,7 @@ export default function RecordingPage() {
         syncMeetingNow(id)
       }
       saveActionItemsFromNote(id, synthesis)
+      saveEmbeddingForMeeting(id, synthesis)
     }).catch(err => console.error('[db] salvataggio meeting fallito:', err))
   }, [synthesisState])
  
@@ -308,6 +316,7 @@ export default function RecordingPage() {
   function handleNewRecording() {
     reset()
     setTranscript('')
+    setSegments([])
     setSynthesis('')
     setSynthesisState('idle')
     setHighlights([])
@@ -322,7 +331,9 @@ export default function RecordingPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-8 p-8">
       <h1 className="text-2xl font-semibold">Nuovo meeting</h1>
- 
+
+      {state === 'idle' && whisperState === 'ready' && <MeetingBriefing />}
+
       {/* Stato Whisper */}
       {whisperState === 'loading' && (
         <div className="flex flex-col items-center gap-2 w-full max-w-xs">
@@ -385,9 +396,7 @@ export default function RecordingPage() {
  
       {/* Trascrizione */}
       {transcript && (
-        <div className="w-full max-w-xl bg-gray-50 rounded-lg p-4 text-sm text-gray-700 whitespace-pre-wrap">
-          {transcript}
-        </div>
+        <TranscriptViewer segments={segments} rawText={transcript} />
       )}
  
       {/* Selettore template + bottone sintesi */}

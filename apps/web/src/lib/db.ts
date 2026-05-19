@@ -17,14 +17,14 @@ export interface Transcript {
   id: string
   meetingId: string
   text: string
-  segments?: string        // JSON array di {start, end, text}
+  segments?: string
   createdAt: number
 }
 
 export interface Note {
   id: string
   meetingId: string
-  content: string          // JSON blocchi editor
+  content: string
   templateId?: string
   generatedAt?: number
   editedAt?: number
@@ -43,11 +43,18 @@ export interface ActionItem {
   createdAt: number
 }
 
+export interface Embedding {
+  meetingId: string   // primary key
+  vector: number[]
+  createdAt: number
+}
+
 class SonabriefDB extends Dexie {
   meetings!: Table<Meeting>
   transcripts!: Table<Transcript>
   notes!: Table<Note>
   action_items!: Table<ActionItem>
+  embeddings!: Table<Embedding>
 
   constructor() {
     super('sonabrief')
@@ -61,6 +68,13 @@ class SonabriefDB extends Dexie {
       transcripts:  '&id, meetingId',
       notes:        '&id, meetingId',
       action_items: '&id, meetingId, completed, createdAt',
+    })
+    this.version(3).stores({
+      meetings:     '&id, startedAt, mode',
+      transcripts:  '&id, meetingId',
+      notes:        '&id, meetingId',
+      action_items: '&id, meetingId, completed, createdAt',
+      embeddings:   '&meetingId, createdAt',
     })
   }
 }
