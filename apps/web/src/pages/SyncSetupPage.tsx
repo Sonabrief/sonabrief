@@ -118,13 +118,13 @@ export default function SyncSetupPage() {
           <div className="space-y-6">
             <h1 className="text-2xl font-semibold text-[#1A4D52]">Attiva il sync cifrato</h1>
             <p className="text-sm leading-relaxed text-gray-600">
-              I tuoi meeting saranno sincronizzati sui nostri server cifrati end-to-end.
-              Solo tu puoi leggerli: noi vediamo soltanto blob illeggibili.
+              Le tue 12 parole di recovery sono l'unica strada per riaprire l'archivio se dimentichi la passphrase.
             </p>
             <p className="text-sm leading-relaxed text-gray-600">
-              La cifratura avviene nel tuo browser prima di qualsiasi upload. Se perdi
-              la passphrase e non hai salvato la recovery phrase, i dati sono
-              irrecuperabili — neanche noi possiamo aiutarti.
+              Le tue conversazioni sono cifrate in modo che nemmeno noi possiamo leggerle — e questo è il punto. Significa anche che senza le tue 12 parole nemmeno noi possiamo aiutarti a recuperarle.
+            </p>
+            <p className="text-sm leading-relaxed text-gray-600">
+              Salvale ora: scrivile su carta, conservale dove conservi i documenti importanti. È un'operazione che fai una volta sola, e ti garantisce che i tuoi clienti restino solo tuoi.
             </p>
             <Button
               className="w-full bg-[#1A4D52] hover:bg-[#1A4D52]/90 text-white"
