@@ -32,6 +32,8 @@ export default function ArchivePage() {
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null)
   const [selectedNote, setSelectedNote] = useState<Note | null>(null)
   const [copyDone, setCopyDone] = useState(false)
+  const [editingClient, setEditingClient] = useState('')
+  const [editingStream, setEditingStream] = useState('')
 
   const meetings = useLiveQuery(
     () => db.meetings.orderBy('startedAt').reverse().toArray(),
@@ -46,6 +48,17 @@ export default function ArchivePage() {
     setSelectedMeeting(meeting)
     const note = await db.notes.where('meetingId').equals(meeting.id).first()
     setSelectedNote(note ?? null)
+    setEditingClient(meeting.clientName ?? '')
+    setEditingStream(meeting.projectStream ?? '')
+  }
+
+  async function saveClientFields() {
+    if (selectedMeeting) {
+      await db.meetings.update(selectedMeeting.id, {
+        clientName: editingClient.trim() || undefined,
+        projectStream: editingStream.trim() || undefined,
+      })
+    }
   }
 
   function buildExportData() {
@@ -62,10 +75,7 @@ export default function ArchivePage() {
     <div className="flex min-h-screen flex-col items-center gap-8 p-8">
       <div className="w-full max-w-2xl flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Archivio meeting</h1>
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="text-sm text-gray-400 underline"
-        >
+        <button onClick={() => navigate('/dashboard')} className="text-sm text-gray-400 underline">
           Dashboard
         </button>
       </div>
@@ -116,10 +126,31 @@ export default function ArchivePage() {
           <p className="text-xs font-medium text-teal-700 uppercase tracking-wide">
             Sintesi — {selectedMeeting.title}
           </p>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="Nome cliente..."
+              value={editingClient}
+              onChange={e => setEditingClient(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && saveClientFields()}
+              className="flex-1 rounded-md border border-gray-200 px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
+            />
+            <input
+              type="text"
+              placeholder="Stream / progetto..."
+              value={editingStream}
+              onChange={e => setEditingStream(e.target.value)}
+              onBlur={saveClientFields}
+              onKeyDown={e => e.key === 'Enter' && saveClientFields()}
+              className="flex-1 rounded-md border border-gray-200 px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
+            />
+            <span className="text-xs text-gray-400 whitespace-nowrap">Invio per salvare</span>
+          </div>
+
           {selectedNote ? (
             <>
               <SynthesisEditor content={selectedNote.content} readonly />
-
               <div className="flex flex-wrap gap-2 pt-2">
                 {[
                   { label: 'Markdown', action: () => exportMarkdown(buildExportData()) },

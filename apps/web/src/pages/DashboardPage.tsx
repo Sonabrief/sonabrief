@@ -165,6 +165,13 @@ export default function DashboardPage() {
             Action Items
           </button>
 
+          <button
+            onClick={() => navigate('/clients')}
+            className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:border-gray-300 transition-colors"
+          >
+            Clienti & Progetti
+          </button>
+
           {tier !== 'free' && (
             <button
               onClick={handleManageSubscription}

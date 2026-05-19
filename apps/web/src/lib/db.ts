@@ -11,6 +11,8 @@ export interface Meeting {
   audioPath?: string
   createdAt: number
   updatedAt: number
+  clientName?: string
+  projectStream?: string
 }
 
 export interface Transcript {
@@ -71,6 +73,20 @@ class SonabriefDB extends Dexie {
     })
     this.version(3).stores({
       meetings:     '&id, startedAt, mode',
+      transcripts:  '&id, meetingId',
+      notes:        '&id, meetingId',
+      action_items: '&id, meetingId, completed, createdAt',
+      embeddings:   '&meetingId, createdAt',
+    })
+    this.version(4).stores({
+      meetings:     '&id, startedAt, mode, clientName',
+      transcripts:  '&id, meetingId',
+      notes:        '&id, meetingId',
+      action_items: '&id, meetingId, completed, createdAt',
+      embeddings:   '&meetingId, createdAt',
+    })
+    this.version(5).stores({
+      meetings:     '&id, startedAt, mode, clientName, projectStream',
       transcripts:  '&id, meetingId',
       notes:        '&id, meetingId',
       action_items: '&id, meetingId, completed, createdAt',

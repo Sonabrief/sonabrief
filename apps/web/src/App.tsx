@@ -13,6 +13,7 @@ import OnboardingPage from './pages/OnboardingPage';
 import CalendarPage from './pages/CalendarPage';
 import ActionItemsPage from './pages/ActionItemsPage';
 import SearchPage from './pages/SearchPage';
+import ClientsPage from './pages/ClientsPage';
 import RequireAuth from './components/RequireAuth';
 import SyncGate from './components/SyncGate';
 
@@ -57,6 +58,9 @@ export default function App() {
         } />
         <Route path="/admin" element={
           <RequireAuth><AdminPage /></RequireAuth>
+        } />
+        <Route path="/clients" element={
+          <RequireAuth><SyncGate><ClientsPage /></SyncGate></RequireAuth>
         } />
       </Routes>
     </BrowserRouter>
