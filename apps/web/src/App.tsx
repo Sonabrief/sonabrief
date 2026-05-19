@@ -14,6 +14,7 @@ import CalendarPage from './pages/CalendarPage';
 import ActionItemsPage from './pages/ActionItemsPage';
 import SearchPage from './pages/SearchPage';
 import ClientsPage from './pages/ClientsPage';
+import TemplatesPage from './pages/TemplatesPage';
 import RequireAuth from './components/RequireAuth';
 import SyncGate from './components/SyncGate';
 
@@ -61,6 +62,9 @@ export default function App() {
         } />
         <Route path="/clients" element={
           <RequireAuth><SyncGate><ClientsPage /></SyncGate></RequireAuth>
+        } />
+        <Route path="/templates" element={
+          <RequireAuth><SyncGate><TemplatesPage /></SyncGate></RequireAuth>
         } />
       </Routes>
     </BrowserRouter>
