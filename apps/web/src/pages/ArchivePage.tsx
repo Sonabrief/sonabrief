@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { AppNav } from '../components/AppNav'
@@ -136,10 +137,15 @@ export default function ArchivePage() {
               </div>
             ) : (
               <ul className="flex flex-col gap-2" role="list">
-                {filtered.map(meeting => {
+                {filtered.map((meeting, i) => {
                   const isSelected = selectedMeeting?.id === meeting.id
                   return (
-                    <li key={meeting.id}>
+                    <motion.li
+                      key={meeting.id}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.16, delay: i * 0.04, ease: [0.4, 0, 0.2, 1] }}
+                    >
                       <button
                         onClick={() => handleSelect(meeting)}
                         aria-selected={isSelected}
@@ -160,7 +166,7 @@ export default function ArchivePage() {
                           {formatMinutes(meeting.durationSeconds)}
                         </p>
                       </button>
-                    </li>
+                    </motion.li>
                   )
                 })}
               </ul>
@@ -169,56 +175,72 @@ export default function ArchivePage() {
 
           {/* ── Detail ────────────────────────────────────── */}
           <div className="rounded-lg border border-border bg-card">
-            {!selectedMeeting ? (
-              <div className="flex min-h-80 flex-col items-center justify-center p-8 text-center">
-                <p className="text-sm font-semibold text-foreground">Seleziona un meeting</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  La sintesi del meeting selezionato verrà mostrata qui.
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-5 p-6">
-                <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
-                  <input
-                    type="text"
-                    placeholder="Nome cliente"
-                    value={editingClient}
-                    onChange={e => setEditingClient(e.target.value)}
-                    onBlur={saveClientFields}
-                    onKeyDown={e => e.key === 'Enter' && saveClientFields()}
-                    className="flex-1 rounded-md border border-border bg-card px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Stream / progetto"
-                    value={editingStream}
-                    onChange={e => setEditingStream(e.target.value)}
-                    onBlur={saveClientFields}
-                    onKeyDown={e => e.key === 'Enter' && saveClientFields()}
-                    className="flex-1 rounded-md border border-border bg-card px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
-                  />
-                </div>
+            <AnimatePresence mode="wait">
+              {!selectedMeeting ? (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="flex min-h-80 flex-col items-center justify-center p-8 text-center"
+                >
+                  <p className="text-sm font-semibold text-foreground">Seleziona un meeting</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    La sintesi del meeting selezionato verrà mostrata qui.
+                  </p>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={selectedMeeting.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+                  className="flex flex-col gap-5 p-6"
+                >
+                  <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+                    <input
+                      type="text"
+                      placeholder="Nome cliente"
+                      value={editingClient}
+                      onChange={e => setEditingClient(e.target.value)}
+                      onBlur={saveClientFields}
+                      onKeyDown={e => e.key === 'Enter' && saveClientFields()}
+                      className="flex-1 rounded-md border border-border bg-card px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Stream / progetto"
+                      value={editingStream}
+                      onChange={e => setEditingStream(e.target.value)}
+                      onBlur={saveClientFields}
+                      onKeyDown={e => e.key === 'Enter' && saveClientFields()}
+                      className="flex-1 rounded-md border border-border bg-card px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+                    />
+                  </div>
 
-                {selectedNote ? (
-                  <>
-                    <SynthesisEditor content={selectedNote.content} readonly />
-                    <div className="flex flex-wrap gap-2 border-t border-border pt-4">
-                      {exportActions.map(btn => (
-                        <button
-                          key={btn.label}
-                          onClick={btn.fn}
-                          className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none"
-                        >
-                          {btn.label}
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-sm text-muted-foreground">Nessuna sintesi disponibile.</p>
-                )}
-              </div>
-            )}
+                  {selectedNote ? (
+                    <>
+                      <SynthesisEditor content={selectedNote.content} readonly />
+                      <div className="flex flex-wrap gap-2 border-t border-border pt-4">
+                        {exportActions.map(btn => (
+                          <button
+                            key={btn.label}
+                            onClick={btn.fn}
+                            className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none"
+                          >
+                            {btn.label}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Nessuna sintesi disponibile.</p>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
         </div>

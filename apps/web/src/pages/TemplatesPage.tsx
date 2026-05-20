@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import { API_URL } from '../config'
 import { AppNav } from '../components/AppNav'
 import { getBillingStatus } from '../lib/api'
@@ -189,8 +190,13 @@ export default function TemplatesPage() {
                 Salvati ({customTemplates.length})
               </p>
               <ul className="flex flex-col gap-2" role="list">
-                {customTemplates.map(t => (
-                  <li key={t.id}>
+                {customTemplates.map((t, i) => (
+                  <motion.li
+                    key={t.id}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.16, delay: i * 0.05 }}
+                  >
                     <div className="flex items-start justify-between gap-4 rounded-lg border border-border bg-card px-5 py-4">
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground">{t.name}</p>
@@ -233,15 +239,23 @@ export default function TemplatesPage() {
                         )}
                       </div>
                     </div>
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
             </div>
           )}
 
           {/* ── Editor ───────────────────────────────── */}
+          <AnimatePresence mode="wait">
           {editing && (
-            <div className="rounded-lg border border-primary/30 bg-card p-5">
+            <motion.div
+              key="editor"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+              className="rounded-lg border border-primary/30 bg-card p-5"
+            >
               <h2 className="mb-4 text-sm font-semibold text-foreground">
                 {editing.id ? 'Modifica template' : 'Nuovo template'}
               </h2>
@@ -335,8 +349,9 @@ export default function TemplatesPage() {
                   </button>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
+          </AnimatePresence>
 
         </div>
       </main>

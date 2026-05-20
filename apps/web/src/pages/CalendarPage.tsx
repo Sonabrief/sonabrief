@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import { API_URL } from '../config'
 import { AppNav } from '../components/AppNav'
 
@@ -18,11 +19,8 @@ interface CalendarState {
 
 function formatEventDate(iso: string): string {
   return new Date(iso).toLocaleString('it-IT', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
+    weekday: 'short', day: 'numeric', month: 'short',
+    hour: '2-digit', minute: '2-digit',
   })
 }
 
@@ -35,6 +33,60 @@ function formatDuration(start: string, end: string): string {
   return m > 0 ? `${h}h ${m}min` : `${h}h`
 }
 
+// ── Provider card ─────────────────────────────────────────────────────────────
+
+function ProviderCard({
+  name,
+  emoji,
+  connected,
+  connecting,
+  onConnect,
+  onDisconnect,
+}: {
+  name: string
+  emoji: string
+  connected: boolean
+  connecting: boolean
+  onConnect: () => void
+  onDisconnect: () => void
+}) {
+  return (
+    <div className="rounded-lg border border-border bg-card p-5">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-lg" aria-hidden="true">{emoji}</span>
+          <span className="text-sm font-medium text-foreground">{name}</span>
+        </div>
+        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+          connected
+            ? 'bg-primary/10 text-primary'
+            : 'bg-border text-muted-foreground'
+        }`}>
+          {connected ? 'Connesso' : 'Non connesso'}
+        </span>
+      </div>
+      {connected ? (
+        <button
+          onClick={onDisconnect}
+          className="text-xs text-destructive transition-colors hover:underline motion-reduce:transition-none"
+        >
+          Disconnetti
+        </button>
+      ) : (
+        <button
+          onClick={onConnect}
+          disabled={connecting}
+          className="w-full rounded-md border border-primary px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50 motion-reduce:transition-none"
+        >
+          {connecting ? 'Connessione...' : `Connetti ${name}`}
+        </button>
+      )}
+    </div>
+  )
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+
 export default function CalendarPage() {
   const [google, setGoogle] = useState<CalendarState | null>(null)
   const [microsoft, setMicrosoft] = useState<CalendarState | null>(null)
@@ -44,8 +96,10 @@ export default function CalendarPage() {
   async function loadCalendars() {
     setLoading(true)
     const [gRes, mRes] = await Promise.all([
-      fetch(`${API_URL}/v1/calendar/events`, { credentials: 'include' }).then(r => r.json()).catch(() => null),
-      fetch(`${API_URL}/v1/calendar/microsoft/events`, { credentials: 'include' }).then(r => r.json()).catch(() => null),
+      fetch(`${API_URL}/v1/calendar/events`, { credentials: 'include' })
+        .then(r => r.json()).catch(() => null),
+      fetch(`${API_URL}/v1/calendar/microsoft/events`, { credentials: 'include' })
+        .then(r => r.json()).catch(() => null),
     ])
     setGoogle(gRes)
     setMicrosoft(mRes)
@@ -85,135 +139,137 @@ export default function CalendarPage() {
     ...(microsoft?.events ?? []).map(e => ({ ...e, provider: 'microsoft' as const })),
   ].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
 
+  const isConnected = !!(google?.connected || microsoft?.connected)
+
   return (
     <div className="min-h-screen bg-background">
       <AppNav />
 
       <main className="mx-auto max-w-2xl px-6 py-8">
-        <h1 className="mb-6 font-heading text-2xl font-bold leading-[1.2] tracking-[-0.015em] text-foreground">
+        <motion.h1
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+          className="mb-6 font-heading text-2xl font-bold leading-[1.2] tracking-[-0.015em] text-foreground"
+        >
           Calendario
-        </h1>
+        </motion.h1>
+
         <div className="flex flex-col gap-6">
 
-        {/* Provider cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Google */}
-          <div className="rounded-xl border border-gray-200 bg-white p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">📅</span>
-                <span className="text-sm font-medium text-gray-700">Google Calendar</span>
-              </div>
-              {google?.connected ? (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-teal-50 text-teal-700">Connesso</span>
-              ) : (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">Non connesso</span>
-              )}
-            </div>
-            {google?.connected ? (
-              <button
-                onClick={disconnectGoogle}
-                className="text-xs text-red-500 underline"
+          {/* Provider cards */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, delay: 0.05, ease: [0.4, 0, 0.2, 1] }}
+            className="grid grid-cols-1 gap-4 md:grid-cols-2"
+          >
+            <ProviderCard
+              name="Google Calendar"
+              emoji="📅"
+              connected={!!google?.connected}
+              connecting={connecting === 'google'}
+              onConnect={connectGoogle}
+              onDisconnect={disconnectGoogle}
+            />
+            <ProviderCard
+              name="Microsoft 365"
+              emoji="📆"
+              connected={!!microsoft?.connected}
+              connecting={connecting === 'microsoft'}
+              onConnect={connectMicrosoft}
+              onDisconnect={disconnectMicrosoft}
+            />
+          </motion.div>
+
+          {/* Contenuto eventi */}
+          <AnimatePresence mode="wait">
+            {loading ? (
+              <motion.div
+                key="loading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="animate-pulse space-y-3"
               >
-                Disconnetti
-              </button>
+                {[0, 1, 2].map(i => (
+                  <div key={i} className="h-20 rounded-lg bg-border" />
+                ))}
+              </motion.div>
+            ) : !isConnected ? (
+              <motion.div
+                key="empty-unconnected"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="rounded-lg border border-border bg-card p-8 text-center"
+              >
+                <p className="text-sm font-semibold text-foreground">Nessun calendario collegato</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Connetti il tuo calendario per vedere i prossimi meeting e ricevere briefing automatici.
+                </p>
+              </motion.div>
+            ) : allEvents.length === 0 ? (
+              <motion.div
+                key="empty-connected"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="rounded-lg border border-border bg-card p-6 text-center"
+              >
+                <p className="text-sm text-muted-foreground">Nessun meeting nei prossimi 7 giorni.</p>
+              </motion.div>
             ) : (
-              <button
-                onClick={connectGoogle}
-                disabled={connecting === 'google'}
-                className="w-full rounded-lg border border-[#1A4D52] px-3 py-2 text-sm text-[#1A4D52] hover:bg-teal-50 transition-colors disabled:opacity-50"
+              <motion.div
+                key="events"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="flex flex-col gap-3"
               >
-                {connecting === 'google' ? 'Connessione...' : 'Connetti Google Calendar'}
-              </button>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                  Prossimi 7 giorni
+                </p>
+                <ul className="flex flex-col gap-2" role="list">
+                  {allEvents.map((event, i) => (
+                    <motion.li
+                      key={`${event.provider}-${event.id}`}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.16, delay: i * 0.05, ease: [0.4, 0, 0.2, 1] }}
+                    >
+                      <div className="rounded-lg border border-border bg-card px-5 py-4">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-foreground">{event.title}</p>
+                            <p className="mt-0.5 text-xs text-muted-foreground">
+                              {formatEventDate(event.start)} · {formatDuration(event.start, event.end)}
+                            </p>
+                            {event.attendees.length > 0 && (
+                              <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                                {event.attendees.slice(0, 3).map(a => a.name ?? a.email).join(', ')}
+                                {event.attendees.length > 3 && ` +${event.attendees.length - 3}`}
+                              </p>
+                            )}
+                          </div>
+                          <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+                            event.provider === 'google'
+                              ? 'bg-blue-50 text-blue-600'
+                              : 'bg-purple-50 text-purple-600'
+                          }`}>
+                            {event.provider === 'google' ? 'Google' : 'Microsoft'}
+                          </span>
+                        </div>
+                      </div>
+                    </motion.li>
+                  ))}
+                </ul>
+              </motion.div>
             )}
-          </div>
-
-          {/* Microsoft */}
-          <div className="rounded-xl border border-gray-200 bg-white p-5">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <span className="text-lg">📆</span>
-                <span className="text-sm font-medium text-gray-700">Microsoft 365</span>
-              </div>
-              {microsoft?.connected ? (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-teal-50 text-teal-700">Connesso</span>
-              ) : (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">Non connesso</span>
-              )}
-            </div>
-            {microsoft?.connected ? (
-              <button
-                onClick={disconnectMicrosoft}
-                className="text-xs text-red-500 underline"
-              >
-                Disconnetti
-              </button>
-            ) : (
-              <button
-                onClick={connectMicrosoft}
-                disabled={connecting === 'microsoft'}
-                className="w-full rounded-lg border border-[#1A4D52] px-3 py-2 text-sm text-[#1A4D52] hover:bg-teal-50 transition-colors disabled:opacity-50"
-              >
-                {connecting === 'microsoft' ? 'Connessione...' : 'Connetti Microsoft 365'}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Prossimi eventi */}
-        {loading && (
-          <p className="text-sm text-gray-400 text-center">Caricamento...</p>
-        )}
-
-        {!loading && !google?.connected && !microsoft?.connected && (
-          <div className="rounded-xl border border-gray-200 bg-white p-8 text-center">
-            <p className="text-sm text-gray-500">
-              Connetti il tuo calendario per vedere i prossimi meeting e ricevere briefing automatici prima di ogni call.
-            </p>
-          </div>
-        )}
-
-        {!loading && allEvents.length > 0 && (
-          <div className="flex flex-col gap-3">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-              Prossimi 7 giorni
-            </p>
-            {allEvents.map(event => (
-              <div
-                key={`${event.provider}-${event.id}`}
-                className="rounded-xl border border-gray-200 bg-white px-5 py-4"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">{event.title}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {formatEventDate(event.start)} · {formatDuration(event.start, event.end)}
-                    </p>
-                    {event.attendees.length > 0 && (
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        {event.attendees.slice(0, 3).map(a => a.name ?? a.email).join(', ')}
-                        {event.attendees.length > 3 && ` +${event.attendees.length - 3}`}
-                      </p>
-                    )}
-                  </div>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    event.provider === 'google'
-                      ? 'bg-blue-50 text-blue-600'
-                      : 'bg-purple-50 text-purple-600'
-                  }`}>
-                    {event.provider === 'google' ? 'Google' : 'Microsoft'}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {!loading && (google?.connected || microsoft?.connected) && allEvents.length === 0 && (
-          <div className="rounded-xl border border-gray-200 bg-white p-6 text-center">
-            <p className="text-sm text-gray-400">Nessun meeting nei prossimi 7 giorni.</p>
-          </div>
-        )}
+          </AnimatePresence>
 
         </div>
       </main>

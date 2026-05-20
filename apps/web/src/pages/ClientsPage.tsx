@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { motion } from 'motion/react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useNavigate } from 'react-router-dom'
 import { db, type Meeting } from '../lib/db'
@@ -123,7 +124,7 @@ export default function ClientsPage() {
             {/* ── Client cards ─────────────────────────────── */}
             {clientList.length > 0 && (
               <ul className="flex flex-col gap-4" role="list">
-                {clientList.map(([clientName, streams]) => {
+                {clientList.map(([clientName, streams], i) => {
                   const allMeetings = Object.values(streams).flat()
                   const totalOpen = allMeetings.reduce(
                     (sum, m) => sum + (openByMeeting[m.id] ?? 0), 0
@@ -133,7 +134,12 @@ export default function ClientsPage() {
                   )
 
                   return (
-                    <li key={clientName}>
+                    <motion.li
+                      key={clientName}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.18, delay: i * 0.05, ease: [0.4, 0, 0.2, 1] }}
+                    >
                       <div className="overflow-hidden rounded-lg border border-border bg-card">
                         {/* Client header — typography only, no tinted band */}
                         <div className="flex items-center justify-between border-b border-border px-5 py-4">
@@ -182,7 +188,7 @@ export default function ClientsPage() {
                           </div>
                         ))}
                       </div>
-                    </li>
+                    </motion.li>
                   )
                 })}
               </ul>

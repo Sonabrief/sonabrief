@@ -17,5 +17,8 @@
   "devDependencies": {
     "typescript": "^5.4.0",
     "wrangler": "^4.92.0"
+  },
+  "dependencies": {
+    "motion": "^12.39.0"
   }
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { Mic, Monitor, Video } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -70,6 +71,13 @@ function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
   const s = (seconds % 60).toString().padStart(2, '0')
   return `${m}:${s}`
+}
+
+const fadeUp = {
+  initial: { opacity: 0, y: 6 },
+  animate: { opacity: 1, y: 0 },
+  exit:    { opacity: 0, y: -4 },
+  transition: { duration: 0.18, ease: [0.4, 0, 0.2, 1] as const },
 }
 
 // ─── Waveform ────────────────────────────────────────────────────────────────
@@ -576,31 +584,34 @@ export default function RecordingPage() {
             </h2>
 
             {/* Source selector — visible when idle */}
-            {state === 'idle' && (
-              <section aria-labelledby="source-heading">
-                <p
-                  id="source-heading"
-                  className="mb-2.5 text-xs font-medium uppercase tracking-widest text-muted-foreground"
-                >
-                  Sorgente audio
-                </p>
-                <div className="flex gap-2">
-                  {SOURCE_OPTIONS.map(opt => (
-                    <SourceButton
-                      key={opt.id}
-                      option={opt}
-                      active={source === opt.id}
-                      disabled={!canStart}
-                      onClick={() => setSource(opt.id)}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
+            <AnimatePresence mode="wait">
+              {state === 'idle' && (
+                <motion.section key="source" {...fadeUp} aria-labelledby="source-heading">
+                  <p
+                    id="source-heading"
+                    className="mb-2.5 text-xs font-medium uppercase tracking-widest text-muted-foreground"
+                  >
+                    Sorgente audio
+                  </p>
+                  <div className="flex gap-2">
+                    {SOURCE_OPTIONS.map(opt => (
+                      <SourceButton
+                        key={opt.id}
+                        option={opt}
+                        active={source === opt.id}
+                        disabled={!canStart}
+                        onClick={() => setSource(opt.id)}
+                      />
+                    ))}
+                  </div>
+                </motion.section>
+              )}
+            </AnimatePresence>
 
             {/* Language + mode — visible when idle, before start */}
-            {state === 'idle' && (
-              <div className="space-y-4">
+            <AnimatePresence mode="wait">
+              {state === 'idle' && (
+              <motion.div key="lang-mode" {...fadeUp} className="space-y-4">
                 <div>
                   <label
                     htmlFor="language-select"
@@ -649,8 +660,9 @@ export default function RecordingPage() {
                     ))}
                   </div>
                 </fieldset>
-              </div>
-            )}
+              </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Start button — idle + ready */}
             {canStart && (
@@ -670,8 +682,9 @@ export default function RecordingPage() {
             )}
 
             {/* Recording: timer + waveform + pause/stop */}
-            {isRecording && (
-              <div className="space-y-5">
+            <AnimatePresence mode="wait">
+              {isRecording && (
+              <motion.div key="recording" {...fadeUp} className="space-y-5">
                 <div className="flex items-center gap-4">
                   <span
                     className={`h-2.5 w-2.5 shrink-0 rounded-full bg-destructive ${paused ? 'opacity-40' : 'animate-pulse motion-reduce:animate-none'}`}
@@ -710,8 +723,9 @@ export default function RecordingPage() {
                     {paused ? 'Riprendi' : 'Pausa'}
                   </Button>
                 </div>
-              </div>
-            )}
+              </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Processing: audio conversion */}
             {isProcessing && (
@@ -719,8 +733,9 @@ export default function RecordingPage() {
             )}
 
             {/* Transcribing: simulated progress bar */}
-            {isTranscribing && (
-              <div className="space-y-2">
+            <AnimatePresence mode="wait">
+              {isTranscribing && (
+              <motion.div key="transcribing" {...fadeUp} className="space-y-2">
                 <p className="text-sm font-medium text-foreground">
                   Trascrizione in corso... {transcribeProgress}%
                 </p>
@@ -738,8 +753,9 @@ export default function RecordingPage() {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">Potrebbe richiedere qualche minuto</p>
-              </div>
-            )}
+              </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Transcription complete flash */}
             {isDone && showTranscribeComplete && (
@@ -747,8 +763,9 @@ export default function RecordingPage() {
             )}
 
             {/* Done: transcript + synthesis flow */}
-            {isDone && !showTranscribeComplete && (
-              <div className="space-y-5">
+            <AnimatePresence mode="wait">
+              {isDone && !showTranscribeComplete && (
+              <motion.div key="done" {...fadeUp} className="space-y-5">
 
                 {/* Collapsible transcript */}
                 {transcript && (
@@ -922,8 +939,9 @@ export default function RecordingPage() {
                     Archivio
                   </Button>
                 </div>
-              </div>
-            )}
+              </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Error: recorder failed */}
             {state === 'error' && (
@@ -1022,13 +1040,19 @@ export default function RecordingPage() {
                 {quickNotes.length > 0 && (
                   <ul className="space-y-1.5">
                     {quickNotes.map((note, i) => (
-                      <li key={i} className="flex items-start gap-2">
+                      <motion.li
+                        key={i}
+                        initial={{ opacity: 0, x: -6 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.16, delay: i * 0.04 }}
+                        className="flex items-start gap-2"
+                      >
                         <span
                           className="mt-1.25 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"
                           aria-hidden="true"
                         />
                         <span className="text-xs text-foreground">{note}</span>
-                      </li>
+                      </motion.li>
                     ))}
                   </ul>
                 )}

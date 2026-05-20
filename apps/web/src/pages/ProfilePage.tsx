@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import {
   getMe, getBillingStatus, getBillingPortalUrl,
@@ -7,6 +8,12 @@ import {
 import { API_URL } from '../config'
 import { AppNav } from '../components/AppNav'
 import { Button } from '../components/ui/button'
+
+const fadeUp = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] as const },
+}
 
 const PROFESSIONS: { category: string; items: string[] }[] = [
   {
@@ -210,7 +217,7 @@ export default function ProfilePage() {
         <div className="space-y-8">
 
           {/* ── Account ─────────────────────────────────── */}
-          <section aria-labelledby="account-heading">
+          <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0 }} aria-labelledby="account-heading">
             <div className="mb-4">
               <SectionHeading>
                 <span id="account-heading">Account</span>
@@ -229,10 +236,10 @@ export default function ProfilePage() {
                 </Row>
               )}
             </div>
-          </section>
+          </motion.section>
 
           {/* ── Piano ───────────────────────────────────── */}
-          <section aria-labelledby="piano-heading">
+          <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.06 }} aria-labelledby="piano-heading">
             <div className="mb-4">
               <SectionHeading>
                 <span id="piano-heading">Piano e quota</span>
@@ -288,10 +295,10 @@ export default function ProfilePage() {
                 )}
               </div>
             </div>
-          </section>
+          </motion.section>
 
           {/* ── Preferenze ──────────────────────────────── */}
-          <section aria-labelledby="prefs-heading">
+          <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.12 }} aria-labelledby="prefs-heading">
             <div className="mb-4">
               <SectionHeading>
                 <span id="prefs-heading">Preferenze</span>
@@ -387,17 +394,26 @@ export default function ProfilePage() {
                 >
                   {saving ? 'Salvataggio…' : 'Salva preferenze'}
                 </Button>
-                {saveSuccess && (
-                  <span role="status" className="text-sm text-muted-foreground">
-                    Salvato.
-                  </span>
-                )}
+                <AnimatePresence>
+                  {saveSuccess && (
+                    <motion.span
+                      role="status"
+                      initial={{ opacity: 0, x: -4 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="text-sm text-muted-foreground"
+                    >
+                      Salvato.
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
-          </section>
+          </motion.section>
 
           {/* ── Privacy & Dati ──────────────────────────── */}
-          <section aria-labelledby="privacy-heading">
+          <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.18 }} aria-labelledby="privacy-heading">
             <div className="mb-4">
               <SectionHeading>
                 <span id="privacy-heading">Privacy e dati</span>
@@ -416,51 +432,68 @@ export default function ProfilePage() {
                 Scarica whitepaper architettura privacy (PDF)
               </a>
               <div className="border-t border-border pt-4">
-                {!deleteConfirm ? (
-                  <button
-                    onClick={() => setDeleteConfirm(true)}
-                    className="text-sm text-destructive transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive motion-reduce:transition-none"
-                  >
-                    Elimina account
-                  </button>
-                ) : (
-                  <div className="space-y-3">
-                    <p className="text-sm text-foreground font-medium">
-                      Questa azione è irreversibile.
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Tutti i tuoi dati verranno eliminati permanentemente.
-                      Scrivi <strong className="text-foreground">elimina</strong> per confermare.
-                    </p>
-                    <input
-                      type="text"
-                      value={deleteInput}
-                      onChange={e => setDeleteInput(e.target.value)}
-                      placeholder="elimina"
-                      autoComplete="off"
-                      className="w-full rounded-md border border-destructive bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
-                      aria-label="Conferma eliminazione account"
-                    />
-                    <div className="flex items-center gap-3">
+                <AnimatePresence mode="wait">
+                  {!deleteConfirm ? (
+                    <motion.div
+                      key="delete-trigger"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                    >
                       <button
-                        onClick={handleDeleteAccount}
-                        disabled={deleteInput.toLowerCase() !== 'elimina' || deleting}
-                        className="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive disabled:opacity-40 motion-reduce:transition-none"
+                        onClick={() => setDeleteConfirm(true)}
+                        className="text-sm text-destructive transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive motion-reduce:transition-none"
                       >
-                        {deleting ? 'Eliminazione…' : 'Elimina definitivamente'}
+                        Elimina account
                       </button>
-                      <button
-                        onClick={() => { setDeleteConfirm(false); setDeleteInput('') }}
-                        className="text-sm text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
-                      >
-                        Annulla
-                      </button>
-                    </div>
-                  </div>
-                )}
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="delete-confirm"
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.18 }}
+                      className="space-y-3"
+                    >
+                      <p className="text-sm text-foreground font-medium">
+                        Questa azione è irreversibile.
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Tutti i tuoi dati verranno eliminati permanentemente.
+                        Scrivi <strong className="text-foreground">elimina</strong> per confermare.
+                      </p>
+                      <input
+                        type="text"
+                        value={deleteInput}
+                        onChange={e => setDeleteInput(e.target.value)}
+                        placeholder="elimina"
+                        autoComplete="off"
+                        className="w-full rounded-md border border-destructive bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
+                        aria-label="Conferma eliminazione account"
+                      />
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={handleDeleteAccount}
+                          disabled={deleteInput.toLowerCase() !== 'elimina' || deleting}
+                          className="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive disabled:opacity-40 motion-reduce:transition-none"
+                        >
+                          {deleting ? 'Eliminazione…' : 'Elimina definitivamente'}
+                        </button>
+                        <button
+                          onClick={() => { setDeleteConfirm(false); setDeleteInput('') }}
+                          className="text-sm text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
+                        >
+                          Annulla
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
-          </section>
+          </motion.section>
 
         </div>
       </main>

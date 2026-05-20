@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { db, type ActionItem } from '../lib/db'
 import { AppNav } from '../components/AppNav'
@@ -119,8 +120,13 @@ export default function ActionItemsPage() {
             </div>
           ) : (
             <ul className="flex flex-col gap-2" role="list">
-              {filtered.map(item => (
-                <li key={item.id}>
+              {filtered.map((item, i) => (
+                <motion.li
+                  key={item.id}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.16, delay: i * 0.04, ease: [0.4, 0, 0.2, 1] }}
+                >
                   <div className="flex items-start gap-4 rounded-lg border border-border bg-card px-5 py-4">
                     <input
                       type="checkbox"
@@ -144,7 +150,7 @@ export default function ActionItemsPage() {
                       </div>
                     </div>
                   </div>
-                </li>
+                </motion.li>
               ))}
             </ul>
           )}

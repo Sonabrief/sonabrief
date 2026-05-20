@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'motion/react';
 import LoginPage from './pages/LoginPage';
 import VerifyPage from './pages/VerifyPage';
 import DashboardPage from './pages/DashboardPage';
@@ -23,62 +24,97 @@ import PrivacyPage from './pages/PrivacyPage';
 import ProfilePage from './pages/ProfilePage';
 import { AppFooter } from './components/AppFooter';
 
+const pageVariants = {
+  initial: { opacity: 0, y: 6 },
+  animate: { opacity: 1, y: 0 },
+  exit:    { opacity: 0, y: -4 },
+};
+
+const pageTransition = {
+  duration: 0.18,
+  ease: [0.4, 0, 0.2, 1] as const,
+};
+
+function PageWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      transition={pageTransition}
+      className="flex-1"
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function AnimatedRoutes() {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <Routes location={location} key={location.pathname}>
+        <Route path="/" element={<PageWrapper><LoginPage /></PageWrapper>} />
+        <Route path="/auth/verify" element={<PageWrapper><VerifyPage /></PageWrapper>} />
+        <Route path="/dashboard" element={
+          <PageWrapper><RequireAuth><SyncGate><DashboardPage /></SyncGate></RequireAuth></PageWrapper>
+        } />
+        <Route path="/recording" element={
+          <PageWrapper><RequireAuth><SyncGate><RecordingPage /></SyncGate></RequireAuth></PageWrapper>
+        } />
+        <Route path="/archive" element={
+          <PageWrapper><RequireAuth><SyncGate><ArchivePage /></SyncGate></RequireAuth></PageWrapper>
+        } />
+        <Route path="/search" element={
+          <PageWrapper><RequireAuth><SyncGate><ProRoute feature="Ricerca semantica"><SearchPage /></ProRoute></SyncGate></RequireAuth></PageWrapper>
+        } />
+        <Route path="/onboarding" element={
+          <PageWrapper><RequireAuth><OnboardingPage /></RequireAuth></PageWrapper>
+        } />
+        <Route path="/calendar" element={
+          <PageWrapper><RequireAuth><ProRoute feature="Calendario"><CalendarPage /></ProRoute></RequireAuth></PageWrapper>
+        } />
+        <Route path="/actions" element={
+          <PageWrapper><RequireAuth><SyncGate><ProRoute feature="Dashboard Azioni"><ActionItemsPage /></ProRoute></SyncGate></RequireAuth></PageWrapper>
+        } />
+        <Route path="/sync/setup" element={
+          <PageWrapper><RequireAuth><SyncSetupPage /></RequireAuth></PageWrapper>
+        } />
+        <Route path="/sync/unlock" element={
+          <PageWrapper><RequireAuth><SyncUnlockPage /></RequireAuth></PageWrapper>
+        } />
+        <Route path="/pricing" element={
+          <PageWrapper><RequireAuth><PricingPage /></RequireAuth></PageWrapper>
+        } />
+        <Route path="/billing/success" element={
+          <PageWrapper><RequireAuth><BillingSuccessPage /></RequireAuth></PageWrapper>
+        } />
+        <Route path="/admin" element={
+          <PageWrapper><RequireAuth><AdminPage /></RequireAuth></PageWrapper>
+        } />
+        <Route path="/clients" element={
+          <PageWrapper><RequireAuth><SyncGate><ProRoute feature="Vista clienti"><ClientsPage /></ProRoute></SyncGate></RequireAuth></PageWrapper>
+        } />
+        <Route path="/templates" element={
+          <PageWrapper><RequireAuth><SyncGate><TemplatesPage /></SyncGate></RequireAuth></PageWrapper>
+        } />
+        <Route path="/profile" element={
+          <PageWrapper><RequireAuth><ProfilePage /></RequireAuth></PageWrapper>
+        } />
+        <Route path="/terms" element={<PageWrapper><TermsPage /></PageWrapper>} />
+        <Route path="/privacy" element={<PageWrapper><PrivacyPage /></PageWrapper>} />
+      </Routes>
+    </AnimatePresence>
+  );
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen flex flex-col">
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/auth/verify" element={<VerifyPage />} />
-        <Route path="/dashboard" element={
-          <RequireAuth><SyncGate><DashboardPage /></SyncGate></RequireAuth>
-        } />
-        <Route path="/recording" element={
-          <RequireAuth><SyncGate><RecordingPage /></SyncGate></RequireAuth>
-        } />
-        <Route path="/archive" element={
-          <RequireAuth><SyncGate><ArchivePage /></SyncGate></RequireAuth>
-        } />
-        <Route path="/search" element={
-          <RequireAuth><SyncGate><ProRoute feature="Ricerca semantica"><SearchPage /></ProRoute></SyncGate></RequireAuth>
-        } />
-        <Route path="/onboarding" element={
-          <RequireAuth><OnboardingPage /></RequireAuth>
-        } />
-        <Route path="/calendar" element={
-          <RequireAuth><ProRoute feature="Calendario"><CalendarPage /></ProRoute></RequireAuth>
-        } />
-        <Route path="/actions" element={
-          <RequireAuth><SyncGate><ProRoute feature="Dashboard Azioni"><ActionItemsPage /></ProRoute></SyncGate></RequireAuth>
-        } />
-        <Route path="/sync/setup" element={
-          <RequireAuth><SyncSetupPage /></RequireAuth>
-        } />
-        <Route path="/sync/unlock" element={
-          <RequireAuth><SyncUnlockPage /></RequireAuth>
-        } />
-        <Route path="/pricing" element={
-          <RequireAuth><PricingPage /></RequireAuth>
-        } />
-        <Route path="/billing/success" element={
-          <RequireAuth><BillingSuccessPage /></RequireAuth>
-        } />
-        <Route path="/admin" element={
-          <RequireAuth><AdminPage /></RequireAuth>
-        } />
-        <Route path="/clients" element={
-          <RequireAuth><SyncGate><ProRoute feature="Vista clienti"><ClientsPage /></ProRoute></SyncGate></RequireAuth>
-        } />
-        <Route path="/templates" element={
-          <RequireAuth><SyncGate><TemplatesPage /></SyncGate></RequireAuth>
-        } />
-        <Route path="/profile" element={
-          <RequireAuth><ProfilePage /></RequireAuth>
-        } />
-        <Route path="/terms" element={<TermsPage />} />
-        <Route path="/privacy" element={<PrivacyPage />} />
-      </Routes>
-      <AppFooter />
+        <AnimatedRoutes />
+        <AppFooter />
       </div>
     </BrowserRouter>
   );

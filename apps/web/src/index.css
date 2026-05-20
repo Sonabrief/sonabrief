@@ -6,6 +6,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@keyframes spin-around {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.animate-spin-around {
+  animation: spin-around calc(var(--speed, 3s) * 2) linear infinite;
+}
+
 @theme inline {
     --font-heading: 'Plus Jakarta Sans Variable', system-ui, sans-serif;
     --font-sans: 'Manrope Variable', system-ui, sans-serif;

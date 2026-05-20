@@ -1,7 +1,9 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'motion/react'
 import { semanticSearch } from '../lib/semanticSearch'
 import { embeddingsService } from '../lib/embeddings'
+import { AppNav } from '../components/AppNav'
 
 function formatDate(ts: number): string {
   return new Date(ts).toLocaleDateString('it-IT', {
@@ -37,78 +39,122 @@ export default function SearchPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center p-8 gap-6">
-      <div className="w-full max-w-xl flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Ricerca</h1>
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="text-sm text-gray-400 underline"
-        >
-          Dashboard
-        </button>
-      </div>
+    <div className="min-h-screen bg-background">
+      <AppNav />
 
-      {/* Search bar */}
-      <div className="w-full max-w-xl flex gap-2">
-        <input
-          ref={inputRef}
-          type="text"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          onKeyDown={handleKey}
-          placeholder='Cerca per significato: "accordo con cliente", "decisione budget"…'
-          className="flex-1 rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
-          autoFocus
-        />
-        <button
-          onClick={handleSearch}
-          disabled={state === 'searching' || !query.trim()}
-          className="rounded-lg bg-teal-700 text-white px-4 py-2.5 text-sm font-medium hover:bg-teal-800 disabled:opacity-40 transition-colors"
-        >
-          {state === 'searching' ? '…' : 'Cerca'}
-        </button>
-      </div>
+      <main className="mx-auto max-w-2xl px-6 py-10">
+        <h1 className="mb-8 font-heading text-2xl font-bold tracking-[-0.015em] text-foreground">
+          Ricerca semantica
+        </h1>
 
-      {/* Risultati */}
-      {state === 'searching' && (
-        <p className="text-sm text-gray-400 animate-pulse">Analisi semantica in corso…</p>
-      )}
-
-      {state === 'done' && results.length === 0 && (
-        <div className="w-full max-w-xl text-center py-8 text-sm text-gray-400">
-          Nessun meeting trovato per questa ricerca.
+        {/* Search bar */}
+        <div className="flex gap-2">
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={handleKey}
+            placeholder='Es. "accordo con cliente", "decisione budget"…'
+            aria-label="Cerca nei tuoi meeting per significato"
+            className="flex-1 rounded-md border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+            autoFocus
+          />
+          <button
+            onClick={handleSearch}
+            disabled={state === 'searching' || !query.trim()}
+            className="rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-40 motion-reduce:transition-none"
+          >
+            {state === 'searching' ? '…' : 'Cerca'}
+          </button>
         </div>
-      )}
 
-      {state === 'error' && (
-        <p className="text-sm text-red-500">Errore durante la ricerca. Riprova.</p>
-      )}
+        {/* Stati */}
+        <div className="mt-6">
+          <AnimatePresence mode="wait">
+            {state === 'searching' && (
+              <motion.p
+                key="searching"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="animate-pulse text-sm text-muted-foreground motion-reduce:animate-none"
+              >
+                Analisi semantica in corso…
+              </motion.p>
+            )}
 
-      {results.length > 0 && (
-        <div className="w-full max-w-xl flex flex-col gap-3">
-          <p className="text-xs text-gray-400">{results.length} risultati per "{query}"</p>
-          {results.map(r => (
-            <button
-              key={r.meetingId}
-              onClick={() => navigate(`/meeting/${r.meetingId}`)}
-              className="w-full text-left rounded-xl border border-gray-200 p-4 hover:border-teal-300 hover:bg-teal-50/30 transition-colors"
-            >
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-sm font-medium text-gray-800">{r.title}</p>
-                <div className="flex items-center gap-2 shrink-0 ml-2">
-                  <span className="text-[10px] text-teal-600 bg-teal-50 rounded-full px-2 py-0.5">
-                    {Math.round(r.score * 100)}% match
-                  </span>
-                  <span className="text-xs text-gray-400">{formatDate(r.date)}</span>
-                </div>
-              </div>
-              {r.preview && (
-                <p className="text-xs text-gray-500 line-clamp-2">{r.preview}</p>
-              )}
-            </button>
-          ))}
+            {state === 'done' && results.length === 0 && (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                className="py-12 text-center"
+              >
+                <p className="text-sm font-semibold text-foreground">Nessun risultato</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Prova con termini diversi o frasi più specifiche.
+                </p>
+              </motion.div>
+            )}
+
+            {state === 'error' && (
+              <motion.p
+                key="error"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="text-sm text-destructive"
+              >
+                Errore durante la ricerca. Riprova.
+              </motion.p>
+            )}
+
+            {results.length > 0 && (
+              <motion.div
+                key="results"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.18 }}
+              >
+                <p className="mb-3 text-xs text-muted-foreground">
+                  {results.length} risultati per &ldquo;{query}&rdquo;
+                </p>
+                <ul className="flex flex-col gap-2" role="list">
+                  {results.map((r, i) => (
+                    <motion.li
+                      key={r.meetingId}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.16, delay: i * 0.04, ease: [0.4, 0, 0.2, 1] }}
+                    >
+                      <button
+                        onClick={() => navigate('/archive')}
+                        className="w-full rounded-lg border border-border bg-card p-4 text-left transition-colors hover:border-primary hover:bg-primary/5 motion-reduce:transition-none"
+                      >
+                        <div className="mb-1 flex items-center justify-between gap-2">
+                          <p className="text-sm font-medium text-foreground">{r.title}</p>
+                          <div className="flex shrink-0 items-center gap-2">
+                            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                              {Math.round(r.score * 100)}% match
+                            </span>
+                            <span className="text-xs text-muted-foreground">{formatDate(r.date)}</span>
+                          </div>
+                        </div>
+                        {r.preview && (
+                          <p className="line-clamp-2 text-xs text-muted-foreground">{r.preview}</p>
+                        )}
+                      </button>
+                    </motion.li>
+                  ))}
+                </ul>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      )}
+      </main>
     </div>
   )
 }

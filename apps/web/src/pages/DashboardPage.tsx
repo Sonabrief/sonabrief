@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../lib/db'
@@ -9,6 +10,9 @@ import {
 } from '../lib/api'
 import { Button } from '../components/ui/button'
 import { AppNav } from '../components/AppNav'
+import { NumberTicker } from '../components/ui/number-ticker'
+import { BorderBeam } from '../components/ui/border-beam'
+import { ShimmerButton } from '../components/ui/shimmer-button'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -234,17 +238,21 @@ export default function DashboardPage() {
           <div className="space-y-10">
 
             {/* Hero */}
-            <section>
-              <Button
+            <motion.section
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+            >
+              <ShimmerButton
                 onClick={() => navigate('/recording')}
-                className="h-11 rounded-md px-7 text-[15px] font-semibold hover:bg-(--primary-hover)"
+                className="h-11 px-7 text-[15px] font-semibold"
               >
                 Avvia registrazione
-              </Button>
+              </ShimmerButton>
               <p className="mt-3 text-sm text-muted-foreground">
                 Registra, trascrivi, archivia &mdash; tutto sul tuo computer
               </p>
-            </section>
+            </motion.section>
 
             {/* Upcoming calendar events */}
             <section aria-labelledby="calendario-heading">
@@ -350,8 +358,13 @@ export default function DashboardPage() {
                 <p className="text-xs text-muted-foreground">Nessun meeting.</p>
               ) : (
                 <ul className="divide-y divide-border" role="list">
-                  {recentMeetings.map(meeting => (
-                    <li key={meeting.id}>
+                  {recentMeetings.map((meeting, i) => (
+                    <motion.li
+                      key={meeting.id}
+                      initial={{ opacity: 0, x: -6 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.18, delay: i * 0.05, ease: [0.4, 0, 0.2, 1] }}
+                    >
                       <button
                         onClick={() => navigate('/archive')}
                         className="flex w-full items-start justify-between gap-2 py-2.5 text-left"
@@ -373,7 +386,7 @@ export default function DashboardPage() {
                           {formatDateShort(meeting.startedAt)}
                         </time>
                       </button>
-                    </li>
+                    </motion.li>
                   ))}
                 </ul>
               )}
@@ -408,9 +421,10 @@ export default function DashboardPage() {
               ) : (
                 <>
                   <p className="mb-2.5">
-                    <span className="text-xl font-semibold tabular-nums text-foreground">
-                      {openCount}
-                    </span>
+                    <NumberTicker
+                      value={openCount}
+                      className="text-xl font-semibold text-foreground"
+                    />
                     <span className="ml-1 text-xs text-muted-foreground">in sospeso</span>
                   </p>
                   <ul className="space-y-2" role="list">
@@ -433,9 +447,18 @@ export default function DashboardPage() {
             {/* Quota — minimal */}
             {billing && tier !== 'unlimited' && (
               <section
-                className="rounded-lg border border-border bg-card px-4 py-3"
+                className="relative rounded-lg border border-border bg-card px-4 py-3"
                 aria-labelledby="quota-heading"
               >
+                {percentUsed > 80 && (
+                  <BorderBeam
+                    size={60}
+                    duration={8}
+                    colorFrom="#B84545"
+                    colorTo="#C89868"
+                    borderWidth={1.5}
+                  />
+                )}
                 <div className="mb-2 flex items-center justify-between">
                   <h2
                     id="quota-heading"
