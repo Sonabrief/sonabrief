@@ -19,6 +19,44 @@ import { isUnlocked } from '../lib/keystore'
 import { MeetingBriefing } from '../components/MeetingBriefing'
 import { AppNav } from '../components/AppNav'
 import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
+import { useTier } from '../hooks/useTier'
+
+function ProGatedButton({ label, feature, onAction }: {
+  label: string
+  feature: string
+  onAction: () => void
+}) {
+  const { isFree } = useTier()
+  const [showTooltip, setShowTooltip] = useState(false)
+
+  if (isFree) {
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setShowTooltip(t => !t)}
+          className="rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground opacity-50 cursor-not-allowed"
+        >
+          {label} ✦
+        </button>
+        {showTooltip && (
+          <div className="absolute bottom-full left-0 mb-2 w-48 rounded-lg border border-border bg-card p-3 shadow-lg z-10">
+            <p className="text-xs font-semibold text-foreground mb-1">{feature} è Pro</p>
+            <a href="/pricing" className="text-xs text-primary hover:underline">Vedi i piani →</a>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <button
+      onClick={onAction}
+      className="rounded-md border border-border px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary hover:text-primary motion-reduce:transition-none"
+    >
+      {label}
+    </button>
+  )
+}
 
 const LANG_LABEL: Record<string, string> = {
   it: 'Italiano', en: 'English', fr: 'Français', es: 'Español', de: 'Deutsch',
@@ -814,28 +852,37 @@ export default function RecordingPage() {
                     )}
                     {synthesisState === 'done' && (
                       <div className="flex flex-wrap gap-2">
-                        {[
-                          { label: 'Markdown', action: () => exportMarkdown(buildExportData()) },
-                          { label: 'PDF', action: () => exportPDF(buildExportData()) },
-                          { label: 'Word', action: () => exportWord(buildExportData()) },
-                          { label: 'Email', action: () => exportEmail(buildExportData()) },
-                          {
-                            label: copyDone ? 'Copiato' : 'Copia testo',
-                            action: async () => {
-                              await copyFormatted(buildExportData())
-                              setCopyDone(true)
-                              setTimeout(() => setCopyDone(false), 2000)
-                            },
-                          },
-                        ].map(btn => (
-                          <button
-                            key={btn.label}
-                            onClick={btn.action}
-                            className="rounded-md border border-border px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary hover:text-primary motion-reduce:transition-none"
-                          >
-                            {btn.label}
-                          </button>
-                        ))}
+                        <button
+                          onClick={() => exportMarkdown(buildExportData())}
+                          className="rounded-md border border-border px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary hover:text-primary motion-reduce:transition-none"
+                        >
+                          Markdown
+                        </button>
+                        <ProGatedButton
+                          label="PDF"
+                          feature="Export PDF"
+                          onAction={() => exportPDF(buildExportData())}
+                        />
+                        <ProGatedButton
+                          label="Word"
+                          feature="Export Word"
+                          onAction={() => exportWord(buildExportData())}
+                        />
+                        <ProGatedButton
+                          label="Email"
+                          feature="Export Email"
+                          onAction={() => exportEmail(buildExportData())}
+                        />
+                        <button
+                          onClick={async () => {
+                            await copyFormatted(buildExportData())
+                            setCopyDone(true)
+                            setTimeout(() => setCopyDone(false), 2000)
+                          }}
+                          className="rounded-md border border-border px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary hover:text-primary motion-reduce:transition-none"
+                        >
+                          {copyDone ? 'Copiato' : 'Copia testo'}
+                        </button>
                       </div>
                     )}
                   </div>

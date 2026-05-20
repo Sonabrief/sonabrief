@@ -35,14 +35,35 @@ export async function handleTemplates(req: Request, env: Env): Promise<Response>
 
   // GET /v1/templates
   if (method === "GET") {
-    const rows = await env.DB.prepare(
-      `SELECT id, user_id, name, description, language, system_prompt, output_structure, is_system, parent_id, created_at, updated_at
-       FROM templates
-       WHERE is_system = 1 OR user_id = ?
-       ORDER BY is_system DESC, created_at ASC`
-    )
-      .bind(session.userId)
-      .all();
+    const tier = await getUserTier(env, session.userId);
+
+    const FREE_SYSTEM_TEMPLATES = [
+      'sys_generic_it_v2',
+      'sys_client_meeting_it_v1',
+      'sys_one_on_one_it_v1',
+    ];
+
+    let rows;
+    if (tier === 'free') {
+      const placeholders = FREE_SYSTEM_TEMPLATES.map(() => '?').join(', ');
+      rows = await env.DB.prepare(
+        `SELECT id, user_id, name, description, language, system_prompt, output_structure, is_system, parent_id, created_at, updated_at
+         FROM templates
+         WHERE is_system = 1 AND id IN (${placeholders})
+         ORDER BY created_at ASC`
+      )
+        .bind(...FREE_SYSTEM_TEMPLATES)
+        .all();
+    } else {
+      rows = await env.DB.prepare(
+        `SELECT id, user_id, name, description, language, system_prompt, output_structure, is_system, parent_id, created_at, updated_at
+         FROM templates
+         WHERE is_system = 1 OR user_id = ?
+         ORDER BY is_system DESC, created_at ASC`
+      )
+        .bind(session.userId)
+        .all();
+    }
 
     return json(rows.results);
   }

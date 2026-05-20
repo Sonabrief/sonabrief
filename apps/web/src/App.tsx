@@ -17,6 +17,7 @@ import ClientsPage from './pages/ClientsPage';
 import TemplatesPage from './pages/TemplatesPage';
 import RequireAuth from './components/RequireAuth';
 import SyncGate from './components/SyncGate';
+import ProRoute from './components/ProRoute';
 
 export default function App() {
   return (
@@ -40,10 +41,10 @@ export default function App() {
           <RequireAuth><OnboardingPage /></RequireAuth>
         } />
         <Route path="/calendar" element={
-          <RequireAuth><CalendarPage /></RequireAuth>
+          <RequireAuth><ProRoute feature="Calendario"><CalendarPage /></ProRoute></RequireAuth>
         } />
         <Route path="/actions" element={
-          <RequireAuth><SyncGate><ActionItemsPage /></SyncGate></RequireAuth>
+          <RequireAuth><SyncGate><ProRoute feature="Dashboard Azioni"><ActionItemsPage /></ProRoute></SyncGate></RequireAuth>
         } />
         <Route path="/sync/setup" element={
           <RequireAuth><SyncSetupPage /></RequireAuth>
