@@ -92,34 +92,58 @@ const CLIENT_VOLUMES = [
 
 const TOTAL_STEPS = 5
 
+// ── Sub-components ────────────────────────────────────────────────────────────
+
 function ProgressBar({ step }: { step: number }) {
   return (
-    <div className="flex gap-1.5 mb-8">
-      {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-        <div
-          key={i}
-          className={`h-1 flex-1 rounded-full transition-all ${
-            i < step ? 'bg-[#1A4D52]' : 'bg-gray-200'
-          }`}
-        />
-      ))}
+    <div className="mb-8">
+      <span className="sr-only">Passo {step} di {TOTAL_STEPS}</span>
+      <div className="flex gap-1.5" aria-hidden="true">
+        {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+          <div
+            key={i}
+            className={`h-1 flex-1 rounded-full transition-colors motion-reduce:transition-none ${
+              i < step ? 'bg-primary' : 'bg-border'
+            }`}
+          />
+        ))}
+      </div>
     </div>
   )
 }
 
-function StepTitle({ title, sub }: { title: string; sub?: string }) {
+function StepTitle({ title, sub, display }: { title: string; sub?: string; display?: boolean }) {
   return (
     <div className="mb-6">
       <h2
-        className="text-2xl text-[#1A4D52]"
-        style={{ fontFamily: '"Instrument Serif", serif' }}
+        className={
+          display
+            ? 'font-heading font-extrabold text-[clamp(1.875rem,4vw,3rem)] leading-[1.1] tracking-[-0.02em] text-foreground'
+            : 'font-heading font-bold text-2xl leading-[1.2] tracking-[-0.015em] text-foreground'
+        }
       >
         {title}
       </h2>
-      {sub && <p className="mt-1 text-sm text-gray-500">{sub}</p>}
+      {sub && <p className="mt-2 text-sm text-muted-foreground">{sub}</p>}
     </div>
   )
 }
+
+const optionCard = (active: boolean) =>
+  `w-full text-left rounded-lg border px-5 py-3 transition-colors motion-reduce:transition-none ${
+    active
+      ? 'border-primary bg-secondary'
+      : 'border-border bg-card hover:bg-border'
+  }`
+
+const optionCardWide = (active: boolean) =>
+  `w-full text-left rounded-lg border px-5 py-4 transition-colors motion-reduce:transition-none ${
+    active
+      ? 'border-primary bg-secondary'
+      : 'border-border bg-card hover:bg-border'
+  }`
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function OnboardingPage() {
   const navigate = useNavigate()
@@ -178,21 +202,24 @@ export default function OnboardingPage() {
   function canProceed(): boolean {
     if (step === 1) return !!language
     if (step === 2) return !!profession
-    if (step === 3) return true // opzionale
+    if (step === 3) return true
     if (step === 4) return !!meetingDuration && !!clientVolume
     if (step === 5) return true
     return false
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF7F0] flex items-center justify-center px-6 py-12">
+    <div className="min-h-screen bg-background flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-lg">
+        <img src="/logo.svg" alt="Sonabrief" className="mb-10 h-7 w-auto" />
+
         <ProgressBar step={step} />
 
         {/* Step 1 — Lingua */}
         {step === 1 && (
           <div>
             <StepTitle
+              display
               title="Benvenuto su Sonabrief."
               sub="Scegli la lingua in cui vuoi lavorare. Potrai cambiarla in qualsiasi momento."
             />
@@ -200,14 +227,14 @@ export default function OnboardingPage() {
               {LANGUAGES.map(lang => (
                 <button
                   key={lang.code}
+                  type="button"
                   onClick={() => setLanguage(lang.code)}
-                  className={`w-full text-left rounded-xl border px-5 py-3 text-sm transition-colors ${
-                    language === lang.code
-                      ? 'border-[#1A4D52] bg-teal-50 text-[#1A4D52]'
-                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                  }`}
+                  aria-pressed={language === lang.code}
+                  className={optionCard(language === lang.code)}
                 >
-                  {lang.label}
+                  <span className={`text-sm ${language === lang.code ? 'text-primary' : 'text-foreground'}`}>
+                    {lang.label}
+                  </span>
                 </button>
               ))}
             </div>
@@ -223,32 +250,33 @@ export default function OnboardingPage() {
             />
             <input
               type="text"
+              aria-label="Cerca la tua professione"
               placeholder="Cerca la tua professione..."
               value={professionSearch}
               onChange={e => setProfessionSearch(e.target.value)}
-              className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600 mb-4"
+              className="mb-4 w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
             />
             <div className="flex flex-col gap-4 max-h-72 overflow-y-auto pr-1">
               {filteredProfessions.map(cat => (
                 <div key={cat.category}>
-                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">
+                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                     {cat.category}
                   </p>
                   <div className="flex flex-col gap-1">
                     {cat.items.map(item => (
                       <button
                         key={item}
+                        type="button"
                         onClick={() => {
                           setProfession(item)
                           setProfessionCategory(cat.category)
                         }}
-                        className={`w-full text-left rounded-lg border px-4 py-2.5 text-sm transition-colors ${
-                          profession === item
-                            ? 'border-[#1A4D52] bg-teal-50 text-[#1A4D52]'
-                            : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                        }`}
+                        aria-pressed={profession === item}
+                        className={optionCard(profession === item)}
                       >
-                        {item}
+                        <span className={`text-sm ${profession === item ? 'text-primary' : 'text-foreground'}`}>
+                          {item}
+                        </span>
                       </button>
                     ))}
                   </div>
@@ -262,17 +290,20 @@ export default function OnboardingPage() {
         {step === 3 && (
           <div>
             <StepTitle
-              title="Aggiungi contesto (opzionale)"
+              title="Aggiungi contesto"
               sub="Una frase sul tuo lavoro rende le sintesi ancora più precise. Puoi saltare questo step."
             />
             <textarea
-              placeholder="Es. &quot;Seguo clienti PMI nel settore manifatturiero&quot; oppure &quot;Conduco interviste qualitative per ricerca accademica&quot;"
+              aria-label="Contesto professionale"
+              placeholder='Es. "Seguo clienti PMI nel settore manifatturiero" oppure "Conduco interviste qualitative per ricerca accademica"'
               value={contextNote}
               onChange={e => setContextNote(e.target.value.slice(0, 200))}
               rows={4}
-              className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600 resize-none"
+              className="w-full rounded-md border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary resize-none motion-reduce:transition-none"
             />
-            <p className="text-xs text-gray-400 mt-1 text-right">{contextNote.length}/200</p>
+            <p className="mt-1 text-right text-xs text-muted-foreground">
+              {contextNote.length}/200
+            </p>
           </div>
         )}
 
@@ -281,44 +312,42 @@ export default function OnboardingPage() {
           <div>
             <StepTitle
               title="Come lavori?"
-              sub="Due domande veloci per ottimizzare la tua esperienza."
+              sub="Due impostazioni per ottimizzare la tua esperienza."
             />
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Durata tipica dei tuoi meeting
             </p>
-            <div className="flex flex-col gap-2 mb-6">
+            <div className="mb-6 flex flex-col gap-2">
               {MEETING_DURATIONS.map(d => (
                 <button
                   key={d.value}
+                  type="button"
                   onClick={() => setMeetingDuration(d.value)}
-                  className={`w-full text-left rounded-xl border px-5 py-3 transition-colors ${
-                    meetingDuration === d.value
-                      ? 'border-[#1A4D52] bg-teal-50'
-                      : 'border-gray-200 bg-white hover:border-gray-300'
-                  }`}
+                  aria-pressed={meetingDuration === d.value}
+                  className={optionCardWide(meetingDuration === d.value)}
                 >
-                  <p className={`text-sm ${meetingDuration === d.value ? 'text-[#1A4D52]' : 'text-gray-700'}`}>
+                  <p className={`text-sm font-medium ${meetingDuration === d.value ? 'text-primary' : 'text-foreground'}`}>
                     {d.label}
                   </p>
-                  <p className="text-xs text-gray-400">{d.sub}</p>
+                  <p className="text-xs text-muted-foreground">{d.sub}</p>
                 </button>
               ))}
             </div>
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Clienti / progetti gestiti in parallelo
             </p>
             <div className="flex flex-col gap-2">
               {CLIENT_VOLUMES.map(v => (
                 <button
                   key={v.value}
+                  type="button"
                   onClick={() => setClientVolume(v.value)}
-                  className={`w-full text-left rounded-xl border px-5 py-3 text-sm transition-colors ${
-                    clientVolume === v.value
-                      ? 'border-[#1A4D52] bg-teal-50 text-[#1A4D52]'
-                      : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                  }`}
+                  aria-pressed={clientVolume === v.value}
+                  className={optionCard(clientVolume === v.value)}
                 >
-                  {v.label}
+                  <span className={`text-sm ${clientVolume === v.value ? 'text-primary' : 'text-foreground'}`}>
+                    {v.label}
+                  </span>
                 </button>
               ))}
             </div>
@@ -332,73 +361,65 @@ export default function OnboardingPage() {
               title="Come vuoi usare Sonabrief?"
               sub="Puoi cambiare queste impostazioni per ogni meeting."
             />
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Modalità di sintesi predefinita
             </p>
-            <div className="flex flex-col gap-2 mb-6">
+            <div className="mb-6 flex flex-col gap-2">
               <button
+                type="button"
                 onClick={() => setSynthesisMode('standard')}
-                className={`w-full text-left rounded-xl border px-5 py-4 transition-colors ${
-                  synthesisMode === 'standard'
-                    ? 'border-[#1A4D52] bg-teal-50'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
-                }`}
+                aria-pressed={synthesisMode === 'standard'}
+                className={optionCardWide(synthesisMode === 'standard')}
               >
-                <p className={`text-sm font-medium ${synthesisMode === 'standard' ? 'text-[#1A4D52]' : 'text-gray-700'}`}>
+                <p className={`text-sm font-medium ${synthesisMode === 'standard' ? 'text-primary' : 'text-foreground'}`}>
                   Standard
                 </p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   Trascrizione locale + sintesi cloud EU. Qualità migliore, audio mai caricato.
                 </p>
               </button>
               <button
+                type="button"
                 onClick={() => setSynthesisMode('local')}
-                className={`w-full text-left rounded-xl border px-5 py-4 transition-colors ${
-                  synthesisMode === 'local'
-                    ? 'border-[#1A4D52] bg-teal-50'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
-                }`}
+                aria-pressed={synthesisMode === 'local'}
+                className={optionCardWide(synthesisMode === 'local')}
               >
-                <p className={`text-sm font-medium ${synthesisMode === 'local' ? 'text-[#1A4D52]' : 'text-gray-700'}`}>
+                <p className={`text-sm font-medium ${synthesisMode === 'local' ? 'text-primary' : 'text-foreground'}`}>
                   Local Only
                 </p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   Tutto sul tuo computer. Zero dati escono. Richiede Ollama installato.
                 </p>
               </button>
             </div>
 
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Sincronizzazione note
             </p>
             <div className="flex flex-col gap-2">
               <button
+                type="button"
                 onClick={() => setSyncEnabled(false)}
-                className={`w-full text-left rounded-xl border px-5 py-4 transition-colors ${
-                  !syncEnabled
-                    ? 'border-[#1A4D52] bg-teal-50'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
-                }`}
+                aria-pressed={!syncEnabled}
+                className={optionCardWide(!syncEnabled)}
               >
-                <p className={`text-sm font-medium ${!syncEnabled ? 'text-[#1A4D52]' : 'text-gray-700'}`}>
+                <p className={`text-sm font-medium ${!syncEnabled ? 'text-primary' : 'text-foreground'}`}>
                   Solo locale
                 </p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   Le note restano su questo dispositivo.
                 </p>
               </button>
               <button
+                type="button"
                 onClick={() => setSyncEnabled(true)}
-                className={`w-full text-left rounded-xl border px-5 py-4 transition-colors ${
-                  syncEnabled
-                    ? 'border-[#1A4D52] bg-teal-50'
-                    : 'border-gray-200 bg-white hover:border-gray-300'
-                }`}
+                aria-pressed={syncEnabled}
+                className={optionCardWide(syncEnabled)}
               >
-                <p className={`text-sm font-medium ${syncEnabled ? 'text-[#1A4D52]' : 'text-gray-700'}`}>
+                <p className={`text-sm font-medium ${syncEnabled ? 'text-primary' : 'text-foreground'}`}>
                   Sync cifrato
                 </p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="mt-0.5 text-xs text-muted-foreground">
                   Note sincronizzate tra dispositivi con crittografia zero-knowledge. Configuri la passphrase nel prossimo step.
                 </p>
               </button>
@@ -406,12 +427,14 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Navigazione */}
+        {/* Navigation */}
         <div className="mt-8 flex items-center justify-between">
           {step > 1 ? (
             <button
+              type="button"
               onClick={() => setStep(s => s - 1)}
-              className="text-sm text-gray-400 hover:text-gray-600"
+              aria-label="Torna al passo precedente"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
             >
               ← Indietro
             </button>
@@ -421,19 +444,21 @@ export default function OnboardingPage() {
 
           {step < TOTAL_STEPS ? (
             <button
+              type="button"
               onClick={() => setStep(s => s + 1)}
               disabled={!canProceed()}
-              className="rounded-lg bg-[#1A4D52] px-6 py-2.5 text-sm font-medium text-white hover:bg-[#143a3e] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
             >
               {step === 3 ? (contextNote.trim() ? 'Continua' : 'Salta') : 'Continua'}
             </button>
           ) : (
             <button
+              type="button"
               onClick={handleFinish}
               disabled={saving}
-              className="rounded-lg bg-[#1A4D52] px-6 py-2.5 text-sm font-medium text-white hover:bg-[#143a3e] transition-colors disabled:opacity-40"
+              className="rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-40 motion-reduce:transition-none"
             >
-              {saving ? 'Salvataggio...' : 'Inizia a usare Sonabrief →'}
+              {saving ? 'Salvataggio...' : 'Apri la dashboard'}
             </button>
           )}
         </div>

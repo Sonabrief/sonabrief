@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Mic, Monitor, Video } from 'lucide-react'
+import { Mic, Monitor, Video } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAudioRecorder } from '../hooks/useAudioRecorder'
 import { whisper } from '../lib/whisper'
@@ -17,6 +17,7 @@ import { saveEmbeddingForMeeting } from '../lib/semanticSearch'
 import { embeddingsService } from '../lib/embeddings'
 import { isUnlocked } from '../lib/keystore'
 import { MeetingBriefing } from '../components/MeetingBriefing'
+import { AppNav } from '../components/AppNav'
 import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
 
 const LANG_LABEL: Record<string, string> = {
@@ -132,53 +133,6 @@ const MODE_OPTIONS: ModeOption[] = [
   { id: 'standard', label: 'Standard', desc: 'Trascrizione locale, sintesi tramite AI' },
   { id: 'local', label: 'Solo locale', desc: 'Tutto sul tuo computer, nessun dato inviato' },
 ]
-
-// ─── Navigation ───────────────────────────────────────────────────────────────
-
-const NAV_ITEMS = [
-  { label: 'Archivio', path: '/archive' },
-  { label: 'Calendario', path: '/calendar' },
-  { label: 'Azioni', path: '/actions' },
-  { label: 'Clienti', path: '/clients' },
-  { label: 'Template', path: '/templates' },
-]
-
-function RecordingNav() {
-  const navigate = useNavigate()
-  return (
-    <nav
-      className="sticky top-0 z-10 border-b border-border bg-card"
-      aria-label="Navigazione principale"
-    >
-      <div className="mx-auto flex h-14 max-w-4xl items-center gap-8 px-6">
-        <img src="/logo.svg" alt="Sonabrief" className="h-7 w-auto" />
-
-        <ul className="hidden items-center gap-0.5 md:flex" role="list">
-          {NAV_ITEMS.map(({ label, path }) => (
-            <li key={path}>
-              <button
-                onClick={() => navigate(path)}
-                className="rounded-md px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
-              >
-                {label}
-              </button>
-            </li>
-          ))}
-        </ul>
-
-        <div className="ml-auto">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
-          >
-            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
-            Dashboard
-          </button>
-        </div>
-      </div>
-    </nav>
-  )
-}
 
 // ─── Source selector button ────────────────────────────────────────────────────
 
@@ -552,7 +506,7 @@ export default function RecordingPage() {
   return (
     <div className="min-h-screen bg-background">
       <h1 className="sr-only">Nuovo meeting — Sonabrief</h1>
-      <RecordingNav />
+      <AppNav />
 
       <main className="mx-auto max-w-4xl px-6 py-10">
         <div className="lg:grid lg:grid-cols-[3fr_2fr] lg:gap-10">

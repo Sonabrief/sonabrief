@@ -1,16 +1,17 @@
-import { useState } from 'react';
-import { API_URL } from '../config';
+import { useState } from 'react'
+import { API_URL } from '../config'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [sent, setSent] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [email, setEmail] = useState('')
+  const [sent, setSent] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  async function handleSubmit() {
-    if (!email) return;
-    setLoading(true);
-    setError(null);
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    if (!email) return
+    setLoading(true)
+    setError(null)
     try {
       const res = await fetch(`${API_URL}/auth/request`, {
         method: 'POST',
@@ -20,62 +21,91 @@ export default function LoginPage() {
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           screen_resolution: `${window.screen.width}x${window.screen.height}`,
         }),
-      });
+      })
       if (!res.ok) {
-        const data = await res.json().catch(() => ({})) as { error?: string };
+        const data = await res.json().catch(() => ({})) as { error?: string }
         if (data.error === 'disposable_email') {
-          setError('Usa un indirizzo email reale — le email temporanee non sono accettate.');
+          setError('Usa un indirizzo email reale: le email temporanee non sono accettate.')
         } else if (data.error === 'rate_limited') {
-          setError('Troppi tentativi. Riprova tra qualche ora.');
+          setError('Troppi tentativi. Riprova tra qualche ora.')
         } else if (data.error === 'datacenter_ip_blocked') {
-          setError('Registrazione non disponibile da questa rete.');
+          setError('Registrazione non disponibile da questa rete.')
         } else {
-          setError('Errore durante l\'invio. Riprova tra poco.');
+          setError('Errore durante l\'invio. Riprova tra poco.')
         }
-        setLoading(false);
-        return;
+        setLoading(false)
+        return
       }
-      setSent(true);
+      setSent(true)
     } catch {
-      setError('Errore di rete. Controlla la connessione e riprova.');
+      setError('Errore di rete. Controlla la connessione e riprova.')
     }
-    setLoading(false);
+    setLoading(false)
   }
 
   if (sent) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-semibold mb-2">Controlla la tua email</h1>
-          <p className="text-gray-500">Abbiamo inviato un link di accesso a <strong>{email}</strong></p>
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+        <div className="w-full max-w-sm text-center">
+          <img src="/logo.svg" alt="Sonabrief" className="mx-auto mb-10 h-7 w-auto" />
+          <h1 className="font-heading text-[clamp(1.875rem,4vw,3rem)] font-extrabold leading-[1.1] tracking-[-0.02em] text-foreground">
+            Controlla la tua email
+          </h1>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Abbiamo inviato un link di accesso a:
+          </p>
+          <p className="mt-1 text-sm font-semibold text-foreground">{email}</p>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Il link è valido per 15 minuti. Controlla anche lo spam.
+          </p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="w-full max-w-sm space-y-4">
-        <h1 className="text-2xl font-semibold">Accedi a Sonabrief</h1>
-        <input
-          type="email"
-          placeholder="La tua email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-          className="w-full border rounded px-3 py-2 text-sm"
-        />
-        {error && (
-          <p className="text-sm text-red-600">{error}</p>
-        )}
-        <button
-          onClick={handleSubmit}
-          disabled={loading}
-          className="w-full bg-[#1A4D52] text-white rounded px-3 py-2 text-sm disabled:opacity-50"
-        >
-          {loading ? 'Invio...' : 'Invia link di accesso'}
-        </button>
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="w-full max-w-sm">
+        <img src="/logo.svg" alt="Sonabrief" className="mb-10 h-7 w-auto" />
+
+        <h1 className="mb-6 font-heading text-[clamp(1.875rem,4vw,3rem)] font-extrabold leading-[1.1] tracking-[-0.02em] text-foreground">
+          Accedi a Sonabrief
+        </h1>
+
+        <form onSubmit={handleSubmit} noValidate>
+          <div>
+            <label
+              htmlFor="email"
+              className="mb-1.5 block text-sm font-medium text-foreground"
+            >
+              Indirizzo email
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              placeholder="nome@esempio.it"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+            />
+            {error && (
+              <p role="alert" className="mt-2 text-sm text-destructive">
+                {error}
+              </p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            aria-busy={loading}
+            className="mt-4 w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 motion-reduce:transition-none"
+          >
+            {loading ? 'Invio in corso...' : 'Invia link di accesso'}
+          </button>
+        </form>
       </div>
     </div>
-  );
+  )
 }

@@ -4,10 +4,11 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../lib/db'
 import { API_URL } from '../config'
 import {
-  getMe, logout, getBillingStatus, getBillingPortalUrl,
+  getMe, getBillingStatus, getBillingPortalUrl,
   getPreferences, type BillingStatus,
 } from '../lib/api'
 import { Button } from '../components/ui/button'
+import { AppNav } from '../components/AppNav'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -108,57 +109,6 @@ function QuotaBar({ used, cap, percent }: { used: number; cap: number; percent: 
   )
 }
 
-// ── Navigation ────────────────────────────────────────────────────────────────
-
-const NAV_ITEMS = [
-  { label: 'Archivio', path: '/archive' },
-  { label: 'Calendario', path: '/calendar' },
-  { label: 'Azioni', path: '/actions' },
-  { label: 'Clienti', path: '/clients' },
-  { label: 'Template', path: '/templates' },
-]
-
-function AppNav({ email, onLogout }: { email: string; onLogout: () => void }) {
-  const navigate = useNavigate()
-  return (
-    <nav
-      className="sticky top-0 z-10 border-b border-border bg-card"
-      aria-label="Navigazione principale"
-    >
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-8 px-6">
-        <img src="/logo.svg" alt="Sonabrief" className="h-7 w-auto" />
-
-        <ul className="hidden items-center gap-0.5 md:flex" role="list">
-          {NAV_ITEMS.map(({ label, path }) => (
-            <li key={path}>
-              <button
-                onClick={() => navigate(path)}
-                className="rounded-md px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
-              >
-                {label}
-              </button>
-            </li>
-          ))}
-        </ul>
-
-        <div className="ml-auto flex items-center gap-5">
-          {email && (
-            <span className="hidden max-w-[200px] truncate text-xs text-muted-foreground md:block">
-              {email}
-            </span>
-          )}
-          <button
-            onClick={onLogout}
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
-          >
-            Esci
-          </button>
-        </div>
-      </div>
-    </nav>
-  )
-}
-
 // ── Loading skeleton ──────────────────────────────────────────────────────────
 
 function LoadingShell() {
@@ -236,11 +186,6 @@ export default function DashboardPage() {
     return new Set(meetings.map(m => m.clientName!.toLowerCase()))
   }, [])
 
-  async function handleLogout() {
-    await logout()
-    navigate('/', { replace: true })
-  }
-
   async function handleManageSubscription() {
     const url = await getBillingPortalUrl()
     if (url) window.open(url, '_blank')
@@ -280,7 +225,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       <h1 className="sr-only">Dashboard &mdash; Sonabrief</h1>
-      <AppNav email={email} onLogout={handleLogout} />
+      <AppNav />
 
       <main className="mx-auto max-w-6xl px-6 py-10">
         <div className="lg:grid lg:grid-cols-[2fr_1fr] lg:gap-10">

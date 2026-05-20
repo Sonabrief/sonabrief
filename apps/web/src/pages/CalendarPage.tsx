@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../config'
+import { AppNav } from '../components/AppNav'
 
 interface CalendarEvent {
   id: string
@@ -36,7 +36,6 @@ function formatDuration(start: string, end: string): string {
 }
 
 export default function CalendarPage() {
-  const navigate = useNavigate()
   const [google, setGoogle] = useState<CalendarState | null>(null)
   const [microsoft, setMicrosoft] = useState<CalendarState | null>(null)
   const [loading, setLoading] = useState(true)
@@ -87,17 +86,14 @@ export default function CalendarPage() {
   ].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
 
   return (
-    <div className="min-h-screen bg-[#FAF7F0] px-6 py-10">
-      <div className="mx-auto max-w-2xl flex flex-col gap-6">
+    <div className="min-h-screen bg-background">
+      <AppNav />
 
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl text-[#1A4D52]" style={{ fontFamily: '"Instrument Serif", serif' }}>
-            Calendario
-          </h1>
-          <button onClick={() => navigate('/dashboard')} className="text-sm text-gray-400 underline">
-            ← Dashboard
-          </button>
-        </div>
+      <main className="mx-auto max-w-2xl px-6 py-8">
+        <h1 className="mb-6 font-heading text-2xl font-bold leading-[1.2] tracking-[-0.015em] text-foreground">
+          Calendario
+        </h1>
+        <div className="flex flex-col gap-6">
 
         {/* Provider cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -219,7 +215,8 @@ export default function CalendarPage() {
           </div>
         )}
 
-      </div>
+        </div>
+      </main>
     </div>
   )
 }

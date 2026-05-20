@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { AppNav } from '../components/AppNav'
 import { db, type Meeting, type Note } from '../lib/db'
 import { SynthesisEditor } from '../components/SynthesisEditor'
 import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
@@ -71,116 +72,157 @@ export default function ArchivePage() {
     }
   }
 
+  const exportActions = [
+    { label: 'Markdown', fn: () => exportMarkdown(buildExportData()) },
+    { label: 'PDF', fn: () => exportPDF(buildExportData()) },
+    { label: 'Word', fn: () => exportWord(buildExportData()) },
+    { label: 'Email', fn: () => exportEmail(buildExportData()) },
+    {
+      label: copyDone ? 'Copiato' : 'Copia testo',
+      fn: async () => {
+        await copyFormatted(buildExportData())
+        setCopyDone(true)
+        setTimeout(() => setCopyDone(false), 2000)
+      },
+    },
+  ]
+
   return (
-    <div className="flex min-h-screen flex-col items-center gap-8 p-8">
-      <div className="w-full max-w-2xl flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Archivio meeting</h1>
-        <button onClick={() => navigate('/dashboard')} className="text-sm text-gray-400 underline">
-          Dashboard
-        </button>
-      </div>
+    <div className="min-h-screen bg-background">
+      <AppNav />
 
-      <div className="w-full max-w-2xl">
-        <input
-          type="text"
-          placeholder="Cerca per titolo..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="w-full rounded-md border border-gray-200 px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
-        />
-      </div>
+      <main className="mx-auto max-w-6xl px-6 py-8">
+        <h1 className="mb-8 font-heading text-[clamp(1.875rem,4vw,3rem)] font-extrabold leading-[1.1] tracking-[-0.02em] text-foreground">
+          Archivio
+        </h1>
 
-      {meetings === undefined && (
-        <p className="text-sm text-gray-400">Caricamento...</p>
-      )}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_2fr] md:gap-8">
 
-      {meetings !== undefined && filtered.length === 0 && (
-        <p className="text-sm text-gray-400">Nessun meeting trovato.</p>
-      )}
-
-      <div className="w-full max-w-2xl flex flex-col gap-3">
-        {filtered.map(meeting => (
-          <button
-            key={meeting.id}
-            onClick={() => handleSelect(meeting)}
-            className={`w-full text-left rounded-xl border px-5 py-4 transition-colors ${
-              selectedMeeting?.id === meeting.id
-                ? 'border-teal-600 bg-teal-50'
-                : 'border-gray-200 bg-white hover:border-gray-300'
-            }`}
-          >
-            <p className="text-sm font-medium text-gray-900">{meeting.title}</p>
-            <p className="mt-1 text-xs text-gray-400">
-              {formatDate(meeting.startedAt)}
-              {' · '}
-              {LANG_LABEL[meeting.lang ?? 'it'] ?? meeting.lang}
-              {' · '}
-              {formatMinutes(meeting.durationSeconds)}
-            </p>
-          </button>
-        ))}
-      </div>
-
-      {selectedMeeting && (
-        <div className="w-full max-w-2xl flex flex-col gap-4">
-          <p className="text-xs font-medium text-teal-700 uppercase tracking-wide">
-            Sintesi — {selectedMeeting.title}
-          </p>
-
-          <div className="flex items-center gap-2">
+          {/* ── List ──────────────────────────────────────── */}
+          <div className="flex flex-col gap-3">
             <input
               type="text"
-              placeholder="Nome cliente..."
-              value={editingClient}
-              onChange={e => setEditingClient(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && saveClientFields()}
-              className="flex-1 rounded-md border border-gray-200 px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
+              aria-label="Cerca per titolo"
+              placeholder="Cerca per titolo..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full rounded-md border border-border bg-card px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
             />
-            <input
-              type="text"
-              placeholder="Stream / progetto..."
-              value={editingStream}
-              onChange={e => setEditingStream(e.target.value)}
-              onBlur={saveClientFields}
-              onKeyDown={e => e.key === 'Enter' && saveClientFields()}
-              className="flex-1 rounded-md border border-gray-200 px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
-            />
-            <span className="text-xs text-gray-400 whitespace-nowrap">Invio per salvare</span>
-          </div>
 
-          {selectedNote ? (
-            <>
-              <SynthesisEditor content={selectedNote.content} readonly />
-              <div className="flex flex-wrap gap-2 pt-2">
-                {[
-                  { label: 'Markdown', action: () => exportMarkdown(buildExportData()) },
-                  { label: 'PDF', action: () => exportPDF(buildExportData()) },
-                  { label: 'Word', action: () => exportWord(buildExportData()) },
-                  { label: 'Email', action: () => exportEmail(buildExportData()) },
-                  {
-                    label: copyDone ? 'Copiato ✓' : 'Copia testo',
-                    action: async () => {
-                      await copyFormatted(buildExportData())
-                      setCopyDone(true)
-                      setTimeout(() => setCopyDone(false), 2000)
-                    },
-                  },
-                ].map(btn => (
-                  <button
-                    key={btn.label}
-                    onClick={btn.action}
-                    className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:border-teal-600 hover:text-teal-700 transition-colors"
-                  >
-                    {btn.label}
-                  </button>
+            {meetings === undefined ? (
+              <div className="animate-pulse space-y-2 pt-1">
+                {[0, 1, 2, 3].map(i => (
+                  <div key={i} className="h-18 rounded-lg bg-border" />
                 ))}
               </div>
-            </>
-          ) : (
-            <p className="text-sm text-gray-400">Nessuna sintesi disponibile.</p>
-          )}
+            ) : filtered.length === 0 ? (
+              <div className="pt-4">
+                <p className="text-sm font-semibold text-foreground">
+                  {search ? 'Nessun risultato' : 'Archivio vuoto'}
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {search
+                    ? 'Prova con un termine diverso.'
+                    : 'Registra il tuo primo meeting per iniziare.'}
+                </p>
+                {!search && (
+                  <button
+                    onClick={() => navigate('/recording')}
+                    className="mt-4 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) motion-reduce:transition-none"
+                  >
+                    Avvia registrazione
+                  </button>
+                )}
+              </div>
+            ) : (
+              <ul className="flex flex-col gap-2" role="list">
+                {filtered.map(meeting => {
+                  const isSelected = selectedMeeting?.id === meeting.id
+                  return (
+                    <li key={meeting.id}>
+                      <button
+                        onClick={() => handleSelect(meeting)}
+                        aria-selected={isSelected}
+                        className={`w-full rounded-lg border px-5 py-4 text-left transition-colors motion-reduce:transition-none ${
+                          isSelected
+                            ? 'border-primary bg-secondary'
+                            : 'border-border bg-card hover:bg-border'
+                        }`}
+                      >
+                        <p className={`text-sm font-medium ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                          {meeting.title}
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {formatDate(meeting.startedAt)}
+                          {' · '}
+                          {LANG_LABEL[meeting.lang ?? 'it'] ?? meeting.lang}
+                          {' · '}
+                          {formatMinutes(meeting.durationSeconds)}
+                        </p>
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </div>
+
+          {/* ── Detail ────────────────────────────────────── */}
+          <div className="rounded-lg border border-border bg-card">
+            {!selectedMeeting ? (
+              <div className="flex min-h-80 flex-col items-center justify-center p-8 text-center">
+                <p className="text-sm font-semibold text-foreground">Seleziona un meeting</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  La sintesi del meeting selezionato verrà mostrata qui.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-5 p-6">
+                <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+                  <input
+                    type="text"
+                    placeholder="Nome cliente"
+                    value={editingClient}
+                    onChange={e => setEditingClient(e.target.value)}
+                    onBlur={saveClientFields}
+                    onKeyDown={e => e.key === 'Enter' && saveClientFields()}
+                    className="flex-1 rounded-md border border-border bg-card px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Stream / progetto"
+                    value={editingStream}
+                    onChange={e => setEditingStream(e.target.value)}
+                    onBlur={saveClientFields}
+                    onKeyDown={e => e.key === 'Enter' && saveClientFields()}
+                    className="flex-1 rounded-md border border-border bg-card px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+                  />
+                </div>
+
+                {selectedNote ? (
+                  <>
+                    <SynthesisEditor content={selectedNote.content} readonly />
+                    <div className="flex flex-wrap gap-2 border-t border-border pt-4">
+                      {exportActions.map(btn => (
+                        <button
+                          key={btn.label}
+                          onClick={btn.fn}
+                          className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none"
+                        >
+                          {btn.label}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Nessuna sintesi disponibile.</p>
+                )}
+              </div>
+            )}
+          </div>
+
         </div>
-      )}
+      </main>
     </div>
   )
 }

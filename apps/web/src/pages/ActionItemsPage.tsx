@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { db, type ActionItem } from '../lib/db'
+import { AppNav } from '../components/AppNav'
 
 type Filter = 'all' | 'todo' | 'done'
 
@@ -26,7 +27,9 @@ export default function ActionItemsPage() {
 
   async function toggleCompleted(item: ActionItem) {
     await db.action_items.update(item.id, { completed: !item.completed })
-    setItems(prev => prev.map(i => i.id === item.id ? { ...i, completed: !i.completed } : i))
+    setItems(prev => prev.map(i =>
+      i.id === item.id ? { ...i, completed: !i.completed } : i
+    ))
   }
 
   const filtered = items.filter(item => {
@@ -42,95 +45,111 @@ export default function ActionItemsPage() {
     done: items.filter(i => i.completed).length,
   }
 
+  const filterLabels: Record<Filter, string> = {
+    all: `Tutti (${counts.all})`,
+    todo: `Da fare (${counts.todo})`,
+    done: `Completati (${counts.done})`,
+  }
+
   return (
-    <div className="min-h-screen bg-[#FAF7F0] px-6 py-10">
-      <div className="mx-auto max-w-2xl flex flex-col gap-6">
+    <div className="min-h-screen bg-background">
+      <AppNav />
 
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1
-            className="text-2xl text-[#1A4D52]"
-            style={{ fontFamily: '"Instrument Serif", serif' }}
-          >
-            Action Items
-          </h1>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="text-sm text-gray-400 underline"
-          >
-            ← Dashboard
-          </button>
-        </div>
+      <main className="mx-auto max-w-4xl px-6 py-8">
+        <h1 className="mb-8 font-heading text-2xl font-bold leading-[1.2] tracking-[-0.015em] text-foreground">
+          Azioni
+        </h1>
 
-        {/* Ricerca */}
+        {/* Controls */}
         <input
           type="text"
-          placeholder="Cerca action item..."
+          aria-label="Cerca azioni"
+          placeholder="Cerca azioni..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1A4D52]/40"
+          className="w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
         />
 
-        {/* Filtri */}
-        <div className="flex gap-2">
+        <div
+          className="mt-3 flex gap-2"
+          role="group"
+          aria-label="Filtra per stato"
+        >
           {(['all', 'todo', 'done'] as Filter[]).map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`rounded-full px-4 py-1.5 text-xs font-medium transition-colors ${
+              aria-pressed={filter === f}
+              className={`rounded-md px-4 py-1.5 text-xs font-medium transition-colors motion-reduce:transition-none ${
                 filter === f
-                  ? 'bg-[#1A4D52] text-white'
-                  : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'border border-border bg-card text-muted-foreground hover:bg-border'
               }`}
             >
-              {f === 'all' ? `Tutti (${counts.all})` : f === 'todo' ? `Da fare (${counts.todo})` : `Completati (${counts.done})`}
+              {filterLabels[f]}
             </button>
           ))}
         </div>
 
-        {/* Lista */}
-        {filtered.length === 0 ? (
-          <div className="rounded-xl border border-gray-200 bg-white p-8 text-center">
-            <p className="text-sm text-gray-400">
-              {items.length === 0
-                ? 'Nessun action item ancora. Verranno estratti automaticamente dalle sintesi dei meeting.'
-                : 'Nessun risultato per i filtri selezionati.'}
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {filtered.map(item => (
-              <div
-                key={item.id}
-                className={`rounded-xl border bg-white px-5 py-4 flex items-start gap-4 transition-colors ${
-                  item.completed ? 'border-gray-100 opacity-60' : 'border-gray-200'
-                }`}
-              >
-                <input
-                  type="checkbox"
-                  checked={item.completed}
-                  onChange={() => toggleCompleted(item)}
-                  className="mt-0.5 h-4 w-4 shrink-0 accent-[#1A4D52] cursor-pointer"
-                />
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm text-gray-800 ${item.completed ? 'line-through text-gray-400' : ''}`}>
-                    {item.text}
+        {/* Content */}
+        <div className="mt-5">
+          {filtered.length === 0 ? (
+            <div className="py-12 text-center">
+              {items.length === 0 ? (
+                <>
+                  <p className="text-sm font-semibold text-foreground">Nessuna azione ancora</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Le azioni vengono estratte automaticamente dalle sintesi dei meeting.
                   </p>
-                  <div className="mt-1.5">
-                    <button
-                      onClick={() => navigate('/archive')}
-                      className="text-xs text-[#1A4D52] underline underline-offset-2 hover:text-[#143a3e]"
-                    >
-                      {formatDate(item.meetingDate)}
-                    </button>
+                  <button
+                    onClick={() => navigate('/recording')}
+                    className="mt-4 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transition-none"
+                  >
+                    Avvia registrazione
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-semibold text-foreground">Nessun risultato</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Prova con un termine diverso o cambia il filtro.
+                  </p>
+                </>
+              )}
+            </div>
+          ) : (
+            <ul className="flex flex-col gap-2" role="list">
+              {filtered.map(item => (
+                <li key={item.id}>
+                  <div className="flex items-start gap-4 rounded-lg border border-border bg-card px-5 py-4">
+                    <input
+                      type="checkbox"
+                      checked={item.completed}
+                      onChange={() => toggleCompleted(item)}
+                      aria-label={`Segna come ${item.completed ? 'da fare' : 'completato'}: ${item.text}`}
+                      className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-primary"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className={`text-sm ${item.completed ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
+                        {item.text}
+                      </p>
+                      <div className="mt-1.5">
+                        <button
+                          onClick={() => navigate('/archive')}
+                          aria-label={`Vedi meeting del ${formatDate(item.meetingDate)} nell'archivio`}
+                          className="text-xs text-primary transition-colors hover:underline motion-reduce:transition-none"
+                        >
+                          {formatDate(item.meetingDate)}
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-      </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </main>
     </div>
   )
 }
