@@ -125,7 +125,7 @@ function LoadingShell() {
             <div className="space-y-3">
               <div className="h-4 w-32 rounded bg-border" />
               {[0, 1, 2].map(i => (
-                <div key={i} className="h-[76px] rounded-lg bg-border" />
+                <div key={i} className="h-19 rounded-lg bg-border" />
               ))}
             </div>
           </div>
@@ -237,7 +237,7 @@ export default function DashboardPage() {
             <section>
               <Button
                 onClick={() => navigate('/recording')}
-                className="h-11 rounded-md px-7 text-[15px] font-semibold hover:bg-[var(--primary-hover)]"
+                className="h-11 rounded-md px-7 text-[15px] font-semibold hover:bg-(--primary-hover)"
               >
                 Avvia registrazione
               </Button>
@@ -266,7 +266,7 @@ export default function DashboardPage() {
               {isCalLoading ? (
                 <div className="space-y-2">
                   {[0, 1, 2].map(i => (
-                    <div key={i} className="h-[76px] animate-pulse rounded-lg bg-border" />
+                    <div key={i} className="h-19 animate-pulse rounded-lg bg-border" />
                   ))}
                 </div>
               ) : !isCalConnected ? (
@@ -417,7 +417,7 @@ export default function DashboardPage() {
                     {topItems.map(item => (
                       <li key={item.id} className="flex gap-2">
                         <span
-                          className="mt-[5px] h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
+                          className="mt-1.25 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
                           aria-hidden="true"
                         />
                         <p className="line-clamp-2 text-xs leading-snug text-foreground">
