@@ -57,9 +57,9 @@ export const TIER_ROUTING: Record<ModelTier, TierRouting> = {
     primary: { provider: "mistral", model: "mistral-small-latest" },
   },
   pro: {
-    primary: { provider: "mistral", model: "mistral-small-latest" },
+    primary: { provider: "mistral", model: "mistral-large-latest" },
   },
   unlimited: {
-    primary: { provider: "mistral", model: "mistral-small-latest" },
+    primary: { provider: "mistral", model: "mistral-large-latest" },
   },
 };

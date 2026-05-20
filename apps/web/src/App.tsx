@@ -18,10 +18,14 @@ import TemplatesPage from './pages/TemplatesPage';
 import RequireAuth from './components/RequireAuth';
 import SyncGate from './components/SyncGate';
 import ProRoute from './components/ProRoute';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
+import { AppFooter } from './components/AppFooter';
 
 export default function App() {
   return (
     <BrowserRouter>
+      <div className="min-h-screen flex flex-col">
       <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/auth/verify" element={<VerifyPage />} />
@@ -67,7 +71,11 @@ export default function App() {
         <Route path="/templates" element={
           <RequireAuth><SyncGate><TemplatesPage /></SyncGate></RequireAuth>
         } />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
       </Routes>
+      <AppFooter />
+      </div>
     </BrowserRouter>
   );
 }
