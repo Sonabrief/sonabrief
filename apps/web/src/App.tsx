@@ -35,7 +35,7 @@ export default function App() {
           <RequireAuth><SyncGate><ArchivePage /></SyncGate></RequireAuth>
         } />
         <Route path="/search" element={
-          <RequireAuth><SyncGate><SearchPage /></SyncGate></RequireAuth>
+          <RequireAuth><SyncGate><ProRoute feature="Ricerca semantica"><SearchPage /></ProRoute></SyncGate></RequireAuth>
         } />
         <Route path="/onboarding" element={
           <RequireAuth><OnboardingPage /></RequireAuth>
@@ -62,7 +62,7 @@ export default function App() {
           <RequireAuth><AdminPage /></RequireAuth>
         } />
         <Route path="/clients" element={
-          <RequireAuth><SyncGate><ClientsPage /></SyncGate></RequireAuth>
+          <RequireAuth><SyncGate><ProRoute feature="Vista clienti"><ClientsPage /></ProRoute></SyncGate></RequireAuth>
         } />
         <Route path="/templates" element={
           <RequireAuth><SyncGate><TemplatesPage /></SyncGate></RequireAuth>

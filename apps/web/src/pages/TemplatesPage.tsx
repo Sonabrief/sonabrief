@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { API_URL } from '../config'
 import { AppNav } from '../components/AppNav'
+import { getBillingStatus } from '../lib/api'
 
 interface Template {
   id: string
@@ -46,6 +47,13 @@ export default function TemplatesPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
+  const [isFree, setIsFree] = useState(false)
+
+  useEffect(() => {
+    getBillingStatus().then(status => {
+      setIsFree(!status || status.tier === 'free')
+    })
+  }, [])
 
   async function load() {
     const r = await fetch(`${API_URL}/v1/templates`, { credentials: 'include' })
@@ -142,21 +150,35 @@ export default function TemplatesPage() {
               <p className="mt-1 text-sm text-muted-foreground">
                 Definisci come Sonabrief struttura le sintesi per un tipo specifico di meeting: un formato legale, un briefing commerciale, un'intervista qualitativa.
               </p>
-              <div className="mt-4 flex gap-2">
-                <button
-                  onClick={startFromScratch}
-                  className="flex-1 rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none"
-                >
-                  Personalizza da zero
-                </button>
-                <button
-                  onClick={startFromGeneric}
-                  disabled={!genericTemplate}
-                  className="flex-1 rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground disabled:opacity-40 motion-reduce:transition-none"
-                >
-                  Usa struttura base
-                </button>
-              </div>
+              {isFree ? (
+                <div className="mt-4 rounded-md border border-border bg-muted/40 px-4 py-3 flex items-center justify-between gap-4">
+                  <p className="text-sm text-muted-foreground">
+                    I template personalizzati sono disponibili con il piano Pro.
+                  </p>
+                  <a
+                    href="/pricing"
+                    className="shrink-0 rounded-md bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90 transition-opacity"
+                  >
+                    Passa a Pro
+                  </a>
+                </div>
+              ) : (
+                <div className="mt-4 flex gap-2">
+                  <button
+                    onClick={startFromScratch}
+                    className="flex-1 rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none"
+                  >
+                    Personalizza da zero
+                  </button>
+                  <button
+                    onClick={startFromGeneric}
+                    disabled={!genericTemplate}
+                    className="flex-1 rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground disabled:opacity-40 motion-reduce:transition-none"
+                  >
+                    Usa struttura base
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

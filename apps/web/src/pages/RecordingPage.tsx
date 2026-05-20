@@ -17,6 +17,7 @@ import { saveEmbeddingForMeeting } from '../lib/semanticSearch'
 import { embeddingsService } from '../lib/embeddings'
 import { isUnlocked } from '../lib/keystore'
 import { MeetingBriefing } from '../components/MeetingBriefing'
+import { ProGate } from '../components/ProGate'
 import { AppNav } from '../components/AppNav'
 import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
 import { useTier } from '../hooks/useTier'
@@ -752,7 +753,9 @@ export default function RecordingPage() {
                         id="transcript-content"
                         className="border-t border-border px-4 pb-4 pt-3"
                       >
-                        <TranscriptViewer segments={segments} rawText={transcript} />
+                        <ProGate feature="Speaker labeling">
+                          <TranscriptViewer segments={segments} rawText={transcript} />
+                        </ProGate>
                       </div>
                     )}
                   </div>
@@ -923,7 +926,9 @@ export default function RecordingPage() {
           >
 
             {/* Briefing context — always visible */}
-            <MeetingBriefing />
+            <ProGate feature="Briefing pre-meeting">
+              <MeetingBriefing />
+            </ProGate>
 
             {/* Model loading */}
             {whisperState === 'loading' && (

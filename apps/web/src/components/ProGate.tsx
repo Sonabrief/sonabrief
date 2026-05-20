@@ -24,7 +24,7 @@ export function ProGate({ children, feature = 'Questa funzione' }: ProGateProps)
             <p className="text-xs text-muted-foreground mb-3">
               Passa a Pro per sbloccare tutte le funzioni.
             </p>
-            
+            <a
               href="/pricing"
               className="inline-block bg-[#1A4D52] text-white text-xs font-medium px-4 py-2 rounded-md hover:opacity-90 transition-opacity"
             >
