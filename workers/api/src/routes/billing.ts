@@ -67,32 +67,37 @@ export async function handleBillingPortal(req: Request, env: Env): Promise<Respo
   }
 
   const license = await env.DB
-    .prepare('SELECT ls_subscription_id FROM licenses WHERE user_id = ? AND status != ?')
+    .prepare('SELECT polar_subscription_id FROM licenses WHERE user_id = ? AND tier != ?')
     .bind(session.userId, 'free')
-    .first<{ ls_subscription_id: string }>()
+    .first<{ polar_subscription_id: string }>()
 
-  if (!license?.ls_subscription_id) {
+  if (!license?.polar_subscription_id) {
     return new Response(JSON.stringify({ error: 'no_active_subscription' }), { status: 404 })
   }
 
-  const lsRes = await fetch(
-    `https://api.lemonsqueezy.com/v1/subscriptions/${license.ls_subscription_id}`,
+  const polarRes = await fetch(
+    `https://api.polar.sh/v1/subscriptions/${license.polar_subscription_id}`,
     {
       headers: {
-        'Accept': 'application/vnd.api+json',
-        'Authorization': `Bearer ${env.LEMONSQUEEZY_API_KEY}`,
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${env.POLAR_API_KEY}`,
       },
     }
   )
 
-  if (!lsRes.ok) {
+  if (!polarRes.ok) {
     return new Response(JSON.stringify({ error: 'portal_fetch_failed' }), { status: 502 })
   }
 
-  const data = await lsRes.json() as {
-    data: { attributes: { urls: { customer_portal: string } } }
+  const data = await polarRes.json() as {
+    customer_portal_url?: string
   }
-  const portalUrl = data.data.attributes.urls.customer_portal
+
+  const portalUrl = data.customer_portal_url
+
+  if (!portalUrl) {
+    return new Response(JSON.stringify({ error: 'no_portal_url' }), { status: 502 })
+  }
 
   return new Response(JSON.stringify({ url: portalUrl }), {
     status: 200,

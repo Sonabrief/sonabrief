@@ -71,9 +71,13 @@ export function AppNav() {
 
         <div className="ml-auto flex items-center gap-5">
           {email && (
-            <span className="hidden max-w-[200px] truncate text-xs text-muted-foreground md:block">
+            <button
+              onClick={() => navigate('/profile')}
+              className="hidden max-w-50 truncate text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none md:block"
+              aria-label="Vai al profilo"
+            >
               {email}
-            </span>
+            </button>
           )}
           <button
             onClick={handleLogout}

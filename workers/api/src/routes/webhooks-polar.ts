@@ -94,11 +94,11 @@ async function processPolarEvent(eventType: string, data: Record<string, any>, e
       const now = Date.now();
 
       await env.DB.prepare(`
-        INSERT INTO licenses (id, user_id, tier, status, ls_subscription_id, billing_cycle, renews_at, created_at, updated_at)
+        INSERT INTO licenses (id, user_id, tier, status, polar_subscription_id, billing_cycle, renews_at, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(user_id) DO UPDATE SET
           tier = excluded.tier, status = excluded.status,
-          ls_subscription_id = excluded.ls_subscription_id,
+          polar_subscription_id = excluded.polar_subscription_id,
           billing_cycle = excluded.billing_cycle,
           renews_at = excluded.renews_at,
           updated_at = excluded.updated_at
@@ -110,7 +110,7 @@ async function processPolarEvent(eventType: string, data: Record<string, any>, e
       const endsAt = data.ends_at ? new Date(data.ends_at).getTime() : null;
       await env.DB.prepare(`
         UPDATE licenses SET status = 'cancelled', cancelled_at = ?, ends_at = ?, updated_at = ?
-        WHERE ls_subscription_id = ?
+        WHERE polar_subscription_id = ?
       `).bind(Date.now(), endsAt, Date.now(), subscriptionId).run();
       break;
     }

@@ -20,6 +20,7 @@ import SyncGate from './components/SyncGate';
 import ProRoute from './components/ProRoute';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
+import ProfilePage from './pages/ProfilePage';
 import { AppFooter } from './components/AppFooter';
 
 export default function App() {
@@ -70,6 +71,9 @@ export default function App() {
         } />
         <Route path="/templates" element={
           <RequireAuth><SyncGate><TemplatesPage /></SyncGate></RequireAuth>
+        } />
+        <Route path="/profile" element={
+          <RequireAuth><ProfilePage /></RequireAuth>
         } />
         <Route path="/terms" element={<TermsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />

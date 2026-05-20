@@ -16,6 +16,7 @@ import { handlePolarWebhook } from "./routes/webhooks-polar";
 import { handleBillingStatus, handleBillingPortal } from "./routes/billing";
 import { handleAdminStats } from "./routes/admin";
 import { handleGetPreferences, handleSavePreferences } from "./routes/preferences";
+import { handleDeleteAccount } from "./routes/account";
 import { handleGoogleStart, handleGoogleCallback, handleCalendarEvents, handleCalendarDisconnect, handleMicrosoftStart, handleMicrosoftCallback, handleMicrosoftCalendarEvents, handleMicrosoftDisconnect } from "./routes/calendar";
 
 export type { Env };
@@ -80,6 +81,8 @@ export default {
       response = await handleMicrosoftCalendarEvents(request, env)
     } else if (url.pathname === '/v1/calendar/microsoft/disconnect' && request.method === 'POST') {
       response = await handleMicrosoftDisconnect(request, env)
+    } else if (url.pathname === '/v1/account' && request.method === 'DELETE') {
+      response = await handleDeleteAccount(request, env)
     } else {
       response = new Response("Not found", { status: 404 });
     }

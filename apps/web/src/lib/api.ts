@@ -76,6 +76,24 @@ export async function savePreferences(prefs: Partial<UserPreferences>): Promise<
   }
 }
 
+export async function updatePreferences(prefs: {
+  language?: string
+  synthesis_mode?: string
+  profession?: string
+}): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_URL}/v1/preferences`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(prefs),
+    })
+    return res.ok
+  } catch {
+    return false
+  }
+}
+
 export async function logout(): Promise<void> {
   await fetch(`${API_URL}/auth/logout`, {
     method: 'POST',
