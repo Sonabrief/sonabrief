@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useMeetingBriefing } from '../hooks/useMeetingBriefing'
+import { db } from '../lib/db'
 
 function formatRelativeDate(ts: number): string {
   const days = Math.floor((Date.now() - ts) / (1000 * 60 * 60 * 24))
@@ -12,100 +13,206 @@ function formatRelativeDate(ts: number): string {
 
 export function MeetingBriefing() {
   const { briefing, loading } = useMeetingBriefing()
-  const [expanded, setExpanded] = useState(false)
+  const [panelOpen, setPanelOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [expandedNote, setExpandedNote] = useState<string | null>(null)
+  const [loadingNote, setLoadingNote] = useState(false)
+
+  async function handleMeetingClick(id: string) {
+    if (expandedId === id) {
+      setExpandedId(null)
+      setExpandedNote(null)
+      return
+    }
+    setExpandedId(id)
+    setExpandedNote(null)
+    setLoadingNote(true)
+    const note = await db.notes.where('meetingId').equals(id).first()
+    setExpandedNote(note?.content ?? '')
+    setLoadingNote(false)
+  }
+
+  function collapseNote(e: React.MouseEvent) {
+    e.stopPropagation()
+    setExpandedId(null)
+    setExpandedNote(null)
+  }
+
+  const q = search.toLowerCase()
+  const filteredMeetings = briefing?.recentMeetings.filter(m =>
+    !q || m.title.toLowerCase().includes(q)
+  ) ?? []
+  const filteredActions = briefing?.openActionItems.filter(a =>
+    !q || a.text.toLowerCase().includes(q) || a.meetingTitle.toLowerCase().includes(q)
+  ) ?? []
+
+  const totalCount = (briefing?.recentMeetings.length ?? 0) + (briefing?.openActionItems.length ?? 0)
 
   if (loading) return (
-    <div className="w-full max-w-xl text-xs text-gray-300 text-center py-2 animate-pulse">
-      Caricamento contesto…
+    <div className="animate-pulse rounded-lg border border-border bg-card px-4 py-3 text-xs text-muted-foreground">
+      Caricamento contesto...
     </div>
   )
 
-  if (!briefing || (briefing.recentMeetings.length === 0 && briefing.openActionItems.length === 0)) {
-    return (
-      <div className="w-full max-w-xl rounded-lg border border-dashed border-gray-200 px-4 py-3 text-xs text-gray-300 text-center">
-        Nessun meeting precedente — questo è il tuo primo briefing.
-      </div>
-    )
-  }
+  if (!briefing || totalCount === 0) return (
+    <div className="rounded-lg border border-dashed border-border px-4 py-3 text-xs text-muted-foreground">
+      Nessun meeting precedente — questo e il tuo primo briefing.
+    </div>
+  )
 
   return (
-    <div className="w-full max-w-xl rounded-xl border border-teal-100 bg-teal-50/50 overflow-hidden">
-      {/* Header sempre visibile */}
+    <div className="overflow-hidden rounded-lg border border-border bg-card">
+
+      {/* Header — always visible toggle */}
       <button
-        onClick={() => setExpanded(o => !o)}
-        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-teal-50 transition-colors"
+        onClick={() => setPanelOpen(o => !o)}
+        className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-muted motion-reduce:transition-none"
+        aria-expanded={panelOpen}
       >
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-teal-800">📋 Briefing pre-meeting</span>
-          <span className="text-xs text-teal-500 bg-teal-100 rounded-full px-2 py-0.5">
-            {briefing.recentMeetings.length} meeting · {briefing.openActionItems.length} azioni aperte
+          <span className="text-xs font-semibold text-foreground">Briefing pre-meeting</span>
+          <span className="rounded-full bg-border px-2 py-0.5 text-[10px] text-muted-foreground">
+            {briefing.recentMeetings.length} meeting · {briefing.openActionItems.length} azioni
           </span>
         </div>
-        <span className="text-teal-400 text-xs">{expanded ? '▲ chiudi' : '▼ espandi'}</span>
+        <span className="text-xs text-muted-foreground">
+          {panelOpen ? 'Chiudi' : 'Espandi'}
+        </span>
       </button>
 
-      {/* Anteprima compatta (sempre visibile) */}
-      {!expanded && briefing.openActionItems.length > 0 && (
-        <div className="px-4 pb-3 flex flex-col gap-1">
+      {/* Compact preview — top action items, when collapsed */}
+      {!panelOpen && briefing.openActionItems.length > 0 && (
+        <div className="flex flex-col gap-1 border-t border-border px-4 pb-3 pt-2">
           {briefing.openActionItems.slice(0, 3).map(item => (
-            <div key={item.id} className="flex items-start gap-2 text-xs text-teal-700">
-              <span className="mt-0.5 text-teal-400">○</span>
-              <span className="line-clamp-1">{item.text}</span>
+            <div key={item.id} className="flex items-start gap-2">
+              <span className="mt-[5px] h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+              <span className="line-clamp-1 text-xs text-foreground">{item.text}</span>
             </div>
           ))}
           {briefing.openActionItems.length > 3 && (
-            <span className="text-xs text-teal-400 pl-4">
-              +{briefing.openActionItems.length - 3} altri…
+            <span className="pl-3.5 text-xs text-muted-foreground">
+              +{briefing.openActionItems.length - 3} altri
             </span>
           )}
         </div>
       )}
 
-      {/* Dettaglio espanso */}
-      {expanded && (
-        <div className="px-4 pb-4 flex flex-col gap-4 border-t border-teal-100">
-          {briefing.openActionItems.length > 0 && (
-            <div className="pt-3">
-              <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-2">
-                Azioni aperte ({briefing.openActionItems.length})
-              </p>
-              <div className="flex flex-col gap-2">
-                {briefing.openActionItems.map(item => (
-                  <div key={item.id} className="flex items-start gap-2">
-                    <span className="text-teal-400 mt-0.5 text-xs">○</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-teal-800">{item.text}</p>
-                      <p className="text-[10px] text-teal-400">
-                        {item.meetingTitle} · {formatRelativeDate(item.meetingDate)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+      {/* Expanded panel */}
+      {panelOpen && (
+        <>
+          {/* Search */}
+          <div className="border-t border-border px-3 py-2">
+            <input
+              type="search"
+              placeholder="Cerca nei meeting passati..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+          </div>
 
-          {briefing.recentMeetings.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold text-teal-700 uppercase tracking-wide mb-2">
-                Ultimi meeting (90 giorni)
-              </p>
-              <div className="flex flex-col gap-3">
-                {briefing.recentMeetings.map(m => (
-                  <div key={m.id} className="flex flex-col gap-0.5">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-medium text-teal-800">{m.title}</p>
-                      <span className="text-[10px] text-teal-400 shrink-0 ml-2">
-                        {formatRelativeDate(m.date)}
-                      </span>
+          {/* Scrollable content */}
+          <div className="overflow-y-auto border-t border-border" style={{ maxHeight: '320px' }}>
+
+            {/* Action items */}
+            {filteredActions.length > 0 && (
+              <div className="px-4 py-3">
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Azioni aperte ({filteredActions.length})
+                </p>
+                <div className="flex flex-col gap-2">
+                  {filteredActions.map(item => (
+                    <div key={item.id} className="flex items-start gap-2">
+                      <span className="mt-[5px] h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs text-foreground">{item.text}</p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {item.meetingTitle} · {formatRelativeDate(item.meetingDate)}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-[11px] text-teal-600 line-clamp-2">{m.summary}</p>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+
+            {/* Meeting list */}
+            {filteredMeetings.length > 0 && (
+              <div className={`px-4 py-3 ${filteredActions.length > 0 ? 'border-t border-border' : ''}`}>
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Ultimi meeting (90 giorni)
+                </p>
+                <div className="flex flex-col gap-1">
+                  {filteredMeetings.map(m => (
+                    <div key={m.id}>
+                      <button
+                        onClick={() => handleMeetingClick(m.id)}
+                        className="w-full rounded-md px-2 py-1.5 text-left transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="truncate text-xs font-medium text-foreground">{m.title}</p>
+                          <div className="flex shrink-0 items-center gap-1.5">
+                            <span className="text-[10px] text-muted-foreground">
+                              {formatRelativeDate(m.date)}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground">
+                              {expandedId === m.id ? '▲' : '▼'}
+                            </span>
+                          </div>
+                        </div>
+                        {expandedId !== m.id && (
+                          <p className="mt-0.5 line-clamp-1 text-[11px] text-muted-foreground">
+                            {m.summary}
+                          </p>
+                        )}
+                      </button>
+
+                      {/* Inline synthesis */}
+                      {expandedId === m.id && (
+                        <div className="mx-2 mb-1 rounded-md border border-border bg-muted">
+                          <div className="max-h-48 overflow-y-auto px-3 pt-3">
+                            {loadingNote ? (
+                              <p className="animate-pulse text-xs text-muted-foreground">
+                                Caricamento sintesi...
+                              </p>
+                            ) : expandedNote ? (
+                              <p className="whitespace-pre-wrap text-xs leading-relaxed text-foreground">
+                                {expandedNote
+                                  .replace(/^#+\s*/gm, '')
+                                  .replace(/\*\*/g, '')
+                                  .trim()}
+                              </p>
+                            ) : (
+                              <p className="text-xs text-muted-foreground">
+                                Nessuna sintesi disponibile per questo meeting.
+                              </p>
+                            )}
+                          </div>
+                          <div className="px-3 py-2">
+                            <button
+                              onClick={collapseNote}
+                              className="text-[10px] font-medium text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
+                            >
+                              Chiudi sintesi
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Empty search state */}
+            {filteredMeetings.length === 0 && filteredActions.length === 0 && (
+              <p className="px-4 py-3 text-xs text-muted-foreground">
+                Nessun risultato per &ldquo;{search}&rdquo;
+              </p>
+            )}
+          </div>
+        </>
       )}
     </div>
   )

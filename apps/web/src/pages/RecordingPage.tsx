@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { ChevronLeft, Mic, Monitor, Video } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { useAudioRecorder } from '../hooks/useAudioRecorder'
 import { whisper } from '../lib/whisper'
 import { Button } from '../components/ui/button'
@@ -21,59 +23,63 @@ const LANG_LABEL: Record<string, string> = {
   it: 'Italiano', en: 'English', fr: 'Français', es: 'Español', de: 'Deutsch',
 }
 
+const NOTES_KEY = 'sonabrief_recording_notes'
+const IS_MAC = typeof navigator !== 'undefined' && navigator.platform.toUpperCase().includes('MAC')
+
 function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
   const s = (seconds % 60).toString().padStart(2, '0')
   return `${m}:${s}`
 }
- 
+
 // ─── Waveform ────────────────────────────────────────────────────────────────
- 
-function Waveform({ stream }: { stream: MediaStream | null }) {
+
+function Waveform({ stream, frozen }: { stream: MediaStream | null; frozen: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rafRef = useRef<number>(0)
-  const analyserRef = useRef<AnalyserNode | null>(null)
-  const ctxRef = useRef<AudioContext | null>(null)
- 
+  const frozenRef = useRef(frozen)
+
+  useEffect(() => { frozenRef.current = frozen }, [frozen])
+
   useEffect(() => {
     if (!stream) return
     const audioCtx = new AudioContext()
     const analyser = audioCtx.createAnalyser()
     analyser.fftSize = 64
     audioCtx.createMediaStreamSource(stream).connect(analyser)
-    analyserRef.current = analyser
-    ctxRef.current = audioCtx
- 
+
     const data = new Uint8Array(analyser.frequencyBinCount)
     const canvas = canvasRef.current!
     const ctx = canvas.getContext('2d')!
     const BAR_COUNT = 20
     const GAP = 3
- 
+
     function draw() {
-      analyser.getByteFrequencyData(data)
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      const barW = (canvas.width - GAP * (BAR_COUNT - 1)) / BAR_COUNT
-      for (let i = 0; i < BAR_COUNT; i++) {
-        const val = data[Math.floor(i * data.length / BAR_COUNT)] / 255
-        const h = Math.max(3, val * canvas.height)
-        const x = i * (barW + GAP)
-        const y = (canvas.height - h) / 2
-        ctx.fillStyle = `rgba(26, 77, 82, ${0.4 + val * 0.6})`
-        ctx.beginPath()
-        ctx.roundRect(x, y, barW, h, 2)
-        ctx.fill()
+      if (!frozenRef.current) {
+        analyser.getByteFrequencyData(data)
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        const barW = (canvas.width - GAP * (BAR_COUNT - 1)) / BAR_COUNT
+        for (let i = 0; i < BAR_COUNT; i++) {
+          const val = data[Math.floor(i * data.length / BAR_COUNT)] / 255
+          const h = Math.max(3, val * canvas.height)
+          const x = i * (barW + GAP)
+          const y = (canvas.height - h) / 2
+          ctx.fillStyle = `rgba(26, 77, 82, ${0.4 + val * 0.6})`
+          ctx.beginPath()
+          ctx.roundRect(x, y, barW, h, 2)
+          ctx.fill()
+        }
       }
       rafRef.current = requestAnimationFrame(draw)
     }
     draw()
- 
+
     return () => {
       cancelAnimationFrame(rafRef.current)
       audioCtx.close()
     }
   }, [stream])
- 
+
   return (
     <canvas
       ref={canvasRef}
@@ -83,55 +89,137 @@ function Waveform({ stream }: { stream: MediaStream | null }) {
     />
   )
 }
- 
-// ─── Highlights ──────────────────────────────────────────────────────────────
- 
-interface Highlight {
-  ts: number   // secondi dall'inizio registrazione
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type AudioSource = 'microphone' | 'tab' | 'both'
+
+interface SourceOption {
+  id: AudioSource
   label: string
+  subtitle: string
+  icon: LucideIcon
 }
- 
-// ─── Note panel ──────────────────────────────────────────────────────────────
- 
-const NOTES_KEY = 'sonabrief_recording_notes'
- 
-function NotesPanel({ visible }: { visible: boolean }) {
-  const [text, setText] = useState('')
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
- 
-  function handleChange(val: string) {
-    setText(val)
-    if (saveTimer.current) clearTimeout(saveTimer.current)
-    saveTimer.current = setTimeout(() => {
-      localStorage.setItem(NOTES_KEY, val)
-    }, 800)
-  }
- 
-  useEffect(() => () => { if (saveTimer.current) clearTimeout(saveTimer.current) }, [])
- 
-  if (!visible) return null
- 
+
+const SOURCE_OPTIONS: SourceOption[] = [
+  {
+    id: 'microphone',
+    label: 'Microfono',
+    subtitle: 'Solo la tua voce, ideale per meeting in presenza',
+    icon: Mic,
+  },
+  {
+    id: 'both',
+    label: 'Videochiamata',
+    subtitle: 'Tua voce + audio della scheda, ideale per call online',
+    icon: Video,
+  },
+  {
+    id: 'tab',
+    label: 'Solo scheda',
+    subtitle: "Solo l'audio in riproduzione, ideale per webinar o presentazioni",
+    icon: Monitor,
+  },
+]
+
+interface ModeOption {
+  id: 'standard' | 'local'
+  label: string
+  desc: string
+}
+
+const MODE_OPTIONS: ModeOption[] = [
+  { id: 'standard', label: 'Standard', desc: 'Trascrizione locale, sintesi tramite AI' },
+  { id: 'local', label: 'Solo locale', desc: 'Tutto sul tuo computer, nessun dato inviato' },
+]
+
+// ─── Navigation ───────────────────────────────────────────────────────────────
+
+const NAV_ITEMS = [
+  { label: 'Archivio', path: '/archive' },
+  { label: 'Calendario', path: '/calendar' },
+  { label: 'Azioni', path: '/actions' },
+  { label: 'Clienti', path: '/clients' },
+  { label: 'Template', path: '/templates' },
+]
+
+function RecordingNav() {
+  const navigate = useNavigate()
   return (
-    <div className="fixed right-4 top-4 bottom-4 w-64 flex flex-col bg-white border border-gray-200 rounded-xl shadow-lg z-50">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
-        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Note</span>
-        <span className="text-[10px] text-gray-300">autosalvataggio</span>
+    <nav
+      className="sticky top-0 z-10 border-b border-border bg-card"
+      aria-label="Navigazione principale"
+    >
+      <div className="mx-auto flex h-14 max-w-4xl items-center gap-8 px-6">
+        <img src="/logo.svg" alt="Sonabrief" className="h-7 w-auto" />
+
+        <ul className="hidden items-center gap-0.5 md:flex" role="list">
+          {NAV_ITEMS.map(({ label, path }) => (
+            <li key={path}>
+              <button
+                onClick={() => navigate(path)}
+                className="rounded-md px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+              >
+                {label}
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        <div className="ml-auto">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
+          >
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+            Dashboard
+          </button>
+        </div>
       </div>
-      <textarea
-        className="flex-1 resize-none p-3 text-sm text-gray-700 placeholder-gray-300 focus:outline-none rounded-b-xl"
-        placeholder="Scrivi note durante il meeting…"
-        value={text}
-        onChange={e => handleChange(e.target.value)}
-      />
-    </div>
+    </nav>
   )
 }
- 
+
+// ─── Source selector button ────────────────────────────────────────────────────
+
+function SourceButton({
+  option,
+  active,
+  disabled,
+  onClick,
+}: {
+  option: SourceOption
+  active: boolean
+  disabled: boolean
+  onClick: () => void
+}) {
+  const Icon = option.icon
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`flex flex-1 flex-col gap-1.5 rounded-lg border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-40 ${
+        active
+          ? 'border-primary bg-primary/10'
+          : 'border-border bg-card hover:bg-muted'
+      }`}
+    >
+      <div className={`flex items-center gap-1.5 ${active ? 'text-primary' : 'text-foreground'}`}>
+        <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+        <span className="text-xs font-semibold">{option.label}</span>
+      </div>
+      <p className={`text-[10px] leading-snug ${active ? 'text-primary/70' : 'text-muted-foreground'}`}>
+        {option.subtitle}
+      </p>
+    </button>
+  )
+}
+
 // ─── Page ────────────────────────────────────────────────────────────────────
- 
+
 export default function RecordingPage() {
   const navigate = useNavigate()
-  const { state, duration, error, start, stop, audioData, reset, stream } = useAudioRecorder()
+  const { state, duration, error, paused, start, stop, pause, resume, audioData, reset, stream } = useAudioRecorder()
   const [whisperState, setWhisperState] = useState<'loading' | 'ready' | 'transcribing' | 'done' | 'error'>('loading')
   const [whisperProgress, setWhisperProgress] = useState(0)
   const [transcript, setTranscript] = useState('')
@@ -140,14 +228,37 @@ export default function RecordingPage() {
   const [synthesis, setSynthesis] = useState('')
   const [language, setLanguage] = useState<'it' | 'en' | 'fr' | 'es' | 'de'>('it')
   const [mode, setMode] = useState<'standard' | 'local'>('standard')
-  const [highlights, setHighlights] = useState<Highlight[]>([])
-  const [notesOpen, setNotesOpen] = useState(false)
+  const [source, setSource] = useState<AudioSource>('microphone')
+  const [quickNotes, setQuickNotes] = useState<string[]>([])
+  const [showQuickNoteInput, setShowQuickNoteInput] = useState(false)
+  const [quickNoteInput, setQuickNoteInput] = useState('')
+  const [notes, setNotes] = useState(() => localStorage.getItem(NOTES_KEY) ?? '')
+  const [transcriptOpen, setTranscriptOpen] = useState(false)
   const [copyDone, setCopyDone] = useState(false)
   const [templates, setTemplates] = useState<{ id: string; name: string; system_prompt: string }[]>([])
   const [selectedTemplate, setSelectedTemplate] = useState<string>('sys_generic_it_v2')
   const [templatePrompt, setTemplatePrompt] = useState<string>('')
+  const [transcribeProgress, setTranscribeProgress] = useState(0)
+  const [showTranscribeComplete, setShowTranscribeComplete] = useState(false)
+  const [clientName, setClientName] = useState('')
+  const [projectStream, setProjectStream] = useState('')
+  const [clientSuggestion, setClientSuggestion] = useState<string | null>(null)
   const meetingIdRef = useRef('')
+  const clientSuggestionLoadedRef = useRef(false)
+  const notesTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const quickNoteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const quickNoteInputRef = useRef<HTMLInputElement>(null)
 
+  // ── Derived state
+  const canStart = state === 'idle' && whisperState === 'ready'
+  const isRecording = state === 'recording'
+  const isProcessing = state === 'processing'
+  const isTranscribing = state === 'done' && whisperState === 'transcribing'
+  const isDone = state === 'done' && whisperState === 'done'
+  const showNotesArea = isRecording || isProcessing || isTranscribing || isDone
+  const shortcutLabel = IS_MAC ? '⌘E' : 'Ctrl+E'
+
+  // ── Export data builder
   function buildExportData() {
     const now = Date.now()
     const date = new Date(now).toLocaleString('it-IT', {
@@ -162,7 +273,61 @@ export default function RecordingPage() {
       content: synthesis,
     }
   }
- 
+
+  // ── Combine notes for synthesis
+  function buildNotesForSynthesis(): string | undefined {
+    const parts: string[] = []
+    const textarea = localStorage.getItem(NOTES_KEY)?.trim()
+    if (textarea) parts.push(textarea)
+    if (quickNotes.length > 0) {
+      parts.push(`Punti che l'utente vuole evidenziare: ${quickNotes.join(', ')}`)
+    }
+    return parts.length > 0 ? parts.join('\n\n') : undefined
+  }
+
+  // ── Notes textarea autosave
+  function handleNotesChange(val: string) {
+    setNotes(val)
+    if (notesTimerRef.current) clearTimeout(notesTimerRef.current)
+    notesTimerRef.current = setTimeout(() => {
+      localStorage.setItem(NOTES_KEY, val)
+    }, 800)
+  }
+
+  useEffect(() => () => {
+    if (notesTimerRef.current) clearTimeout(notesTimerRef.current)
+    if (quickNoteTimerRef.current) clearTimeout(quickNoteTimerRef.current)
+  }, [])
+
+  // ── Focus quick note input when shown
+  useEffect(() => {
+    if (showQuickNoteInput) {
+      quickNoteInputRef.current?.focus()
+    }
+  }, [showQuickNoteInput])
+
+  // ── Quick note commit
+  function commitQuickNote() {
+    if (quickNoteTimerRef.current) clearTimeout(quickNoteTimerRef.current)
+    const val = quickNoteInput.trim()
+    if (val) setQuickNotes(prev => [...prev, val])
+    setQuickNoteInput('')
+    setShowQuickNoteInput(false)
+  }
+
+  function handleQuickNoteChange(val: string) {
+    const trimmed = val.slice(0, 100)
+    setQuickNoteInput(trimmed)
+    if (quickNoteTimerRef.current) clearTimeout(quickNoteTimerRef.current)
+    if (trimmed.trim()) {
+      quickNoteTimerRef.current = setTimeout(() => {
+        setQuickNotes(prev => [...prev, trimmed.trim()])
+        setQuickNoteInput('')
+        setShowQuickNoteInput(false)
+      }, 8000)
+    }
+  }
+
   // ── Whisper init
   useEffect(() => {
     whisper.init()
@@ -171,7 +336,11 @@ export default function RecordingPage() {
       if (event.type === 'loading') setWhisperProgress(event.progress)
       if (event.type === 'ready') setWhisperState('ready')
       if (event.type === 'transcribing') setWhisperState('transcribing')
-      if (event.type === 'result') { setTranscript(event.text); setSegments((event.segments as WhisperSegment[]) ?? []); setWhisperState('done') }
+      if (event.type === 'result') {
+        setTranscript(event.text)
+        setSegments((event.segments as WhisperSegment[]) ?? [])
+        setWhisperState('done')
+      }
       if (event.type === 'error') setWhisperState('error')
     })
     whisper.load('Xenova/whisper-small')
@@ -187,7 +356,7 @@ export default function RecordingPage() {
       .catch(() => {})
     return () => { unsub(); whisper.destroy() }
   }, [])
- 
+
   useEffect(() => {
     const tpl = templates.find(t => t.id === selectedTemplate)
     if (tpl) setTemplatePrompt(tpl.system_prompt)
@@ -196,8 +365,8 @@ export default function RecordingPage() {
   useEffect(() => {
     if (audioData && whisperState === 'ready') whisper.transcribe(audioData, language)
   }, [audioData, whisperState])
- 
-  // ── Salvataggio DB
+
+  // ── DB save
   useEffect(() => {
     if (synthesisState !== 'done') return
     const id = meetingIdRef.current
@@ -215,10 +384,15 @@ export default function RecordingPage() {
         durationSeconds: duration,
         mode: 'standard',
         lang: language,
+        ...(clientName.trim() && { clientName: clientName.trim() }),
+        ...(projectStream.trim() && { projectStream: projectStream.trim() }),
         createdAt: now,
         updatedAt: now,
       })
-      await db.transcripts.add({ id: crypto.randomUUID(), meetingId: id, text: transcript, segments: JSON.stringify(segments), createdAt: now })
+      await db.transcripts.add({
+        id: crypto.randomUUID(), meetingId: id,
+        text: transcript, segments: JSON.stringify(segments), createdAt: now,
+      })
       await db.notes.add({
         id: crypto.randomUUID(), meetingId: id, content: synthesis,
         generatedAt: now, createdAt: now, updatedAt: now,
@@ -231,41 +405,79 @@ export default function RecordingPage() {
       saveEmbeddingForMeeting(id, synthesis)
     }).catch(err => console.error('[db] salvataggio meeting fallito:', err))
   }, [synthesisState])
- 
-  // ── Highlight hotkey
-  const addHighlight = useCallback(() => {
+
+  // ── Quick note shortcut
+  const triggerQuickNote = useCallback(() => {
     if (state !== 'recording') return
-    setHighlights(prev => [...prev, { ts: duration, label: `Highlight ${prev.length + 1}` }])
-  }, [state, duration])
- 
+    setShowQuickNoteInput(true)
+  }, [state])
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'e' && (e.metaKey || e.ctrlKey)) {
+      if (e.key === 'e' && (IS_MAC ? e.metaKey : e.ctrlKey)) {
         e.preventDefault()
-        addHighlight()
-      }
-      if (e.key === 'm' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        if (state === 'recording') setNotesOpen(o => !o)
+        triggerQuickNote()
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [addHighlight, state])
- 
-  // ── Sintesi
+  }, [triggerQuickNote])
+
+  // ── Simulated transcription progress
+  useEffect(() => {
+    if (!isTranscribing) return
+    setTranscribeProgress(0)
+    const estimated = Math.max(2000, duration * 0.5 * 1000)
+    const startTime = Date.now()
+    const timer = setInterval(() => {
+      const elapsed = Date.now() - startTime
+      const pct = Math.min(95, Math.round((elapsed / estimated) * 95))
+      setTranscribeProgress(pct)
+      if (pct >= 95) clearInterval(timer)
+    }, 200)
+    return () => clearInterval(timer)
+  }, [isTranscribing])
+
+  useEffect(() => {
+    if (whisperState !== 'done') return
+    setTranscribeProgress(100)
+    setShowTranscribeComplete(true)
+    const t = setTimeout(() => setShowTranscribeComplete(false), 1500)
+    return () => clearTimeout(t)
+  }, [whisperState])
+
+  // ── Client suggestion from most-frequent past meetings
+  useEffect(() => {
+    if (state !== 'processing' || clientSuggestionLoadedRef.current) return
+    clientSuggestionLoadedRef.current = true
+    db.meetings
+      .filter(m => !!m.clientName)
+      .toArray()
+      .then(meetings => {
+        if (!meetings.length) return
+        const counts = new Map<string, number>()
+        meetings.forEach(m => {
+          if (m.clientName) counts.set(m.clientName, (counts.get(m.clientName) ?? 0) + 1)
+        })
+        const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0]
+        if (top) setClientSuggestion(top[0])
+      })
+      .catch(() => {})
+  }, [state])
+
+  // ── Synthesis
   async function generateSynthesis() {
     meetingIdRef.current = crypto.randomUUID()
     setSynthesisState('streaming')
     setSynthesis('')
 
-    const notes = localStorage.getItem('sonabrief_recording_notes')?.trim() || undefined
+    const combinedNotes = buildNotesForSynthesis()
 
     if (mode === 'local') {
       await synthesizeWithOllama(
         transcript,
         language,
-        notes,
+        combinedNotes,
         templatePrompt,
         (text) => setSynthesis(prev => prev + text),
         () => setSynthesisState('done'),
@@ -287,7 +499,7 @@ export default function RecordingPage() {
           system_prompt: templatePrompt,
           template_id: selectedTemplate,
           audio_minutes: Math.ceil(duration / 60),
-          notes,
+          notes: combinedNotes,
         }),
       })
       if (!response.ok || !response.body) { setSynthesisState('error'); return }
@@ -312,222 +524,517 @@ export default function RecordingPage() {
       }
     } catch { setSynthesisState('error') }
   }
- 
+
   function handleNewRecording() {
     reset()
     setTranscript('')
     setSegments([])
     setSynthesis('')
     setSynthesisState('idle')
-    setHighlights([])
-    setNotesOpen(false)
+    setQuickNotes([])
+    setShowQuickNoteInput(false)
+    setQuickNoteInput('')
+    setNotes('')
+    setTranscriptOpen(false)
     setCopyDone(false)
     meetingIdRef.current = ''
     localStorage.removeItem(NOTES_KEY)
     setSelectedTemplate('sys_generic_it_v2')
     setWhisperState('ready')
+    setTranscribeProgress(0)
+    setShowTranscribeComplete(false)
+    setClientName('')
+    setProjectStream('')
+    setClientSuggestion(null)
+    clientSuggestionLoadedRef.current = false
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-8 p-8">
-      <h1 className="text-2xl font-semibold">Nuovo meeting</h1>
+    <div className="min-h-screen bg-background">
+      <h1 className="sr-only">Nuovo meeting — Sonabrief</h1>
+      <RecordingNav />
 
-      {state === 'idle' && whisperState === 'ready' && <MeetingBriefing />}
+      <main className="mx-auto max-w-4xl px-6 py-10">
+        <div className="lg:grid lg:grid-cols-[3fr_2fr] lg:gap-10">
 
-      {/* Stato Whisper */}
-      {whisperState === 'loading' && (
-        <div className="flex flex-col items-center gap-2 w-full max-w-xs">
-          <p className="text-sm text-gray-400">
-            {whisperProgress > 0 ? `Caricamento modello... ${whisperProgress}%` : 'Inizializzazione modello AI...'}
-          </p>
-          {whisperProgress > 0 && (
-            <div className="w-full bg-gray-200 rounded-full h-1.5">
-              <div
-                className="bg-teal-700 h-1.5 rounded-full transition-all duration-300"
-                style={{ width: `${whisperProgress}%` }}
-              />
-            </div>
-          )}
-          <p className="text-xs text-gray-300">Solo al primo utilizzo (~140MB)</p>
-        </div>
-      )}
- 
-      {/* Timer + waveform */}
-      <div className="text-center space-y-3">
-        <p className="text-5xl font-mono tracking-widest">{formatDuration(duration)}</p>
-        {state === 'recording' && <Waveform stream={stream ?? null} />}
-        <p className="text-sm text-gray-400">
-          {state === 'idle' && whisperState === 'ready' && 'Scegli la sorgente audio e avvia'}
-          {state === 'idle' && whisperState === 'loading' && 'Attendi il caricamento del modello...'}
-          {state === 'recording' && '● Registrazione in corso...'}
-          {state === 'processing' && 'Conversione audio...'}
-          {state === 'done' && whisperState === 'transcribing' && 'Trascrizione in corso...'}
-          {state === 'done' && whisperState === 'done' && 'Trascrizione completata'}
-          {state === 'error' && `Errore: ${error}`}
-        </p>
-      </div>
- 
-      {/* Highlights durante registrazione */}
-      {state === 'recording' && (
-        <div className="flex flex-col items-center gap-2">
-          <div className="flex gap-2 flex-wrap justify-center max-w-xs">
-            {highlights.map((h, i) => (
-              <span key={i} className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
-                ★ {formatDuration(h.ts)}
-              </span>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={addHighlight}
-              className="text-xs text-amber-600 border border-amber-300 rounded-full px-3 py-1 hover:bg-amber-50 transition-colors"
-            >
-              ★ Segna momento <span className="text-gray-400 ml-1">⌘E</span>
-            </button>
-            <button
-              onClick={() => setNotesOpen(o => !o)}
-              className="text-xs text-teal-600 border border-teal-200 rounded-full px-3 py-1 hover:bg-teal-50 transition-colors"
-            >
-              📝 Note <span className="text-gray-400 ml-1">⌘M</span>
-            </button>
-          </div>
-        </div>
-      )}
- 
-      {/* Trascrizione */}
-      {transcript && (
-        <TranscriptViewer segments={segments} rawText={transcript} />
-      )}
- 
-      {/* Selettore template + bottone sintesi */}
-      {whisperState === 'done' && transcript && synthesisState === 'idle' && (
-        <div className="flex flex-col gap-3 w-full max-w-xl">
-          {templates.length > 0 && (
-            <div className="flex flex-col gap-1">
-              <label className="text-xs text-gray-400">Tipo di meeting</label>
-              <select
-                value={selectedTemplate}
-                onChange={e => setSelectedTemplate(e.target.value)}
-                className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
+          {/* ── Left column: recording workspace ──────────────────── */}
+          <div className="space-y-7">
+
+            <h2 className="font-heading text-2xl font-bold text-foreground tracking-[-0.015em]">
+              Nuovo meeting
+            </h2>
+
+            {/* Source selector — visible when idle */}
+            {state === 'idle' && (
+              <section aria-labelledby="source-heading">
+                <p
+                  id="source-heading"
+                  className="mb-2.5 text-xs font-medium uppercase tracking-widest text-muted-foreground"
+                >
+                  Sorgente audio
+                </p>
+                <div className="flex gap-2">
+                  {SOURCE_OPTIONS.map(opt => (
+                    <SourceButton
+                      key={opt.id}
+                      option={opt}
+                      active={source === opt.id}
+                      disabled={!canStart}
+                      onClick={() => setSource(opt.id)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Language + mode — visible when idle, before start */}
+            {state === 'idle' && (
+              <div className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="language-select"
+                    className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground"
+                  >
+                    Lingua del meeting
+                  </label>
+                  <select
+                    id="language-select"
+                    value={language}
+                    onChange={e => setLanguage(e.target.value as typeof language)}
+                    disabled={!canStart}
+                    className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <option value="it">Italiano</option>
+                    <option value="en">English</option>
+                    <option value="fr">Français</option>
+                    <option value="es">Español</option>
+                    <option value="de">Deutsch</option>
+                  </select>
+                </div>
+
+                <fieldset>
+                  <legend className="mb-2 text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                    Modalità sintesi
+                  </legend>
+                  <div className="flex gap-2">
+                    {MODE_OPTIONS.map(m => (
+                      <button
+                        key={m.id}
+                        onClick={() => setMode(m.id)}
+                        disabled={!canStart}
+                        className={`flex flex-1 flex-col gap-0.5 rounded-lg border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-40 ${
+                          mode === m.id
+                            ? 'border-primary bg-primary/10'
+                            : 'border-border bg-card hover:bg-muted'
+                        }`}
+                      >
+                        <span className={`text-xs font-semibold ${mode === m.id ? 'text-primary' : 'text-foreground'}`}>
+                          {m.label}
+                        </span>
+                        <span className={`text-[10px] leading-snug ${mode === m.id ? 'text-primary/70' : 'text-muted-foreground'}`}>
+                          {m.desc}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+              </div>
+            )}
+
+            {/* Start button — idle + ready */}
+            {canStart && (
+              <Button
+                onClick={() => { localStorage.removeItem(NOTES_KEY); setNotes(''); start(source) }}
+                className="w-full rounded-md hover:bg-(--primary-hover)"
               >
-                {templates.map(t => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
-                ))}
-              </select>
-            </div>
-          )}
-          <Button onClick={generateSynthesis}>Genera sintesi</Button>
-        </div>
-      )}
- 
-      {/* Sintesi */}
-      {(synthesisState === 'streaming' || synthesisState === 'done') && (
-        <div className="w-full max-w-xl">
-          <p className="text-xs font-medium text-teal-700 mb-2 uppercase tracking-wide">Sintesi</p>
-          <SynthesisEditor content={synthesis} isStreaming={synthesisState === 'streaming'} />
-          {synthesisState === 'streaming' && (
-            <span className="mt-1 block text-sm text-gray-400 animate-pulse">▍</span>
-          )}
-          {synthesisState === 'done' && (
-            <div className="flex flex-wrap gap-2 pt-3">
-              {[
-                { label: 'Markdown', action: () => exportMarkdown(buildExportData()) },
-                { label: 'PDF', action: () => exportPDF(buildExportData()) },
-                { label: 'Word', action: () => exportWord(buildExportData()) },
-                { label: 'Email', action: () => exportEmail(buildExportData()) },
-                {
-                  label: copyDone ? 'Copiato ✓' : 'Copia testo',
-                  action: async () => {
-                    await copyFormatted(buildExportData())
-                    setCopyDone(true)
-                    setTimeout(() => setCopyDone(false), 2000)
-                  },
-                },
-              ].map(btn => (
-                <button
-                  key={btn.label}
-                  onClick={btn.action}
-                  className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:border-teal-600 hover:text-teal-700 transition-colors"
+                Avvia registrazione
+              </Button>
+            )}
+
+            {/* Model not ready yet */}
+            {state === 'idle' && whisperState === 'loading' && (
+              <p className="text-sm text-muted-foreground">
+                Preparazione del modello AI in corso...
+              </p>
+            )}
+
+            {/* Recording: timer + waveform + pause/stop */}
+            {isRecording && (
+              <div className="space-y-5">
+                <div className="flex items-center gap-4">
+                  <span
+                    className={`h-2.5 w-2.5 shrink-0 rounded-full bg-destructive ${paused ? 'opacity-40' : 'animate-pulse motion-reduce:animate-none'}`}
+                    aria-hidden="true"
+                  />
+                  <span className="font-mono text-4xl tabular-nums text-foreground">
+                    {paused ? (
+                      <span className="text-muted-foreground">
+                        {formatDuration(duration)} <span className="text-2xl font-sans font-normal">— in pausa</span>
+                      </span>
+                    ) : (
+                      formatDuration(duration)
+                    )}
+                  </span>
+                </div>
+
+                <Waveform stream={stream ?? null} frozen={paused} />
+
+                <p className="text-sm text-muted-foreground">
+                  {paused ? 'Registrazione in pausa' : 'Registrazione in corso'}
+                </p>
+
+                <div className="flex gap-3">
+                  <Button
+                    variant="destructive"
+                    onClick={stop}
+                    className="rounded-md"
+                  >
+                    Ferma registrazione
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={paused ? resume : pause}
+                    className="rounded-md"
+                  >
+                    {paused ? 'Riprendi' : 'Pausa'}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Processing: audio conversion */}
+            {isProcessing && (
+              <p className="text-sm text-muted-foreground">Conversione audio...</p>
+            )}
+
+            {/* Transcribing: simulated progress bar */}
+            {isTranscribing && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-foreground">
+                  Trascrizione in corso... {transcribeProgress}%
+                </p>
+                <div
+                  role="progressbar"
+                  aria-valuenow={transcribeProgress}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`Trascrizione: ${transcribeProgress}%`}
+                  className="h-1.5 w-full overflow-hidden rounded-full bg-border"
                 >
-                  {btn.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
- 
-      {synthesisState === 'error' && (
-        <p className="text-sm text-red-500">Errore durante la sintesi. Riprova.</p>
-      )}
- 
-      {/* Selettore lingua e modalità */}
-      {state === 'idle' && whisperState === 'ready' && (
-        <div className="flex flex-col gap-3 w-full max-w-xs">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-gray-400">Lingua del meeting</label>
-            <select
-              value={language}
-              onChange={e => setLanguage(e.target.value as typeof language)}
-              className="rounded-md border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
-            >
-              <option value="it">Italiano</option>
-              <option value="en">English</option>
-              <option value="fr">Français</option>
-              <option value="es">Español</option>
-              <option value="de">Deutsch</option>
-            </select>
+                  <div
+                    className="h-full rounded-full bg-primary transition-[width] duration-300 ease-out motion-reduce:transition-none"
+                    style={{ width: `${transcribeProgress}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">Potrebbe richiedere qualche minuto</p>
+              </div>
+            )}
+
+            {/* Transcription complete flash */}
+            {isDone && showTranscribeComplete && (
+              <p className="text-sm font-medium text-primary">Trascrizione completata</p>
+            )}
+
+            {/* Done: transcript + synthesis flow */}
+            {isDone && !showTranscribeComplete && (
+              <div className="space-y-5">
+
+                {/* Collapsible transcript */}
+                {transcript && (
+                  <div className="rounded-lg border border-border bg-card">
+                    <button
+                      onClick={() => setTranscriptOpen(o => !o)}
+                      className="flex w-full items-center justify-between px-4 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      aria-expanded={transcriptOpen}
+                      aria-controls="transcript-content"
+                    >
+                      <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                        Trascrizione
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {transcriptOpen ? 'Chiudi' : 'Mostra'}
+                      </span>
+                    </button>
+                    {transcriptOpen && (
+                      <div
+                        id="transcript-content"
+                        className="border-t border-border px-4 pb-4 pt-3"
+                      >
+                        <TranscriptViewer segments={segments} rawText={transcript} />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Template selector + client/project + generate */}
+                {synthesisState === 'idle' && (
+                  <div className="space-y-3">
+                    {templates.length > 0 && (
+                      <div>
+                        <label
+                          htmlFor="template-select"
+                          className="mb-1.5 block text-xs font-medium text-muted-foreground"
+                        >
+                          Tipo di meeting
+                        </label>
+                        <select
+                          id="template-select"
+                          value={selectedTemplate}
+                          onChange={e => setSelectedTemplate(e.target.value)}
+                          className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        >
+                          {templates.map(t => (
+                            <option key={t.id} value={t.id}>{t.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Client / project */}
+                    <div className="space-y-2.5">
+                      <div>
+                        <label
+                          htmlFor="client-name"
+                          className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground"
+                        >
+                          Cliente <span className="normal-case tracking-normal text-muted-foreground/60">(opzionale)</span>
+                        </label>
+                        {clientSuggestion && !clientName && (
+                          <button
+                            onClick={() => setClientName(clientSuggestion)}
+                            className="mb-1.5 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20 motion-reduce:transition-none"
+                          >
+                            Usa: {clientSuggestion}
+                          </button>
+                        )}
+                        <input
+                          id="client-name"
+                          type="text"
+                          value={clientName}
+                          onChange={e => setClientName(e.target.value)}
+                          placeholder="es. Acme Srl"
+                          className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="project-stream"
+                          className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground"
+                        >
+                          Progetto / Stream <span className="normal-case tracking-normal text-muted-foreground/60">(opzionale)</span>
+                        </label>
+                        <input
+                          id="project-stream"
+                          type="text"
+                          value={projectStream}
+                          onChange={e => setProjectStream(e.target.value)}
+                          placeholder="es. Lancio Q3"
+                          className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                        />
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={generateSynthesis}
+                      className="w-full rounded-md hover:bg-(--primary-hover)"
+                    >
+                      Genera sintesi
+                    </Button>
+                  </div>
+                )}
+
+                {/* Synthesis editor */}
+                {(synthesisState === 'streaming' || synthesisState === 'done') && (
+                  <div className="space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      Sintesi
+                    </p>
+                    <SynthesisEditor
+                      content={synthesis}
+                      isStreaming={synthesisState === 'streaming'}
+                    />
+                    {synthesisState === 'streaming' && (
+                      <span className="block animate-pulse text-sm text-muted-foreground motion-reduce:animate-none">
+                        &#9609;
+                      </span>
+                    )}
+                    {synthesisState === 'done' && (
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { label: 'Markdown', action: () => exportMarkdown(buildExportData()) },
+                          { label: 'PDF', action: () => exportPDF(buildExportData()) },
+                          { label: 'Word', action: () => exportWord(buildExportData()) },
+                          { label: 'Email', action: () => exportEmail(buildExportData()) },
+                          {
+                            label: copyDone ? 'Copiato' : 'Copia testo',
+                            action: async () => {
+                              await copyFormatted(buildExportData())
+                              setCopyDone(true)
+                              setTimeout(() => setCopyDone(false), 2000)
+                            },
+                          },
+                        ].map(btn => (
+                          <button
+                            key={btn.label}
+                            onClick={btn.action}
+                            className="rounded-md border border-border px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary hover:text-primary motion-reduce:transition-none"
+                          >
+                            {btn.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {synthesisState === 'error' && (
+                  <p className="text-sm text-destructive">Errore durante la sintesi. Riprova.</p>
+                )}
+
+                {/* Post-recording navigation */}
+                <div className="flex gap-3 pt-2">
+                  <Button variant="outline" onClick={handleNewRecording} className="rounded-md">
+                    Nuova registrazione
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate('/archive')} className="rounded-md">
+                    Archivio
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Error: recorder failed */}
+            {state === 'error' && (
+              <div className="space-y-3">
+                <p className="text-sm text-destructive">Errore: {error}</p>
+                <Button variant="outline" onClick={handleNewRecording} className="rounded-md">
+                  Riprova
+                </Button>
+              </div>
+            )}
+
           </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-gray-400">Modalità sintesi</label>
-            <div className="flex gap-2">
-              {(['standard', 'local'] as const).map(m => (
-                <button
-                  key={m}
-                  onClick={() => setMode(m)}
-                  className={`flex-1 rounded-md border px-3 py-2 text-sm transition-colors ${
-                    mode === m
-                      ? 'border-teal-600 bg-teal-50 text-teal-700'
-                      : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
-                  }`}
+
+          {/* ── Right sidebar ─────────────────────────────────────── */}
+          <aside
+            className="mt-8 space-y-6 lg:mt-0"
+            aria-label="Contesto e note"
+          >
+
+            {/* Briefing context — always visible */}
+            <MeetingBriefing />
+
+            {/* Model loading */}
+            {whisperState === 'loading' && (
+              <div className="rounded-lg border border-border bg-card px-4 py-3">
+                <p className="mb-2 text-xs font-medium text-muted-foreground">
+                  {whisperProgress > 0
+                    ? `Preparazione modello AI — ${whisperProgress}%`
+                    : 'Inizializzazione modello AI...'}
+                </p>
+                <div
+                  role="progressbar"
+                  aria-valuenow={whisperProgress}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={`Caricamento modello AI: ${whisperProgress}%`}
+                  className="h-1.5 w-full overflow-hidden rounded-full bg-border"
                 >
-                  {m === 'standard' ? '☁️ Standard' : '🔒 Local Only'}
-                </button>
-              ))}
-            </div>
-          </div>
+                  <div
+                    className="h-full rounded-full bg-primary transition-[width] duration-300 ease-out motion-reduce:transition-none"
+                    style={{ width: `${whisperProgress}%` }}
+                  />
+                </div>
+                <p className="mt-1.5 text-xs text-muted-foreground">Solo al primo utilizzo</p>
+              </div>
+            )}
+
+            {/* Quick notes — during recording */}
+            {isRecording && (
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                    Note rapide
+                  </p>
+                  <button
+                    onClick={triggerQuickNote}
+                    className="flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    aria-label={`Aggiungi nota rapida (${shortcutLabel})`}
+                  >
+                    <span className="text-xs text-muted-foreground">Aggiungi</span>
+                    <span className="rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                      {shortcutLabel}
+                    </span>
+                  </button>
+                </div>
+
+                {showQuickNoteInput && (
+                  <div className="mb-3">
+                    <input
+                      ref={quickNoteInputRef}
+                      type="text"
+                      value={quickNoteInput}
+                      onChange={e => handleQuickNoteChange(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter') { e.preventDefault(); commitQuickNote() }
+                        if (e.key === 'Escape') { setShowQuickNoteInput(false); setQuickNoteInput('') }
+                      }}
+                      maxLength={100}
+                      placeholder="Nota rapida..."
+                      className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                    <p className="mt-1 text-[10px] text-muted-foreground">
+                      Invio per salvare · Esc per annullare · autosalvataggio in 8s
+                    </p>
+                  </div>
+                )}
+
+                {quickNotes.length === 0 && !showQuickNoteInput && (
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    Premi ⌘E (Mac) o Ctrl+E (Windows) per segnare un tema chiave in questo momento — verrà evidenziato come punto importante nella sintesi finale.
+                  </p>
+                )}
+
+                {quickNotes.length > 0 && (
+                  <ul className="space-y-1.5">
+                    {quickNotes.map((note, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span
+                          className="mt-1.25 h-1.5 w-1.5 shrink-0 rounded-full bg-accent"
+                          aria-hidden="true"
+                        />
+                        <span className="text-xs text-foreground">{note}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+
+            {/* Notes textarea — during and after recording */}
+            {showNotesArea && (
+              <div>
+                <label
+                  htmlFor="recording-notes"
+                  className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground"
+                >
+                  Note
+                </label>
+                <textarea
+                  id="recording-notes"
+                  value={notes}
+                  onChange={e => handleNotesChange(e.target.value)}
+                  placeholder="Segna qui i tuoi appunti — verranno integrati nella sintesi insieme alle note rapide"
+                  className="w-full resize-none rounded-md border border-border bg-card px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  style={{ minHeight: '160px' }}
+                />
+                <p className="mt-1 text-xs text-muted-foreground">Autosalvataggio attivo</p>
+              </div>
+            )}
+
+          </aside>
         </div>
-      )}
- 
-      {/* Controlli avvio */}
-      {state === 'idle' && whisperState === 'ready' && (
-        <div className="flex flex-col gap-3 w-full max-w-xs">
-          <Button onClick={() => { localStorage.removeItem(NOTES_KEY); start('microphone') }}>🎙 Solo microfono</Button>
-          <Button variant="outline" onClick={() => { localStorage.removeItem(NOTES_KEY); start('tab') }}>🖥 Audio scheda browser</Button>
-          <Button variant="outline" onClick={() => { localStorage.removeItem(NOTES_KEY); start('both') }}>🎙 + 🖥 Microfono e scheda</Button>
-        </div>
-      )}
- 
-      {state === 'recording' && (
-        <Button variant="destructive" onClick={stop}>⏹ Ferma registrazione</Button>
-      )}
- 
-      {(whisperState === 'done' || state === 'error') && (
-        <div className="flex gap-3">
-          <Button variant="outline" onClick={handleNewRecording}>Nuova registrazione</Button>
-          <Button variant="outline" onClick={() => navigate('/dashboard')}>Torna alla dashboard</Button>
-        </div>
-      )}
- 
-      {state === 'idle' && (
-        <div className="flex gap-4">
-          <button onClick={() => navigate('/dashboard')} className="text-sm text-gray-400 underline">Annulla</button>
-          <button onClick={() => navigate('/archive')} className="text-sm text-gray-400 underline">Archivio</button>
-        </div>
-      )}
- 
-      {/* Pannello note (overlay laterale) */}
-      <NotesPanel visible={notesOpen} />
+      </main>
     </div>
   )
 }

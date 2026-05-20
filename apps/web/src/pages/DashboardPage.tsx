@@ -1,18 +1,41 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getMe, logout, getBillingStatus, getBillingPortalUrl, getPreferences, type BillingStatus } from '../lib/api'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { db } from '../lib/db'
+import { API_URL } from '../config'
+import {
+  getMe, logout, getBillingStatus, getBillingPortalUrl,
+  getPreferences, type BillingStatus,
+} from '../lib/api'
 import { Button } from '../components/ui/button'
 
-const TIER_LABEL: Record<string, string> = {
-  free: 'Free',
-  pro: 'Pro',
-  unlimited: 'Pro Unlimited',
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface CalendarEvent {
+  id: string
+  title: string
+  start: string
+  end: string
+  attendees: { email: string; name?: string }[]
 }
 
-const TIER_COLOR: Record<string, string> = {
-  free: 'bg-gray-100 text-gray-600',
-  pro: 'bg-teal-50 text-teal-700 border border-teal-200',
-  unlimited: 'bg-amber-50 text-amber-700 border border-amber-200',
+interface CalendarState {
+  connected: boolean
+  events: CalendarEvent[]
+  error?: string
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function formatDateShort(ts: number): string {
+  return new Date(ts).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })
+}
+
+function formatEventTime(start: string): string {
+  return new Date(start).toLocaleString('it-IT', {
+    weekday: 'short', day: 'numeric', month: 'short',
+    hour: '2-digit', minute: '2-digit',
+  })
 }
 
 function formatMinutes(minutes: number): string {
@@ -20,176 +43,510 @@ function formatMinutes(minutes: number): string {
   const m = minutes % 60
   if (h === 0) return `${m} min`
   if (m === 0) return `${h}h`
-  return `${h}h ${m}min`
+  return `${h}h ${m}m`
 }
+
+const TIER_LABEL: Record<string, string> = {
+  free: 'Free',
+  pro: 'Pro',
+  unlimited: 'Pro Unlimited',
+}
+
+// ── Tier badge ────────────────────────────────────────────────────────────────
+
+function TierBadge({ tier }: { tier: string }) {
+  if (tier === 'unlimited') {
+    return (
+      <span
+        className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+        style={{ background: '#F5EFE4', color: '#7A5C30' }}
+      >
+        {TIER_LABEL.unlimited}
+      </span>
+    )
+  }
+  if (tier === 'pro') {
+    return (
+      <span className="inline-flex items-center rounded-full border border-border bg-card px-2.5 py-0.5 text-xs font-medium text-primary">
+        {TIER_LABEL.pro}
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center rounded-full bg-border px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+      {TIER_LABEL.free}
+    </span>
+  )
+}
+
+// ── Quota bar ─────────────────────────────────────────────────────────────────
+
+function QuotaBar({ used, cap, percent }: { used: number; cap: number; percent: number }) {
+  const remaining = Math.max(0, cap - used)
+  const warning = percent > 80
+  return (
+    <div>
+      <div
+        role="progressbar"
+        aria-valuenow={percent}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Quota sintesi cloud: ${percent}% utilizzata, ${formatMinutes(remaining)} rimanenti su ${formatMinutes(cap)}`}
+        className="h-1.5 w-full overflow-hidden rounded-full bg-border"
+      >
+        <div
+          className={`h-full rounded-full transition-[width] duration-300 ease-out motion-reduce:transition-none ${
+            warning ? 'bg-destructive' : 'bg-primary'
+          }`}
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">
+        {formatMinutes(used)} usati &middot; {formatMinutes(remaining)} rimanenti
+      </p>
+    </div>
+  )
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+
+const NAV_ITEMS = [
+  { label: 'Archivio', path: '/archive' },
+  { label: 'Calendario', path: '/calendar' },
+  { label: 'Azioni', path: '/actions' },
+  { label: 'Clienti', path: '/clients' },
+  { label: 'Template', path: '/templates' },
+]
+
+function AppNav({ email, onLogout }: { email: string; onLogout: () => void }) {
+  const navigate = useNavigate()
+  return (
+    <nav
+      className="sticky top-0 z-10 border-b border-border bg-card"
+      aria-label="Navigazione principale"
+    >
+      <div className="mx-auto flex h-14 max-w-6xl items-center gap-8 px-6">
+        <img src="/logo.svg" alt="Sonabrief" className="h-7 w-auto" />
+
+        <ul className="hidden items-center gap-0.5 md:flex" role="list">
+          {NAV_ITEMS.map(({ label, path }) => (
+            <li key={path}>
+              <button
+                onClick={() => navigate(path)}
+                className="rounded-md px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+              >
+                {label}
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        <div className="ml-auto flex items-center gap-5">
+          {email && (
+            <span className="hidden max-w-[200px] truncate text-xs text-muted-foreground md:block">
+              {email}
+            </span>
+          )}
+          <button
+            onClick={onLogout}
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
+          >
+            Esci
+          </button>
+        </div>
+      </div>
+    </nav>
+  )
+}
+
+// ── Loading skeleton ──────────────────────────────────────────────────────────
+
+function LoadingShell() {
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="h-14 border-b border-border bg-card" aria-hidden="true" />
+      <div className="mx-auto max-w-6xl px-6 py-10">
+        <div className="animate-pulse lg:grid lg:grid-cols-[2fr_1fr] lg:gap-10">
+          <div className="space-y-10">
+            <div className="space-y-3">
+              <div className="h-11 w-48 rounded-md bg-border" />
+              <div className="h-4 w-72 rounded bg-border" />
+            </div>
+            <div className="space-y-3">
+              <div className="h-4 w-32 rounded bg-border" />
+              {[0, 1, 2].map(i => (
+                <div key={i} className="h-[76px] rounded-lg bg-border" />
+              ))}
+            </div>
+          </div>
+          <div className="mt-10 space-y-4 lg:mt-0">
+            <div className="h-32 rounded-lg bg-border" />
+            <div className="h-28 rounded-lg bg-border" />
+            <div className="h-16 rounded-lg bg-border" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
   const [email, setEmail] = useState('')
   const [billing, setBilling] = useState<BillingStatus | null>(null)
-  const [onboarded, setOnboarded] = useState<boolean | null>(null)
+  const [ready, setReady] = useState(false)
+  // undefined = loading, null = fetch error / not connected
+  const [calGoogle, setCalGoogle] = useState<CalendarState | null | undefined>(undefined)
+  const [calMicrosoft, setCalMicrosoft] = useState<CalendarState | null | undefined>(undefined)
   const navigate = useNavigate()
 
   useEffect(() => {
-    getMe().then(user => {
-      if (user) setEmail(user.email)
-    })
-    getBillingStatus().then(b => {
-      if (b) setBilling(b)
-    })
+    getMe().then(user => { if (user) setEmail(user.email) })
+    getBillingStatus().then(b => { if (b) setBilling(b) })
     getPreferences().then(prefs => {
-      if (prefs && prefs.onboarded === 0) {
-        navigate('/onboarding')
-      } else {
-        setOnboarded(true)
-      }
+      if (prefs && prefs.onboarded === 0) navigate('/onboarding')
+      else setReady(true)
+    })
+    // Calendar loaded in parallel — does not block page readiness
+    Promise.all([
+      fetch(`${API_URL}/v1/calendar/events`, { credentials: 'include' })
+        .then(r => r.json() as Promise<CalendarState>).catch(() => null),
+      fetch(`${API_URL}/v1/calendar/microsoft/events`, { credentials: 'include' })
+        .then(r => r.json() as Promise<CalendarState>).catch(() => null),
+    ]).then(([g, m]) => {
+      setCalGoogle(g)
+      setCalMicrosoft(m)
     })
   }, [])
 
-  async function handleManageSubscription() {
-    const url = await getBillingPortalUrl()
-    if (url) window.open(url, '_blank')
-  }
+  const recentMeetings = useLiveQuery(
+    () => db.meetings.orderBy('startedAt').reverse().limit(4).toArray(),
+    []
+  )
+
+  const openItems = useLiveQuery(
+    () => db.action_items.filter(item => !item.completed).toArray(),
+    []
+  )
+
+  // Known client names to detect "Briefing" signal on calendar events
+  const knownClients = useLiveQuery(async () => {
+    const meetings = await db.meetings.filter(m => !!m.clientName).toArray()
+    return new Set(meetings.map(m => m.clientName!.toLowerCase()))
+  }, [])
 
   async function handleLogout() {
     await logout()
     navigate('/', { replace: true })
   }
 
-  if (onboarded === null) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#FAF7F0]">
-        <p className="text-sm text-gray-400">Caricamento...</p>
-      </div>
+  async function handleManageSubscription() {
+    const url = await getBillingPortalUrl()
+    if (url) window.open(url, '_blank')
+  }
+
+  function hasBriefingData(event: CalendarEvent): boolean {
+    if (!knownClients?.size) return false
+    const titleLower = event.title.toLowerCase()
+    const attendeeTexts = event.attendees.map(a => (a.name ?? a.email).toLowerCase())
+    return [...knownClients].some(client =>
+      titleLower.includes(client) ||
+      attendeeTexts.some(t => t.includes(client) || client.includes(t))
     )
   }
+
+  if (!ready) return <LoadingShell />
 
   const tier = billing?.tier ?? 'free'
   const used = billing?.quota_used_minutes ?? 0
   const cap = billing?.quota_cap_minutes ?? 300
-  const remaining = Math.max(0, cap - used)
   const percentUsed = cap > 0 ? Math.min(100, Math.round((used / cap) * 100)) : 0
 
+  const openCount = openItems?.length ?? 0
+  const topItems = openItems?.slice(0, 3) ?? []
+
+  const isCalLoading = calGoogle === undefined && calMicrosoft === undefined
+  const isCalConnected = !!(calGoogle?.connected || calMicrosoft?.connected)
+  const now = new Date()
+  const upcomingEvents = [
+    ...(calGoogle?.events ?? []),
+    ...(calMicrosoft?.events ?? []),
+  ]
+    .filter(e => new Date(e.start) > now)
+    .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+    .slice(0, 3)
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#FAF7F0]">
-      <div className="w-full max-w-sm space-y-6 px-4 text-center">
+    <div className="min-h-screen bg-background">
+      <h1 className="sr-only">Dashboard &mdash; Sonabrief</h1>
+      <AppNav email={email} onLogout={handleLogout} />
 
-        <h1
-          className="text-3xl text-[#1A4D52]"
-          style={{ fontFamily: '"Instrument Serif", serif' }}
-        >
-          Sonabrief
-        </h1>
+      <main className="mx-auto max-w-6xl px-6 py-10">
+        <div className="lg:grid lg:grid-cols-[2fr_1fr] lg:gap-10">
 
-        {email && (
-          <p className="text-sm text-gray-500">{email}</p>
-        )}
+          {/* ── Left column ───────────────────────────────── */}
+          <div className="space-y-10">
 
-        {/* Badge tier */}
-        <div className="flex items-center justify-center gap-2">
-          <span className={`rounded-full px-3 py-1 text-xs font-medium ${TIER_COLOR[tier] ?? TIER_COLOR.free}`}>
-            {TIER_LABEL[tier] ?? tier}
-          </span>
-          {billing?.billing_cycle && (
-            <span className="text-xs text-gray-400">
-              {billing.billing_cycle === 'monthly' ? 'mensile' : 'annuale'}
-            </span>
-          )}
-        </div>
+            {/* Hero */}
+            <section>
+              <Button
+                onClick={() => navigate('/recording')}
+                className="h-11 rounded-md px-7 text-[15px] font-semibold hover:bg-[var(--primary-hover)]"
+              >
+                Avvia registrazione
+              </Button>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Registra, trascrivi, archivia &mdash; tutto sul tuo computer
+              </p>
+            </section>
 
-        {/* Quota residua — solo per free e pro */}
-        {tier !== 'unlimited' && billing && (
-          <div className="rounded-xl border border-gray-200 bg-white px-5 py-4 text-left">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-gray-500">Sintesi cloud questo mese</span>
-              <span className="text-xs font-medium text-gray-700">
-                {formatMinutes(remaining)} rimanenti
-              </span>
-            </div>
-            <div className="h-1.5 w-full rounded-full bg-gray-100">
-              <div
-                className={`h-1.5 rounded-full transition-all ${
-                  percentUsed > 80 ? 'bg-red-400' : 'bg-[#1A4D52]'
-                }`}
-                style={{ width: `${percentUsed}%` }}
-              />
-            </div>
-            <p className="mt-1.5 text-xs text-gray-400">
-              {formatMinutes(used)} usati su {formatMinutes(cap)}
-            </p>
+            {/* Upcoming calendar events */}
+            <section aria-labelledby="calendario-heading">
+              <div className="mb-4 flex items-center justify-between">
+                <h2
+                  id="calendario-heading"
+                  className="text-xs font-semibold uppercase tracking-widest text-muted-foreground"
+                >
+                  Prossimi meeting
+                </h2>
+                <button
+                  onClick={() => navigate('/calendar')}
+                  className="text-xs text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
+                >
+                  Calendario
+                </button>
+              </div>
+
+              {isCalLoading ? (
+                <div className="space-y-2">
+                  {[0, 1, 2].map(i => (
+                    <div key={i} className="h-[76px] animate-pulse rounded-lg bg-border" />
+                  ))}
+                </div>
+              ) : !isCalConnected ? (
+                <p className="text-sm text-muted-foreground">
+                  Nessun calendario collegato.{' '}
+                  <button
+                    onClick={() => navigate('/calendar')}
+                    className="font-medium text-primary transition-colors hover:underline motion-reduce:transition-none"
+                  >
+                    Collega calendario
+                  </button>
+                </p>
+              ) : upcomingEvents.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  Nessun meeting in programma.
+                </p>
+              ) : (
+                <ul className="space-y-2" role="list">
+                  {upcomingEvents.map(event => (
+                    <li key={event.id}>
+                      <div className="rounded-lg border border-border bg-card px-5 py-4">
+                        <div className="flex items-start gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="truncate text-sm font-medium text-foreground">
+                                {event.title}
+                              </p>
+                              {hasBriefingData(event) && (
+                                <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                                  Briefing
+                                </span>
+                              )}
+                            </div>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              {formatEventTime(event.start)}
+                            </p>
+                            {event.attendees.length > 0 && (
+                              <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                                {event.attendees.slice(0, 3).map(a => a.name ?? a.email).join(', ')}
+                                {event.attendees.length > 3 && ` +${event.attendees.length - 3}`}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
           </div>
-        )}
 
-        {/* Unlimited badge */}
-        {tier === 'unlimited' && (
-          <div className="rounded-xl border border-amber-100 bg-amber-50 px-5 py-3 text-center">
-            <p className="text-xs text-amber-700">Sintesi cloud illimitata ✓</p>
-          </div>
-        )}
+          {/* ── Right column ──────────────────────────────── */}
+          <aside className="mt-10 space-y-4 lg:mt-0" aria-label="Riepilogo">
 
-        {/* Link upgrade — solo per free */}
-        {tier === 'free' && (
-          <button
-            onClick={() => navigate('/pricing')}
-            className="text-sm text-[#1A4D52] underline hover:text-[#143a3e]"
-          >
-            Passa a Pro →
-          </button>
-        )}
-
-        <div className="space-y-3 pt-2">
-          <Button
-            onClick={() => navigate('/recording')}
-            className="w-full bg-[#1A4D52] hover:bg-[#143a3e] text-white"
-          >
-            + Nuovo meeting
-          </Button>
-
-          <button
-            onClick={() => navigate('/archive')}
-            className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:border-gray-300 transition-colors"
-          >
-            Archivio meeting
-          </button>
-
-          <button
-            onClick={() => navigate('/calendar')}
-            className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:border-gray-300 transition-colors"
-          >
-            Calendario
-          </button>
-
-          <button
-            onClick={() => navigate('/actions')}
-            className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:border-gray-300 transition-colors"
-          >
-            Action Items
-          </button>
-
-          <button
-            onClick={() => navigate('/clients')}
-            className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:border-gray-300 transition-colors"
-          >
-            Clienti & Progetti
-          </button>
-
-          {tier !== 'free' && (
-            <button
-              onClick={handleManageSubscription}
-              className="text-xs text-gray-400 underline"
+            {/* Recent meetings — compact, no preview */}
+            <section
+              className="rounded-lg border border-border bg-card px-4 py-4"
+              aria-labelledby="recenti-heading"
             >
-              Gestisci abbonamento
-            </button>
-          )}
+              <div className="mb-3 flex items-center justify-between">
+                <h2
+                  id="recenti-heading"
+                  className="text-xs font-semibold uppercase tracking-widest text-muted-foreground"
+                >
+                  Recenti
+                </h2>
+                <button
+                  onClick={() => navigate('/archive')}
+                  className="text-xs text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
+                >
+                  Vedi tutti
+                </button>
+              </div>
+
+              {recentMeetings === undefined ? (
+                <div className="animate-pulse space-y-2.5">
+                  {[0, 1, 2].map(i => <div key={i} className="h-8 rounded bg-border" />)}
+                </div>
+              ) : recentMeetings.length === 0 ? (
+                <p className="text-xs text-muted-foreground">Nessun meeting.</p>
+              ) : (
+                <ul className="divide-y divide-border" role="list">
+                  {recentMeetings.map(meeting => (
+                    <li key={meeting.id}>
+                      <button
+                        onClick={() => navigate('/archive')}
+                        className="flex w-full items-start justify-between gap-2 py-2.5 text-left"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-xs font-medium text-foreground">
+                            {meeting.title}
+                          </p>
+                          {meeting.clientName && (
+                            <p className="truncate text-xs text-primary">
+                              {meeting.clientName}
+                            </p>
+                          )}
+                        </div>
+                        <time
+                          className="shrink-0 text-xs tabular-nums text-muted-foreground"
+                          dateTime={new Date(meeting.startedAt).toISOString()}
+                        >
+                          {formatDateShort(meeting.startedAt)}
+                        </time>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            {/* Action items — compact */}
+            <section
+              className="rounded-lg border border-border bg-card px-4 py-4"
+              aria-labelledby="azioni-heading"
+            >
+              <div className="mb-2 flex items-center justify-between">
+                <h2
+                  id="azioni-heading"
+                  className="text-xs font-semibold uppercase tracking-widest text-muted-foreground"
+                >
+                  Azioni
+                </h2>
+                <button
+                  onClick={() => navigate('/actions')}
+                  className="text-xs text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
+                >
+                  Vedi tutte
+                </button>
+              </div>
+
+              {openItems === undefined ? (
+                <div className="animate-pulse space-y-2">
+                  {[0, 1].map(i => <div key={i} className="h-6 rounded bg-border" />)}
+                </div>
+              ) : openCount === 0 ? (
+                <p className="text-xs text-muted-foreground">Nessuna azione in sospeso.</p>
+              ) : (
+                <>
+                  <p className="mb-2.5">
+                    <span className="text-xl font-semibold tabular-nums text-foreground">
+                      {openCount}
+                    </span>
+                    <span className="ml-1 text-xs text-muted-foreground">in sospeso</span>
+                  </p>
+                  <ul className="space-y-2" role="list">
+                    {topItems.map(item => (
+                      <li key={item.id} className="flex gap-2">
+                        <span
+                          className="mt-[5px] h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
+                          aria-hidden="true"
+                        />
+                        <p className="line-clamp-2 text-xs leading-snug text-foreground">
+                          {item.text}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </section>
+
+            {/* Quota — minimal */}
+            {billing && tier !== 'unlimited' && (
+              <section
+                className="rounded-lg border border-border bg-card px-4 py-3"
+                aria-labelledby="quota-heading"
+              >
+                <div className="mb-2 flex items-center justify-between">
+                  <h2
+                    id="quota-heading"
+                    className="text-xs font-semibold uppercase tracking-widest text-muted-foreground"
+                  >
+                    Sintesi cloud
+                  </h2>
+                  <TierBadge tier={tier} />
+                </div>
+                <QuotaBar used={used} cap={cap} percent={percentUsed} />
+                {tier === 'free' && (
+                  <button
+                    onClick={() => navigate('/pricing')}
+                    className="mt-2 text-xs font-medium text-primary transition-colors hover:underline motion-reduce:transition-none"
+                  >
+                    Passa a Pro
+                  </button>
+                )}
+              </section>
+            )}
+
+            {/* Account */}
+            <section
+              className="rounded-lg border border-border bg-card px-4 py-4"
+              aria-labelledby="account-heading"
+            >
+              <h2
+                id="account-heading"
+                className="mb-2.5 text-xs font-semibold uppercase tracking-widest text-muted-foreground"
+              >
+                Account
+              </h2>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="min-w-0 truncate text-xs text-muted-foreground">{email}</p>
+                  {tier === 'unlimited' && <TierBadge tier={tier} />}
+                </div>
+                {billing?.billing_cycle && tier !== 'free' && (
+                  <p className="text-xs text-muted-foreground">
+                    {billing.billing_cycle === 'monthly' ? 'Piano mensile' : 'Piano annuale'}
+                  </p>
+                )}
+                {tier !== 'free' && (
+                  <button
+                    onClick={handleManageSubscription}
+                    className="text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
+                  >
+                    Gestisci abbonamento
+                  </button>
+                )}
+              </div>
+            </section>
+
+          </aside>
         </div>
-
-        <button
-          onClick={handleLogout}
-          className="text-xs text-gray-400 underline"
-        >
-          Esci
-        </button>
-
-      </div>
+      </main>
     </div>
   )
 }

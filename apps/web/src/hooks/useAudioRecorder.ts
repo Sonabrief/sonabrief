@@ -20,8 +20,11 @@ export interface UseAudioRecorderReturn {
   state: RecorderState
   duration: number
   error: string | null
+  paused: boolean
   start: (source: AudioSource) => Promise<void>
   stop: () => void
+  pause: () => void
+  resume: () => void
   audioData: Float32Array | null
   reset: () => void
   stream: MediaStream | null
@@ -31,6 +34,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
   const [state, setState] = useState<RecorderState>('idle')
   const [duration, setDuration] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [paused, setPaused] = useState(false)
   const [audioData, setAudioData] = useState<Float32Array | null>(null)
   const [stream, setStream] = useState<MediaStream | null>(null)
 
@@ -96,6 +100,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       }
 
       recorder.onstop = async () => {
+        setPaused(false)
         setState('processing')
         const chunks = [...chunksRef.current]
         cleanup()
@@ -128,13 +133,32 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     mediaRecorderRef.current?.stop()
   }, [])
 
+  const pause = useCallback(() => {
+    const recorder = mediaRecorderRef.current
+    if (recorder && recorder.state === 'recording') {
+      recorder.pause()
+      timerRef.current && clearInterval(timerRef.current)
+      setPaused(true)
+    }
+  }, [])
+
+  const resume = useCallback(() => {
+    const recorder = mediaRecorderRef.current
+    if (recorder && recorder.state === 'paused') {
+      recorder.resume()
+      timerRef.current = setInterval(() => setDuration(d => d + 1), 1000)
+      setPaused(false)
+    }
+  }, [])
+
   const reset = useCallback(() => {
     cleanup()
     setState('idle')
     setDuration(0)
     setError(null)
     setAudioData(null)
+    setPaused(false)
   }, [cleanup])
 
-  return { state, duration, error, start, stop, audioData, reset, stream }
+  return { state, duration, error, paused, start, stop, pause, resume, audioData, reset, stream }
 }

@@ -1,0 +1,333 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-20T00:00:00Z",
+  "title": "Design System: Sonabrief",
+  "extensions": {
+    "colorMeta": {
+      "teal-deep": {
+        "role": "primary",
+        "displayName": "Deep Teal",
+        "canonical": "oklch(32% 0.053 194)",
+        "tonalRamp": [
+          "oklch(15% 0.025 194)",
+          "oklch(22% 0.038 194)",
+          "oklch(32% 0.053 194)",
+          "oklch(42% 0.050 194)",
+          "oklch(54% 0.042 194)",
+          "oklch(66% 0.032 194)",
+          "oklch(80% 0.018 194)",
+          "oklch(93% 0.008 194)"
+        ]
+      },
+      "teal-hover": {
+        "role": "primary",
+        "displayName": "Teal Hover",
+        "canonical": "oklch(27% 0.047 194)",
+        "tonalRamp": [
+          "oklch(12% 0.020 194)",
+          "oklch(18% 0.033 194)",
+          "oklch(27% 0.047 194)",
+          "oklch(36% 0.048 194)",
+          "oklch(48% 0.040 194)",
+          "oklch(60% 0.030 194)",
+          "oklch(75% 0.016 194)",
+          "oklch(90% 0.007 194)"
+        ]
+      },
+      "amber": {
+        "role": "secondary",
+        "displayName": "Amber",
+        "canonical": "oklch(67% 0.083 62)",
+        "tonalRamp": [
+          "oklch(30% 0.045 62)",
+          "oklch(42% 0.062 62)",
+          "oklch(54% 0.075 62)",
+          "oklch(67% 0.083 62)",
+          "oklch(76% 0.075 62)",
+          "oklch(84% 0.055 62)",
+          "oklch(91% 0.032 62)",
+          "oklch(96% 0.015 62)"
+        ]
+      },
+      "cream": {
+        "role": "neutral",
+        "displayName": "Cream",
+        "canonical": "oklch(98% 0.010 88)",
+        "tonalRamp": [
+          "oklch(40% 0.008 88)",
+          "oklch(52% 0.008 88)",
+          "oklch(64% 0.009 88)",
+          "oklch(75% 0.009 88)",
+          "oklch(84% 0.010 88)",
+          "oklch(91% 0.010 88)",
+          "oklch(95% 0.010 88)",
+          "oklch(98% 0.010 88)"
+        ]
+      },
+      "charcoal": {
+        "role": "neutral",
+        "displayName": "Charcoal",
+        "canonical": "oklch(14% 0.007 280)",
+        "tonalRamp": [
+          "oklch(14% 0.007 280)",
+          "oklch(22% 0.006 280)",
+          "oklch(32% 0.006 280)",
+          "oklch(44% 0.005 280)",
+          "oklch(56% 0.005 280)",
+          "oklch(68% 0.005 280)",
+          "oklch(80% 0.004 280)",
+          "oklch(91% 0.003 280)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "canonical": "oklch(99% 0.005 88)",
+        "tonalRamp": [
+          "oklch(40% 0.005 88)",
+          "oklch(55% 0.005 88)",
+          "oklch(68% 0.005 88)",
+          "oklch(78% 0.005 88)",
+          "oklch(87% 0.005 88)",
+          "oklch(93% 0.005 88)",
+          "oklch(96% 0.005 88)",
+          "oklch(99% 0.005 88)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Border",
+        "canonical": "oklch(90% 0.008 88)",
+        "tonalRamp": [
+          "oklch(30% 0.007 88)",
+          "oklch(45% 0.008 88)",
+          "oklch(58% 0.008 88)",
+          "oklch(70% 0.008 88)",
+          "oklch(80% 0.008 88)",
+          "oklch(87% 0.008 88)",
+          "oklch(90% 0.008 88)",
+          "oklch(95% 0.008 88)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "oklch(52% 0.010 194)",
+        "tonalRamp": [
+          "oklch(20% 0.010 194)",
+          "oklch(30% 0.010 194)",
+          "oklch(40% 0.010 194)",
+          "oklch(52% 0.010 194)",
+          "oklch(62% 0.010 194)",
+          "oklch(72% 0.009 194)",
+          "oklch(82% 0.007 194)",
+          "oklch(92% 0.005 194)"
+        ]
+      },
+      "error": {
+        "role": "neutral",
+        "displayName": "Error",
+        "canonical": "oklch(46% 0.155 28)",
+        "tonalRamp": [
+          "oklch(25% 0.100 28)",
+          "oklch(35% 0.130 28)",
+          "oklch(46% 0.155 28)",
+          "oklch(55% 0.160 28)",
+          "oklch(64% 0.145 28)",
+          "oklch(73% 0.120 28)",
+          "oklch(83% 0.080 28)",
+          "oklch(93% 0.040 28)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Screen-level headings. Page titles on dashboard and marketing surfaces."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section titles and modal headers. One per surface maximum."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Subsection heads, card titles, sidebar section labels."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "All running copy, descriptions, and form help text. Cap at 65-75ch."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Metadata, timestamps, status values, badge text, input labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "focus-ring",
+        "value": "0 0 0 2px #1A4D52",
+        "purpose": "Focus affordance on interactive elements. Not a decorative shadow."
+      },
+      {
+        "name": "focus-ring-muted",
+        "value": "0 0 0 3px oklch(32% 0.053 194 / 0.30)",
+        "purpose": "Secondary focus ring on inputs, 30% opacity for visual softness."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-standard",
+        "value": "cubic-bezier(0.0, 0.0, 0.2, 1.0)",
+        "purpose": "Default easing for state transitions. Exits fast, never bounces."
+      },
+      {
+        "name": "duration-fast",
+        "value": "150ms",
+        "purpose": "Color/opacity transitions on hover and focus."
+      },
+      {
+        "name": "duration-standard",
+        "value": "250ms",
+        "purpose": "Layout shifts like progress bar width changes."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary CTA. Deep Teal background, Cream text. Used for the most important action on a screen.",
+      "html": "<button class=\"ds-btn-primary\">New meeting</button>",
+      "css": ".ds-btn-primary { background: #1A4D52; color: #FAF7F0; padding: 10px 16px; border-radius: 8px; border: none; font-family: Manrope, system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; line-height: 1.4; cursor: pointer; transition: background 150ms cubic-bezier(0.0, 0.0, 0.2, 1.0); } .ds-btn-primary:hover { background: #143A3E; } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px #FAF7F0, 0 0 0 4px #1A4D52; } .ds-btn-primary:active { transform: translateY(1px); } @media (prefers-reduced-motion: reduce) { .ds-btn-primary { transition: none; } }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary navigation actions. Transparent at rest, Border-tinted on hover.",
+      "html": "<button class=\"ds-btn-ghost\">Archive</button>",
+      "css": ".ds-btn-ghost { background: transparent; color: #1A1A1F; padding: 8px 16px; border-radius: 8px; border: 1px solid #E2DDD4; font-family: Manrope, system-ui, sans-serif; font-size: 0.875rem; font-weight: 400; line-height: 1.4; cursor: pointer; transition: background 150ms cubic-bezier(0.0, 0.0, 0.2, 1.0), border-color 150ms cubic-bezier(0.0, 0.0, 0.2, 1.0); } .ds-btn-ghost:hover { background: #E2DDD4; border-color: #C8C2B6; } .ds-btn-ghost:focus-visible { outline: none; box-shadow: 0 0 0 2px #1A4D52; } @media (prefers-reduced-motion: reduce) { .ds-btn-ghost { transition: none; } }"
+    },
+    {
+      "name": "Badge — Free",
+      "kind": "chip",
+      "refersTo": "badge-free",
+      "description": "Tier badge for free plan users. Neutral, does not call attention.",
+      "html": "<span class=\"ds-badge-free\">Free</span>",
+      "css": ".ds-badge-free { display: inline-flex; align-items: center; background: #E2DDD4; color: #6B7A7B; padding: 3px 10px; border-radius: 9999px; font-family: Manrope, system-ui, sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.01em; line-height: 1.4; }"
+    },
+    {
+      "name": "Badge — Pro",
+      "kind": "chip",
+      "refersTo": "badge-pro",
+      "description": "Tier badge for Pro plan. Surface background with Deep Teal text — signals active plan without emphasis.",
+      "html": "<span class=\"ds-badge-pro\">Pro</span>",
+      "css": ".ds-badge-pro { display: inline-flex; align-items: center; background: #FDFCF9; color: #1A4D52; padding: 3px 10px; border-radius: 9999px; border: 1px solid #E2DDD4; font-family: Manrope, system-ui, sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.01em; line-height: 1.4; }"
+    },
+    {
+      "name": "Badge — Unlimited",
+      "kind": "chip",
+      "refersTo": "badge-unlimited",
+      "description": "Tier badge for Unlimited plan. The one context where Amber enters a badge element.",
+      "html": "<span class=\"ds-badge-unlimited\">Pro Unlimited</span>",
+      "css": ".ds-badge-unlimited { display: inline-flex; align-items: center; background: #F5EFE4; color: #7A5C30; padding: 3px 10px; border-radius: 9999px; border: 1px solid #E8D9BF; font-family: Manrope, system-ui, sans-serif; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.01em; line-height: 1.4; }"
+    },
+    {
+      "name": "Quota Progress Bar",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Displays monthly cloud synthesis quota usage. Teal fill up to 80%; Error red above 80%. Requires full ARIA attributes.",
+      "html": "<div class=\"ds-quota\"><div class=\"ds-quota-bar\" role=\"progressbar\" aria-valuenow=\"65\" aria-valuemin=\"0\" aria-valuemax=\"100\" aria-label=\"Cloud synthesis quota: 65% used\"><div class=\"ds-quota-fill\" style=\"width: 65%\"></div></div><p class=\"ds-quota-label\">195 min used of 300 min</p></div>",
+      "css": ".ds-quota { display: flex; flex-direction: column; gap: 6px; } .ds-quota-bar { height: 6px; width: 100%; background: #E2DDD4; border-radius: 9999px; overflow: hidden; } .ds-quota-fill { height: 100%; background: #1A4D52; border-radius: 9999px; transition: width 250ms cubic-bezier(0.0, 0.0, 0.2, 1.0); } .ds-quota-fill[data-warning] { background: #C0392B; } .ds-quota-label { font-family: Manrope, system-ui, sans-serif; font-size: 0.75rem; font-weight: 400; color: #6B7A7B; line-height: 1.4; } @media (prefers-reduced-motion: reduce) { .ds-quota-fill { transition: none; } }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": null,
+      "description": "Content container. Surface background on Cream page, Border outline, 12px radius. No shadow.",
+      "html": "<div class=\"ds-card\"><p class=\"ds-card-label\">Cloud synthesis this month</p><p class=\"ds-card-value\">105 min remaining</p></div>",
+      "css": ".ds-card { background: #FDFCF9; border: 1px solid #E2DDD4; border-radius: 12px; padding: 16px 20px; } .ds-card-label { font-family: Manrope, system-ui, sans-serif; font-size: 0.75rem; font-weight: 500; color: #6B7A7B; line-height: 1.4; margin: 0 0 4px; } .ds-card-value { font-family: Manrope, system-ui, sans-serif; font-size: 0.875rem; font-weight: 600; color: #1A1A1F; line-height: 1.4; margin: 0; }"
+    },
+    {
+      "name": "Navigation Item",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "Sidebar or list navigation items. Ghost at rest, Teal text + surface background on active.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item\" href=\"#\">Archive</a><a class=\"ds-nav-item ds-nav-item--active\" href=\"#\">Calendar</a></nav>",
+      "css": ".ds-nav { display: flex; flex-direction: column; gap: 2px; } .ds-nav-item { display: block; padding: 8px 12px; border-radius: 8px; font-family: Manrope, system-ui, sans-serif; font-size: 0.875rem; font-weight: 400; color: #1A1A1F; text-decoration: none; transition: background 150ms cubic-bezier(0.0, 0.0, 0.2, 1.0), color 150ms cubic-bezier(0.0, 0.0, 0.2, 1.0); } .ds-nav-item:hover { background: #E2DDD4; } .ds-nav-item--active { color: #1A4D52; background: oklch(93% 0.008 194); font-weight: 600; } .ds-nav-item:focus-visible { outline: none; box-shadow: 0 0 0 2px #1A4D52; } @media (prefers-reduced-motion: reduce) { .ds-nav-item { transition: none; } }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Trusted Workroom",
+    "overview": "Sonabrief's interface is a private professional space — quiet, ordered, and precise. The visual language is not warm and approachable; it is trusted and competent. Where a consumer product might use softness to lower resistance, Sonabrief uses clarity to signal that something serious is happening here. Every screen should feel like opening a well-organized brief: the right information in the right place, nothing else present.\n\nThe palette is restrained: Deep Teal anchors surfaces and actions; Cream provides a warm but serious backdrop; Amber surfaces rarely, only where something needs to be noticed (quota warnings, upgrade moments, unlimited status). Instrument Serif gives headings authority without heaviness. Manrope keeps body copy professional and readable at small sizes without the cold neutrality of a geometric sans.\n\nThis system explicitly rejects: Notion and Coda's casual collaborative-wiki aesthetic; the \"friendly startup\" softness of generic SaaS cream products with rounded-everything layouts; the consumer meeting-recorder look of tools like Otter.ai and Fireflies; and the intimidating density of heavy enterprise UI.",
+    "keyCharacteristics": [
+      "Restrained color strategy: Teal and Cream carry the surface; Amber is used in ≤10% of any screen",
+      "Serif headings with structured sans body — authority and legibility, not decoration",
+      "Flat surfaces with tonal depth, no decorative shadows",
+      "Left-aligned, structured layouts on app screens; center-alignment reserved for auth and error states",
+      "Precise, expert copy: no exclamation marks, no marketing adjectives in the UI"
+    ],
+    "rules": [
+      {
+        "name": "The Amber Scarcity Rule",
+        "body": "Amber is a signal, not a palette member. It appears on at most one element per screen. If two things need to be amber, one of them is wrong.",
+        "section": "colors"
+      },
+      {
+        "name": "The Chromaless Ceiling Rule",
+        "body": "Pure #000 and #fff are prohibited. Every neutral is tinted toward the brand hue. Charcoal carries a cooler undertone; Cream and Surface carry a warm one. Zero-chroma neutrals fail the trusted workroom atmosphere.",
+        "section": "colors"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "No surface has a shadow at rest. Shadow may appear only as a focus ring, never as ambient decoration. If a component needs a shadow to feel elevated, rethink whether cards are the right affordance for that content.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Mixed Authority Rule",
+        "body": "Instrument Serif owns hierarchy. Manrope owns density. They do not share roles: do not set a paragraph in Instrument Serif and do not set a page heading in Manrope.",
+        "section": "typography"
+      },
+      {
+        "name": "The Scale Contrast Rule",
+        "body": "Adjacent text elements must differ by at least 1.25× in size OR at least one weight step. Flat scales produce walls of text that read as bureaucratic.",
+        "section": "typography"
+      }
+    ],
+    "dos": [
+      "Do use Deep Teal (#1A4D52) as the structural primary — for buttons, active states, brand wordmark, and quota fill.",
+      "Do reserve Amber (#C89868) for Unlimited status and >80% quota warnings. One Amber element per screen, maximum.",
+      "Do use Instrument Serif exclusively for headings (Display and Headline roles). Manrope for everything else.",
+      "Do tint every neutral toward the brand hue. Surface is #FDFCF9, not #FFFFFF. Charcoal is #1A1A1F, not #000000.",
+      "Do use tonal layering for depth: Cream → Surface → Border, in that order, as surfaces nest.",
+      "Do left-align content on authenticated app screens.",
+      "Do add role=\"progressbar\" and full ARIA attributes to the quota bar.",
+      "Do include @media (prefers-reduced-motion: reduce) on every CSS transition and animation.",
+      "Do cap body copy at 65-75ch line length.",
+      "Do use weight contrast (≥1.25 ratio between adjacent hierarchy steps) alongside size to create visual hierarchy.",
+      "Do write button copy in the imperative: \"New meeting\", \"Manage subscription\". No informal + prefix on primary CTAs."
+    ],
+    "donts": [
+      "Don't use #000000 or #ffffff anywhere. Every neutral is tinted.",
+      "Don't use border-left or border-right thicker than 1px as a colored accent on cards, list items, or alerts.",
+      "Don't use gradient text (background-clip: text + gradient). Single solid color for all text.",
+      "Don't use glassmorphism (backdrop-filter: blur) decoratively.",
+      "Don't display a hero metric template (big number, small label, supporting stats, gradient accent).",
+      "Don't render identical-sized cards in an icon + heading + text grid.",
+      "Don't reach for a modal as the first solution.",
+      "Don't mix Tailwind's generic semantic colors (bg-teal-50, text-teal-700, text-amber-700) with the brand palette.",
+      "Don't hardcode brand hex values inline. Wire brand tokens to the CSS custom property layer.",
+      "Don't apply font-family via style prop. Use the CSS custom properties set in index.css.",
+      "Don't design to look like Notion, Coda, Otter.ai, Fireflies, or generic SaaS cream.",
+      "Don't use emoji in UI copy or component labels.",
+      "Don't apply text-center to authenticated dashboard or list screens."
+    ]
+  }
+}
