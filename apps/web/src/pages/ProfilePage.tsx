@@ -408,6 +408,13 @@ export default function ProfilePage() {
                 I tuoi audio non lasciano mai il tuo computer. Le sintesi e le note
                 sono cifrate con zero-knowledge quando usi la modalità Synced.
               </p>
+              <a
+                href="/docs/whitepaper-privacy.md"
+                download="Sonabrief-Whitepaper-Privacy.md"
+                className="text-sm text-muted-foreground underline hover:text-foreground transition-colors"
+              >
+                Scarica whitepaper architettura privacy (PDF)
+              </a>
               <div className="border-t border-border pt-4">
                 {!deleteConfirm ? (
                   <button

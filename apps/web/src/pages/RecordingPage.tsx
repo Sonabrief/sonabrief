@@ -542,6 +542,24 @@ export default function RecordingPage() {
     clientSuggestionLoadedRef.current = false
   }
 
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+
+  if (isMobile) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center">
+        <div className="text-4xl mb-4">🎙️</div>
+        <h2 className="font-heading text-xl font-semibold text-foreground mb-2">
+          Registrazione non ancora disponibile su mobile
+        </h2>
+        <p className="text-muted-foreground text-sm max-w-sm">
+          Stiamo lavorando all'app mobile. Per ora la registrazione
+          richiede un computer. Da qui puoi consultare l'archivio,
+          gestire le azioni e cercare nei tuoi meeting.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <h1 className="sr-only">Nuovo meeting — Sonabrief</h1>
