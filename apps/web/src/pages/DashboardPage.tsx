@@ -8,7 +8,6 @@ import {
   getMe, getBillingStatus, getBillingPortalUrl,
   getPreferences, type BillingStatus,
 } from '../lib/api'
-import { Button } from '../components/ui/button'
 import { AppNav } from '../components/AppNav'
 import { NumberTicker } from '../components/ui/number-ticker'
 import { BorderBeam } from '../components/ui/border-beam'

@@ -15,6 +15,9 @@
       "bucket_name": "sonabrief-blobs"
     }
   ],
+  "triggers": {
+    "crons": ["0 3 * * *"]
+  },
   "vars": {
     // Polar product IDs
     "POLAR_PRODUCT_PRO_MONTHLY": "081f7ae8-65dd-4bd5-9324-08ebfa26fcb6",

@@ -17,6 +17,7 @@ import { handleBillingStatus, handleBillingPortal } from "./routes/billing";
 import { handleAdminStats } from "./routes/admin";
 import { handleGetPreferences, handleSavePreferences } from "./routes/preferences";
 import { handleDeleteAccount } from "./routes/account";
+import { handleRetentionCleanup } from "./routes/cron-retention";
 import { handleGoogleStart, handleGoogleCallback, handleCalendarEvents, handleCalendarDisconnect, handleMicrosoftStart, handleMicrosoftCallback, handleMicrosoftCalendarEvents, handleMicrosoftDisconnect } from "./routes/calendar";
 
 export type { Env };
@@ -89,4 +90,12 @@ export default {
 
     return withCors(response, request, env);
   },
+};
+
+export const scheduled: ExportedHandlerScheduledHandler<Env> = async (
+  _event,
+  env,
+  _ctx
+) => {
+  await handleRetentionCleanup(env);
 };
