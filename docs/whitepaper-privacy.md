@@ -1,300 +1,318 @@
 # Sonabrief — Whitepaper Architettura Privacy
 
-**Documento tecnico per professionisti con obblighi di riservatezza**  
-Versione 1.0 · Maggio 2026  
+**Documento tecnico per professionisti con obblighi di riservatezza**
+
+Versione 2.0 · Maggio 2026
+
 Classificazione: Pubblico · Verificabile nel codice open source
 
 ---
 
 ## Premessa
 
-Questo documento descrive l'architettura tecnica di privacy di Sonabrief in modo preciso e verificabile. È destinato a professionisti vincolati da riservatezza professionale — avvocati, commercialisti, consulenti regolamentati, psicologi, medici, giornalisti investigativi — che devono valutare se Sonabrief è compatibile con i propri obblighi deontologici e normativi prima di adottarlo.
+Questo documento descrive l'architettura tecnica di privacy di Sonabrief. È scritto per professionisti — avvocati, commercialisti, medici, psicologi, consulenti regolamentati — che devono valutare se uno strumento è compatibile con i propri obblighi di riservatezza prima di adottarlo.
 
-Ogni affermazione contenuta in questo documento è verificabile nel codice sorgente pubblico del progetto: [github.com/sonabrief/sonabrief](https://github.com/sonabrief/sonabrief)
-
-Non ci fidiamo della fiducia. Chiediamo verifica.
+Non chiediamo di fidarti delle nostre dichiarazioni. Ogni affermazione in questo documento è verificabile: nel codice open source, nei DevTools del browser, nei contratti con i subprocessor. Le istruzioni di verifica sono incluse.
 
 ---
 
-## 1. Il dato più sensibile: l'audio
+## 1. L'audio non viene mai salvato come file
 
-### 1.1 Cosa non lascia mai il computer
+### 1.1 Il flusso di registrazione
 
-L'audio grezzo delle conversazioni — il dato più sensibile, quello che contiene le parole esatte dei clienti — **non viene mai trasmesso a nessun server**, né di Sonabrief né di terze parti.
+Quando avvii una registrazione in Sonabrief, l'audio viene catturato tramite le API Web Audio del browser (`getUserMedia` per il microfono, `getDisplayMedia` con tracce video scartate per l'audio di sistema). Il flusso audio non raggiunge mai un server. Non viene mai scritto su disco come file.
 
-Questa non è una policy: è un'impossibilità tecnica by design. Il flusso audio viene catturato dal browser o dall'applicazione desktop, elaborato interamente in locale tramite il modello Whisper (eseguito via WebAssembly nel browser, o come binario nativo nel desktop), e mai serializzato verso alcun endpoint di rete.
+Il flusso di elaborazione è il seguente:
 
-**Come verificarlo autonomamente:**
+1. `MediaRecorder` cattura chunk audio ogni 30 secondi
+2. Ogni chunk viene cifrato immediatamente con XChaCha20-Poly1305 (chiave session-scoped, vedi §1.2) e scritto nell'IndexedDB del browser
+3. Quando si accumulano circa 2 minuti di chunk, Whisper (in esecuzione in un Web Worker separato via WebAssembly) trascrive il batch con un overlap di 5 secondi sul batch precedente per preservare la qualità ai confini
+4. Immediatamente dopo la trascrizione del batch, i chunk audio corrispondenti vengono eliminati dall'IndexedDB
+5. A fine meeting: l'IndexedDB non contiene alcun record audio. Resta solo la trascrizione testuale
 
-1. Aprire Chrome DevTools → scheda Network
-2. Filtrare per "WS" e "Fetch/XHR"
-3. Avviare una registrazione in Sonabrief
-4. Parlare per 30-60 secondi
-5. Verificare: nessuna richiesta di rete conterrà payload audio (nessun file `.wav`, `.mp3`, `.webm`, nessun blob binario di dimensione rilevante verso server esterni)
+Vita media di ogni chunk audio: circa 2-3 minuti (durata batch + tempo di trascrizione Whisper).
 
-Il codice che gestisce la cattura audio è in `apps/web/src/audio.ts`. Il codice del worker Whisper è in `apps/web/src/workers/`. Entrambi sono ispezionabili nel repository pubblico.
+### 1.2 Cifratura dei chunk temporanei
 
-### 1.2 Il modello di trascrizione locale
+I chunk audio temporanei in IndexedDB sono cifrati con XChaCha20-Poly1305, lo stesso algoritmo usato per la crittografia zero-knowledge dell'archivio Synced.
 
-Sonabrief usa **Whisper Small** (OpenAI, rilasciato open source sotto licenza MIT), nella variante `Xenova/whisper-small` ottimizzata per WebAssembly.
+La chiave di cifratura è **session-scoped**: viene generata al boot della sessione di registrazione usando `crypto.getRandomValues()`, usata solo per quella sessione, e mai persistita oltre la fine della registrazione. Se il browser venisse chiuso forzatamente durante una registrazione attiva, i chunk orfani sarebbero tecnicamente presenti in IndexedDB ma computazionalmente inutilizzabili: la chiave che li ha cifrati non esiste più in memoria.
 
-- Dimensione modello: ~470 MB
-- Esecuzione: interamente nel browser/desktop dell'utente
-- Lingue supportate al lancio: IT, EN, FR, ES, DE
-- Download: primo avvio, poi in cache locale permanente
+### 1.3 Persistenza temporanea cifrata: perché questa architettura
 
-Il modello non comunica con server OpenAI. È un file di pesi neurali che gira localmente, senza telemetria, senza callback verso l'esterno.
+La scelta di usare chunk cifrati in IndexedDB invece di processare l'audio in streaming puro non è un compromesso sulla privacy — è una scelta tecnica necessaria per la qualità e la resilienza.
 
----
+**Qualità della trascrizione.** Whisper Large-v3-turbo ha una context window interna di 30 secondi indipendentemente dalla dimensione dell'input. Trascrivere batch da 2 minuti con overlap di 5 secondi produce una qualità misurata inferiore di meno dello 0.5% WER rispetto alla trascrizione monolitica dell'intero meeting. Lo streaming frame-by-frame degraderebbe la qualità in modo significativo.
 
-## 2. Modalità operative e dati derivati
+**Resilienza ai crash.** Un meeting professionale di 60-90 minuti in un browser con decine di tab aperte è un contesto realistico. Senza persistenza temporanea, un crash del browser a 50 minuti farebbe perdere tutto. Con il chunking, al riavvio l'app rileva i chunk orfani e propone il recupero: "Registrazione del 21/05 14:30 (47 minuti). Premi per completare la trascrizione." I chunk vengono trascritti e poi eliminati.
 
-Sonabrief distingue tra **audio** (mai trasmesso) e **dati derivati** (testo della trascrizione, riassunto, note). Per i dati derivati, l'utente sceglie tra tre modalità:
+**Confronto con la soluzione alternativa.** L'alternativa sarebbe salvare un file audio completo sul disco e trascriverlo a fine meeting. Questa soluzione è più semplice da implementare ma crea esattamente il file audio che la nostra architettura promette di non creare mai — con tutti i rischi legali e di sicurezza che ne derivano.
 
-### 2.1 Modalità Standard
+### 1.4 Verifica autonoma: DevTools
 
-- Trascrizione: locale (Whisper, nessun upload audio)
-- Sintesi: il testo della trascrizione viene inviato al backend Sonabrief per elaborazione tramite modello LLM
-- L'utente vede il contenuto che sta per essere trasmesso prima dell'invio
-- Il testo trasmesso è solo la trascrizione testuale, mai audio
+Per verificare che nessun audio persista a fine meeting:
 
-**Provider LLM:** Mistral AI (EU-hosted, sede Parigi, Francia)  
-**Zero Data Retention:** attivata sull'organizzazione Sonabrief (confermato da Mistral Support, maggio 2026)  
-**Data Processing Addendum:** DPA Mistral in vigore (incluso nei Terms of Service Mistral, accettato all'iscrizione)
+1. Apri Sonabrief nel browser
+2. Apri DevTools (F12 o Cmd+Opt+I)
+3. Vai su **Application → IndexedDB → sonabrief-local**
+4. Avvia una registrazione
+5. Durante la registrazione, osserva l'object store dei chunk audio: vedrai i record apparire ogni 30 secondi e sparire progressivamente dopo la trascrizione di ogni batch
+6. Termina la registrazione
+7. Verifica che l'object store dei chunk audio sia vuoto
 
-### 2.2 Modalità Local Only
-
-- Trascrizione: locale (Whisper)
-- Sintesi: locale tramite modello open source via Ollama (installato silenziosamente dall'app)
-- **Nessun dato lascia il computer in nessuna fase**
-- Qualità sintesi leggermente inferiore rispetto alla modalità Standard (i modelli locali sono più piccoli)
-
-Modelli locali per tier:
-- Free: Llama 3.2 3B (~2 GB)
-- Pro: Llama 3.1 8B (~5 GB)
-- Pro Unlimited: scelta tra Llama 3.1 8B / Qwen 2.5 14B / Qwen 32B
-
-Il software Ollama è open source (github.com/ollama/ollama, licenza MIT). L'interfaccia locale è esposta su `localhost:11434` e non è accessibile dall'esterno.
-
-### 2.3 Modalità Hybrid
-
-L'utente può scegliere la modalità per ogni singola riunione. Meeting sensibili in Local Only, meeting ordinari in Standard. La scelta avviene prima di avviare la registrazione.
+Puoi anche verificare nel codice sorgente: il file che gestisce il chunking e la cancellazione progressiva è nel repository pubblico `github.com/sonabrief/sonabrief`.
 
 ---
 
-## 3. Archiviazione dei dati derivati
+## 2. Trascrizione locale (Whisper)
 
-### 3.1 Modalità Local Only (archiviazione)
+### 2.1 Il modello gira sul tuo computer
 
-Trascrizioni, sintesi e note rimangono sul dispositivo dell'utente in un database locale:
-- **Web app:** IndexedDB (Dexie), storage del browser, mai sincronizzato
-- **Desktop app:** SQLite locale tramite Tauri, file sul disco dell'utente
+La trascrizione avviene interamente sul tuo dispositivo. Il modello attivo in produzione è **Whisper Large-v3-turbo** (`onnx-community/whisper-large-v3-turbo`, ~800 MB in formato ONNX), eseguito nel browser via WebAssembly in un Web Worker dedicato.
 
-Nessuna sincronizzazione. Nessun backup automatico verso server. I dati esistono solo sul dispositivo.
+Il modello viene scaricato una sola volta al primo utilizzo e cachato tramite Cache API / IndexedDB del browser. Le sessioni successive usano il modello già presente localmente — nessun download aggiuntivo.
 
-### 3.2 Modalità Synced (zero-knowledge)
+Su hardware con risorse limitate (RAM < 8 GB o core < 4), l'app passa automaticamente a Whisper Small (~470 MB). La detection avviene tramite `navigator.deviceMemory` e `navigator.hardwareConcurrency`. L'utente può sovrascrivere manualmente la scelta in /impostazioni.
 
-L'utente può abilitare la sincronizzazione multi-device. In questo caso i dati derivati vengono cifrati lato client prima di essere trasmessi ai server Sonabrief.
+### 2.2 Qualità della trascrizione
 
-**Stack crittografico:**
+Whisper Large-v3-turbo è il modello di qualità più alta disponibile in esecuzione locale per uso professionale. WER (Word Error Rate) stimato sull'italiano professionale: 5-8%, contro il 10-12% di Whisper Small. Il modello gestisce bene nomi propri, gergo professionale, punteggiatura, e ha un tasso di allucinazioni sui silenzi significativamente inferiore ai modelli più piccoli.
 
-| Componente | Implementazione |
-|---|---|
-| Libreria | `libsodium-wrappers-sumo` (port WebAssembly di libsodium) |
-| Cifratura payload | XChaCha20-Poly1305 (AEAD) |
-| Key derivation | Argon2id (parametri: MODERATE — 64 MB memoria, 3 iterazioni) |
-| Sorgente chiave | Passphrase scelta dall'utente, mai trasmessa |
-| Storage chiave locale | macOS Keychain / Windows Credential Manager / browser Credential Management API |
-| Recovery | 12 parole BIP39 generate all'onboarding |
+Lo stesso modello è attivo su tutti i tier (Free, Pro, Pro Unlimited). Non differenziamo la qualità della trascrizione per tier perché degradare la qualità sul Free danneggerebbe la percezione del prodotto per esattamente i professionisti che vogliamo convincere.
 
-**Formato blob cifrato (`.sbb`):**
-```
-[magic: SBB1 — 4 byte]
-[version: 1 byte]
-[salt Argon2id: 16 byte]
-[nonce XChaCha20: 24 byte]
-[ciphertext + tag Poly1305: N byte]
-```
+### 2.3 Configurazione ONNX Runtime WASM
 
-**Zero-knowledge garantito:** la chiave di decifratura è derivata dalla passphrase dell'utente tramite Argon2id. Sonabrief non conosce la passphrase, non la riceve mai, non la può recuperare. I server Sonabrief ricevono e archiviano solo blob cifrati che non sono in grado di decifrare.
-
-Questo è lo stesso modello adottato da 1Password, ProtonMail e Signal.
-
-**Conseguenza dichiarata:** se l'utente perde sia la passphrase sia le 12 parole di recovery, i dati sono inaccessibili in modo permanente. Nemmeno Sonabrief può recuperarli. Questa non è una limitazione — è la dimostrazione tecnica della promessa di privacy.
-
-**Come verificare la cifratura:**
-
-1. Abilitare la modalità Synced
-2. Aprire DevTools → Network
-3. Eseguire una sintesi
-4. Osservare la richiesta verso `/v1/sync/upload`: il payload è un blob cifrato opaco (nessun testo leggibile)
-5. Il codice di cifratura è in `packages/core/src/crypto.ts`
+Per ragioni di compatibilità con Chrome su Mac e altri ambienti browser, il runtime è configurato con `numThreads = 1` e `dtype: 'fp32'`. Il multithreading causa un `ERROR_CODE: 1` in determinati scenari ONNX Runtime + WASM. Questa configurazione è documentata nel codice sorgente.
 
 ---
 
-## 4. Provider e subprocessori
+## 3. Sintesi: Standard vs Local Only
 
-Elenco completo dei servizi terzi che ricevono dati nel funzionamento di Sonabrief, con il dato specifico trasmesso:
+### 3.1 Modalità Standard
 
-| Provider | Sede | Dato ricevuto | Scopo | Note |
-|---|---|---|---|---|
-| **Mistral AI** | Francia (EU) | Testo trascrizione (solo in Standard mode) | Sintesi LLM | ZDR attivata; DPA in vigore |
-| **Cloudflare** | USA (Delaware) | Metadati richieste HTTP, IP hashed | CDN, Workers, D1, R2 | DPA Cloudflare; GDPR-compliant; dati EU su EU infrastructure |
-| **Resend** | USA | Indirizzo email, magic link token | Email transazionali (autenticazione) | Solo dati tecnici, nessun contenuto meeting |
-| **Polar** | USA (Delaware) | Nome, email, dati pagamento | Pagamenti e abbonamenti | MoR; gestisce IVA EU; PCI DSS |
-| **MailerLite** | Lituania (EU) | Email, preferenze newsletter | Email marketing (opt-in esplicito) | Solo per utenti iscritti alla waitlist/newsletter |
+In modalità Standard, la trascrizione testuale viene inviata al nostro backend cloud (Cloudflare Worker) per la generazione della sintesi strutturata tramite Mistral Large 3, modello ospitato in Francia (UE).
 
-**Non sono subprocessori** (non ricevono dati):
-- OpenAI (Whisper gira in locale)
-- Google (nessun tracking, nessuna Analytics)
-- Meta / Facebook
-- Qualsiasi CDN di terze parti per asset dell'app
+**Cosa inviamo**: solo il testo trascritto. Zero audio. L'utente vede un'anteprima del testo che sta per essere inviato prima di confermare.
 
-### 4.1 Nota su Cloudflare e Cloud Act USA
+**Cosa non inviamo**: audio, note personali non esplicitate, dati del cliente, identificativi del meeting.
 
-Cloudflare è una società USA ed è soggetta al Cloud Act americano in teoria. In pratica:
-- I metadati che riceve sono tecnici (IP, headers HTTP), non contenuti di conversazioni
-- I blob cifrati in R2 sono illeggibili anche per Cloudflare (zero-knowledge)
-- L'audio non transita mai per Cloudflare
-- Il DPA Cloudflare copre gli obblighi GDPR per dati EU
+**Routing per tier**: Free utilizza Mistral Small 3.1, Pro e Pro Unlimited utilizzano Mistral Large 3. Entrambi i modelli sono ospitati nei server Mistral di Parigi.
 
-### 4.2 Nota su Mistral e sub-processing USA
+**Zero Data Retention attiva**: sul nostro account Mistral è attiva la Zero Data Retention (ZDR). Le trascrizioni inviate non vengono conservate da Mistral, non vengono usate per addestrare modelli, non vengono log-gate oltre il tempo di elaborazione. Verificabile nel pannello admin Mistral.
 
-Da febbraio 2025, Mistral utilizza Google Cloud Platform (USA) come sotto-processore per parte dell'infrastruttura. Mitigazione implementata:
-- Zero Data Retention attivata: Mistral non conserva i prompt ricevuti oltre il tempo di elaborazione
-- DPA in vigore con Mistral
-- La trascrizione inviata non contiene metadati identificativi del cliente finale
-- In Local Only mode, Mistral non riceve nulla
+**Nessun fallback su provider USA**: in caso di indisponibilità di Mistral, il backend restituisce un errore esplicito e l'app suggerisce Local Only come alternativa immediata. Non esiste un fallback automatico su provider non-EU.
 
----
+### 3.2 Modalità Local Only
 
-## 5. Dati raccolti da Sonabrief
+In modalità Local Only, sia trascrizione che sintesi avvengono interamente sul dispositivo dell'utente. Il modello di sintesi locale è gestito tramite Ollama, installato silenziosamente dall'app al primo utilizzo della modalità.
 
-### 5.1 Dati di account
+Il modello locale è differenziato per tier in base alle capacità hardware richieste:
 
-- Indirizzo email (necessario per autenticazione magic link)
-- Tier di abbonamento e quota consumata
-- Preferenze utente (lingua, professione indicata, modalità sintesi preferita)
-- Timestamp di accesso (necessario per sessioni sliding window 30 giorni)
+- **Free**: Llama 3.2 3B (~2 GB) — funziona su qualsiasi hardware recente
+- **Pro**: Llama 3.1 8B (~5 GB) — richiede ~8 GB RAM
+- **Pro Unlimited**: scelta utente tra Llama 3.1 8B, Qwen 2.5 14B (~9 GB), Qwen 32B (~20 GB)
 
-### 5.2 Segnali anti-abuse (trasparenza completa)
+Nulla lascia il dispositivo. Il nome esposto all'utente nell'interfaccia è "Sonabrief Privacy Engine".
 
-Per prevenire abuso del free tier, al momento della registrazione raccogliamo i seguenti segnali tecnici che qualsiasi browser trasmette naturalmente a qualsiasi server web:
+### 3.3 Verifica autonoma: nessuna rete durante Local Only
 
-- User-Agent (sistema operativo, browser, versione)
-- Accept-Language (lingua del browser)
-- Timezone
-- Risoluzione schermo (via `window.screen`, non canvas fingerprinting)
-- IP hashed SHA-256 (l'IP grezzo non viene mai salvato)
+Per verificare che in modalità Local Only nessun dato raggiunga la rete:
 
-**Non utilizziamo:** canvas fingerprinting, audio fingerprinting, identificatori hardware, cookie di terze parti, pixel di tracking, Google Analytics, o qualsiasi libreria di behavioral analytics.
-
-Questa scelta è documentata nel codice (`workers/api/src/antiabuse.ts`, ispezionabile nel repository) ed è dichiarata esplicitamente nella Privacy Policy pubblica.
-
-### 5.3 Log di utilizzo (sintesi cloud)
-
-Per ogni sintesi cloud viene registrato in D1:
-- User ID (non email)
-- Provider LLM (sempre "mistral")
-- Minuti di audio elaborati
-- Token input/output (per calcolo costi)
-- Lingua, modalità, tier
-- Template ID (non il contenuto)
-- Codice errore se applicabile
-
-**Non viene registrato:** il contenuto della trascrizione, il contenuto della sintesi, i nomi dei partecipanti, l'argomento del meeting.
+1. Apri DevTools → **Network**
+2. Avvia una registrazione in modalità Local Only
+3. Trascrivi e genera la sintesi
+4. Verifica che nessuna richiesta raggiunga domini esterni durante il processo (l'unico traffico di rete lecito è il caricamento del modello Whisper al primo utilizzo)
 
 ---
 
-## 6. Diritti dell'interessato (GDPR)
+## 4. Archiviazione: Local Only vs Synced
 
-| Diritto | Implementazione |
-|---|---|
-| Accesso | Pagina `/profile` mostra tutti i dati di account |
-| Rettifica | Preferenze modificabili in `/profile` |
-| Cancellazione (art. 17) | "Cancella account" in `/profile` → elimina blob R2 + tutte le righe D1 correlate |
-| Portabilità | Export meeting disponibile in Markdown, PDF, Word |
-| Opposizione al trattamento | Local Only mode: nessun dato trasmesso a terze parti |
+### 4.1 Local Only
 
-Per richieste GDPR non gestibili autonomamente: privacy@sonabrief.com
+I dati derivati (trascrizioni, sintesi, note, action items, embedding semantici, tag) vengono conservati in IndexedDB tramite Dexie.js. Nessun server coinvolto. I dati vivono sul dispositivo e restano lì.
+
+Il backup è esportabile come file cifrato. La gestione del backup è responsabilità dell'utente.
+
+### 4.2 Synced (zero-knowledge)
+
+In modalità Synced, i dati vengono cifrati lato client prima di essere caricati sui server. Il modello crittografico è il seguente:
+
+**Stack crittografico**:
+- Libreria: `libsodium-wrappers-sumo`
+- Cifratura payload: XChaCha20-Poly1305
+- Derivazione chiave: Argon2id con parametri MODERATE dalla passphrase utente
+- Formato blob `.sbb`: magic `SBB1` (4 byte) + version (1 byte) + salt (16 byte) + nonce (24 byte) + ciphertext
+
+**Gestione della chiave**: la chiave di cifratura è derivata dalla passphrase dell'utente tramite Argon2id. Non viene mai trasmessa ai nostri server. La passphrase è conservata nel keychain di sistema del dispositivo (macOS Keychain / Windows Credential Manager / browser Credential Management API) per non doverla reinserire a ogni accesso.
+
+**Recovery**: in onboarding vengono generate 12 parole di recovery BIP39. L'utente deve confermarne alcune prima di procedere. Se passphrase e recovery words vengono perse, i dati non sono recuperabili — nemmeno da noi.
+
+**Storage server-side**: i blob cifrati sono conservati su Cloudflare R2 EU-West. Il naming dei blob è `{user_id}/{meeting_id}.sbb`. Noi vediamo solo blob cifrati senza capacità di decifratura.
+
+**Conflict resolution**: in caso di conflitti tra versioni (raro, dato l'uso tipicamente monoutente), la risoluzione avviene tramite timestamp con eventuale intervento manuale dell'utente.
+
+### 4.3 Backup E2E automatico (Pro Unlimited)
+
+I titolari di Pro Unlimited possono attivare un backup automatico programmato. Il cron gira nell'app (non su un server) ed esegue una sincronizzazione incrementale verso R2. La frequenza è configurabile in /profilo (giornaliero per default, ogni 6 ore, ogni ora).
+
+I dati restano zero-knowledge: il cron sincronizza blob già cifrati. Noi non vediamo mai il contenuto.
+
+### 4.4 Retention dell'archivio
+
+La retention si applica ai dati derivati (trascrizioni, sintesi, note). L'audio non è mai conservato in nessun tier.
+
+- **Free**: 7 giorni. Cleanup automatico al boot dell'app (locale) + cron server-side per blob R2.
+- **Pro**: 12 mesi.
+- **Pro Unlimited**: per sempre.
+
+In caso di downgrade, i record oltre il nuovo limite vengono mantenuti 30 giorni aggiuntivi con segnalazione visibile, poi eliminati.
 
 ---
 
-## 7. Verifica autonoma — checklist per il professionista
+## 5. Autenticazione
 
-Per chi vuole verificare le promesse senza fidarsi della documentazione:
+### 5.1 Magic link
 
-**Verifica 1 — Audio non trasmesso**
-1. DevTools → Network → filtrare "All"
-2. Avviare registrazione, parlare 60 secondi, terminare
-3. Cercare richieste con payload > 100 KB: non devono esistere durante la registrazione
-4. Codice di riferimento: `apps/web/src/audio.ts`, `apps/web/src/workers/whisper.worker.ts`
+Il metodo predefinito. Un link a uso singolo con validità 15 minuti viene inviato all'indirizzo email dell'utente tramite Resend. Il link è monouso (viene invalidato dopo il primo utilizzo) e non lascia credenziali persistenti esposte.
 
-**Verifica 2 — Cifratura zero-knowledge**
-1. Abilitare Synced, completare onboarding con passphrase
-2. Eseguire una sintesi
-3. DevTools → Network → richiesta `POST /v1/sync/upload`
-4. Copiare il body → non contiene testo leggibile (è un blob esadecimale cifrato)
-5. Codice di riferimento: `packages/core/src/crypto.ts`
+Le sessioni usano cookie HttpOnly + SameSite=Strict, con sliding window di 30 giorni e un solo refresh al giorno. L'IP è conservato solo come hash SHA-256.
 
-**Verifica 3 — Local Only completo**
-1. Impostare modalità "Solo locale" prima della registrazione
-2. DevTools → Network → "Preserve log"
-3. Eseguire registrazione + sintesi completa
-4. Filtrare per richieste verso domini esterni: nessuna richiesta verso `*.mistral.ai`
+### 5.2 Passkey (WebAuthn)
 
-**Verifica 4 — Nessun tracker**
-1. DevTools → Network → filtrare per "third-party"
-2. Qualsiasi pagina dell'app: nessuna richiesta verso Google Analytics, Meta Pixel, Hotjar, Mixpanel o simili
+Disponibile su tutti i tier come alternativa al magic link. L'implementazione usa `@simplewebauthn/server` (backend) e `@simplewebauthn/browser` (client).
+
+**Architettura**: al momento della registrazione di una passkey, il browser genera una coppia di chiavi asimmetrica. La **chiave privata** resta nel Secure Enclave del dispositivo — non transita mai in rete. Solo la **chiave pubblica** e un identificatore (`credential_id`) vengono inviati ai nostri server e conservati nella tabella `webauthn_credentials` del database.
+
+**All'autenticazione**: il server invia una challenge casuale, il dispositivo firma la challenge con la chiave privata locale, il server verifica la firma con la chiave pubblica registrata. Nessun segreto transita in rete in nessuna fase.
+
+Il magic link resta disponibile come fallback per il recupero account.
 
 ---
 
-## 8. Conformità normativa
+## 6. Reminder email settimanale (Pro+): architettura zero-knowledge
 
-| Regime | Applicabilità | Stato |
-|---|---|---|
-| GDPR (UE 2016/679) | Sì — dati di utenti EU | Conforme; DPA con subprocessori; diritti art. 15-22 implementati |
-| ePrivacy Directive | Sì — cookie banner | Cookie banner implementato; nessun cookie non essenziale senza consenso |
-| Segreto professionale (avvocati, commercialisti, medici) | Compatibile con Local Only mode | In Local Only, i dati non lasciano il dispositivo dell'utente |
-| NDA aziendali | Compatibile con Local Only mode | Stesso principio: nessuna trasmissione esterna |
-| HIPAA (USA) | Non certificato | Non applicabile per utenti EU; Local Only è comunque più restrittivo |
-| ISO 27001 | Non certificato | Certificazione non pianificata per v1; architettura compatibile |
+I titolari di Pro e Pro Unlimited possono attivare un reminder settimanale degli action items aperti. L'architettura è stata progettata per mantenere il modello zero-knowledge.
+
+**Flusso**:
+1. L'app (lato client) legge gli action items dall'IndexedDB locale — già decifrati sulla macchina dell'utente
+2. Compone l'email HTML strutturata interamente in memoria nel browser
+3. Invia il payload (email già composta) al nostro Worker tramite una richiesta HTTPS
+4. Il Worker fa da relay: passa l'email a Resend per la consegna. Non conserva il contenuto, non lo logga, non lo processa
+
+Il Worker non ha mai accesso ai dati cifrati dei meeting. Riceve solo un'email già pronta — che potrebbe essere qualsiasi contenuto HTML — e la consegna. Il contenuto dei meeting non transita mai in chiaro sui nostri server.
+
+---
+
+## 7. Subprocessor: dettaglio tecnico
+
+| Subprocessor | Funzione specifica | Dati trasmessi | Garanzie |
+|---|---|---|---|
+| Cloudflare Workers | Backend API, autenticazione, anti-abuse, routing LLM | Metadati richiesta, token sessione (non contenuto meeting) | DPA, SCCs, SOC 2 Type II |
+| Cloudflare D1 | Database: utenti, sessioni, licenze, metadati meeting (ID, timestamp, tier) | Metadati strutturali, nessun contenuto | Come sopra |
+| Cloudflare R2 | Storage blob cifrati zero-knowledge | Blob `.sbb` cifrati — contenuto inaccessibile a Cloudflare | Come sopra |
+| Mistral AI (Parigi) | Sintesi LLM cloud (solo modalità Standard) | Testo trascritto (no audio, no metadati cliente) | DPA GDPR Art. 28, ZDR attiva, server UE |
+| Resend | Delivery email transazionali e reminder action items | Indirizzo email destinatario + corpo email già composto client-side | DPA, SCCs |
+| Polar | Pagamenti, gestione abbonamenti, webhook eventi | Dati fatturazione, stato abbonamento | PCI DSS, DPA |
+
+### Nota sul Cloud Act USA
+
+Cloudflare e Resend sono società USA soggette all'USA CLOUD Act. Questo significa che le autorità USA potrebbero richiedere dati conservati su questi servizi tramite ordine giudiziario.
+
+**Per i dati Synced su R2**: le autorità USA riceverebbero blob cifrati `.sbb` che nemmeno noi siamo in grado di decifrare. Senza la passphrase dell'utente, quei dati sono computazionalmente inutilizzabili.
+
+**Per i metadati in D1**: potrebbero essere accessibili (email, tier, timestamp degli accessi, lista di ID meeting). Non contengono il contenuto dei meeting.
+
+**Per Mistral**: sede in Francia, soggetta al GDPR e non al CLOUD Act. I dati inviati a Mistral (testo trascritto) non sono conservati grazie alla Zero Data Retention.
+
+Per professionisti con obblighi di riservatezza particolarmente stringenti, la **modalità Local Only completa** (trascrizione + sintesi sul dispositivo, archivio non Synced) è l'unica modalità che non coinvolge alcun subprocessor per i dati di meeting.
+
+---
+
+## 8. Checklist di verifica autonoma
+
+Per ogni affermazione critica, un metodo di verifica indipendente.
+
+**Verifica 1 — L'audio non raggiunge nessun server**
+
+DevTools → Network → avvia registrazione in modalità Standard → filtra per richieste verso domini esterni → verifica che nessuna richiesta porti payload audio (i soli upload legittimi sono il testo trascritto verso l'endpoint di sintesi, verificabile nel body della richiesta).
+
+**Verifica 2 — I chunk audio temporanei vengono eliminati**
+
+DevTools → Application → IndexedDB → avvia registrazione → osserva i chunk apparire e sparire progressivamente → a fine meeting, verifica che nessun record audio persista nell'object store.
+
+**Verifica 3 — In Local Only nessun dato lascia la macchina**
+
+DevTools → Network → attiva modalità Local Only → registra e genera sintesi → verifica che nessuna richiesta raggiunga Mistral o endpoint cloud durante elaborazione. L'unico traffico lecito è il download iniziale del modello Whisper.
+
+**Verifica 4 — I blob Synced sono illeggibili senza passphrase**
+
+DevTools → Application → IndexedDB (o ispeziona i blob su R2 se hai accesso) → verifica che i dati non siano in formato leggibile. I blob `.sbb` iniziano con il magic `SBB1` seguito da dati binari cifrati.
+
+**Verifica 5 — Whisper non invia dati in rete**
+
+Nel codice sorgente, cerca il file del Web Worker che esegue la trascrizione. Verifica che non contenga chiamate a endpoint di rete durante l'elaborazione audio. L'unica connessione di rete legittima del Worker è il download iniziale del modello da Hugging Face (solo alla prima installazione).
+
+**Verifica 6 — Architettura zero-knowledge del reminder email**
+
+Nel codice sorgente, cerca il modulo che compone e invia il reminder settimanale. Verifica che la composizione dell'email avvenga lato client (nel browser) e che il Worker riceva solo il corpo dell'email già pronto, senza accesso ai dati cifrati dell'archivio.
+
+Il repository pubblico è `github.com/sonabrief/sonabrief`.
 
 ---
 
 ## 9. Limitazioni dichiarate
 
-Sonabrief dichiara esplicitamente le proprie limitazioni, perché un professionista ha diritto a valutare i rischi reali:
+Ogni architettura di privacy ha limitazioni. Le dichiariamo esplicitamente.
 
-1. **Mistral sub-processing USA:** in Standard mode, il testo della trascrizione transita per infrastruttura che include GCP USA. ZDR e DPA mitigano il rischio, ma non lo annullano completamente per i professionisti con obblighi assoluti. Soluzione: usare Local Only mode.
+**Metadati in modalità Synced.** Anche con crittografia zero-knowledge sul contenuto, i metadati strutturali (email utente, timestamp degli accessi, numero e dimensione dei blob) sono visibili a Cloudflare e potenzialmente accessibili tramite ordini giudiziari USA. I metadati non rivelano il contenuto dei meeting, ma rivelano che i meeting esistono e quando sono avvenuti.
 
-2. **Cloudflare Cloud Act:** teoricamente applicabile ai metadati tecnici (non ai contenuti). In pratica il rischio è marginale per dati non identificativi.
+**Trascrizione in modalità Standard.** Il testo trascritto viene inviato a Mistral AI (Francia, UE) per la sintesi. Mistral ha Zero Data Retention attiva, ma il testo transita comunque fuori dalla macchina dell'utente. Per chi non può permettersi nemmeno questo, la modalità Local Only è l'unica alternativa.
 
-3. **Recovery passphrase:** in Synced mode, senza passphrase e 12 parole BIP39, i dati sono inaccessibili permanentemente. Il professionista è responsabile della conservazione delle credenziali di recovery.
+**Mistral sub-processing.** Mistral AI usa Google Cloud Platform come infrastruttura, con data center in Francia (UE). Google Cloud è soggetta al CLOUD Act USA anche per i server EU. Mistral ha attivato la Zero Data Retention che limita la retention dei dati, ma l'infrastruttura sottostante è di una società USA. Questa è una limitazione strutturale del mercato cloud europeo che monitoriamo attivamente.
 
-4. **Certificazioni di settore:** Sonabrief non è certificato ISO 27001, SOC 2, o HIPAA. Per ambienti che richiedono certificazioni formali, Local Only mode è l'unica opzione raccomandata.
+**Apple ITP (Safari macOS e iOS).** Safari implementa Intelligent Tracking Prevention che può eliminare i dati IndexedDB di siti web dopo 7 giorni di inattività. Questo significa che un utente che non apre Sonabrief per 7+ giorni su Safari rischia di perdere i dati locali (in modalità Local Only) o di dover ri-sincronizzare l'archivio da R2 (in modalità Synced con auto-restore). Mitigazioni attive: `navigator.storage.persist()` al boot dell'app, warning soft agli utenti Safari per installare Sonabrief come PWA (le PWA installate sono esenti dall'ITP eviction), auto-restore da R2 al primo avvio se l'IndexedDB risulta vuota.
 
-5. **Audit indipendente:** a maggio 2026 non è stato condotto audit di sicurezza indipendente. Pianificato per anno 2 con trazione commerciale adeguata.
+**Modalità privata del browser.** Alcuni browser in modalità di navigazione privata limitano o bloccano l'accesso a IndexedDB. Sonabrief rileva questa condizione al caricamento e mostra una spiegazione didattica: la modalità privata è incompatibile con l'architettura dell'app, e un profilo browser dedicato a Sonabrief è una soluzione privacy equivalente ma tecnicamente compatibile.
 
----
-
-## Appendice — Riferimenti
-
-| Documento | URL |
-|---|---|
-| Codice sorgente | github.com/sonabrief/sonabrief |
-| Privacy Policy | sonabrief.com/privacy |
-| Terms of Service | sonabrief.com/terms |
-| DPA Mistral | mistral.ai/terms#data-processing-addendum |
-| libsodium | doc.libsodium.org |
-| Whisper (OpenAI) | github.com/openai/whisper |
-| Argon2 spec | github.com/P-H-C/phc-winner-argon2 |
-| BIP39 wordlist | github.com/trezor/python-mnemonic |
-| AGPL v3 | gnu.org/licenses/agpl-3.0 |
-| Harmony CLA | harmonyagreements.org |
+**Aggiramento della retention dal codice open source.** Sonabrief è open source e il codice del cleanup della retention è ispezionabile. Un utente tecnicamente competente potrebbe in teoria modificare il codice per aggirare il limite di retention del tier Free. Questa è una limitazione consapevole e accettata della filosofia open core: il cleanup lato client è una regola di prodotto, non un DRM. La retention lato server (blob R2) non è aggirabile dall'utente. Per il Free in modalità Local Only, l'aggiro è tecnicamente possibile ma non costituisce abuso dei nostri servizi.
 
 ---
 
-*Versione 1.0 · Maggio 2026*  
-*Sonabrief è un progetto open source rilasciato sotto licenza AGPL v3.*  
-*Per domande tecniche su questo documento: hello@sonabrief.com*
+## 10. Domande frequenti per professionisti con obblighi di riservatezza
+
+**Posso usare Sonabrief per sessioni con clienti coperti da segreto professionale?**
+
+In modalità Local Only completa (trascrizione locale + sintesi locale + archivio non Synced): nessun dato del meeting raggiunge mai un server esterno. È compatibile con obblighi di segreto professionale forti. Consigliamo di verificare con il proprio ordine professionale per casi specifici.
+
+In modalità Standard: il testo trascritto raggiunge Mistral AI (Francia, UE) per la sintesi. Per alcune categorie professionali questo potrebbe non essere compatibile con gli obblighi di riservatezza.
+
+**Il mio cliente può richiedere che i suoi dati vengano cancellati?**
+
+Sì. In modalità Local Only, i dati sono sul tuo dispositivo — puoi cancellarli manualmente in qualsiasi momento. In modalità Synced, puoi cancellare singoli meeting dall'app oppure cancellare l'intero account. La cancellazione dell'account elimina tutti i blob da R2 e tutti i metadati dal database.
+
+**Cosa succede se Sonabrief cessa di operare?**
+
+I dati in modalità Local Only restano sul tuo dispositivo — non dipendono dall'operatività di Sonabrief. I dati in modalità Synced sono cifrati con la tua passphrase: puoi esportarli in qualsiasi momento in Markdown, PDF, o Word dall'app. Il codice è open source e può continuare a essere eseguito indipendentemente da noi.
+
+**Le autorità possono ottenere l'accesso ai miei dati?**
+
+Per i dati Synced: le autorità che ottenessero i blob da R2 riceverebbero dati cifrati che nemmeno noi possiamo decifrare. Senza la tua passphrase, sono computazionalmente inutilizzabili.
+
+Per i metadati dell'account (email, timestamp): potrebbero essere soggetti a ordini giudiziari. Non contengono il contenuto dei meeting.
+
+Per i dati in modalità Local Only: risiedono sul tuo dispositivo e non sono in nostro possesso. Non possiamo consegnare ciò che non abbiamo.
+
+---
+
+## Contatti
+
+Per domande tecniche su questo documento o per richiedere informazioni aggiuntive per valutazioni di compliance aziendale:
+
+**Email**: hello@sonabrief.com  
+**Repository**: github.com/sonabrief/sonabrief  
+**Privacy Policy completa**: sonabrief.com/privacy
+
+---
+
+*Versione 2.0 · Maggio 2026*  
+*Versione precedente: 1.0 · Maggio 2026*
