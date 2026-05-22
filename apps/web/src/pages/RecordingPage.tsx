@@ -359,18 +359,26 @@ export default function RecordingPage() {
       if (event.type === 'error') setWhisperState('error')
     })
     whisper.load('Xenova/whisper-small')
-    fetch(`${API_URL}/v1/templates`, { credentials: 'include' })
+    // templates caricati da useEffect separato
+    return () => { unsub(); whisper.destroy() }
+  }, [])
+
+  useEffect(() => {
+    fetch(`${API_URL}/v1/templates?language=${language}`, { credentials: 'include' })
       .then(r => r.ok ? r.json() : [])
       .then((data: { id: string; name: string; system_prompt: string }[]) => {
         if (Array.isArray(data) && data.length) {
           setTemplates(data)
-          const defaultTpl = data.find(t => t.id === 'sys_generic_it_v2') ?? data[0]
-          if (defaultTpl) setTemplatePrompt(defaultTpl.system_prompt)
+          const genericId = `sys_generic_${language}_v${language === 'it' ? '2' : '1'}`
+          const defaultTpl = data.find(t => t.id === genericId) ?? data[0]
+          if (defaultTpl) {
+            setSelectedTemplate(defaultTpl.id)
+            setTemplatePrompt(defaultTpl.system_prompt)
+          }
         }
       })
       .catch(() => {})
-    return () => { unsub(); whisper.destroy() }
-  }, [])
+  }, [language])
 
   useEffect(() => {
     const tpl = templates.find(t => t.id === selectedTemplate)
@@ -579,7 +587,7 @@ export default function RecordingPage() {
     setCopyDone(false)
     meetingIdRef.current = ''
     localStorage.removeItem(NOTES_KEY)
-    setSelectedTemplate('sys_generic_it_v2')
+    setSelectedTemplate(`sys_generic_${language}_v${language === 'it' ? '2' : '1'}`)
     setWhisperState('ready')
     setTranscribeProgress(0)
     setShowTranscribeComplete(false)

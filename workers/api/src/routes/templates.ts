@@ -36,33 +36,40 @@ export async function handleTemplates(req: Request, env: Env): Promise<Response>
   // GET /v1/templates
   if (method === "GET") {
     const tier = await getUserTier(env, session.userId);
+    const lang = url.searchParams.get("language") ?? null;
 
-    const FREE_SYSTEM_TEMPLATES = [
-      'sys_generic_it_v2',
-      'sys_client_meeting_it_v1',
-      'sys_one_on_one_it_v1',
+    const FREE_SYSTEM_IDS = [
+      'sys_generic_it_v2', 'sys_generic_en_v1', 'sys_generic_fr_v1', 'sys_generic_es_v1', 'sys_generic_de_v1',
+      'sys_client_meeting_it_v1', 'sys_client_meeting_en_v1', 'sys_client_meeting_fr_v1', 'sys_client_meeting_es_v1', 'sys_client_meeting_de_v1',
+      'sys_one_on_one_it_v1', 'sys_one_on_one_en_v1', 'sys_one_on_one_fr_v1', 'sys_one_on_one_es_v1', 'sys_one_on_one_de_v1',
     ];
 
     let rows;
     if (tier === 'free') {
-      const placeholders = FREE_SYSTEM_TEMPLATES.map(() => '?').join(', ');
+      const ids = lang
+        ? FREE_SYSTEM_IDS.filter(id => id.includes(`_${lang}_`) || id.includes(`_${lang}_v`))
+        : FREE_SYSTEM_IDS;
+      const placeholders = ids.map(() => '?').join(', ');
       rows = await env.DB.prepare(
         `SELECT id, user_id, name, description, language, system_prompt, output_structure, is_system, parent_id, created_at, updated_at
          FROM templates
          WHERE is_system = 1 AND id IN (${placeholders})
          ORDER BY created_at ASC`
       )
-        .bind(...FREE_SYSTEM_TEMPLATES)
+        .bind(...ids)
         .all();
     } else {
-      rows = await env.DB.prepare(
-        `SELECT id, user_id, name, description, language, system_prompt, output_structure, is_system, parent_id, created_at, updated_at
-         FROM templates
-         WHERE is_system = 1 OR user_id = ?
-         ORDER BY is_system DESC, created_at ASC`
-      )
-        .bind(session.userId)
-        .all();
+      const langFilter = lang ? `AND (language = ? OR user_id = ?)` : '';
+      const query = `
+        SELECT id, user_id, name, description, language, system_prompt, output_structure, is_system, parent_id, created_at, updated_at
+        FROM templates
+        WHERE (is_system = 1 OR user_id = ?)
+        ${langFilter}
+        ORDER BY is_system DESC, created_at ASC`;
+      const stmt = lang
+        ? env.DB.prepare(query).bind(session.userId, lang, session.userId)
+        : env.DB.prepare(query).bind(session.userId);
+      rows = await stmt.all();
     }
 
     return json(rows.results);
