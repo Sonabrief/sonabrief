@@ -433,6 +433,16 @@ export default function RecordingPage() {
     }).catch(err => console.error('[db] salvataggio meeting fallito:', err))
   }, [synthesisState])
 
+  // ── Wake Lock: impedisce blocco schermo durante registrazione
+  useEffect(() => {
+    if (!('wakeLock' in navigator)) return
+    let lock: WakeLockSentinel | null = null
+    if (isRecording && !paused) {
+      navigator.wakeLock.request('screen').then(l => { lock = l }).catch(() => {})
+    }
+    return () => { lock?.release().catch(() => {}) }
+  }, [isRecording, paused])
+  
   // ── Quick note shortcut
   const triggerQuickNote = useCallback(() => {
     if (state !== 'recording') return
