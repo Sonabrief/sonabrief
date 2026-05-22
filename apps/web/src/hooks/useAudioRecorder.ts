@@ -31,6 +31,7 @@ export interface UseAudioRecorderReturn {
   stream: MediaStream | null
   sessionId: string | null
   chunkCount: number
+  chunkSession: ChunkStoreSession | null
 }
 
 export function useAudioRecorder(): UseAudioRecorderReturn {
@@ -42,6 +43,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [chunkCount, setChunkCount] = useState(0)
+  const [chunkSession, setChunkSession] = useState<ChunkStoreSession | null>(null)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
@@ -64,6 +66,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     chunkIndexRef.current = 0
     setChunkCount(0)
     setSessionId(null)
+    setChunkSession(null)
     setStream(null)
   }, [])
 
@@ -108,6 +111,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       chunkIndexRef.current = 0
       chunkStartMsRef.current = Date.now()
       setSessionId(chunkSession.sessionId)
+      setChunkSession(chunkSession)
       setChunkCount(0)
 
       setStream(recordStream)
@@ -190,5 +194,5 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     setPaused(false)
   }, [cleanup])
 
-  return { state, duration, error, paused, start, stop, pause, resume, audioData, reset, stream, sessionId, chunkCount }
+  return { state, duration, error, paused, start, stop, pause, resume, audioData, reset, stream, sessionId, chunkCount, chunkSession }
 }

@@ -1,12 +1,15 @@
 import sodium from 'libsodium-wrappers-sumo'
 import { db } from './db'
 import type { RecordingChunk } from './db'
+import { extractWebMHeader } from './audio'
 
 export interface ChunkStoreSession {
   sessionId: string
   encryptChunk: (blob: Blob, chunkIndex: number, startMs: number) => Promise<string>
   getTranscribableChunks: () => Promise<RecordingChunk[]>
   decryptChunk: (chunk: RecordingChunk) => Promise<Blob>
+  getFirstChunkBlob: () => Promise<Blob | null>
+  getWebMHeader: () => Uint8Array | null
   markTranscribed: (chunkIds: string[]) => Promise<void>
   deleteTranscribed: () => Promise<void>
   deleteAll: () => Promise<void>
@@ -16,6 +19,7 @@ export async function createChunkSession(mimeType: string): Promise<ChunkStoreSe
   await sodium.ready
   const sessionId = crypto.randomUUID()
   const key = sodium.randombytes_buf(sodium.crypto_aead_xchacha20poly1305_ietf_KEYBYTES)
+  let webmHeader: Uint8Array | null = null
 
   async function encryptChunk(blob: Blob, chunkIndex: number, startMs: number): Promise<string> {
     const id = crypto.randomUUID()
@@ -34,6 +38,12 @@ export async function createChunkSession(mimeType: string): Promise<ChunkStoreSe
       status: 'pending',
       createdAt: Date.now(),
     })
+
+    // Estrai header WebM dal primo chunk per uso futuro
+    if (chunkIndex === 0 && !webmHeader) {
+      webmHeader = await extractWebMHeader(blob)
+    }
+
     return id
   }
 
@@ -64,13 +74,22 @@ export async function createChunkSession(mimeType: string): Promise<ChunkStoreSe
       .delete()
   }
 
+  async function getFirstChunkBlob(): Promise<Blob | null> {
+    const first = await db.recording_chunks
+      .where('sessionId').equals(sessionId)
+      .and(c => c.chunkIndex === 0)
+      .first()
+    if (!first) return null
+    return decryptChunk(first)
+  }
+
   async function deleteAll(): Promise<void> {
     await db.recording_chunks
       .where('sessionId').equals(sessionId)
       .delete()
   }
 
-  return { sessionId, encryptChunk, getTranscribableChunks, decryptChunk, markTranscribed, deleteTranscribed, deleteAll }
+  return { sessionId, encryptChunk, getTranscribableChunks, decryptChunk, getFirstChunkBlob, getWebMHeader: () => webmHeader, markTranscribed, deleteTranscribed, deleteAll }
 }
 
 // Cerca chunk orfani di sessioni precedenti (crash recovery)

@@ -63,6 +63,14 @@ export interface RecordingChunk {
   createdAt: number
 }
 
+export interface RecordingSession {
+  sessionId: string      // primary key
+  partialText: string    // trascrizione accumulata fino ad ora
+  lang: string
+  startedAt: number
+  updatedAt: number
+}
+
 class SonabriefDB extends Dexie {
   meetings!: Table<Meeting>
   transcripts!: Table<Transcript>
@@ -70,6 +78,7 @@ class SonabriefDB extends Dexie {
   action_items!: Table<ActionItem>
   embeddings!: Table<Embedding>
   recording_chunks!: Table<RecordingChunk>
+  recording_sessions!: Table<RecordingSession>
 
   constructor() {
     super('sonabrief')
@@ -112,6 +121,15 @@ class SonabriefDB extends Dexie {
       action_items:      '&id, meetingId, completed, createdAt',
       embeddings:        '&meetingId, createdAt',
       recording_chunks:  '&id, sessionId, chunkIndex, status, createdAt',
+    })
+    this.version(7).stores({
+      meetings:           '&id, startedAt, mode, clientName, projectStream',
+      transcripts:        '&id, meetingId',
+      notes:              '&id, meetingId',
+      action_items:       '&id, meetingId, completed, createdAt',
+      embeddings:         '&meetingId, createdAt',
+      recording_chunks:   '&id, sessionId, chunkIndex, status, createdAt',
+      recording_sessions: '&sessionId, updatedAt',
     })
   }
 }

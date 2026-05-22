@@ -10,6 +10,7 @@ type WhisperStatus =
   | { type: 'ready' }
   | { type: 'transcribing' }
   | { type: 'result'; text: string; segments: unknown[] }
+  | { type: 'chunk_result'; text: string; segments: unknown[]; batchId: string }
   | { type: 'error'; message: string }
 
 // @ts-ignore
@@ -51,6 +52,21 @@ self.onmessage = async (e: MessageEvent) => {
   try {
     if (action === 'load') await loadModel(payload.model)
     if (action === 'transcribe') await transcribe(payload.audio, payload.language)
+    if (action === 'transcribe_chunk') {
+      const { audio, language, batchId } = payload
+      if (!transcriber) throw new Error('Model not loaded')
+      const result = await transcriber(audio, {
+        return_timestamps: true,
+        language,
+      })
+      const output = Array.isArray(result) ? result[0] : result
+      self.postMessage({
+        type: 'chunk_result',
+        text: (output as { text?: string }).text ?? '',
+        segments: (output as { chunks?: unknown[] }).chunks ?? [],
+        batchId,
+      } satisfies WhisperStatus)
+    }
   } catch (err) {
     self.postMessage({
       type: 'error',

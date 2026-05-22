@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { Mic, Monitor, Video } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAudioRecorder } from '../hooks/useAudioRecorder'
+import { useChunkedTranscription } from '../hooks/useChunkedTranscription'
 import { whisper } from '../lib/whisper'
 import { Button } from '../components/ui/button'
 import { API_URL } from '../config'
@@ -221,7 +222,8 @@ function SourceButton({
 
 export default function RecordingPage() {
   const navigate = useNavigate()
-  const { state, duration, error, paused, start, stop, pause, resume, audioData, reset, stream } = useAudioRecorder()
+  const { state, duration, error, paused, start, stop, pause, resume, audioData, reset, stream, chunkSession } = useAudioRecorder()
+  const [partialTranscript, setPartialTranscript] = useState('')
   const [whisperState, setWhisperState] = useState<'loading' | 'ready' | 'transcribing' | 'done' | 'error'>('loading')
   const [whisperProgress, setWhisperProgress] = useState(0)
   const [transcript, setTranscript] = useState('')
@@ -250,6 +252,7 @@ export default function RecordingPage() {
   const notesTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const quickNoteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const quickNoteInputRef = useRef<HTMLInputElement>(null)
+  const lastSessionIdRef = useRef<string | null>(null)
 
   // ── Derived state
   const canStart = state === 'idle' && whisperState === 'ready'
@@ -259,6 +262,14 @@ export default function RecordingPage() {
   const isDone = state === 'done' && whisperState === 'done'
   const showNotesArea = isRecording || isProcessing || isTranscribing || isDone
   const shortcutLabel = IS_MAC ? '⌘E' : 'Ctrl+E'
+
+  const { reset: resetChunked } = useChunkedTranscription({
+    session: chunkSession,
+    sessionId: chunkSession?.sessionId ?? null,
+    language,
+    isRecording,
+    onPartialTranscript: setPartialTranscript,
+  })
 
   // ── Export data builder
   function buildExportData() {
@@ -405,6 +416,9 @@ export default function RecordingPage() {
       }
       saveActionItemsFromNote(id, synthesis)
       saveEmbeddingForMeeting(id, synthesis)
+      if (chunkSession) {
+        db.recording_sessions.delete(chunkSession.sessionId).catch(() => {})
+      }
     }).catch(err => console.error('[db] salvataggio meeting fallito:', err))
   }, [synthesisState])
 
@@ -440,11 +454,26 @@ export default function RecordingPage() {
     return () => clearInterval(timer)
   }, [isTranscribing])
 
+  // Tieni traccia dell'ultimo sessionId attivo
+  useEffect(() => {
+    if (chunkSession?.sessionId) {
+      lastSessionIdRef.current = chunkSession.sessionId
+    }
+  }, [chunkSession])
+
   useEffect(() => {
     if (whisperState !== 'done') return
     setTranscribeProgress(100)
     setShowTranscribeComplete(true)
     const t = setTimeout(() => setShowTranscribeComplete(false), 1500)
+
+    // Usa l'ultimo sessionId noto (chunkSession potrebbe essere già null)
+    const sessionIdToDelete = lastSessionIdRef.current
+    if (sessionIdToDelete) {
+      db.recording_sessions.delete(sessionIdToDelete).catch(() => {})
+      lastSessionIdRef.current = null
+    }
+
     return () => clearTimeout(t)
   }, [whisperState])
 
@@ -528,7 +557,13 @@ export default function RecordingPage() {
   }
 
   function handleNewRecording() {
+    const sessionIdToDelete = chunkSession?.sessionId ?? null
     reset()
+    resetChunked()
+    if (sessionIdToDelete) {
+      db.recording_sessions.delete(sessionIdToDelete).catch(() => {})
+    }
+    setPartialTranscript('')
     setTranscript('')
     setSegments([])
     setSynthesis('')
@@ -575,7 +610,7 @@ export default function RecordingPage() {
       <AppNav />
 
       <main className="mx-auto max-w-4xl px-6 py-10">
-        <RecoveryBanner />
+        {state === 'idle' && <RecoveryBanner />}
         <div className="lg:grid lg:grid-cols-[3fr_2fr] lg:gap-10">
 
           {/* ── Left column: recording workspace ──────────────────── */}

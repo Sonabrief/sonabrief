@@ -1,10 +1,11 @@
-export type WhisperModel = 'Xenova/whisper-tiny' | 'Xenova/whisper-base' | 'Xenova/whisper-small'
+export type WhisperModel = 'Xenova/whisper-tiny' | 'Xenova/whisper-base' | 'Xenova/whisper-small' | 'onnx-community/whisper-large-v3-turbo'
 
 export type WhisperEvent =
   | { type: 'loading'; progress: number; file: string }
   | { type: 'ready' }
   | { type: 'transcribing' }
   | { type: 'result'; text: string; segments: unknown[] }
+  | { type: 'chunk_result'; text: string; segments: unknown[]; batchId: string }
   | { type: 'error'; message: string }
 
 type Listener = (event: WhisperEvent) => void
@@ -30,6 +31,10 @@ class WhisperService {
 
   transcribe(audio: Float32Array, language?: string) {
     this.worker?.postMessage({ action: 'transcribe', payload: { audio, language } })
+  }
+
+  transcribeChunk(audio: Float32Array, language: string, batchId: string) {
+    this.worker?.postMessage({ action: 'transcribe_chunk', payload: { audio, language, batchId } })
   }
 
   on(listener: Listener) {

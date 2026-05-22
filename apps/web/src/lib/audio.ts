@@ -79,6 +79,50 @@ export async function blobToFloat32Array(blob: Blob): Promise<Float32Array> {
   return resampled.getChannelData(0)
 }
 
+/**
+ * Estrae l'header WebM (tutto fino al primo Cluster) dal primo chunk di MediaRecorder.
+ * L'header così estratto può essere prependiato ai chunk successivi per renderli decodificabili.
+ */
+export async function extractWebMHeader(firstChunk: Blob): Promise<Uint8Array | null> {
+  try {
+    const buffer = new Uint8Array(await firstChunk.arrayBuffer())
+    const CLUSTER_ID = [0x1F, 0x43, 0xB6, 0x75]
+
+    for (let i = 0; i < buffer.length - 4; i++) {
+      if (
+        buffer[i] === CLUSTER_ID[0] &&
+        buffer[i + 1] === CLUSTER_ID[1] &&
+        buffer[i + 2] === CLUSTER_ID[2] &&
+        buffer[i + 3] === CLUSTER_ID[3]
+      ) {
+        return buffer.slice(0, i)
+      }
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Decodifica un chunk WebM senza header prependendo l'header estratto dal primo chunk.
+ */
+export async function blobToFloat32ArrayChunk(
+  chunk: Blob,
+  header: Uint8Array | null,
+  isFirstChunk: boolean,
+): Promise<Float32Array> {
+  if (isFirstChunk || !header) {
+    return blobToFloat32Array(chunk)
+  }
+  const chunkBuffer = new Uint8Array(await chunk.arrayBuffer())
+  const combined = new Uint8Array(header.length + chunkBuffer.length)
+  combined.set(header, 0)
+  combined.set(chunkBuffer, header.length)
+  const reconstructed = new Blob([combined], { type: chunk.type })
+  return blobToFloat32Array(reconstructed)
+}
+
 /** Ferma tutte le tracce di uno stream e libera risorse */
 export function stopStream(stream: MediaStream | null) {
   stream?.getTracks().forEach(t => t.stop())
