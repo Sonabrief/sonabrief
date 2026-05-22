@@ -8,6 +8,13 @@ import {
 import { API_URL } from '../config'
 import { AppNav } from '../components/AppNav'
 import { Button } from '../components/ui/button'
+import {
+  isWebAuthnSupported,
+  listPasskeys,
+  registerPasskey,
+  deletePasskey,
+  type PasskeyCredential,
+} from '../lib/webauthn'
 
 const fadeUp = {
   initial: { opacity: 0, y: 8 },
@@ -137,6 +144,59 @@ export default function ProfilePage() {
   const [deleteInput, setDeleteInput] = useState('')
   const [deleting, setDeleting] = useState(false)
   const [portalLoading, setPortalLoading] = useState(false)
+  const passkeySupported = useMemo(() => isWebAuthnSupported(), [])
+  const [passkeys, setPasskeys] = useState<PasskeyCredential[]>([])
+  const [passkeyDeviceName, setPasskeyDeviceName] = useState('')
+  const [passkeyAdding, setPasskeyAdding] = useState(false)
+  const [passkeyError, setPasskeyError] = useState<string | null>(null)
+
+  async function refreshPasskeys() {
+    try {
+      const list = await listPasskeys()
+      setPasskeys(list)
+    } catch {
+      // Silenzioso: utente vede la lista vuota se la chiamata fallisce
+    }
+  }
+
+  async function handleAddPasskey() {
+    if (!passkeyDeviceName.trim()) return
+    setPasskeyAdding(true)
+    setPasskeyError(null)
+    try {
+      await registerPasskey(passkeyDeviceName.trim())
+      setPasskeyDeviceName('')
+      await refreshPasskeys()
+    } catch (err) {
+      console.error('[passkey register]', err)
+      const name = (err as Error & { name?: string })?.name
+      if (name === 'NotAllowedError') {
+        setPasskeyError('Operazione annullata')
+      } else {
+        setPasskeyError('Impossibile aggiungere la passkey. Riprova.')
+      }
+    }
+    setPasskeyAdding(false)
+  }
+
+  async function handleDeletePasskey(id: string) {
+    if (!window.confirm('Eliminare questa passkey?')) return
+    try {
+      await deletePasskey(id)
+      await refreshPasskeys()
+    } catch {
+      setPasskeyError('Impossibile eliminare la passkey. Riprova.')
+    }
+  }
+
+  function formatPasskeyDate(ts: number | null): string {
+    if (!ts) return '—'
+    return new Date(ts).toLocaleDateString('it-IT', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    })
+  }
 
   const filteredProfessions = useMemo(() =>
     professionSearch.trim()
@@ -165,7 +225,10 @@ export default function ProfilePage() {
       setProfession(p.profession ?? '')
       setPrefsLoaded(true)
     })
-  }, [])
+    if (passkeySupported) {
+      refreshPasskeys()
+    }
+  }, [passkeySupported])
 
   async function handleSavePrefs() {
     setSaving(true)
@@ -234,6 +297,83 @@ export default function ProfilePage() {
                 <Row label="Ciclo">
                   {billingCycle === 'monthly' ? 'Mensile' : 'Annuale'}
                 </Row>
+              )}
+            </div>
+          </motion.section>
+
+          {/* ── Passkey ─────────────────────────────────── */}
+          <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.03 }} aria-labelledby="passkey-heading">
+            <div className="mb-4">
+              <SectionHeading>
+                <span id="passkey-heading">Passkey</span>
+              </SectionHeading>
+            </div>
+            <div className="rounded-lg border border-border bg-card px-5 py-4 space-y-4">
+              {!passkeySupported ? (
+                <p className="text-sm text-muted-foreground">
+                  Le passkey non sono supportate su questo browser.
+                </p>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Accedi senza email con il riconoscimento biometrico del tuo dispositivo.
+                  </p>
+
+                  {passkeys.length > 0 && (
+                    <ul className="space-y-2">
+                      {passkeys.map(pk => (
+                        <li
+                          key={pk.id}
+                          className="flex items-center justify-between gap-4 rounded-md border border-border bg-background px-3 py-2"
+                        >
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium text-foreground">
+                              {pk.device_name || 'Dispositivo senza nome'}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Aggiunta il {formatPasskeyDate(pk.created_at)}
+                              {pk.last_used_at && ` · Ultimo uso ${formatPasskeyDate(pk.last_used_at)}`}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => handleDeletePasskey(pk.id)}
+                            className="shrink-0 text-sm text-destructive transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive motion-reduce:transition-none"
+                          >
+                            Elimina
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  <div className="space-y-2">
+                    <label htmlFor="passkey-device-name" className="text-sm text-muted-foreground">
+                      Nome dispositivo
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        id="passkey-device-name"
+                        type="text"
+                        value={passkeyDeviceName}
+                        onChange={e => setPasskeyDeviceName(e.target.value)}
+                        placeholder="MacBook Pro, iPhone…"
+                        className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      />
+                      <Button
+                        onClick={handleAddPasskey}
+                        disabled={passkeyAdding || !passkeyDeviceName.trim()}
+                        className="h-9 px-4 text-sm"
+                      >
+                        {passkeyAdding ? 'Aggiunta…' : 'Aggiungi passkey'}
+                      </Button>
+                    </div>
+                    {passkeyError && (
+                      <p role="alert" className="text-sm text-destructive">
+                        {passkeyError}
+                      </p>
+                    )}
+                  </div>
+                </>
               )}
             </div>
           </motion.section>

@@ -8,6 +8,11 @@ const RETENTION_DAYS: Record<string, number> = {
 export async function handleRetentionCleanup(env: Env): Promise<void> {
   const now = Date.now();
 
+  // Pulisci challenge WebAuthn scaduti (5 min TTL — accumulano rapidamente)
+  await env.DB.prepare(`DELETE FROM webauthn_challenges WHERE expires_at < ?`)
+    .bind(now)
+    .run();
+
   for (const [tier, days] of Object.entries(RETENTION_DAYS)) {
     const cutoff = now - days * 24 * 60 * 60 * 1000;
 

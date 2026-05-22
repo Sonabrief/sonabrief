@@ -16,6 +16,7 @@
     "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
     "@fontsource/instrument-serif": "^5.2.8",
     "@huggingface/transformers": "3.5.2",
+    "@simplewebauthn/browser": "^13.3.0",
     "@tiptap/extension-typography": "^3.23.4",
     "@tiptap/react": "^3.23.4",
     "@tiptap/starter-kit": "^3.23.4",

@@ -19,6 +19,14 @@ import { handleGetPreferences, handleSavePreferences } from "./routes/preference
 import { handleDeleteAccount } from "./routes/account";
 import { handleRetentionCleanup } from "./routes/cron-retention";
 import { handleGoogleStart, handleGoogleCallback, handleCalendarEvents, handleCalendarDisconnect, handleMicrosoftStart, handleMicrosoftCallback, handleMicrosoftCalendarEvents, handleMicrosoftDisconnect } from "./routes/calendar";
+import {
+  handleWebAuthnRegisterOptions,
+  handleWebAuthnRegisterVerify,
+  handleWebAuthnAuthenticateOptions,
+  handleWebAuthnAuthenticateVerify,
+  handleWebAuthnList,
+  handleWebAuthnDelete,
+} from "./routes/webauthn";
 
 export type { Env };
 
@@ -40,6 +48,18 @@ export default {
       response = await handleAuthLogout(request, env);
     } else if (url.pathname === "/auth/me" && request.method === "GET") {
       response = await handleAuthMe(request, env);
+    } else if (url.pathname === "/auth/webauthn/register/options" && request.method === "POST") {
+      response = await handleWebAuthnRegisterOptions(request, env);
+    } else if (url.pathname === "/auth/webauthn/register/verify" && request.method === "POST") {
+      response = await handleWebAuthnRegisterVerify(request, env);
+    } else if (url.pathname === "/auth/webauthn/authenticate/options" && request.method === "POST") {
+      response = await handleWebAuthnAuthenticateOptions(request, env);
+    } else if (url.pathname === "/auth/webauthn/authenticate/verify" && request.method === "POST") {
+      response = await handleWebAuthnAuthenticateVerify(request, env);
+    } else if (url.pathname === "/auth/webauthn/credentials" && request.method === "GET") {
+      response = await handleWebAuthnList(request, env);
+    } else if (url.pathname === "/auth/webauthn/credentials" && request.method === "DELETE") {
+      response = await handleWebAuthnDelete(request, env);
     } else if (url.pathname === "/v1/synthesize" && request.method === "POST") {
       response = await handleSynthesize(request, env);
     } else if (url.pathname.startsWith("/v1/templates")) {

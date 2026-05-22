@@ -1,11 +1,32 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { KeyRound } from 'lucide-react'
 import { API_URL } from '../config'
+import { isWebAuthnSupported, loginWithPasskey } from '../lib/webauthn'
 
 export default function LoginPage() {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [passkeyLoading, setPasskeyLoading] = useState(false)
+  const passkeySupported = isWebAuthnSupported()
+
+  async function handlePasskeyLogin() {
+    setPasskeyLoading(true); setError(null)
+    try {
+      await loginWithPasskey()
+      navigate('/dashboard', { replace: true })
+    } catch (err) {
+      console.error('[passkey login]', err)
+      const name = (err as Error & { name?: string })?.name
+      if (name === 'NotAllowedError') setError('Operazione annullata')
+      else setError('Passkey non riconosciuta. Prova con email.')
+    } finally {
+      setPasskeyLoading(false)
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -71,6 +92,27 @@ export default function LoginPage() {
         <h1 className="mb-6 font-heading text-[clamp(1.875rem,4vw,3rem)] font-extrabold leading-[1.1] tracking-[-0.02em] text-foreground">
           Accedi a Sonabrief
         </h1>
+
+        {passkeySupported && (
+          <>
+            <button
+              type="button"
+              onClick={handlePasskeyLogin}
+              disabled={passkeyLoading}
+              aria-busy={passkeyLoading}
+              className="mb-4 flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 motion-reduce:transition-none"
+            >
+              <KeyRound className="h-4 w-4" aria-hidden="true" />
+              {passkeyLoading ? 'Verifica in corso…' : 'Accedi con passkey'}
+            </button>
+
+            <div className="my-4 flex items-center gap-3">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs uppercase tracking-widest text-muted-foreground">oppure</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+          </>
+        )}
 
         <form onSubmit={handleSubmit} noValidate>
           <div>

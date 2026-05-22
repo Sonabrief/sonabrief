@@ -20,6 +20,10 @@ export interface Env {
   MICROSOFT_CLIENT_ID: string;
   MICROSOFT_CLIENT_SECRET: string;
 
+  // WebAuthn / passkeys
+  WEBAUTHN_RP_ID: string;
+  WEBAUTHN_RP_NAME: string;
+
   // Polar (MoR primario)
   POLAR_API_KEY: string;
   POLAR_WEBHOOK_SECRET: string;
