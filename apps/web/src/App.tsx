@@ -1,5 +1,8 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
+import { useEffect, useState } from 'react';
+import { isPrivateMode } from './lib/privateMode';
+import { PrivateModeWarning } from './components/PrivateModeWarning';
 import LoginPage from './pages/LoginPage';
 import VerifyPage from './pages/VerifyPage';
 import DashboardPage from './pages/DashboardPage';
@@ -110,6 +113,14 @@ function AnimatedRoutes() {
 }
 
 export default function App() {
+  const [privateMode, setPrivateMode] = useState(false);
+
+  useEffect(() => {
+    isPrivateMode().then(result => { if (result) setPrivateMode(true); });
+  }, []);
+
+  if (privateMode) return <PrivateModeWarning />;
+
   return (
     <BrowserRouter>
       <div className="min-h-screen flex flex-col">
