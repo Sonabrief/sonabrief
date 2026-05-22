@@ -16,9 +16,14 @@ type WhisperStatus =
 // @ts-ignore
 let transcriber: Awaited<ReturnType<typeof pipeline>> | null = null
 
+self.addEventListener('unhandledrejection', (e) => {
+  const msg = e.reason instanceof Error ? e.reason.message : String(e.reason)
+  self.postMessage({ type: 'error', message: msg })
+})
+
 async function loadModel(model: string) {
   transcriber = await pipeline('automatic-speech-recognition', model, {
-    dtype: 'fp32',
+    dtype: 'q4',
     progress_callback: (p: { status: string; progress?: number; file?: string }) => {
       if (p.status === 'downloading' || p.status === 'loading') {
         self.postMessage({

@@ -358,7 +358,7 @@ export default function RecordingPage() {
       }
       if (event.type === 'error') setWhisperState('error')
     })
-    whisper.load('Xenova/whisper-small')
+    whisper.loadAuto()
     // templates caricati da useEffect separato
     return () => { unsub(); whisper.destroy() }
   }, [])

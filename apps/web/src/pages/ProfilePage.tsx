@@ -16,7 +16,7 @@ import {
   type PasskeyCredential,
 } from '../lib/webauthn'
 import { useBackupScheduler, type BackupFrequency } from '../hooks/useBackupScheduler'
-
+import { setModelOverride, detectWhisperModel, WHISPER_LARGE, WHISPER_SMALL, type WhisperModelId } from '../lib/whisperModel'
 const fadeUp = {
   initial: { opacity: 0, y: 8 },
   animate: { opacity: 1, y: 0 },
@@ -153,6 +153,8 @@ export default function ProfilePage() {
   const [backupFrequency, setBackupFrequency] = useState<BackupFrequency>('24h')
   const [lastBackupAt, setLastBackupAt] = useState<number | null>(null)
   const [backupRunning, setBackupRunning] = useState(false)
+  const [whisperOverride, setWhisperOverride] = useState<WhisperModelId | null>(null)
+  const detectedModel = useMemo(() => detectWhisperModel(), [])
 
   useBackupScheduler(tier, backupFrequency, (at) => setLastBackupAt(at))
 
@@ -241,6 +243,8 @@ export default function ProfilePage() {
     if (saved) setLastBackupAt(Number(saved))
     const freq = localStorage.getItem('sb_backup_frequency') as BackupFrequency | null
     if (freq) setBackupFrequency(freq)
+    const override = localStorage.getItem('whisper_model_override') as WhisperModelId | null
+    setWhisperOverride(override)
   }, [])
 
   async function handleSavePrefs() {
@@ -582,6 +586,50 @@ export default function ProfilePage() {
                   )}
                 </AnimatePresence>
               </div>
+            </div>
+          </motion.section>
+          {/* ── Trascrizione ────────────────────────────── */}
+          <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.14 }} aria-labelledby="transcription-heading">
+            <div className="mb-4">
+              <SectionHeading>
+                <span id="transcription-heading">Trascrizione</span>
+              </SectionHeading>
+            </div>
+            <div className="rounded-lg border border-border bg-card px-5 py-4 space-y-4">
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Modello Whisper usato per trascrivere i tuoi meeting. Il rilevamento automatico sceglie in base all'hardware del tuo computer.
+              </p>
+              <div className="space-y-1.5">
+                <label htmlFor="whisper-model-select" className="text-sm text-muted-foreground">
+                  Modello di trascrizione
+                </label>
+                <select
+                  id="whisper-model-select"
+                  value={whisperOverride ?? 'auto'}
+                  onChange={e => {
+                    const v = e.target.value
+                    if (v === 'auto') {
+                      setModelOverride(null)
+                      setWhisperOverride(null)
+                    } else {
+                      setModelOverride(v as WhisperModelId)
+                      setWhisperOverride(v as WhisperModelId)
+                    }
+                  }}
+                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <option value="auto">
+                    Automatico (rilevato: {detectedModel === WHISPER_LARGE ? 'Large-v3-turbo' : 'Small'})
+                  </option>
+                  <option value={WHISPER_LARGE}>Large-v3-turbo — qualità massima (~800 MB)</option>
+                  <option value={WHISPER_SMALL}>Small — compatibile con hardware limitato (~470 MB)</option>
+                </select>
+              </div>
+              {whisperOverride && (
+                <p className="text-xs text-muted-foreground">
+                  Override manuale attivo. Le modifiche hanno effetto dalla prossima registrazione.
+                </p>
+              )}
             </div>
           </motion.section>
 
