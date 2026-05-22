@@ -225,7 +225,7 @@ export default function RecordingPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { state, duration, error, paused, start, stop, pause, resume, audioData, reset, stream, chunkSession } = useAudioRecorder()
-  const [partialTranscript, setPartialTranscript] = useState('')
+  const [_partialTranscript, setPartialTranscript] = useState('')
   const [whisperState, setWhisperState] = useState<'loading' | 'ready' | 'transcribing' | 'done' | 'error'>('loading')
   const [whisperProgress, setWhisperProgress] = useState(0)
   const [transcript, setTranscript] = useState('')

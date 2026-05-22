@@ -26,6 +26,7 @@ import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import ProfilePage from './pages/ProfilePage';
 import { AppFooter } from './components/AppFooter';
+import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 
 const pageVariants = {
   initial: { opacity: 0, y: 6 },
@@ -126,6 +127,7 @@ export default function App() {
       <div className="min-h-screen flex flex-col">
         <AnimatedRoutes />
         <AppFooter />
+        <PWAInstallPrompt />
       </div>
     </BrowserRouter>
   );

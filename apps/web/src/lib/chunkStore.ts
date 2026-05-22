@@ -58,7 +58,7 @@ export async function createChunkSession(mimeType: string): Promise<ChunkStoreSe
     const plaintext = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
       null, chunk.encryptedData, null, chunk.nonce, key
     )
-    return new Blob([plaintext], { type: mimeType })
+    return new Blob([plaintext.buffer as ArrayBuffer], { type: mimeType })
   }
 
   async function markTranscribed(chunkIds: string[]): Promise<void> {

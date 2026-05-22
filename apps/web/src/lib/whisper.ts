@@ -1,4 +1,4 @@
-import { resolveWhisperModel, detectWhisperModel, WHISPER_SMALL, WHISPER_LARGE } from './whisperModel'
+import { resolveWhisperModel, WHISPER_SMALL, WHISPER_LARGE } from './whisperModel'
 
 export type WhisperModel =
   | 'Xenova/whisper-tiny'
