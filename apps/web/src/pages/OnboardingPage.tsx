@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { savePreferences } from '../lib/api'
+import { savePreferences, updateDisplayName } from '../lib/api'
 
 const PROFESSIONS: { category: string; items: string[] }[] = [
   {
@@ -90,7 +90,7 @@ const CLIENT_VOLUMES = [
   { value: 'many', label: 'Più di 15 clienti / progetti' },
 ]
 
-const TOTAL_STEPS = 5
+const TOTAL_STEPS = 6
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -165,7 +165,10 @@ export default function OnboardingPage() {
   const [meetingDuration, setMeetingDuration] = useState('')
   const [clientVolume, setClientVolume] = useState('')
 
-  // Step 5 — modalità + sync
+  // Step 5 — nome
+  const [displayName, setDisplayName] = useState('')
+
+  // Step 6 — modalità + sync
   const [synthesisMode, setSynthesisMode] = useState('standard')
   const [syncEnabled, setSyncEnabled] = useState(false)
 
@@ -190,6 +193,7 @@ export default function OnboardingPage() {
       synthesis_mode: synthesisMode,
       sync_enabled: syncEnabled ? 1 : 0,
       onboarded: 1,
+      display_name: displayName.trim() || null,
     })
     setSaving(false)
     if (syncEnabled) {
@@ -205,6 +209,7 @@ export default function OnboardingPage() {
     if (step === 3) return true
     if (step === 4) return !!meetingDuration && !!clientVolume
     if (step === 5) return true
+    if (step === 6) return true
     return false
   }
 
@@ -354,8 +359,27 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Step 5 — Modalità + Sync */}
+        {/* Step 5 — Nome */}
         {step === 5 && (
+          <div>
+            <StepTitle
+              title="Come ti chiami?"
+              sub="Il tuo nome verrà usato per personalizzare l'esperienza. Puoi saltare questo step."
+            />
+            <input
+              type="text"
+              aria-label="Il tuo nome"
+              placeholder="Es. Sofia"
+              value={displayName}
+              onChange={e => setDisplayName(e.target.value.slice(0, 50))}
+              className="w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+              autoFocus
+            />
+          </div>
+        )}
+
+        {/* Step 6 — Modalità + Sync */}
+        {step === 6 && (
           <div>
             <StepTitle
               title="Come vuoi usare Sonabrief?"
@@ -449,7 +473,7 @@ export default function OnboardingPage() {
               disabled={!canProceed()}
               className="rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
             >
-              {step === 3 ? (contextNote.trim() ? 'Continua' : 'Salta') : 'Continua'}
+              {step === 3 && !contextNote.trim() ? 'Salta' : step === 5 && !displayName.trim() ? 'Salta' : 'Continua'}
             </button>
           ) : (
             <button

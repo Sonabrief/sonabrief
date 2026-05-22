@@ -95,7 +95,7 @@ export default {
       response = await handleAdminWhitelistRemove(request, env);
     } else if (url.pathname === '/v1/preferences' && request.method === 'GET') {
       response = await handleGetPreferences(request, env)
-    } else if (url.pathname === '/v1/preferences' && request.method === 'POST') {
+    } else if (url.pathname === '/v1/preferences' && (request.method === 'POST' || request.method === 'PATCH')) {
       response = await handleSavePreferences(request, env)
     } else if (url.pathname === '/auth/google/start' && request.method === 'GET') {
       response = await handleGoogleStart(request, env)

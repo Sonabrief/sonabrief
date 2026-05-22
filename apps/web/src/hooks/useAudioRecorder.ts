@@ -50,6 +50,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
   const streamsRef = useRef<MediaStream[]>([])
   const audioContextRef = useRef<AudioContext | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const startTimeRef = useRef<number>(0)
   const chunkSessionRef = useRef<ChunkStoreSession | null>(null)
   const chunkStartMsRef = useRef(0)
   const chunkIndexRef = useRef(0)
@@ -151,9 +152,11 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
 
       recorder.start(30000)
 
+      // Timer durata — usa Date.now() per durata reale anche con tab throttling
+      startTimeRef.current = Date.now()
       timerRef.current = setInterval(() => {
-        setDuration(d => d + 1)
-      }, 1000)
+        setDuration(Math.floor((Date.now() - startTimeRef.current) / 1000))
+      }, 500)
 
     } catch (err) {
       cleanup()

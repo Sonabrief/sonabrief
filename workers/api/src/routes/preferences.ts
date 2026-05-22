@@ -11,6 +11,7 @@ interface UserPreferences {
   synthesis_mode: string
   sync_enabled: number
   onboarded: number
+  display_name: string | null
 }
 
 export async function handleGetPreferences(req: Request, env: Env): Promise<Response> {
@@ -35,6 +36,7 @@ export async function handleGetPreferences(req: Request, env: Env): Promise<Resp
       synthesis_mode: 'standard',
       sync_enabled: 0,
       onboarded: 0,
+      display_name: null,
     }), { status: 200, headers: { 'Content-Type': 'application/json' } })
   }
 
@@ -62,9 +64,9 @@ export async function handleSavePreferences(req: Request, env: Env): Promise<Res
       INSERT INTO user_preferences (
         user_id, language, profession, profession_category,
         context_note, meeting_duration, client_volume,
-        synthesis_mode, sync_enabled, onboarded,
+        synthesis_mode, sync_enabled, onboarded, display_name,
         created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(user_id) DO UPDATE SET
         language = COALESCE(excluded.language, language),
         profession = COALESCE(excluded.profession, profession),
@@ -75,6 +77,7 @@ export async function handleSavePreferences(req: Request, env: Env): Promise<Res
         synthesis_mode = COALESCE(excluded.synthesis_mode, synthesis_mode),
         sync_enabled = COALESCE(excluded.sync_enabled, sync_enabled),
         onboarded = COALESCE(excluded.onboarded, onboarded),
+        display_name = COALESCE(excluded.display_name, display_name),
         updated_at = excluded.updated_at
     `)
     .bind(
@@ -88,6 +91,7 @@ export async function handleSavePreferences(req: Request, env: Env): Promise<Res
       body.synthesis_mode ?? 'standard',
       body.sync_enabled ?? 0,
       body.onboarded ?? 0,
+      body.display_name ?? null,
       now,
       now,
     )

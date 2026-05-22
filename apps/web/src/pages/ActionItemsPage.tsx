@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { db, type ActionItem } from '../lib/db'
@@ -18,10 +18,16 @@ export default function ActionItemsPage() {
   const [items, setItems] = useState<ActionItem[]>([])
   const [filter, setFilter] = useState<Filter>('all')
   const [search, setSearch] = useState('')
+  const [filterClient, setFilterClient] = useState<string>('all')
+  const [meetings, setMeetings] = useState<Record<string, { title: string; clientName?: string }>>({})
 
   async function load() {
     const all = await db.action_items.orderBy('createdAt').reverse().toArray()
     setItems(all)
+    const allMeetings = await db.meetings.toArray()
+    const meetingMap: Record<string, { title: string; clientName?: string }> = {}
+    for (const m of allMeetings) meetingMap[m.id] = { title: m.title, clientName: m.clientName }
+    setMeetings(meetingMap)
   }
 
   useEffect(() => { load() }, [])
@@ -33,10 +39,20 @@ export default function ActionItemsPage() {
     ))
   }
 
+  const clientOptions = useMemo(() => {
+    const clients = new Set<string>()
+    for (const item of items) {
+      const client = meetings[item.meetingId]?.clientName
+      if (client) clients.add(client)
+    }
+    return [...clients].sort()
+  }, [items, meetings])
+
   const filtered = items.filter(item => {
     if (filter === 'todo' && item.completed) return false
     if (filter === 'done' && !item.completed) return false
     if (search.trim() && !item.text.toLowerCase().includes(search.toLowerCase())) return false
+    if (filterClient !== 'all' && meetings[item.meetingId]?.clientName !== filterClient) return false
     return true
   })
 
@@ -92,6 +108,36 @@ export default function ActionItemsPage() {
           ))}
         </div>
 
+        {clientOptions.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Filtra per cliente">
+            <button
+              onClick={() => setFilterClient('all')}
+              aria-pressed={filterClient === 'all'}
+              className={`rounded-md px-3 py-1 text-xs font-medium transition-colors motion-reduce:transition-none ${
+                filterClient === 'all'
+                  ? 'bg-secondary text-primary'
+                  : 'border border-border bg-card text-muted-foreground hover:bg-border'
+              }`}
+            >
+              Tutti i clienti
+            </button>
+            {clientOptions.map(c => (
+              <button
+                key={c}
+                onClick={() => setFilterClient(c)}
+                aria-pressed={filterClient === c}
+                className={`rounded-md px-3 py-1 text-xs font-medium transition-colors motion-reduce:transition-none ${
+                  filterClient === c
+                    ? 'bg-secondary text-primary'
+                    : 'border border-border bg-card text-muted-foreground hover:bg-border'
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Content */}
         <div className="mt-5">
           {filtered.length === 0 ? (
@@ -139,14 +185,19 @@ export default function ActionItemsPage() {
                       <p className={`text-sm ${item.completed ? 'text-muted-foreground line-through' : 'text-foreground'}`}>
                         {item.text}
                       </p>
-                      <div className="mt-1.5">
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2">
                         <button
-                          onClick={() => navigate('/archive')}
-                          aria-label={`Vedi meeting del ${formatDate(item.meetingDate)} nell'archivio`}
+                          onClick={() => navigate('/archive', { state: { meetingId: item.meetingId } })}
                           className="text-xs text-primary transition-colors hover:underline motion-reduce:transition-none"
                         >
-                          {formatDate(item.meetingDate)}
+                          {meetings[item.meetingId]?.title ?? formatDate(item.meetingDate)}
                         </button>
+                        {meetings[item.meetingId]?.clientName && (
+                          <span className="rounded-full bg-secondary px-2 py-0.5 text-xs text-primary">
+                            {meetings[item.meetingId].clientName}
+                          </span>
+                        )}
+                        <span className="text-xs text-muted-foreground">{formatDate(item.meetingDate)}</span>
                       </div>
                     </div>
                   </div>

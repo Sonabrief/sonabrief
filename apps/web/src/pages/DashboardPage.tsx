@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
+import { Mic } from 'lucide-react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../lib/db'
 import { API_URL } from '../config'
@@ -244,16 +245,32 @@ export default function DashboardPage() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+              aria-labelledby="nuova-sessione-heading"
             >
-              <ShimmerButton
-                onClick={() => navigate('/recording')}
-                className="h-11 px-7 text-[15px] font-semibold"
+              <div
+                className="rounded-2xl border border-border px-7 py-8"
+                style={{ background: 'color-mix(in srgb, var(--accent) 6%, var(--card))' }}
               >
-                Avvia registrazione
-              </ShimmerButton>
-              <p className="mt-3 text-sm text-muted-foreground">
-                Registra, trascrivi, archivia &mdash; tutto sul tuo computer
-              </p>
+                <p className="mb-5 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+                  Nuova sessione
+                </p>
+                <Mic className="mb-5 h-8 w-8 text-primary" strokeWidth={1.5} />
+                <h2
+                  id="nuova-sessione-heading"
+                  className="font-heading mb-1.5 text-xl font-semibold tracking-[-0.015em] text-foreground"
+                >
+                  Registra, trascrivi, archivia
+                </h2>
+                <p className="mb-8 text-sm text-muted-foreground">
+                  Tutto elaborato sul tuo computer. Mai nel cloud.
+                </p>
+                <ShimmerButton
+                  onClick={() => navigate('/recording')}
+                  className="h-10 px-6 text-sm font-semibold"
+                >
+                  Avvia registrazione
+                </ShimmerButton>
+              </div>
             </motion.section>
 
             {/* Upcoming calendar events */}

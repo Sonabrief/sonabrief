@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { motion } from 'motion/react'
+import { useEffect, useMemo, useState } from 'react'
+import { motion, AnimatePresence } from 'motion/react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useNavigate } from 'react-router-dom'
+import { ChevronDown } from 'lucide-react'
 import { db, type Meeting } from '../lib/db'
 import { AppNav } from '../components/AppNav'
 
@@ -11,9 +12,16 @@ function formatDate(ms: number) {
 
 // ── UnassignedRow ─────────────────────────────────────────────────────────────
 
-function UnassignedRow({ meeting }: { meeting: Meeting }) {
+function UnassignedRow({
+  meeting,
+  notesByMeeting,
+}: {
+  meeting: Meeting
+  notesByMeeting: Record<string, string>
+}) {
   const [client, setClient] = useState(meeting.clientName ?? '')
   const [stream, setStream] = useState(meeting.projectStream ?? '')
+  const [expanded, setExpanded] = useState(false)
 
   async function save() {
     await db.meetings.update(meeting.id, {
@@ -48,6 +56,36 @@ function UnassignedRow({ meeting }: { meeting: Meeting }) {
           className="flex-1 rounded-md border border-border bg-card px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
         />
       </div>
+
+      <button
+        onClick={() => setExpanded(e => !e)}
+        className="mt-2 flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
+      >
+        <ChevronDown className={`h-3 w-3 transition-transform duration-200 motion-reduce:transition-none ${expanded ? 'rotate-180' : ''}`} />
+        {expanded ? 'Chiudi sintesi' : 'Mostra sintesi'}
+      </button>
+
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="mt-3 rounded-md border border-border bg-background px-4 py-3">
+              {notesByMeeting[meeting.id] ? (
+                <p className="whitespace-pre-wrap text-xs leading-relaxed text-foreground">
+                  {notesByMeeting[meeting.id]}
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">Nessuna sintesi disponibile.</p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -58,6 +96,38 @@ export default function ClientsPage() {
   const navigate = useNavigate()
   const meetings = useLiveQuery(() => db.meetings.orderBy('startedAt').reverse().toArray(), [])
   const actionItems = useLiveQuery(() => db.action_items.where('completed').equals(0).toArray(), [])
+  const notes = useLiveQuery(() => db.notes.toArray(), [])
+
+  const [expandedMeetingId, setExpandedMeetingId] = useState<string | null>(null)
+  const [filterClient, setFilterClient] = useState<string>('all')
+  const [filterStream, setFilterStream] = useState<string>('all')
+
+  useEffect(() => { setFilterStream('all') }, [filterClient])
+
+  const notesByMeeting = useMemo(() => {
+    const map: Record<string, string> = {}
+    for (const n of notes ?? []) map[n.meetingId] = n.content
+    return map
+  }, [notes])
+
+  const assigned = useMemo(
+    () => (meetings ?? []).filter(m => m.clientName?.trim()),
+    [meetings]
+  )
+
+  const allClients = useMemo(
+    () => [...new Set(assigned.map(m => m.clientName!.trim()))].sort(),
+    [assigned]
+  )
+
+  const allStreams = useMemo(() => {
+    const source = filterClient === 'all'
+      ? assigned
+      : assigned.filter(m => m.clientName!.trim() === filterClient)
+    return [...new Set(source.map(m => m.projectStream?.trim() || '— Generale'))].sort(
+      (a, b) => a === '— Generale' ? 1 : b === '— Generale' ? -1 : a.localeCompare(b)
+    )
+  }, [assigned, filterClient])
 
   if (!meetings) {
     return (
@@ -80,7 +150,6 @@ export default function ClientsPage() {
     openByMeeting[ai.meetingId] = (openByMeeting[ai.meetingId] ?? 0) + 1
   }
 
-  const assigned = meetings.filter(m => m.clientName?.trim())
   const unassigned = meetings.filter(m => !m.clientName?.trim())
 
   const byClient: Record<string, Record<string, Meeting[]>> = {}
@@ -93,6 +162,17 @@ export default function ClientsPage() {
   }
 
   const clientList = Object.entries(byClient).sort(([a], [b]) => a.localeCompare(b))
+
+  const filteredClientList = clientList
+    .filter(([clientName]) => filterClient === 'all' || clientName === filterClient)
+    .map(([clientName, streams]) => {
+      if (filterStream === 'all') return [clientName, streams] as const
+      const filtered = Object.fromEntries(
+        Object.entries(streams).filter(([s]) => s === filterStream)
+      )
+      return [clientName, filtered] as const
+    })
+    .filter(([, streams]) => Object.keys(streams).length > 0)
 
   const isEmpty = clientList.length === 0 && unassigned.length === 0
 
@@ -123,75 +203,178 @@ export default function ClientsPage() {
 
             {/* ── Client cards ─────────────────────────────── */}
             {clientList.length > 0 && (
-              <ul className="flex flex-col gap-4" role="list">
-                {clientList.map(([clientName, streams], i) => {
-                  const allMeetings = Object.values(streams).flat()
-                  const totalOpen = allMeetings.reduce(
-                    (sum, m) => sum + (openByMeeting[m.id] ?? 0), 0
-                  )
-                  const streamList = Object.entries(streams).sort(([a], [b]) =>
-                    a === '— Generale' ? 1 : b === '— Generale' ? -1 : a.localeCompare(b)
-                  )
+              <>
+                {/* Filtri cliente / stream */}
+                {clientList.length > 1 && (
+                  <div className="mb-2 flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filtra per cliente">
+                      <button
+                        onClick={() => setFilterClient('all')}
+                        aria-pressed={filterClient === 'all'}
+                        className={`rounded-md px-3 py-1 text-xs font-medium transition-colors motion-reduce:transition-none ${
+                          filterClient === 'all'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'border border-border bg-card text-muted-foreground hover:bg-border'
+                        }`}
+                      >
+                        Tutti
+                      </button>
+                      {allClients.map(c => (
+                        <button
+                          key={c}
+                          onClick={() => setFilterClient(c)}
+                          aria-pressed={filterClient === c}
+                          className={`rounded-md px-3 py-1 text-xs font-medium transition-colors motion-reduce:transition-none ${
+                            filterClient === c
+                              ? 'bg-primary text-primary-foreground'
+                              : 'border border-border bg-card text-muted-foreground hover:bg-border'
+                          }`}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
 
-                  return (
-                    <motion.li
-                      key={clientName}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.18, delay: i * 0.05, ease: [0.4, 0, 0.2, 1] }}
-                    >
-                      <div className="overflow-hidden rounded-lg border border-border bg-card">
-                        {/* Client header — typography only, no tinted band */}
-                        <div className="flex items-center justify-between border-b border-border px-5 py-4">
-                          <span className="text-sm font-semibold text-foreground">
-                            {clientName}
-                          </span>
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs text-muted-foreground">
-                              {allMeetings.length} {allMeetings.length === 1 ? 'meeting' : 'meeting'}
-                            </span>
-                            {totalOpen > 0 && (
-                              <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-primary">
-                                {totalOpen} azioni aperte
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {streamList.map(([streamName, streamMeetings]) => (
-                          <div key={streamName}>
-                            {streamList.length > 1 && (
-                              <div className="border-b border-border bg-muted px-5 py-1.5">
-                                <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                                  {streamName}
-                                </span>
-                              </div>
-                            )}
-                            <ul className="divide-y divide-border" role="list">
-                              {streamMeetings.map(m => (
-                                <li key={m.id}>
-                                  <button
-                                    onClick={() => navigate('/archive', { state: { meetingId: m.id } })}
-                                    className="w-full px-5 py-3 text-left transition-colors hover:bg-border motion-reduce:transition-none"
-                                  >
-                                    <p className="text-sm font-medium text-foreground">{m.title}</p>
-                                    <p className="mt-0.5 text-xs text-muted-foreground">
-                                      {formatDate(m.startedAt)}
-                                      {openByMeeting[m.id]
-                                        ? ` · ${openByMeeting[m.id]} azioni aperte`
-                                        : ''}
-                                    </p>
-                                  </button>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
+                    {filterClient !== 'all' && allStreams.length > 1 && (
+                      <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filtra per stream">
+                        <button
+                          onClick={() => setFilterStream('all')}
+                          aria-pressed={filterStream === 'all'}
+                          className={`rounded-md px-3 py-1 text-xs font-medium transition-colors motion-reduce:transition-none ${
+                            filterStream === 'all'
+                              ? 'bg-secondary text-primary'
+                              : 'border border-border bg-card text-muted-foreground hover:bg-border'
+                          }`}
+                        >
+                          Tutti gli stream
+                        </button>
+                        {allStreams.map(s => (
+                          <button
+                            key={s}
+                            onClick={() => setFilterStream(s)}
+                            aria-pressed={filterStream === s}
+                            className={`rounded-md px-3 py-1 text-xs font-medium transition-colors motion-reduce:transition-none ${
+                              filterStream === s
+                                ? 'bg-secondary text-primary'
+                                : 'border border-border bg-card text-muted-foreground hover:bg-border'
+                            }`}
+                          >
+                            {s}
+                          </button>
                         ))}
                       </div>
-                    </motion.li>
-                  )
-                })}
-              </ul>
+                    )}
+                  </div>
+                )}
+
+                <ul className="flex flex-col gap-4" role="list">
+                  {filteredClientList.map(([clientName, streams], i) => {
+                    const allMeetingsInCard = Object.values(streams).flat()
+                    const totalOpen = allMeetingsInCard.reduce(
+                      (sum, m) => sum + (openByMeeting[m.id] ?? 0), 0
+                    )
+                    const streamList = Object.entries(streams).sort(([a], [b]) =>
+                      a === '— Generale' ? 1 : b === '— Generale' ? -1 : a.localeCompare(b)
+                    )
+
+                    return (
+                      <motion.li
+                        key={clientName}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.18, delay: i * 0.05, ease: [0.4, 0, 0.2, 1] }}
+                      >
+                        <div className="overflow-hidden rounded-lg border border-border bg-card">
+                          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+                            <span className="text-sm font-semibold text-foreground">
+                              {clientName}
+                            </span>
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs text-muted-foreground">
+                                {allMeetingsInCard.length} meeting
+                              </span>
+                              {totalOpen > 0 && (
+                                <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-primary">
+                                  {totalOpen} azioni aperte
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {streamList.map(([streamName, streamMeetings]) => (
+                            <div key={streamName}>
+                              {streamList.length > 1 && (
+                                <div className="border-b border-border bg-muted px-5 py-1.5">
+                                  <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                    {streamName}
+                                  </span>
+                                </div>
+                              )}
+                              <ul className="divide-y divide-border" role="list">
+                                {streamMeetings.map(m => (
+                                  <li key={m.id}>
+                                    <>
+                                      <button
+                                        onClick={() => setExpandedMeetingId(id => id === m.id ? null : m.id)}
+                                        className="w-full px-5 py-3 text-left transition-colors hover:bg-border motion-reduce:transition-none"
+                                      >
+                                        <div className="flex items-center justify-between gap-2">
+                                          <div>
+                                            <p className="text-sm font-medium text-foreground">{m.title}</p>
+                                            <p className="mt-0.5 text-xs text-muted-foreground">
+                                              {formatDate(m.startedAt)}
+                                              {openByMeeting[m.id] ? ` · ${openByMeeting[m.id]} azioni aperte` : ''}
+                                            </p>
+                                          </div>
+                                          <ChevronDown
+                                            className={`h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200 motion-reduce:transition-none ${
+                                              expandedMeetingId === m.id ? 'rotate-180' : ''
+                                            }`}
+                                          />
+                                        </div>
+                                      </button>
+
+                                      <AnimatePresence>
+                                        {expandedMeetingId === m.id && (
+                                          <motion.div
+                                            initial={{ height: 0, opacity: 0 }}
+                                            animate={{ height: 'auto', opacity: 1 }}
+                                            exit={{ height: 0, opacity: 0 }}
+                                            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                                            className="overflow-hidden border-t border-border"
+                                          >
+                                            <div className="px-5 py-4">
+                                              {notesByMeeting[m.id] ? (
+                                                <>
+                                                  <div className="prose prose-sm max-w-none whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+                                                    {notesByMeeting[m.id]}
+                                                  </div>
+                                                  <button
+                                                    onClick={() => navigate('/archive', { state: { meetingId: m.id } })}
+                                                    className="mt-3 text-xs font-medium text-primary transition-colors hover:underline motion-reduce:transition-none"
+                                                  >
+                                                    Apri in archivio →
+                                                  </button>
+                                                </>
+                                              ) : (
+                                                <p className="text-xs text-muted-foreground">Nessuna sintesi disponibile.</p>
+                                              )}
+                                            </div>
+                                          </motion.div>
+                                        )}
+                                      </AnimatePresence>
+                                    </>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      </motion.li>
+                    )
+                  })}
+                </ul>
+              </>
             )}
 
             {/* ── Unassigned ───────────────────────────────── */}
@@ -205,7 +388,7 @@ export default function ClientsPage() {
                 <ul role="list">
                   {unassigned.map(m => (
                     <li key={m.id}>
-                      <UnassignedRow meeting={m} />
+                      <UnassignedRow meeting={m} notesByMeeting={notesByMeeting} />
                     </li>
                   ))}
                 </ul>

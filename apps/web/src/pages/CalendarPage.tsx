@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { useNavigate } from 'react-router-dom'
+import { Mic } from 'lucide-react'
 import { API_URL } from '../config'
 import { AppNav } from '../components/AppNav'
 
@@ -88,6 +90,7 @@ function ProviderCard({
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function CalendarPage() {
+  const navigate = useNavigate()
   const [google, setGoogle] = useState<CalendarState | null>(null)
   const [microsoft, setMicrosoft] = useState<CalendarState | null>(null)
   const [loading, setLoading] = useState(true)
@@ -254,6 +257,15 @@ export default function CalendarPage() {
                                 {event.attendees.length > 3 && ` +${event.attendees.length - 3}`}
                               </p>
                             )}
+                            <button
+                              onClick={() => navigate('/recording', {
+                                state: { prefillTitle: event.title, source: 'both' },
+                              })}
+                              className="mt-3 flex items-center gap-1.5 rounded-md border border-primary/30 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+                            >
+                              <Mic className="h-3 w-3" aria-hidden="true" />
+                              Registra questo meeting
+                            </button>
                           </div>
                           <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
                             event.provider === 'google'

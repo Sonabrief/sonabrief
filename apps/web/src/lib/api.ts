@@ -1,6 +1,6 @@
 import { API_URL } from '../config';
 
-export async function getMe(): Promise<{ userId: string; email: string } | null> {
+export async function getMe(): Promise<{ userId: string; email: string; display_name: string | null } | null> {
   try {
     const res = await fetch(`${API_URL}/auth/me`, { credentials: 'include' });
     if (!res.ok) return null;
@@ -50,6 +50,7 @@ export interface UserPreferences {
   synthesis_mode: string
   sync_enabled: number
   onboarded: number
+  display_name: string | null
 }
 
 export async function getPreferences(): Promise<UserPreferences | null> {
@@ -87,6 +88,20 @@ export async function updatePreferences(prefs: {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(prefs),
+    })
+    return res.ok
+  } catch {
+    return false
+  }
+}
+
+export async function updateDisplayName(name: string): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_URL}/v1/preferences`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ display_name: name }),
     })
     return res.ok
   } catch {

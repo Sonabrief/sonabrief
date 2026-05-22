@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Mic, Monitor, Video } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAudioRecorder } from '../hooks/useAudioRecorder'
@@ -223,6 +223,7 @@ function SourceButton({
 
 export default function RecordingPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { state, duration, error, paused, start, stop, pause, resume, audioData, reset, stream, chunkSession } = useAudioRecorder()
   const [partialTranscript, setPartialTranscript] = useState('')
   const [whisperState, setWhisperState] = useState<'loading' | 'ready' | 'transcribing' | 'done' | 'error'>('loading')
@@ -233,7 +234,13 @@ export default function RecordingPage() {
   const [synthesis, setSynthesis] = useState('')
   const [language, setLanguage] = useState<'it' | 'en' | 'fr' | 'es' | 'de'>('it')
   const [mode, setMode] = useState<'standard' | 'local'>('standard')
-  const [source, setSource] = useState<AudioSource>('microphone')
+  const [source, setSource] = useState<AudioSource>(() => {
+    const s = (location.state as { source?: AudioSource; prefillTitle?: string } | null)?.source
+    return s && ['microphone', 'both', 'tab'].includes(s) ? s : 'microphone'
+  })
+  const [sessionTitle, setSessionTitle] = useState<string>(
+    (location.state as { prefillTitle?: string } | null)?.prefillTitle ?? ''
+  )
   const [quickNotes, setQuickNotes] = useState<string[]>([])
   const [showQuickNoteInput, setShowQuickNoteInput] = useState(false)
   const [quickNoteInput, setQuickNoteInput] = useState('')
@@ -395,10 +402,11 @@ export default function RecordingPage() {
     const id = meetingIdRef.current
     if (!id) return
     const now = Date.now()
-    const title = new Date(now).toLocaleString(language, {
+    const autoTitle = new Date(now).toLocaleString(language, {
       day: 'numeric', month: 'long', year: 'numeric',
       hour: '2-digit', minute: '2-digit',
     })
+    const title = sessionTitle.trim() || autoTitle
     db.transaction('rw', [db.meetings, db.transcripts, db.notes], async () => {
       await db.meetings.add({
         id, title,
@@ -722,6 +730,25 @@ export default function RecordingPage() {
               </motion.div>
               )}
             </AnimatePresence>
+
+            {/* Session title prefill — visible when idle and prefillTitle passed */}
+            {state === 'idle' && sessionTitle && (
+              <div>
+                <label
+                  htmlFor="session-title"
+                  className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground"
+                >
+                  Titolo sessione
+                </label>
+                <input
+                  id="session-title"
+                  type="text"
+                  value={sessionTitle}
+                  onChange={e => setSessionTitle(e.target.value)}
+                  className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+              </div>
+            )}
 
             {/* Start button — idle + ready */}
             {canStart && (

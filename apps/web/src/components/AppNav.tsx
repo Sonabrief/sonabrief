@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion } from 'motion/react'
+import { ChevronDown, LogOut, User } from 'lucide-react'
 import { getMe, getBillingStatus, logout } from '../lib/api'
 
 const NAV_ITEMS = [
@@ -10,16 +12,157 @@ const NAV_ITEMS = [
   { label: 'Template', path: '/templates', proOnly: false },
 ]
 
+function getInitials(email: string): string {
+  const parts = email.split('@')[0].split(/[._-]/)
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase()
+  }
+  return email.slice(0, 2).toUpperCase()
+}
+
+function TierBadge({ tier }: { tier: string }) {
+  if (tier === 'unlimited') {
+    return (
+      <span
+        className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium"
+        style={{ background: '#F5EFE4', color: '#7A5C30' }}
+      >
+        Pro Unlimited
+      </span>
+    )
+  }
+  if (tier === 'pro') {
+    return (
+      <span className="inline-flex items-center rounded-full border border-border bg-card px-2 py-0.5 text-[10px] font-medium text-primary">
+        Pro
+      </span>
+    )
+  }
+  return null
+}
+
+function UserMenu({
+  displayName,
+  email,
+  tier,
+  onLogout,
+}: {
+  displayName: string | null
+  email: string
+  tier: string
+  onLogout: () => void
+}) {
+  const navigate = useNavigate()
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onMouseDown(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onMouseDown)
+    return () => document.removeEventListener('mousedown', onMouseDown)
+  }, [open])
+
+  const visibleName = displayName ?? email.split('@')[0]
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        className="flex cursor-pointer items-center gap-2 rounded-full px-2.5 py-1 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+      >
+        <span
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white"
+          aria-hidden="true"
+        >
+          {getInitials(email)}
+        </span>
+        <span className="hidden max-w-32 truncate text-sm font-medium text-foreground md:block">
+          {visibleName}
+        </span>
+        <ChevronDown
+          className={`hidden h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-150 motion-reduce:transition-none md:block ${
+            open ? 'rotate-180' : ''
+          }`}
+          aria-hidden="true"
+        />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            role="menu"
+            initial={{ opacity: 0, y: -6, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.97 }}
+            transition={{ duration: 0.15, ease: [0.4, 0, 0.2, 1] }}
+            className="absolute right-0 top-full z-20 mt-2 min-w-55 rounded-xl border border-border bg-card shadow-lg shadow-black/5"
+          >
+            {/* Header — non cliccabile */}
+            <div className="border-b border-border px-4 py-3">
+              <p className="text-sm font-medium text-foreground">{visibleName}</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">{email}</p>
+              {tier !== 'free' && (
+                <div className="mt-1.5">
+                  <TierBadge tier={tier} />
+                </div>
+              )}
+            </div>
+
+            {/* Voci */}
+            <div className="py-1">
+              <button
+                role="menuitem"
+                onClick={() => { setOpen(false); navigate('/profile') }}
+                className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-muted motion-reduce:transition-none"
+              >
+                <User className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                Il tuo profilo
+              </button>
+
+              <div className="border-t border-border" />
+
+              <button
+                role="menuitem"
+                onClick={() => { setOpen(false); onLogout() }}
+                className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-destructive transition-colors hover:bg-destructive/5 motion-reduce:transition-none"
+              >
+                <LogOut className="h-4 w-4" aria-hidden="true" />
+                Esci
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
 export function AppNav() {
   const navigate = useNavigate()
   const location = useLocation()
   const [email, setEmail] = useState('')
+  const [displayName, setDisplayName] = useState<string | null>(null)
+  const [tier, setTier] = useState('free')
   const [isFree, setIsFree] = useState(false)
 
   useEffect(() => {
-    getMe().then(user => { if (user) setEmail(user.email) })
+    getMe().then(user => {
+      if (user) {
+        setEmail(user.email)
+        setDisplayName(user.display_name)
+      }
+    })
     getBillingStatus().then(status => {
-      setIsFree(!status || status.tier === 'free')
+      const t = status?.tier ?? 'free'
+      setTier(t)
+      setIsFree(t === 'free')
     })
   }, [])
 
@@ -71,20 +214,13 @@ export function AppNav() {
 
         <div className="ml-auto flex items-center gap-5">
           {email && (
-            <button
-              onClick={() => navigate('/profile')}
-              className="hidden max-w-50 truncate text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none md:block"
-              aria-label="Vai al profilo"
-            >
-              {email}
-            </button>
+            <UserMenu
+              displayName={displayName}
+              email={email}
+              tier={tier}
+              onLogout={handleLogout}
+            />
           )}
-          <button
-            onClick={handleLogout}
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
-          >
-            Esci
-          </button>
         </div>
       </div>
     </nav>

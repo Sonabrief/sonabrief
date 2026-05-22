@@ -220,7 +220,17 @@ export async function handleAuthMe(request: Request, env: Env): Promise<Response
     .bind(user.userId)
     .first<{ email: string }>()
 
-  return new Response(JSON.stringify({ ok: true, userId: user.userId, email: userRow?.email ?? '' }), {
+  const prefs = await env.DB
+    .prepare('SELECT display_name FROM user_preferences WHERE user_id = ?')
+    .bind(user.userId)
+    .first<{ display_name: string | null }>()
+
+  return new Response(JSON.stringify({
+    ok: true,
+    userId: user.userId,
+    email: userRow?.email ?? '',
+    display_name: prefs?.display_name ?? null,
+  }), {
     headers: { ...cors, 'Content-Type': 'application/json' },
   })
 }
