@@ -24,6 +24,7 @@ import { AppNav } from '../components/AppNav'
 import { RecoveryBanner } from '../components/RecoveryBanner'
 import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
 import { useTier } from '../hooks/useTier'
+import { TagInput } from '../components/TagInput'
 
 function ProGatedButton({ label, feature, onAction }: {
   label: string
@@ -246,6 +247,7 @@ export default function RecordingPage() {
   const [showTranscribeComplete, setShowTranscribeComplete] = useState(false)
   const [clientName, setClientName] = useState('')
   const [projectStream, setProjectStream] = useState('')
+  const [meetingTags, setMeetingTags] = useState<string[]>([])
   const [clientSuggestion, setClientSuggestion] = useState<string | null>(null)
   const meetingIdRef = useRef('')
   const clientSuggestionLoadedRef = useRef(false)
@@ -399,6 +401,7 @@ export default function RecordingPage() {
         lang: language,
         ...(clientName.trim() && { clientName: clientName.trim() }),
         ...(projectStream.trim() && { projectStream: projectStream.trim() }),
+        ...(meetingTags.length > 0 && { tags: meetingTags }),
         createdAt: now,
         updatedAt: now,
       })
@@ -582,6 +585,7 @@ export default function RecordingPage() {
     setShowTranscribeComplete(false)
     setClientName('')
     setProjectStream('')
+    setMeetingTags([])
     setClientSuggestion(null)
     clientSuggestionLoadedRef.current = false
   }
@@ -898,6 +902,14 @@ export default function RecordingPage() {
                           placeholder="es. Lancio Q3"
                           className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                         />
+                      </div>
+                      <div>
+                        <label className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                          Tag <span className="normal-case tracking-normal text-muted-foreground/60">(opzionale)</span>
+                        </label>
+                        <ProGate feature="Tag meeting">
+                          <TagInput value={meetingTags} onChange={setMeetingTags} />
+                        </ProGate>
                       </div>
                     </div>
 

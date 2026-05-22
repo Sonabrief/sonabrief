@@ -6,6 +6,8 @@ import { AppNav } from '../components/AppNav'
 import { db, type Meeting, type Note } from '../lib/db'
 import { SynthesisEditor } from '../components/SynthesisEditor'
 import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
+import { TagInput, TagPill } from '../components/TagInput'
+import { ProGate } from '../components/ProGate'
 
 const LANG_LABEL: Record<string, string> = {
   it: 'Italiano',
@@ -36,6 +38,7 @@ export default function ArchivePage() {
   const [copyDone, setCopyDone] = useState(false)
   const [editingClient, setEditingClient] = useState('')
   const [editingStream, setEditingStream] = useState('')
+  const [filterTag, setFilterTag] = useState<string | null>(null)
 
   const meetings = useLiveQuery(
     () => db.meetings.orderBy('startedAt').reverse().toArray(),
@@ -43,7 +46,8 @@ export default function ArchivePage() {
   )
 
   const filtered = meetings?.filter(m =>
-    m.title.toLowerCase().includes(search.toLowerCase())
+    m.title.toLowerCase().includes(search.toLowerCase()) &&
+    (filterTag === null || m.tags?.includes(filterTag))
   ) ?? []
 
   async function handleSelect(meeting: Meeting) {
@@ -52,6 +56,13 @@ export default function ArchivePage() {
     setSelectedNote(note ?? null)
     setEditingClient(meeting.clientName ?? '')
     setEditingStream(meeting.projectStream ?? '')
+  }
+
+  async function saveTags(tags: string[]) {
+    if (selectedMeeting) {
+      await db.meetings.update(selectedMeeting.id, { tags })
+      setSelectedMeeting(prev => prev ? { ...prev, tags } : prev)
+    }
   }
 
   async function saveClientFields() {
@@ -110,6 +121,29 @@ export default function ArchivePage() {
               className="w-full rounded-md border border-border bg-card px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
             />
 
+            {/* Tag filter chips */}
+            {(() => {
+              const allTags = [...new Set(meetings?.flatMap(m => m.tags ?? []) ?? [])]
+              if (allTags.length === 0) return null
+              return (
+                <div className="flex flex-wrap gap-1.5">
+                  {allTags.map(tag => (
+                    <button
+                      key={tag}
+                      onClick={() => setFilterTag(f => f === tag ? null : tag)}
+                      className={`rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
+                        filterTag === tag
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border bg-card text-muted-foreground hover:border-primary hover:text-primary'
+                      }`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              )
+            })()}
+
             {meetings === undefined ? (
               <div className="animate-pulse space-y-2 pt-1">
                 {[0, 1, 2, 3].map(i => (
@@ -165,6 +199,11 @@ export default function ArchivePage() {
                           {' · '}
                           {formatMinutes(meeting.durationSeconds)}
                         </p>
+                        {meeting.tags && meeting.tags.length > 0 && (
+                          <div className="mt-1.5 flex flex-wrap gap-1">
+                            {meeting.tags.map(tag => <TagPill key={tag} tag={tag} />)}
+                          </div>
+                        )}
                       </button>
                     </motion.li>
                   )
@@ -219,6 +258,12 @@ export default function ArchivePage() {
                       className="flex-1 rounded-md border border-border bg-card px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
                     />
                   </div>
+                  <ProGate feature="Tag meeting">
+                    <TagInput
+                      value={selectedMeeting.tags ?? []}
+                      onChange={saveTags}
+                    />
+                  </ProGate>
 
                   {selectedNote ? (
                     <>
