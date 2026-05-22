@@ -6,6 +6,7 @@
 
 import { useState, useRef, useCallback } from 'react'
 import type { AudioSource } from '../lib/audio'
+import { createChunkSession, type ChunkStoreSession } from '../lib/chunkStore'
 import {
   getMicrophoneStream,
   getTabStream,
@@ -28,6 +29,8 @@ export interface UseAudioRecorderReturn {
   audioData: Float32Array | null
   reset: () => void
   stream: MediaStream | null
+  sessionId: string | null
+  chunkCount: number
 }
 
 export function useAudioRecorder(): UseAudioRecorderReturn {
@@ -37,12 +40,17 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
   const [paused, setPaused] = useState(false)
   const [audioData, setAudioData] = useState<Float32Array | null>(null)
   const [stream, setStream] = useState<MediaStream | null>(null)
+  const [sessionId, setSessionId] = useState<string | null>(null)
+  const [chunkCount, setChunkCount] = useState(0)
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
   const streamsRef = useRef<MediaStream[]>([])
   const audioContextRef = useRef<AudioContext | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const chunkSessionRef = useRef<ChunkStoreSession | null>(null)
+  const chunkStartMsRef = useRef(0)
+  const chunkIndexRef = useRef(0)
 
   const cleanup = useCallback(() => {
     timerRef.current && clearInterval(timerRef.current)
@@ -52,6 +60,10 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     audioContextRef.current = null
     mediaRecorderRef.current = null
     chunksRef.current = []
+    chunkSessionRef.current = null
+    chunkIndexRef.current = 0
+    setChunkCount(0)
+    setSessionId(null)
     setStream(null)
   }, [])
 
@@ -91,31 +103,49 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
         ? 'audio/ogg;codecs=opus'
         : ''
 
+      const chunkSession = await createChunkSession(mimeType || 'audio/webm')
+      chunkSessionRef.current = chunkSession
+      chunkIndexRef.current = 0
+      chunkStartMsRef.current = Date.now()
+      setSessionId(chunkSession.sessionId)
+      setChunkCount(0)
+
       setStream(recordStream)
       const recorder = new MediaRecorder(recordStream, mimeType ? { mimeType } : undefined)
       mediaRecorderRef.current = recorder
 
-      recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data)
+      recorder.ondataavailable = async (e) => {
+        if (e.data.size > 0) {
+          chunksRef.current.push(e.data)
+          const session = chunkSessionRef.current
+          if (session) {
+            const idx = chunkIndexRef.current++
+            const startMs = idx * 30000
+            await session.encryptChunk(e.data, idx, startMs)
+            setChunkCount(idx + 1)
+          }
+        }
       }
 
       recorder.onstop = async () => {
         setPaused(false)
         setState('processing')
         const chunks = [...chunksRef.current]
+        const finalSession = chunkSessionRef.current
         cleanup()
         try {
           const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' })
           const float32 = await blobToFloat32Array(blob)
           setAudioData(float32)
           setState('done')
+          if (finalSession) await finalSession.deleteAll()
         } catch (err) {
           setError(err instanceof Error ? err.message : 'Errore conversione audio')
           setState('error')
         }
       }
 
-      recorder.start(1000)
+      recorder.start(30000)
 
       timerRef.current = setInterval(() => {
         setDuration(d => d + 1)
@@ -160,5 +190,5 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
     setPaused(false)
   }, [cleanup])
 
-  return { state, duration, error, paused, start, stop, pause, resume, audioData, reset, stream }
+  return { state, duration, error, paused, start, stop, pause, resume, audioData, reset, stream, sessionId, chunkCount }
 }

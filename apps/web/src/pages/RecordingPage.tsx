@@ -20,6 +20,7 @@ import { isUnlocked } from '../lib/keystore'
 import { MeetingBriefing } from '../components/MeetingBriefing'
 import { ProGate } from '../components/ProGate'
 import { AppNav } from '../components/AppNav'
+import { RecoveryBanner } from '../components/RecoveryBanner'
 import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
 import { useTier } from '../hooks/useTier'
 
@@ -574,6 +575,7 @@ export default function RecordingPage() {
       <AppNav />
 
       <main className="mx-auto max-w-4xl px-6 py-10">
+        <RecoveryBanner />
         <div className="lg:grid lg:grid-cols-[3fr_2fr] lg:gap-10">
 
           {/* ── Left column: recording workspace ──────────────────── */}
