@@ -140,3 +140,58 @@ export async function recordSignupSignals(
     .bind(userId, ipHash, signals.user_agent, signals.accept_language, signals.timezone, signals.screen_resolution, fingerprintHash, flagged, flag_reason, Date.now())
     .run()
 }
+
+// === WHITELIST ===
+
+/** ASN aziendali trusted (Autonomous System Numbers).
+ * Aggiunti via PR quando un cliente Enterprise richiede whitelist della propria rete.
+ * Cloudflare passa request.cf.asn nativamente — zero costo API esterne.
+ */
+const TRUSTED_ASNS = new Set<number>([
+  16509,  // Amazon AWS (include WorkSpaces — utenti remoti su VM)
+  14618,  // Amazon AWS (range secondario)
+  15169,  // Google Cloud / Workspace
+  8075,   // Microsoft (Azure + M365)
+  13335,  // Cloudflare (Zero Trust enterprise)
+  396982, // Google Cloud (range secondario)
+])
+
+export function isTrustedASN(asn: number | undefined): boolean {
+  if (asn === undefined) return false
+  return TRUSTED_ASNS.has(asn)
+}
+
+export async function isUserWhitelisted(userId: string, env: Env): Promise<boolean> {
+  const row = await env.DB
+    .prepare('SELECT user_id FROM user_whitelist WHERE user_id = ?')
+    .bind(userId)
+    .first()
+  return row !== null
+}
+
+export async function addUserToWhitelist(
+  userId: string,
+  reason: 'payment_auto' | 'admin_override',
+  env: Env,
+  options?: { grantedBy?: string; notes?: string },
+): Promise<void> {
+  await env.DB
+    .prepare(`
+      INSERT INTO user_whitelist (user_id, reason, granted_by, granted_at, notes)
+      VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT(user_id) DO UPDATE SET
+        reason = excluded.reason,
+        granted_by = excluded.granted_by,
+        granted_at = excluded.granted_at,
+        notes = excluded.notes
+    `)
+    .bind(userId, reason, options?.grantedBy ?? null, Date.now(), options?.notes ?? null)
+    .run()
+}
+
+export async function removeUserFromWhitelist(userId: string, env: Env): Promise<void> {
+  await env.DB
+    .prepare('DELETE FROM user_whitelist WHERE user_id = ?')
+    .bind(userId)
+    .run()
+}

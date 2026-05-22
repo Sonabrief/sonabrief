@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../config'
+import { fetchWhitelist, addToWhitelist, removeFromWhitelist, type WhitelistEntry } from '../lib/admin'
 
 interface AdminStats {
   overview: {
@@ -84,6 +85,55 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
 
+  // Whitelist state
+  const [wlEntries, setWlEntries] = useState<WhitelistEntry[]>([])
+  const [wlLoading, setWlLoading] = useState(true)
+  const [wlError, setWlError] = useState<string | null>(null)
+  const [newEmail, setNewEmail] = useState('')
+  const [newNotes, setNewNotes] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  async function loadWhitelist() {
+    setWlLoading(true)
+    setWlError(null)
+    try {
+      const entries = await fetchWhitelist()
+      setWlEntries(entries)
+    } catch (e) {
+      setWlError(e instanceof Error ? e.message : 'fetch_failed')
+    } finally {
+      setWlLoading(false)
+    }
+  }
+
+  async function handleAdd(e: React.FormEvent) {
+    e.preventDefault()
+    if (!newEmail.trim()) return
+    setSubmitting(true)
+    setWlError(null)
+    try {
+      await addToWhitelist(newEmail.trim(), newNotes.trim() || null)
+      setNewEmail('')
+      setNewNotes('')
+      await loadWhitelist()
+    } catch (err) {
+      setWlError(err instanceof Error ? err.message : 'add_failed')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  async function handleRemove(userId: string) {
+    if (!window.confirm('Rimuovere dalla whitelist?')) return
+    setWlError(null)
+    try {
+      await removeFromWhitelist(userId)
+      await loadWhitelist()
+    } catch (err) {
+      setWlError(err instanceof Error ? err.message : 'remove_failed')
+    }
+  }
+
   async function loadStats() {
     setLoading(true)
     setError(null)
@@ -105,6 +155,7 @@ export default function AdminPage() {
   }
 
   useEffect(() => { loadStats() }, [])
+  useEffect(() => { loadWhitelist() }, [])
 
   if (loading && !stats) {
     return (
@@ -314,6 +365,68 @@ export default function AdminPage() {
               </div>
             ))}
           </div>
+        </Section>
+
+        {/* Whitelist anti-abuse */}
+        <Section title="Whitelist anti-abuse">
+          {wlLoading ? (
+            <p className="text-sm text-gray-400">Caricamento...</p>
+          ) : (
+            <>
+              {wlError && (
+                <div role="alert" className="mb-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  {wlError}
+                </div>
+              )}
+
+              {wlEntries.length === 0 ? (
+                <p className="text-sm text-gray-400">Nessuna voce in whitelist</p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {wlEntries.map(e => (
+                    <div key={e.user_id} className="flex items-center justify-between text-sm gap-2 py-1">
+                      <span className="text-gray-700 flex-1 truncate">{e.email ?? e.user_id}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${e.reason === 'payment_auto' ? 'bg-teal-50 text-teal-700' : 'bg-blue-50 text-blue-700'}`}>
+                        {e.reason === 'payment_auto' ? 'Pagamento auto' : 'Override manuale'}
+                      </span>
+                      <span className="text-gray-400 text-xs w-36 text-right">{formatDate(e.granted_at)}</span>
+                      <span className="text-gray-500 text-xs flex-1 truncate">{e.notes ?? '—'}</span>
+                      <button
+                        onClick={() => handleRemove(e.user_id)}
+                        className="text-xs px-2 py-1 rounded border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        Elimina
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <form onSubmit={handleAdd} className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center">
+                <input
+                  type="email"
+                  value={newEmail}
+                  onChange={ev => setNewEmail(ev.target.value)}
+                  placeholder="email@esempio.it"
+                  className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-teal-600"
+                />
+                <input
+                  type="text"
+                  value={newNotes}
+                  onChange={ev => setNewNotes(ev.target.value)}
+                  placeholder="Note (opzionale)"
+                  className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:border-teal-600"
+                />
+                <button
+                  type="submit"
+                  disabled={!newEmail || submitting}
+                  className="rounded-lg bg-[#1A4D52] text-white px-4 py-2 text-sm hover:bg-[#163f44] transition-colors disabled:opacity-50"
+                >
+                  {submitting ? 'Aggiungo...' : 'Aggiungi alla whitelist'}
+                </button>
+              </form>
+            </>
+          )}
         </Section>
 
       </div>

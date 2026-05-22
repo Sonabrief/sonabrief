@@ -8,6 +8,8 @@ import {
   fingerprint,
   checkAndUpdateIPThrottle,
   recordSignupSignals,
+  isUserWhitelisted,
+  isTrustedASN,
 } from "../lib/antiabuse";
 
 interface AuthRequestBody {
@@ -55,7 +57,14 @@ export async function handleAuthRequest(request: Request, env: Env): Promise<Res
     .bind(email)
     .first<{ id: string }>();
 
-  if (!existingUser && isDatacenterIP(ip)) {
+  // Whitelist check: utenti già whitelistati bypassano tutti i controlli successivi
+  const userWhitelisted = existingUser ? await isUserWhitelisted(existingUser.id, env) : false
+
+  // ASN aziendali trusted (Cloudflare passa cf.asn nativamente)
+  const asn = (request as any).cf?.asn as number | undefined
+  const asnTrusted = isTrustedASN(asn)
+
+  if (!existingUser && isDatacenterIP(ip) && !asnTrusted) {
     return new Response(JSON.stringify({ ok: false, error: "datacenter_ip_blocked" }), {
       status: 403,
       headers: { ...cors, "Content-Type": "application/json" },
@@ -65,7 +74,7 @@ export async function handleAuthRequest(request: Request, env: Env): Promise<Res
   const ipHash = await hashIP(ip);
 
   // Check 3: IP throttling — solo per nuovi signup, non per re-login
-  if (!existingUser) {
+  if (!existingUser && !asnTrusted) {
     const throttle = await checkAndUpdateIPThrottle(ipHash, env);
     if (!throttle.allowed) {
       return new Response(JSON.stringify({ ok: false, error: "rate_limited", reason: throttle.reason }), {

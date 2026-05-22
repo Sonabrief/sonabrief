@@ -1,4 +1,5 @@
 import type { Env } from "../lib/env";
+import { addUserToWhitelist } from "../lib/antiabuse";
 
 async function verifyPolarSignature(
   rawBody: string,
@@ -103,6 +104,13 @@ async function processPolarEvent(eventType: string, data: Record<string, any>, e
           renews_at = excluded.renews_at,
           updated_at = excluded.updated_at
       `).bind(crypto.randomUUID(), userId, plan.tier, status, subscriptionId, plan.cycle, renewsAt, now, now).run();
+
+      // Auto-whitelist: utente pagante bypassa controlli anti-abuse al re-login
+      if (status === "active") {
+        await addUserToWhitelist(userId, "payment_auto", env, {
+          notes: `Tier ${plan.tier} ${plan.cycle}`,
+        })
+      }
       break;
     }
     case "subscription.canceled":

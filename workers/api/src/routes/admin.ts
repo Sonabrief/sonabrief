@@ -1,7 +1,37 @@
 import type { Env } from '../lib/env'
 import { getUserFromSession } from '../lib/sessions'
+import { corsHeaders } from '../lib/cors'
+import { addUserToWhitelist, removeUserFromWhitelist } from '../lib/antiabuse'
 
 const FOUNDER_EMAIL = 'sonabrief.app@gmail.com'
+
+async function requireFounder(req: Request, env: Env): Promise<{ ok: true; userId: string } | { ok: false; response: Response }> {
+  const cors = corsHeaders(req, env)
+  const session = await getUserFromSession(req, env)
+  if (!session) {
+    return {
+      ok: false,
+      response: new Response(JSON.stringify({ ok: false, error: "unauthorized" }), {
+        status: 401,
+        headers: { ...cors, "Content-Type": "application/json" },
+      }),
+    }
+  }
+  const user = await env.DB
+    .prepare('SELECT email FROM users WHERE id = ?')
+    .bind(session.userId)
+    .first<{ email: string }>()
+  if (!user || user.email !== FOUNDER_EMAIL) {
+    return {
+      ok: false,
+      response: new Response(JSON.stringify({ ok: false, error: "forbidden" }), {
+        status: 403,
+        headers: { ...cors, "Content-Type": "application/json" },
+      }),
+    }
+  }
+  return { ok: true, userId: session.userId }
+}
 
 function currentMonth(): string {
   const d = new Date()
@@ -16,18 +46,9 @@ const MRR_MAP: Record<string, number> = {
 }
 
 export async function handleAdminStats(req: Request, env: Env): Promise<Response> {
-  // Auth: solo founder
-  const session = await getUserFromSession(req, env)
-  if (!session) {
-    return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401 })
-  }
-  const user = await env.DB
-    .prepare('SELECT email FROM users WHERE id = ?')
-    .bind(session.userId)
-    .first<{ email: string }>()
-  if (!user || user.email !== FOUNDER_EMAIL) {
-    return new Response(JSON.stringify({ error: 'forbidden' }), { status: 403 })
-  }
+  const auth = await requireFounder(req, env)
+  if (!auth.ok) return auth.response
+  const cors = corsHeaders(req, env)
 
   const month = currentMonth()
   const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
@@ -165,6 +186,77 @@ export async function handleAdminStats(req: Request, env: Env): Promise<Response
     subscription_status: subStatus.results,
   }), {
     status: 200,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...cors, 'Content-Type': 'application/json' },
+  })
+}
+
+export async function handleAdminWhitelistList(req: Request, env: Env): Promise<Response> {
+  const auth = await requireFounder(req, env)
+  if (!auth.ok) return auth.response
+  const cors = corsHeaders(req, env)
+
+  const rows = await env.DB.prepare(`
+    SELECT w.user_id, w.reason, w.granted_by, w.granted_at, w.notes, u.email
+    FROM user_whitelist w
+    LEFT JOIN users u ON u.id = w.user_id
+    ORDER BY w.granted_at DESC
+    LIMIT 200
+  `).all()
+
+  return new Response(JSON.stringify({ ok: true, entries: rows.results }), {
+    headers: { ...cors, "Content-Type": "application/json" },
+  })
+}
+
+export async function handleAdminWhitelistAdd(req: Request, env: Env): Promise<Response> {
+  const auth = await requireFounder(req, env)
+  if (!auth.ok) return auth.response
+  const cors = corsHeaders(req, env)
+
+  const body = await req.json().catch(() => null) as { email?: string; notes?: string } | null
+  const email = body?.email?.trim().toLowerCase()
+  if (!email) {
+    return new Response(JSON.stringify({ ok: false, error: "email_required" }), {
+      status: 400,
+      headers: { ...cors, "Content-Type": "application/json" },
+    })
+  }
+
+  const user = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(email).first<{ id: string }>()
+  if (!user) {
+    return new Response(JSON.stringify({ ok: false, error: "user_not_found" }), {
+      status: 404,
+      headers: { ...cors, "Content-Type": "application/json" },
+    })
+  }
+
+  await addUserToWhitelist(user.id, "admin_override", env, {
+    grantedBy: auth.userId,
+    notes: body?.notes,
+  })
+
+  return new Response(JSON.stringify({ ok: true, userId: user.id }), {
+    headers: { ...cors, "Content-Type": "application/json" },
+  })
+}
+
+export async function handleAdminWhitelistRemove(req: Request, env: Env): Promise<Response> {
+  const auth = await requireFounder(req, env)
+  if (!auth.ok) return auth.response
+  const cors = corsHeaders(req, env)
+
+  const url = new URL(req.url)
+  const userId = url.searchParams.get("user_id")
+  if (!userId) {
+    return new Response(JSON.stringify({ ok: false, error: "user_id_required" }), {
+      status: 400,
+      headers: { ...cors, "Content-Type": "application/json" },
+    })
+  }
+
+  await removeUserFromWhitelist(userId, env)
+
+  return new Response(JSON.stringify({ ok: true }), {
+    headers: { ...cors, "Content-Type": "application/json" },
   })
 }

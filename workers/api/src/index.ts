@@ -14,7 +14,12 @@ import { handleLemonsqueezyWebhook } from "./routes/webhooks";
 import { handlePolarCheckout } from "./routes/checkout-polar";
 import { handlePolarWebhook } from "./routes/webhooks-polar";
 import { handleBillingStatus, handleBillingPortal } from "./routes/billing";
-import { handleAdminStats } from "./routes/admin";
+import {
+  handleAdminStats,
+  handleAdminWhitelistList,
+  handleAdminWhitelistAdd,
+  handleAdminWhitelistRemove,
+} from "./routes/admin";
 import { handleGetPreferences, handleSavePreferences } from "./routes/preferences";
 import { handleDeleteAccount } from "./routes/account";
 import { handleRetentionCleanup } from "./routes/cron-retention";
@@ -82,6 +87,12 @@ export default {
       response = await handlePolarWebhook(request, env);
     } else if (url.pathname === "/admin/stats" && request.method === "GET") {
       response = await handleAdminStats(request, env);
+    } else if (url.pathname === "/admin/whitelist" && request.method === "GET") {
+      response = await handleAdminWhitelistList(request, env);
+    } else if (url.pathname === "/admin/whitelist" && request.method === "POST") {
+      response = await handleAdminWhitelistAdd(request, env);
+    } else if (url.pathname === "/admin/whitelist" && request.method === "DELETE") {
+      response = await handleAdminWhitelistRemove(request, env);
     } else if (url.pathname === '/v1/preferences' && request.method === 'GET') {
       response = await handleGetPreferences(request, env)
     } else if (url.pathname === '/v1/preferences' && request.method === 'POST') {
