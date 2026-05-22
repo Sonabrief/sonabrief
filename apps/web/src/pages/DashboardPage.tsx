@@ -12,6 +12,8 @@ import { AppNav } from '../components/AppNav'
 import { NumberTicker } from '../components/ui/number-ticker'
 import { BorderBeam } from '../components/ui/border-beam'
 import { ShimmerButton } from '../components/ui/shimmer-button'
+import { useRetentionCleanup } from '../hooks/useRetentionCleanup'
+import type { Tier } from '../hooks/useTier'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -204,9 +206,10 @@ export default function DashboardPage() {
     )
   }
 
-  if (!ready) return <LoadingShell />
-
   const tier = billing?.tier ?? 'free'
+  useRetentionCleanup(tier as Tier, !ready)
+
+  if (!ready) return <LoadingShell />
   const used = billing?.quota_used_minutes ?? 0
   const cap = billing?.quota_cap_minutes ?? 300
   const percentUsed = cap > 0 ? Math.min(100, Math.round((used / cap) * 100)) : 0
