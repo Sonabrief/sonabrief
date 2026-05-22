@@ -15,6 +15,7 @@ import {
   deletePasskey,
   type PasskeyCredential,
 } from '../lib/webauthn'
+import { useBackupScheduler, type BackupFrequency } from '../hooks/useBackupScheduler'
 
 const fadeUp = {
   initial: { opacity: 0, y: 8 },
@@ -149,6 +150,11 @@ export default function ProfilePage() {
   const [passkeyDeviceName, setPasskeyDeviceName] = useState('')
   const [passkeyAdding, setPasskeyAdding] = useState(false)
   const [passkeyError, setPasskeyError] = useState<string | null>(null)
+  const [backupFrequency, setBackupFrequency] = useState<BackupFrequency>('24h')
+  const [lastBackupAt, setLastBackupAt] = useState<number | null>(null)
+  const [backupRunning, setBackupRunning] = useState(false)
+
+  useBackupScheduler(tier, backupFrequency, (at) => setLastBackupAt(at))
 
   async function refreshPasskeys() {
     try {
@@ -230,6 +236,13 @@ export default function ProfilePage() {
     }
   }, [passkeySupported])
 
+  useEffect(() => {
+    const saved = localStorage.getItem('sb_last_backup_at')
+    if (saved) setLastBackupAt(Number(saved))
+    const freq = localStorage.getItem('sb_backup_frequency') as BackupFrequency | null
+    if (freq) setBackupFrequency(freq)
+  }, [])
+
   async function handleSavePrefs() {
     setSaving(true)
     await updatePreferences({ language, synthesis_mode: defaultMode, profession })
@@ -268,6 +281,26 @@ export default function ProfilePage() {
   }
 
   const percentUsed = quotaCap > 0 ? Math.min(100, Math.round((quotaUsed / quotaCap) * 100)) : 0
+
+  function formatBackupDate(ts: number | null): string {
+    if (!ts) return 'Mai'
+    return new Date(ts).toLocaleString('it-IT', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    })
+  }
+
+  async function handleManualBackup() {
+    setBackupRunning(true)
+    try {
+      const { syncAllMeetings } = await import('../lib/sync')
+      const result = await syncAllMeetings()
+      setLastBackupAt(result.lastSyncedAt)
+    } catch (err) {
+      console.error('[backup] error:', err)
+    }
+    setBackupRunning(false)
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -551,6 +584,58 @@ export default function ProfilePage() {
               </div>
             </div>
           </motion.section>
+
+          {/* ── Backup automatico ───────────────────────── */}
+          {tier === 'unlimited' && (
+            <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.15 }} aria-labelledby="backup-heading">
+              <div className="mb-4">
+                <SectionHeading>
+                  <span id="backup-heading">Backup automatico</span>
+                </SectionHeading>
+              </div>
+              <div className="rounded-lg border border-border bg-card px-5 py-4 space-y-4">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  I tuoi meeting vengono cifrati sul tuo computer e sincronizzati su cloud automaticamente.
+                  Nemmeno noi possiamo leggerli.
+                </p>
+
+                <div className="space-y-1.5">
+                  <label htmlFor="backup-freq" className="text-sm text-muted-foreground">
+                    Frequenza backup
+                  </label>
+                  <select
+                    id="backup-freq"
+                    value={backupFrequency}
+                    onChange={e => {
+                      const v = e.target.value as BackupFrequency
+                      setBackupFrequency(v)
+                      localStorage.setItem('sb_backup_frequency', v)
+                    }}
+                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    <option value="1h">Ogni ora</option>
+                    <option value="6h">Ogni 6 ore</option>
+                    <option value="24h">Giornaliero (default)</option>
+                    <option value="off">Disattivato</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-sm text-muted-foreground">
+                    Ultimo backup: <span className="text-foreground">{formatBackupDate(lastBackupAt)}</span>
+                  </span>
+                  <Button
+                    onClick={handleManualBackup}
+                    disabled={backupRunning}
+                    className="h-9 px-4 text-sm"
+                    variant="outline"
+                  >
+                    {backupRunning ? 'Backup…' : 'Esegui ora'}
+                  </Button>
+                </div>
+              </div>
+            </motion.section>
+          )}
 
           {/* ── Privacy & Dati ──────────────────────────── */}
           <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.18 }} aria-labelledby="privacy-heading">

@@ -72,3 +72,24 @@ export async function syncMeetingNow(meetingId: string): Promise<void> {
     console.error(`[sync] upload failed for ${meetingId}:`, err)
   }
 }
+
+export async function syncAllMeetings(): Promise<{ synced: number; failed: number; lastSyncedAt: number }> {
+  if (!isUnlocked()) throw new Error('keystore_locked')
+
+  const meetings = await db.meetings.toArray()
+  let synced = 0
+  let failed = 0
+
+  for (const meeting of meetings) {
+    try {
+      await uploadMeeting(meeting.id)
+      synced++
+    } catch {
+      failed++
+    }
+  }
+
+  const lastSyncedAt = Date.now()
+  localStorage.setItem('sb_last_backup_at', String(lastSyncedAt))
+  return { synced, failed, lastSyncedAt }
+}
