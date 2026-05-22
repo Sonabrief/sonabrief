@@ -12,6 +12,7 @@ interface UserPreferences {
   sync_enabled: number
   onboarded: number
   display_name: string | null
+  weekly_reminder_enabled: number
 }
 
 export async function handleGetPreferences(req: Request, env: Env): Promise<Response> {
@@ -65,8 +66,8 @@ export async function handleSavePreferences(req: Request, env: Env): Promise<Res
         user_id, language, profession, profession_category,
         context_note, meeting_duration, client_volume,
         synthesis_mode, sync_enabled, onboarded, display_name,
-        created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        weekly_reminder_enabled, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(user_id) DO UPDATE SET
         language = COALESCE(excluded.language, language),
         profession = COALESCE(excluded.profession, profession),
@@ -78,6 +79,7 @@ export async function handleSavePreferences(req: Request, env: Env): Promise<Res
         sync_enabled = COALESCE(excluded.sync_enabled, sync_enabled),
         onboarded = COALESCE(excluded.onboarded, onboarded),
         display_name = COALESCE(excluded.display_name, display_name),
+        weekly_reminder_enabled = COALESCE(excluded.weekly_reminder_enabled, weekly_reminder_enabled),
         updated_at = excluded.updated_at
     `)
     .bind(
@@ -92,6 +94,7 @@ export async function handleSavePreferences(req: Request, env: Env): Promise<Res
       body.sync_enabled ?? 0,
       body.onboarded ?? 0,
       body.display_name ?? null,
+      body.weekly_reminder_enabled ?? 0,
       now,
       now,
     )

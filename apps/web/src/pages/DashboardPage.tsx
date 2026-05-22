@@ -14,6 +14,7 @@ import { NumberTicker } from '../components/ui/number-ticker'
 import { BorderBeam } from '../components/ui/border-beam'
 import { ShimmerButton } from '../components/ui/shimmer-button'
 import { useRetentionCleanup } from '../hooks/useRetentionCleanup'
+import { useWeeklyReminder } from '../hooks/useWeeklyReminder'
 import type { Tier } from '../hooks/useTier'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -163,6 +164,9 @@ export default function DashboardPage() {
     getPreferences().then(prefs => {
       if (prefs && prefs.onboarded === 0) navigate('/onboarding')
       else setReady(true)
+      if (prefs?.weekly_reminder_enabled !== undefined) {
+        localStorage.setItem('sb_weekly_reminder', prefs.weekly_reminder_enabled === 1 ? '1' : '0')
+      }
     })
     // Calendar loaded in parallel — does not block page readiness
     Promise.all([
@@ -209,6 +213,8 @@ export default function DashboardPage() {
 
   const tier = billing?.tier ?? 'free'
   useRetentionCleanup(tier as Tier, !ready)
+  const weeklyReminderEnabled = localStorage.getItem('sb_weekly_reminder') === '1'
+  useWeeklyReminder(tier, weeklyReminderEnabled)
 
   if (!ready) return <LoadingShell />
   const used = billing?.quota_used_minutes ?? 0

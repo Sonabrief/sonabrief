@@ -22,6 +22,7 @@ import {
 } from "./routes/admin";
 import { handleGetPreferences, handleSavePreferences } from "./routes/preferences";
 import { handleDeleteAccount } from "./routes/account";
+import { handleSendWeeklyReminder } from "./routes/email-reminder";
 import { handleRetentionCleanup } from "./routes/cron-retention";
 import { handleGoogleStart, handleGoogleCallback, handleCalendarEvents, handleCalendarDisconnect, handleMicrosoftStart, handleMicrosoftCallback, handleMicrosoftCalendarEvents, handleMicrosoftDisconnect } from "./routes/calendar";
 import {
@@ -113,6 +114,8 @@ export default {
       response = await handleMicrosoftCalendarEvents(request, env)
     } else if (url.pathname === '/v1/calendar/microsoft/disconnect' && request.method === 'POST') {
       response = await handleMicrosoftDisconnect(request, env)
+    } else if (url.pathname === '/v1/email/reminder' && request.method === 'POST') {
+      response = await handleSendWeeklyReminder(request, env)
     } else if (url.pathname === '/v1/account' && request.method === 'DELETE') {
       response = await handleDeleteAccount(request, env)
     } else {

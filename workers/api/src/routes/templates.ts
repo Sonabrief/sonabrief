@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getUserFromSession } from "../lib/sessions";
+import { getUserTier as getUserTierShared } from "../lib/tier";
 import type { Env } from "../lib/env";
 
 const CUSTOM_TEMPLATE_LIMITS: Record<string, number> = {
@@ -18,12 +19,7 @@ const TemplateWriteSchema = z.object({
 });
 
 async function getUserTier(env: Env, userId: string): Promise<string> {
-  const row = await env.DB.prepare(
-    `SELECT tier FROM licenses WHERE user_id = ? AND status = 'active' ORDER BY created_at DESC LIMIT 1`
-  )
-    .bind(userId)
-    .first<{ tier: string }>();
-  return row?.tier ?? "free";
+  return getUserTierShared(userId, env)
 }
 
 export async function handleTemplates(req: Request, env: Env): Promise<Response> {

@@ -16,6 +16,8 @@ import {
   type PasskeyCredential,
 } from '../lib/webauthn'
 import { useBackupScheduler, type BackupFrequency } from '../hooks/useBackupScheduler'
+import { ProGate } from '../components/ProGate'
+import { cn } from '@/lib/utils'
 import { setModelOverride, detectWhisperModel, WHISPER_LARGE, WHISPER_SMALL, type WhisperModelId } from '../lib/whisperModel'
 const fadeUp = {
   initial: { opacity: 0, y: 8 },
@@ -153,6 +155,7 @@ export default function ProfilePage() {
   const [backupFrequency, setBackupFrequency] = useState<BackupFrequency>('24h')
   const [lastBackupAt, setLastBackupAt] = useState<number | null>(null)
   const [backupRunning, setBackupRunning] = useState(false)
+  const [weeklyReminder, setWeeklyReminder] = useState(false)
   const [whisperOverride, setWhisperOverride] = useState<WhisperModelId | null>(null)
   const detectedModel = useMemo(() => detectWhisperModel(), [])
 
@@ -231,6 +234,7 @@ export default function ProfilePage() {
       setLanguage(p.language ?? 'it')
       setDefaultMode(p.synthesis_mode ?? 'standard')
       setProfession(p.profession ?? '')
+      setWeeklyReminder(p.weekly_reminder_enabled === 1)
       setPrefsLoaded(true)
     })
     if (passkeySupported) {
@@ -630,6 +634,43 @@ export default function ProfilePage() {
                   Override manuale attivo. Le modifiche hanno effetto dalla prossima registrazione.
                 </p>
               )}
+            </div>
+          </motion.section>
+
+          {/* ── Notifiche email ─────────────────────── */}
+          <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.16 }} aria-labelledby="notifications-heading">
+            <div className="mb-4">
+              <SectionHeading>
+                <span id="notifications-heading">Notifiche email</span>
+              </SectionHeading>
+            </div>
+            <div className="rounded-lg border border-border bg-card px-5 py-4">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm font-medium text-foreground">Reminder action items settimanale</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Ogni lunedì alle 8:00 ricevi un riepilogo degli action items aperti.</p>
+                </div>
+                <ProGate feature="Reminder email">
+                  <button
+                    role="switch"
+                    aria-checked={weeklyReminder}
+                    onClick={async () => {
+                      const next = !weeklyReminder
+                      setWeeklyReminder(next)
+                      await updatePreferences({ weekly_reminder_enabled: next ? 1 : 0 })
+                    }}
+                    className={cn(
+                      'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                      weeklyReminder ? 'bg-primary' : 'bg-muted'
+                    )}
+                  >
+                    <span className={cn(
+                      'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg transform transition-transform',
+                      weeklyReminder ? 'translate-x-5' : 'translate-x-0'
+                    )} />
+                  </button>
+                </ProGate>
+              </div>
             </div>
           </motion.section>
 

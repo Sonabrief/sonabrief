@@ -51,6 +51,7 @@ export interface UserPreferences {
   sync_enabled: number
   onboarded: number
   display_name: string | null
+  weekly_reminder_enabled: number
 }
 
 export async function getPreferences(): Promise<UserPreferences | null> {
@@ -81,6 +82,7 @@ export async function updatePreferences(prefs: {
   language?: string
   synthesis_mode?: string
   profession?: string
+  weekly_reminder_enabled?: number
 }): Promise<boolean> {
   try {
     const res = await fetch(`${API_URL}/v1/preferences`, {
