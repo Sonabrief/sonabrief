@@ -229,7 +229,7 @@ export default function RecordingPage() {
   })
   const [_partialTranscript, setPartialTranscript] = useState('')
   const [whisperState, setWhisperState] = useState<'loading' | 'ready' | 'transcribing' | 'done' | 'error'>('loading')
-  const [whisperProgress, setWhisperProgress] = useState(0)
+  const [_whisperProgress, setWhisperProgress] = useState(0)
   const [whisperReady, setWhisperReady] = useState(false)
   const [showLoadingBanner, setShowLoadingBanner] = useState(false)
   const isModelCachedRef = useRef(false)
@@ -744,6 +744,7 @@ export default function RecordingPage() {
           React.createElement(PiPRecorder, {
             duration: d,
             paused: p,
+            stream: stream ?? null,
             initialNotes: notes,
             onPause: () => { pause(); render(duration, true) },
             onResume: () => { resume(); render(duration, false) },
@@ -1387,7 +1388,7 @@ export default function RecordingPage() {
                   id="recording-notes"
                   value={notes}
                   onChange={e => handleNotesChange(e.target.value)}
-                  placeholder="Segna qui i tuoi appunti — verranno integrati nella sintesi insieme alle note rapide"
+                  placeholder="Quello che scrivi qui verrà integrato nella sintesi AI insieme alle note rapide."
                   className="w-full resize-none rounded-md border border-border bg-card px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                   style={{ minHeight: '160px' }}
                 />

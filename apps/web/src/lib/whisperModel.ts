@@ -7,7 +7,7 @@ export const WHISPER_SMALL = 'Xenova/whisper-small' as const
 export const STORAGE_KEY = 'whisper_model_override'
 
 export function detectWhisperModel(): WhisperModelId {
-  const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 4
+  const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8
   const cores = navigator.hardwareConcurrency ?? 2
   return mem >= 8 && cores >= 4 ? WHISPER_LARGE : WHISPER_SMALL
 }

@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Download, X } from 'lucide-react';
 
+const DISMISSED_KEY = 'pwa_install_dismissed';
+
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
@@ -12,8 +14,8 @@ export function PWAInstallPrompt() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    // Non mostrare se già installata
     if (window.matchMedia('(display-mode: standalone)').matches) return;
+    if (localStorage.getItem(DISMISSED_KEY)) return;
 
     const handler = (e: Event) => {
       e.preventDefault();
@@ -29,11 +31,15 @@ export function PWAInstallPrompt() {
     if (!deferredPrompt) return;
     await deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') setVisible(false);
+    if (outcome === 'accepted') {
+      localStorage.setItem(DISMISSED_KEY, '1');
+    }
+    setVisible(false);
     setDeferredPrompt(null);
   };
 
   const handleDismiss = () => {
+    localStorage.setItem(DISMISSED_KEY, '1');
     setVisible(false);
     setDeferredPrompt(null);
   };

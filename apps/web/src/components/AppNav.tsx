@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
-import { ChevronDown, LogOut, User } from 'lucide-react'
+import { ChevronDown, LogOut, Menu, User, X } from 'lucide-react'
 import { getMe, getBillingStatus, logout } from '../lib/api'
 
 const NAV_ITEMS = [
@@ -151,6 +151,7 @@ export function AppNav() {
   const [displayName, setDisplayName] = useState<string | null>(null)
   const [tier, setTier] = useState('free')
   const [isFree, setIsFree] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
     getMe().then(user => {
@@ -183,6 +184,14 @@ export function AppNav() {
           aria-label="Torna alla dashboard"
         >
           <img src="/logo.svg" alt="Sonabrief" className="h-7 w-auto" />
+        </button>
+
+        <button
+          className="flex items-center justify-center rounded-md p-2 text-foreground hover:bg-muted md:hidden"
+          onClick={() => setMobileOpen(o => !o)}
+          aria-label={mobileOpen ? 'Chiudi menu' : 'Apri menu'}
+        >
+          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
 
         <ul className="hidden items-center gap-0.5 md:flex" role="list">
@@ -223,6 +232,42 @@ export function AppNav() {
           )}
         </div>
       </div>
+
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            className="overflow-hidden border-t border-border bg-card md:hidden"
+          >
+            <ul className="flex flex-col px-4 py-2" role="list">
+              {NAV_ITEMS.map(({ label, path, proOnly }) => {
+                const locked = proOnly && isFree
+                return (
+                  <li key={path}>
+                    <button
+                      onClick={() => { setMobileOpen(false); navigate(path) }}
+                      aria-current={location.pathname === path ? 'page' : undefined}
+                      className={`flex w-full items-center rounded-md px-3 py-2.5 text-sm font-medium transition-colors ${
+                        location.pathname === path
+                          ? 'bg-secondary text-primary'
+                          : locked
+                          ? 'text-muted-foreground/50'
+                          : 'text-foreground hover:bg-muted'
+                      }`}
+                    >
+                      {label}
+                      {locked && <span className="ml-1 text-[10px] text-muted-foreground/50">✦</span>}
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   )
 }
