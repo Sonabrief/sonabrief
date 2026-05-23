@@ -238,33 +238,32 @@ class OfflineSpeakerDiarization {
     this.config.clustering = configObj.clustering;
   }
 
-  process(samples) {
-    const pointer =
-        this.Module._malloc(samples.length * samples.BYTES_PER_ELEMENT);
+  process(samples, numSpeakers, threshold) {
+    // Aggiorna config clustering se specificato
+    if (numSpeakers && numSpeakers > 0) {
+      this.setConfig({ clustering: { numClusters: numSpeakers, threshold: threshold || 0.5 } });
+    } else {
+      this.setConfig({ clustering: { numClusters: -1, threshold: threshold || 0.5 } });
+    }
+
+    const pointer = this.Module._malloc(samples.length * samples.BYTES_PER_ELEMENT);
     this.Module.HEAPF32.set(samples, pointer / samples.BYTES_PER_ELEMENT);
 
     let r = this.Module._SherpaOnnxOfflineSpeakerDiarizationProcess(
-        this.handle, pointer, samples.length);
+      this.handle, pointer, samples.length);
     this.Module._free(pointer);
 
-    let numSegments =
-        this.Module._SherpaOnnxOfflineSpeakerDiarizationResultGetNumSegments(r);
-
-    let segments =
-        this.Module._SherpaOnnxOfflineSpeakerDiarizationResultSortByStartTime(
-            r);
+    let numSegments = this.Module._SherpaOnnxOfflineSpeakerDiarizationResultGetNumSegments(r);
+    let segments = this.Module._SherpaOnnxOfflineSpeakerDiarizationResultSortByStartTime(r);
 
     let ans = [];
-
     let sizeOfSegment = 3 * 4;
     for (let i = 0; i < numSegments; ++i) {
-      let p = segments + i * sizeOfSegment
-
+      let p = segments + i * sizeOfSegment;
       let start = this.Module.HEAPF32[p / 4 + 0];
       let end = this.Module.HEAPF32[p / 4 + 1];
       let speaker = this.Module.HEAP32[p / 4 + 2];
-
-      ans.push({start: start, end: end, speaker: speaker});
+      ans.push({start, end, speaker});
     }
 
     this.Module._SherpaOnnxOfflineSpeakerDiarizationDestroySegment(segments);
