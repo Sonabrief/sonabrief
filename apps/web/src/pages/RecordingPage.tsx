@@ -230,6 +230,10 @@ export default function RecordingPage() {
   const [_partialTranscript, setPartialTranscript] = useState('')
   const [whisperState, setWhisperState] = useState<'loading' | 'ready' | 'transcribing' | 'done' | 'error'>('loading')
   const [whisperProgress, setWhisperProgress] = useState(0)
+  const [whisperReady, setWhisperReady] = useState(false)
+  const [showLoadingBanner, setShowLoadingBanner] = useState(false)
+  const isModelCachedRef = useRef(false)
+  const bannerTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [transcript, setTranscript] = useState('')
   const [segments, setSegments] = useState<WhisperSegment[]>([])
   const [synthesisState, setSynthesisState] = useState<'idle' | 'streaming' | 'done' | 'error'>('idle')
@@ -362,9 +366,33 @@ export default function RecordingPage() {
   useEffect(() => {
     whisper.init()
     embeddingsService.init()
+
+    const alreadyDownloaded = localStorage.getItem('sonabrief_whisper_ready') === 'true'
+    if (!alreadyDownloaded) {
+      bannerTimerRef.current = setTimeout(() => {
+        if (!isModelCachedRef.current) {
+          setShowLoadingBanner(true)
+        }
+      }, 600)
+    }
+
     const unsub = whisper.on((event) => {
       if (event.type === 'loading') setWhisperProgress(event.progress)
-      if (event.type === 'ready') setWhisperState('ready')
+      if (event.type === 'ready') {
+        isModelCachedRef.current = true
+        const isFirstDownload = localStorage.getItem('sonabrief_whisper_ready') !== 'true'
+        localStorage.setItem('sonabrief_whisper_ready', 'true')
+        if (bannerTimerRef.current) {
+          clearTimeout(bannerTimerRef.current)
+          bannerTimerRef.current = null
+        }
+        setShowLoadingBanner(false)
+        setWhisperState('ready')
+        if (isFirstDownload) {
+          setWhisperReady(true)
+          setTimeout(() => setWhisperReady(false), 2000)
+        }
+      }
       if (event.type === 'transcribing') setWhisperState('transcribing')
       if (event.type === 'result') {
         setTranscript(event.text)
@@ -373,9 +401,17 @@ export default function RecordingPage() {
       }
       if (event.type === 'error') setWhisperState('error')
     })
+
     whisper.loadAuto()
-    // templates caricati da useEffect separato
-    return () => { unsub(); whisper.destroy() }
+
+    return () => {
+      unsub()
+      whisper.destroy()
+      if (bannerTimerRef.current) {
+        clearTimeout(bannerTimerRef.current)
+        bannerTimerRef.current = null
+      }
+    }
   }, [])
 
   useEffect(() => {
@@ -477,17 +513,6 @@ export default function RecordingPage() {
     setShowQuickNoteInput(true)
   }, [state])
 
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'e' && (IS_MAC ? e.metaKey : e.ctrlKey)) {
-        e.preventDefault()
-        triggerQuickNote()
-      }
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [triggerQuickNote])
-
   // ── Simulated transcription progress
   useEffect(() => {
     if (!isTranscribing) return
@@ -502,6 +527,17 @@ export default function RecordingPage() {
     }, 200)
     return () => clearInterval(timer)
   }, [isTranscribing])
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'e' && (IS_MAC ? e.metaKey : e.ctrlKey)) {
+        e.preventDefault()
+        triggerQuickNote()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [triggerQuickNote])
 
   // Tieni traccia dell'ultimo sessionId attivo
   useEffect(() => {
@@ -802,6 +838,55 @@ export default function RecordingPage() {
               Nuovo meeting
             </h2>
 
+            {/* Banner download modello */}
+            <AnimatePresence mode="wait">
+              {showLoadingBanner && (
+                <motion.div
+                  key="model-loading"
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
+                  className="rounded-lg border border-primary/30 bg-primary/10 px-4 py-3 space-y-2"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <svg
+                      className="h-4 w-4 shrink-0 animate-spin text-primary motion-reduce:animate-none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
+                    </svg>
+                    <div>
+                      <p className="text-sm font-semibold text-primary">Sonabrief AI si sta preparando</p>
+                      <p className="text-xs text-primary/70">Solo al primo avvio — ci vuole qualche minuto, poi è sempre immediato</p>
+                    </div>
+                  </div>
+                  <div className="h-1 w-full overflow-hidden rounded-full bg-primary/20">
+                    <div className="h-full w-1/3 rounded-full bg-primary animate-pulse" />
+                  </div>
+                </motion.div>
+              )}
+              {whisperReady && (
+                <motion.div
+                  key="model-ready"
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
+                  className="rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 flex items-center gap-2.5"
+                >
+                  <svg className="h-4 w-4 shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <p className="text-sm font-semibold text-green-700 dark:text-green-400">Pronto. Puoi avviare la registrazione.</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* Source selector — visible when idle */}
             <AnimatePresence mode="wait">
               {state === 'idle' && (
@@ -910,13 +995,6 @@ export default function RecordingPage() {
               >
                 Avvia registrazione
               </Button>
-            )}
-
-            {/* Model not ready yet */}
-            {state === 'idle' && whisperState === 'loading' && (
-              <p className="text-sm text-muted-foreground">
-                Preparazione del modello AI in corso...
-              </p>
             )}
 
             {/* Recording: timer + waveform + pause/stop */}
@@ -1227,30 +1305,6 @@ export default function RecordingPage() {
               <MeetingBriefing />
             </ProGate>
 
-            {/* Model loading */}
-            {whisperState === 'loading' && (
-              <div className="rounded-lg border border-border bg-card px-4 py-3">
-                <p className="mb-2 text-xs font-medium text-muted-foreground">
-                  {whisperProgress > 0
-                    ? `Preparazione modello AI — ${whisperProgress}%`
-                    : 'Inizializzazione modello AI...'}
-                </p>
-                <div
-                  role="progressbar"
-                  aria-valuenow={whisperProgress}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                  aria-label={`Caricamento modello AI: ${whisperProgress}%`}
-                  className="h-1.5 w-full overflow-hidden rounded-full bg-border"
-                >
-                  <div
-                    className="h-full rounded-full bg-primary transition-[width] duration-300 ease-out motion-reduce:transition-none"
-                    style={{ width: `${whisperProgress}%` }}
-                  />
-                </div>
-                <p className="mt-1.5 text-xs text-muted-foreground">Solo al primo utilizzo</p>
-              </div>
-            )}
 
             {/* Quick notes — during recording */}
             {isRecording && (

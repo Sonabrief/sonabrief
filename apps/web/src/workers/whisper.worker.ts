@@ -11,6 +11,7 @@ type WhisperStatus =
   | { type: 'transcribing' }
   | { type: 'result'; text: string; segments: unknown[] }
   | { type: 'chunk_result'; text: string; segments: unknown[]; batchId: string }
+  | { type: 'chunk_progress'; processed: number; total: number }
   | { type: 'error'; message: string }
 
 const post = (msg: WhisperStatus) => self.postMessage(msg)
