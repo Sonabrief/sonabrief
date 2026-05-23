@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { AppNav } from '../components/AppNav'
-import { db, type Meeting, type Note } from '../lib/db'
+import { db, type Meeting, type Note, type Transcript } from '../lib/db'
 import { SynthesisEditor } from '../components/SynthesisEditor'
 import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
 import { TagInput, TagPill } from '../components/TagInput'
@@ -35,10 +35,12 @@ export default function ArchivePage() {
   const [search, setSearch] = useState('')
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null)
   const [selectedNote, setSelectedNote] = useState<Note | null>(null)
+  const [selectedTranscript, setSelectedTranscript] = useState<Transcript | null>(null)
   const [copyDone, setCopyDone] = useState(false)
   const [editingClient, setEditingClient] = useState('')
   const [editingStream, setEditingStream] = useState('')
   const [filterTag, setFilterTag] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<'synthesis' | 'transcript'>('synthesis')
 
   const meetings = useLiveQuery(
     () => db.meetings.orderBy('startedAt').reverse().toArray(),
@@ -52,8 +54,11 @@ export default function ArchivePage() {
 
   async function handleSelect(meeting: Meeting) {
     setSelectedMeeting(meeting)
+    setActiveTab('synthesis')
     const note = await db.notes.where('meetingId').equals(meeting.id).first()
     setSelectedNote(note ?? null)
+    const transcript = await db.transcripts.where('meetingId').equals(meeting.id).first()
+    setSelectedTranscript(transcript ?? null)
     setEditingClient(meeting.clientName ?? '')
     setEditingStream(meeting.projectStream ?? '')
   }
@@ -81,6 +86,16 @@ export default function ArchivePage() {
       duration: formatMinutes(selectedMeeting!.durationSeconds),
       lang: LANG_LABEL[selectedMeeting!.lang ?? 'it'] ?? selectedMeeting!.lang ?? 'IT',
       content: selectedNote!.content,
+    }
+  }
+
+  function buildTranscriptExportData() {
+    return {
+      title: selectedMeeting!.title,
+      date: formatDate(selectedMeeting!.startedAt),
+      duration: formatMinutes(selectedMeeting!.durationSeconds),
+      lang: LANG_LABEL[selectedMeeting!.lang ?? 'it'] ?? selectedMeeting!.lang ?? 'IT',
+      content: selectedTranscript!.text,
     }
   }
 
@@ -204,6 +219,11 @@ export default function ArchivePage() {
                             {meeting.tags.map(tag => <TagPill key={tag} tag={tag} />)}
                           </div>
                         )}
+                        {!meeting.hasSynthesis && (
+                          <span className="mt-1.5 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                            Solo trascrizione
+                          </span>
+                        )}
                       </button>
                     </motion.li>
                   )
@@ -265,20 +285,80 @@ export default function ArchivePage() {
                     />
                   </ProGate>
 
-                  {selectedNote ? (
-                    <>
-                      <SynthesisEditor content={selectedNote.content} readonly />
-                      <div className="flex flex-wrap gap-2 border-t border-border pt-4">
-                        {exportActions.map(btn => (
-                          <button
-                            key={btn.label}
-                            onClick={btn.fn}
-                            className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none"
-                          >
-                            {btn.label}
-                          </button>
-                        ))}
+                  {selectedMeeting.hasSynthesis === false ? (
+                    selectedTranscript ? (
+                    <div>
+                      <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                        Trascrizione
+                      </p>
+                      <div className="max-h-125 overflow-y-auto rounded-md border border-border bg-muted/30 p-4">
+                        <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
+                          {selectedTranscript.text}
+                        </pre>
                       </div>
+                      <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
+                        <button onClick={() => exportMarkdown(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Markdown</button>
+                        <button onClick={() => exportPDF(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">PDF</button>
+                        <button onClick={() => exportWord(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Word</button>
+                        <button onClick={() => exportEmail(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Email</button>
+                        <button onClick={() => navigator.clipboard.writeText(selectedTranscript!.text)} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Copia testo</button>
+                      </div>
+                    </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">Nessun contenuto disponibile.</p>
+                    )
+                  ) : selectedNote ? (
+                    <>
+                      <div className="flex gap-1 border-b border-border pb-3">
+                        <button
+                          onClick={() => setActiveTab('synthesis')}
+                          className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${activeTab === 'synthesis' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                        >
+                          Sintesi
+                        </button>
+                        <button
+                          onClick={() => setActiveTab('transcript')}
+                          className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${activeTab === 'transcript' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                        >
+                          Trascrizione
+                        </button>
+                      </div>
+                      {activeTab === 'synthesis' && (
+                        <>
+                          <SynthesisEditor content={selectedNote.content} readonly />
+                          <div className="flex flex-wrap gap-2 border-t border-border pt-4">
+                            {exportActions.map(btn => (
+                              <button
+                                key={btn.label}
+                                onClick={btn.fn}
+                                className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none"
+                              >
+                                {btn.label}
+                              </button>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                      {activeTab === 'transcript' && (
+                        selectedTranscript ? (
+                          <>
+                            <div className="max-h-125 overflow-y-auto rounded-md border border-border bg-muted/30 p-4">
+                              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
+                                {selectedTranscript.text}
+                              </pre>
+                            </div>
+                            <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
+                              <button onClick={() => exportMarkdown(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Markdown</button>
+                              <button onClick={() => exportPDF(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">PDF</button>
+                              <button onClick={() => exportWord(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Word</button>
+                              <button onClick={() => exportEmail(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Email</button>
+                              <button onClick={() => navigator.clipboard.writeText(selectedTranscript!.text)} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Copia testo</button>
+                            </div>
+                          </>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Trascrizione non disponibile.</p>
+                        )
+                      )}
                     </>
                   ) : (
                     <p className="text-sm text-muted-foreground">Nessuna sintesi disponibile.</p>

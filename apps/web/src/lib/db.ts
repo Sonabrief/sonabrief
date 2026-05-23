@@ -14,6 +14,7 @@ export interface Meeting {
   clientName?: string
   projectStream?: string
   tags?: string[]
+  hasSynthesis?: boolean
 }
 
 export interface Transcript {

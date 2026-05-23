@@ -418,6 +418,7 @@ export default function RecordingPage() {
         ...(clientName.trim() && { clientName: clientName.trim() }),
         ...(projectStream.trim() && { projectStream: projectStream.trim() }),
         ...(meetingTags.length > 0 && { tags: meetingTags }),
+        hasSynthesis: true,
         createdAt: now,
         updatedAt: now,
       })
@@ -525,6 +526,7 @@ export default function RecordingPage() {
       .catch(() => {})
   }, [state])
 
+  // ── Save transcript without synthesis
   // ── Synthesis
   async function generateSynthesis() {
     meetingIdRef.current = crypto.randomUUID()
@@ -583,6 +585,50 @@ export default function RecordingPage() {
         }
       }
     } catch { setSynthesisState('error') }
+  }
+
+  async function saveTranscriptOnly() {
+    if (!transcript) return
+    const id = meetingIdRef.current || crypto.randomUUID()
+    meetingIdRef.current = id
+    const now = Date.now()
+    const autoTitle = new Date(now).toLocaleString(language, {
+      day: 'numeric', month: 'long', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    })
+    const title = sessionTitle.trim() || autoTitle
+    try {
+      await db.transaction('rw', [db.meetings, db.transcripts], async () => {
+        await db.meetings.add({
+          id, title,
+          startedAt: now - duration * 1000,
+          endedAt: now,
+          durationSeconds: duration,
+          mode: 'standard',
+          lang: language,
+          hasSynthesis: false,
+          ...(clientName.trim() && { clientName: clientName.trim() }),
+          ...(projectStream.trim() && { projectStream: projectStream.trim() }),
+          ...(meetingTags.length > 0 && { tags: meetingTags }),
+          createdAt: now,
+          updatedAt: now,
+        })
+        await db.transcripts.add({
+          id: crypto.randomUUID(), meetingId: id,
+          text: transcript, segments: JSON.stringify(segments), createdAt: now,
+        })
+      })
+      if (localStorage.getItem('sonabrief_sync_enabled') === 'true' && isUnlocked()) {
+        syncMeetingNow(id)
+      }
+      saveEmbeddingForMeeting(id, transcript)
+      if (chunkSession) {
+        db.recording_sessions.delete(chunkSession.sessionId).catch(() => {})
+      }
+      navigate('/archive')
+    } catch (err) {
+      console.error('[db] saveTranscriptOnly fallito:', err)
+    }
   }
 
   function handleNewRecording() {
@@ -963,6 +1009,13 @@ export default function RecordingPage() {
                       className="w-full rounded-md hover:bg-(--primary-hover)"
                     >
                       Genera sintesi
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={saveTranscriptOnly}
+                      className="w-full rounded-md"
+                    >
+                      Salva solo trascrizione
                     </Button>
                   </div>
                 )}
