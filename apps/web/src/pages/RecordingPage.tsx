@@ -224,7 +224,9 @@ function SourceButton({
 export default function RecordingPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { state, duration, error, paused, start, stop, pause, resume, audioData, reset, stream, chunkSession } = useAudioRecorder()
+  const { state, duration, error, paused, start, stop, pause, resume, audioData, reset, stream, chunkSession } = useAudioRecorder(() => {
+    setTriggerPiP(true)
+  })
   const [_partialTranscript, setPartialTranscript] = useState('')
   const [whisperState, setWhisperState] = useState<'loading' | 'ready' | 'transcribing' | 'done' | 'error'>('loading')
   const [whisperProgress, setWhisperProgress] = useState(0)
@@ -262,6 +264,12 @@ export default function RecordingPage() {
   const quickNoteTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const quickNoteInputRef = useRef<HTMLInputElement>(null)
   const lastSessionIdRef = useRef<string | null>(null)
+  const pipWindowRef = useRef<Window | null>(null)
+  const openPiPRef = useRef<(() => void) | null>(null)
+  const pipDurationRef = useRef(duration)
+  const pipPausedRef = useRef(paused)
+  const [triggerPiP, setTriggerPiP] = useState(false)
+  const [pipActive, setPipActive] = useState(false)
 
   // ── Derived state
   const canStart = state === 'idle' && whisperState === 'ready'
@@ -451,7 +459,18 @@ export default function RecordingPage() {
     }
     return () => { lock?.release().catch(() => {}) }
   }, [isRecording, paused])
-  
+
+  useEffect(() => {
+    if (triggerPiP && (source === 'both' || source === 'tab')) {
+      setTriggerPiP(false)
+      openPiP()
+    }
+    if (triggerPiP) setTriggerPiP(false)
+  }, [triggerPiP])
+
+  useEffect(() => { pipDurationRef.current = duration }, [duration])
+  useEffect(() => { pipPausedRef.current = paused }, [paused])
+
   // ── Quick note shortcut
   const triggerQuickNote = useCallback(() => {
     if (state !== 'recording') return
@@ -630,6 +649,93 @@ export default function RecordingPage() {
       console.error('[db] saveTranscriptOnly fallito:', err)
     }
   }
+
+  async function openPiP() {
+    if (!('documentPictureInPicture' in window)) {
+      alert('Il tuo browser non supporta questa funzione. Usa Chrome 116+.')
+      return
+    }
+    try {
+      const pipWin = await (window as any).documentPictureInPicture.requestWindow({
+        width: 400,
+        height: 500,
+      })
+      pipWindowRef.current = pipWin
+      setPipActive(true)
+
+      // Copia i fogli di stile nella finestra PiP
+      ;[...document.styleSheets].forEach(sheet => {
+        try {
+          if (sheet.href) {
+            const link = pipWin.document.createElement('link')
+            link.rel = 'stylesheet'
+            link.href = sheet.href
+            pipWin.document.head.appendChild(link)
+          } else {
+            const style = pipWin.document.createElement('style')
+            const rules = [...(sheet.cssRules ?? [])].map(r => r.cssText).join('\n')
+            style.textContent = rules
+            pipWin.document.head.appendChild(style)
+          }
+        } catch { /* cross-origin sheet, skip */ }
+      })
+
+      // Copia variabili CSS dal root
+      const rootStyle = pipWin.document.createElement('style')
+      rootStyle.textContent = document.documentElement.getAttribute('style') ?? ''
+      pipWin.document.head.appendChild(rootStyle)
+
+      // Copia classe dark se presente
+      if (document.documentElement.classList.contains('dark')) {
+        pipWin.document.documentElement.classList.add('dark')
+      }
+
+      pipWin.document.body.style.cssText = 'margin:0;padding:0;background:var(--background,#fff);'
+
+      // Mount React nell'iframe PiP
+      const container = pipWin.document.createElement('div')
+      container.id = 'pip-root'
+      pipWin.document.body.appendChild(container)
+
+      // Render del componente PiP
+      const { createRoot } = await import('react-dom/client')
+      const { PiPRecorder } = await import('../components/PiPRecorder')
+      const React = await import('react')
+
+      const root = createRoot(container)
+      const render = (d: number, p: boolean) => {
+        root.render(
+          React.createElement(PiPRecorder, {
+            duration: d,
+            paused: p,
+            initialNotes: notes,
+            onPause: () => { pause(); render(duration, true) },
+            onResume: () => { resume(); render(duration, false) },
+            onStop: () => { stop(); pipWin.close() },
+            onNotesChange: (val: string) => {
+              handleNotesChange(val)
+            },
+          })
+        )
+      }
+      render(duration, paused)
+
+      // Aggiorna ogni secondo
+      const interval = setInterval(() => {
+        if (pipWin.closed) { clearInterval(interval); setPipActive(false); return }
+        render(pipDurationRef.current, pipPausedRef.current)
+      }, 1000)
+
+      pipWin.addEventListener('pagehide', () => {
+        clearInterval(interval)
+        setPipActive(false)
+        root.unmount()
+      })
+    } catch (err) {
+      console.error('[PiP] errore:', err)
+    }
+  }
+  openPiPRef.current = openPiP
 
   function handleNewRecording() {
     const sessionIdToDelete = chunkSession?.sessionId ?? null
@@ -855,6 +961,14 @@ export default function RecordingPage() {
                     {paused ? 'Riprendi' : 'Pausa'}
                   </Button>
                 </div>
+                <Button
+                  variant="outline"
+                  onClick={pipActive ? () => { pipWindowRef.current?.close(); setPipActive(false) } : openPiP}
+                  className="rounded-md text-xs"
+                  title="Apre un pannello che rimane sopra la tua videochiamata"
+                >
+                  {pipActive ? 'Chiudi pannello' : '⧉ Sempre visibile'}
+                </Button>
               </motion.div>
               )}
             </AnimatePresence>

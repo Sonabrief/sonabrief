@@ -20,7 +20,7 @@ import {
   handleAdminWhitelistAdd,
   handleAdminWhitelistRemove,
 } from "./routes/admin";
-import { handleGetPreferences, handleSavePreferences } from "./routes/preferences";
+import { handleGetPreferences, handleSavePreferences, handlePatchPreferences } from "./routes/preferences";
 import { handleDeleteAccount } from "./routes/account";
 import { handleSendWeeklyReminder } from "./routes/email-reminder";
 import { handleRetentionCleanup } from "./routes/cron-retention";
@@ -96,8 +96,10 @@ export default {
       response = await handleAdminWhitelistRemove(request, env);
     } else if (url.pathname === '/v1/preferences' && request.method === 'GET') {
       response = await handleGetPreferences(request, env)
-    } else if (url.pathname === '/v1/preferences' && (request.method === 'POST' || request.method === 'PATCH')) {
+    } else if (url.pathname === '/v1/preferences' && request.method === 'POST') {
       response = await handleSavePreferences(request, env)
+    } else if (url.pathname === '/v1/preferences' && request.method === 'PATCH') {
+      response = await handlePatchPreferences(request, env)
     } else if (url.pathname === '/auth/google/start' && request.method === 'GET') {
       response = await handleGoogleStart(request, env)
     } else if (url.pathname === '/auth/google/callback' && request.method === 'GET') {

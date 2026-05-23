@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import {
   getMe, getBillingStatus, getBillingPortalUrl,
-  getPreferences, updatePreferences,
+  getPreferences, updatePreferences, updateDisplayName,
 } from '../lib/api'
 import { API_URL } from '../config'
 import { AppNav } from '../components/AppNav'
@@ -131,6 +131,10 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 export default function ProfilePage() {
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
+  const [displayName, setDisplayName] = useState('')
+  const [editingName, setEditingName] = useState(false)
+  const [nameInput, setNameInput] = useState('')
+  const [nameSaving, setNameSaving] = useState(false)
   const [tier, setTier] = useState('free')
   const [billingCycle, setBillingCycle] = useState<string | null>(null)
   const [quotaUsed, setQuotaUsed] = useState(0)
@@ -221,7 +225,12 @@ export default function ProfilePage() {
   , [professionSearch])
 
   useEffect(() => {
-    getMe().then(u => { if (u) setEmail(u.email) })
+    getMe().then(u => {
+      if (u) {
+        setEmail(u.email)
+        if (u.display_name) setDisplayName(u.display_name)
+      }
+    })
     getBillingStatus().then(b => {
       if (!b) return
       setTier(b.tier ?? 'free')
@@ -257,6 +266,15 @@ export default function ProfilePage() {
     setSaving(false)
     setSaveSuccess(true)
     setTimeout(() => setSaveSuccess(false), 2500)
+  }
+
+  async function handleSaveName() {
+    if (!nameInput.trim()) return
+    setNameSaving(true)
+    await updateDisplayName(nameInput.trim())
+    setDisplayName(nameInput.trim())
+    setEditingName(false)
+    setNameSaving(false)
   }
 
   async function handlePortal() {
@@ -328,6 +346,43 @@ export default function ProfilePage() {
               </SectionHeading>
             </div>
             <div className="rounded-lg border border-border bg-card px-5">
+              <Row label="Nome">
+                {editingName ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={nameInput}
+                      onChange={e => setNameInput(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') handleSaveName() }}
+                      autoFocus
+                      className="rounded-md border border-border bg-background px-2 py-1 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    />
+                    <button
+                      onClick={handleSaveName}
+                      disabled={nameSaving || !nameInput.trim()}
+                      className="text-sm font-medium text-primary hover:underline disabled:opacity-50"
+                    >
+                      {nameSaving ? 'Salvo…' : 'Salva'}
+                    </button>
+                    <button
+                      onClick={() => setEditingName(false)}
+                      className="text-sm text-muted-foreground hover:text-foreground"
+                    >
+                      Annulla
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <span className="text-foreground">{displayName || '—'}</span>
+                    <button
+                      onClick={() => { setNameInput(displayName); setEditingName(true) }}
+                      className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      Modifica
+                    </button>
+                  </div>
+                )}
+              </Row>
               <Row label="Email">
                 <span className="text-muted-foreground">{email || '—'}</span>
               </Row>

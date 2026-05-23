@@ -34,7 +34,7 @@ export interface UseAudioRecorderReturn {
   chunkSession: ChunkStoreSession | null
 }
 
-export function useAudioRecorder(): UseAudioRecorderReturn {
+export function useAudioRecorder(onStreamReady?: () => void): UseAudioRecorderReturn {
   const [state, setState] = useState<RecorderState>('idle')
   const [duration, setDuration] = useState(0)
   const [error, setError] = useState<string | null>(null)
@@ -116,6 +116,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
       setChunkCount(0)
 
       setStream(recordStream)
+      onStreamReady?.()
       const recorder = new MediaRecorder(recordStream, mimeType ? { mimeType } : undefined)
       mediaRecorderRef.current = recorder
 

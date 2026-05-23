@@ -151,6 +151,7 @@ function LoadingShell() {
 
 export default function DashboardPage() {
   const [email, setEmail] = useState('')
+  const [displayName, setDisplayName] = useState('')
   const [billing, setBilling] = useState<BillingStatus | null>(null)
   const [ready, setReady] = useState(false)
   // undefined = loading, null = fetch error / not connected
@@ -159,7 +160,12 @@ export default function DashboardPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    getMe().then(user => { if (user) setEmail(user.email) })
+    getMe().then(user => {
+      if (user) {
+        setEmail(user.email)
+        if (user.display_name) setDisplayName(user.display_name)
+      }
+    })
     getBillingStatus().then(b => { if (b) setBilling(b) })
     getPreferences().then(prefs => {
       if (prefs && prefs.onboarded === 0) navigate('/onboarding')
@@ -265,8 +271,13 @@ export default function DashboardPage() {
                   id="nuova-sessione-heading"
                   className="font-heading mb-1.5 text-xl font-semibold tracking-[-0.015em] text-foreground"
                 >
-                  Registra, trascrivi, archivia
+                  {displayName ? `Ciao, ${displayName}` : 'Registra, trascrivi, archivia'}
                 </h2>
+                {displayName && (
+                  <p className="font-heading mb-1 text-sm text-muted-foreground">
+                    Registra, trascrivi, archivia
+                  </p>
+                )}
                 <p className="mb-8 text-sm text-muted-foreground">
                   Tutto elaborato sul tuo computer. Mai nel cloud.
                 </p>

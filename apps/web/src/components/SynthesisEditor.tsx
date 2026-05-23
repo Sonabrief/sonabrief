@@ -49,8 +49,28 @@ export function SynthesisEditor({ content, readonly = false, isStreaming = false
   }
 
   return (
-    <div className={wrapperClass} style={wrapperStyle}>
-      <EditorContent editor={editor} />
+    <div className="relative">
+      {!readonly && (
+        <span
+          style={{
+            position: 'absolute',
+            top: '0.75rem',
+            right: '1rem',
+            fontFamily: "'Manrope Variable', 'Manrope', sans-serif",
+            fontSize: '0.75rem',
+            fontWeight: 500,
+            padding: '0.125rem 0.5rem',
+            borderRadius: '9999px',
+            background: 'rgba(26,77,82,0.08)',
+            color: '#1A4D52',
+          }}
+        >
+          Modificabile
+        </span>
+      )}
+      <div className={wrapperClass} style={wrapperStyle}>
+        <EditorContent editor={editor} />
+      </div>
     </div>
   )
 }

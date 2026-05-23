@@ -105,3 +105,42 @@ export async function handleSavePreferences(req: Request, env: Env): Promise<Res
     headers: { 'Content-Type': 'application/json' },
   })
 }
+
+export async function handlePatchPreferences(req: Request, env: Env): Promise<Response> {
+  const session = await getUserFromSession(req, env)
+  if (!session) {
+    return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401 })
+  }
+
+  const body = await req.json().catch(() => null) as Record<string, unknown> | null
+  if (!body || typeof body !== 'object') {
+    return new Response(JSON.stringify({ error: 'invalid_body' }), { status: 400 })
+  }
+
+  const allowed = ['language', 'synthesis_mode', 'profession', 'display_name',
+                   'weekly_reminder_enabled', 'sync_enabled', 'onboarded']
+  const fields = Object.keys(body).filter(k => allowed.includes(k))
+
+  if (fields.length === 0) {
+    return new Response(JSON.stringify({ ok: true }), { status: 200 })
+  }
+
+  const setClauses = fields.map(f => `${f} = ?`).join(', ')
+  const values = fields.map(f => {
+    const v = body[f]
+    if (f === 'display_name' && typeof v === 'string' && v.length > 0) {
+      return v.charAt(0).toUpperCase() + v.slice(1)
+    }
+    return v
+  })
+
+  await env.DB
+    .prepare(`UPDATE user_preferences SET ${setClauses}, updated_at = ? WHERE user_id = ?`)
+    .bind(...values, Date.now(), session.userId)
+    .run()
+
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  })
+}
