@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Mic, Monitor, Video } from 'lucide-react'
+import { Mic, Monitor, Video, Pencil } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAudioRecorder } from '../hooks/useAudioRecorder'
 import { useChunkedTranscription } from '../hooks/useChunkedTranscription'
@@ -25,6 +25,7 @@ import { RecoveryBanner } from '../components/RecoveryBanner'
 import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
 import { useTier } from '../hooks/useTier'
 import { TagInput } from '../components/TagInput'
+import { formatMeetingTitle } from '../lib/locale'
 
 function ProGatedButton({ label, feature, onAction }: {
   label: string
@@ -450,10 +451,7 @@ export default function RecordingPage() {
     const id = meetingIdRef.current
     if (!id) return
     const now = Date.now()
-    const autoTitle = new Date(now).toLocaleString(language, {
-      day: 'numeric', month: 'long', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    })
+    const autoTitle = formatMeetingTitle(new Date(now))
     const title = sessionTitle.trim() || autoTitle
     db.transaction('rw', [db.meetings, db.transcripts, db.notes], async () => {
       await db.meetings.add({
@@ -651,10 +649,7 @@ export default function RecordingPage() {
     const id = meetingIdRef.current || crypto.randomUUID()
     meetingIdRef.current = id
     const now = Date.now()
-    const autoTitle = new Date(now).toLocaleString(language, {
-      day: 'numeric', month: 'long', year: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    })
+    const autoTitle = formatMeetingTitle(new Date(now))
     const title = sessionTitle.trim() || autoTitle
     try {
       await db.transaction('rw', [db.meetings, db.transcripts], async () => {
@@ -1127,6 +1122,27 @@ export default function RecordingPage() {
                     )}
                   </div>
                 )}
+
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="session-title-done"
+                    className="block text-xs font-medium uppercase tracking-widest text-muted-foreground"
+                  >
+                    Titolo sessione <span className="normal-case tracking-normal text-muted-foreground/60">(opzionale)</span>
+                  </label>
+                  <div className="relative flex items-center gap-1.5">
+                    <input
+                      id="session-title-done"
+                      type="text"
+                      value={sessionTitle}
+                      onChange={e => setSessionTitle(e.target.value)}
+                      placeholder="Aggiungi un titolo..."
+                      className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                    <Pencil className="absolute right-3 h-3.5 w-3.5 text-muted-foreground pointer-events-none" aria-hidden="true" />
+                  </div>
+                  <p className="text-xs text-muted-foreground">Puoi modificarlo anche dopo in archivio</p>
+                </div>
 
                 {/* Template selector + client/project + generate */}
                 {synthesisState === 'idle' && (

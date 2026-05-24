@@ -9,6 +9,7 @@ import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } fro
 import { TagInput, TagPill } from '../components/TagInput'
 import { ProGate } from '../components/ProGate'
 import { TranscriptViewer, type WhisperSegment } from '../components/TranscriptViewer'
+import { Pencil } from 'lucide-react'
 
 const LANG_LABEL: Record<string, string> = {
   it: 'Italiano',
@@ -41,6 +42,8 @@ export default function ArchivePage() {
   const [showTimestamps, setShowTimestamps] = useState(false)
   const [editingClient, setEditingClient] = useState('')
   const [editingStream, setEditingStream] = useState('')
+  const [editingTitle, setEditingTitle] = useState('')
+  const [titleFocused, setTitleFocused] = useState(false)
   const [filterTag, setFilterTag] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'synthesis' | 'transcript'>('synthesis')
 
@@ -63,6 +66,8 @@ export default function ArchivePage() {
     setSelectedTranscript(transcript ?? null)
     setEditingClient(meeting.clientName ?? '')
     setEditingStream(meeting.projectStream ?? '')
+    setEditingTitle(meeting.title)
+    setTitleFocused(false)
   }
 
   async function saveTags(tags: string[]) {
@@ -70,6 +75,12 @@ export default function ArchivePage() {
       await db.meetings.update(selectedMeeting.id, { tags })
       setSelectedMeeting(prev => prev ? { ...prev, tags } : prev)
     }
+  }
+
+  async function saveTitle() {
+    if (!selectedMeeting || !editingTitle.trim()) return
+    await db.meetings.update(selectedMeeting.id, { title: editingTitle.trim() })
+    setSelectedMeeting(prev => prev ? { ...prev, title: editingTitle.trim() } : prev)
   }
 
   async function saveClientFields() {
@@ -209,15 +220,17 @@ export default function ArchivePage() {
                             : 'border-border bg-card hover:bg-border'
                         }`}
                       >
-                        <p className={`text-sm font-medium ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                        <p className={`text-sm font-semibold leading-snug ${isSelected ? 'text-primary' : 'text-foreground'}`}>
                           {meeting.title}
                         </p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {formatDate(meeting.startedAt)}
-                          {' · '}
-                          {LANG_LABEL[meeting.lang ?? 'it'] ?? meeting.lang}
-                          {' · '}
-                          {formatMinutes(meeting.durationSeconds)}
+                        {(meeting.clientName || meeting.projectStream) && (
+                          <p className="mt-0.5 text-xs text-muted-foreground truncate">
+                            {[meeting.clientName, meeting.projectStream].filter(Boolean).join(' · ')}
+                          </p>
+                        )}
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {new Date(meeting.startedAt).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          {meeting.durationSeconds ? ` · ${Math.ceil(meeting.durationSeconds / 60)} min` : ''}
                         </p>
                         {meeting.tags && meeting.tags.length > 0 && (
                           <div className="mt-1.5 flex flex-wrap gap-1">
@@ -263,6 +276,48 @@ export default function ArchivePage() {
                   transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
                   className="flex flex-col gap-5 p-6"
                 >
+                  <div className="flex flex-col gap-1 pb-2 border-b border-border">
+                    <div className="relative flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        aria-label="Titolo meeting"
+                        value={editingTitle}
+                        onChange={e => setEditingTitle(e.target.value)}
+                        onFocus={() => setTitleFocused(true)}
+                        onBlur={() => {
+                          setTitleFocused(false)
+                          if (!editingTitle.trim()) {
+                            setEditingTitle(selectedMeeting.title)
+                          } else {
+                            saveTitle()
+                          }
+                        }}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            e.currentTarget.blur()
+                          }
+                          if (e.key === 'Escape') {
+                            setEditingTitle(selectedMeeting.title)
+                            e.currentTarget.blur()
+                          }
+                        }}
+                        placeholder="Aggiungi un titolo..."
+                        className={`w-full rounded-md px-3 py-1.5 font-heading text-base font-bold text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none motion-reduce:transition-none ${
+                          titleFocused
+                            ? 'border border-primary bg-muted/40 focus-visible:ring-2 focus-visible:ring-primary'
+                            : 'border border-border bg-muted/40 hover:border-primary/50'
+                        }`}
+                      />
+                      {!titleFocused && (
+                        <Pencil className="h-3.5 w-3.5 shrink-0 text-muted-foreground pointer-events-none" aria-hidden="true" />
+                      )}
+                    </div>
+                    <p className="px-2 text-xs text-muted-foreground">
+                      {formatDate(selectedMeeting.startedAt)}
+                      {selectedMeeting.durationSeconds ? ` · ${formatMinutes(selectedMeeting.durationSeconds)}` : ''}
+                      {selectedMeeting.lang ? ` · ${LANG_LABEL[selectedMeeting.lang] ?? selectedMeeting.lang}` : ''}
+                    </p>
+                  </div>
                   <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
                     <input
                       type="text"
