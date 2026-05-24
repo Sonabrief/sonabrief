@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -281,7 +282,11 @@ export default function ProfilePage() {
     setPortalLoading(true)
     const url = await getBillingPortalUrl()
     setPortalLoading(false)
-    if (url) window.open(url, '_blank')
+    if (url) {
+      window.open(url, '_blank')
+    } else {
+      toast.error('Errore', { description: 'Impossibile aprire il portale. Riprova o contatta il supporto.' })
+    }
   }
 
   async function handleDeleteAccount() {
@@ -518,7 +523,7 @@ export default function ProfilePage() {
                     onClick={() => navigate('/pricing')}
                     className="h-9 px-5 text-sm"
                   >
-                    Passa a Pro
+                    Passa a un piano superiore
                   </Button>
                 ) : (
                   <button

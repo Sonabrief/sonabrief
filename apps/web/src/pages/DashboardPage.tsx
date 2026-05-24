@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { Mic } from 'lucide-react'
@@ -204,7 +205,11 @@ export default function DashboardPage() {
 
   async function handleManageSubscription() {
     const url = await getBillingPortalUrl()
-    if (url) window.open(url, '_blank')
+    if (url) {
+      window.open(url, '_blank')
+    } else {
+      toast.error('Errore', { description: 'Impossibile aprire il portale. Riprova o contatta il supporto.' })
+    }
   }
 
   function hasBriefingData(event: CalendarEvent): boolean {
@@ -537,12 +542,19 @@ export default function DashboardPage() {
                     {billing.billing_cycle === 'monthly' ? 'Piano mensile' : 'Piano annuale'}
                   </p>
                 )}
-                {tier !== 'free' && (
+                {tier !== 'free' ? (
                   <button
                     onClick={handleManageSubscription}
                     className="text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
                   >
                     Gestisci abbonamento
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => navigate('/pricing')}
+                    className="text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
+                  >
+                    Passa a un piano superiore
                   </button>
                 )}
               </div>
