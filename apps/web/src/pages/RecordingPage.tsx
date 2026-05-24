@@ -252,6 +252,7 @@ export default function RecordingPage() {
   const [quickNoteInput, setQuickNoteInput] = useState('')
   const [notes, setNotes] = useState(() => localStorage.getItem(NOTES_KEY) ?? '')
   const [transcriptOpen, setTranscriptOpen] = useState(false)
+  const [showTimestamps, setShowTimestamps] = useState(false)
   const [copyDone, setCopyDone] = useState(false)
   const [templates, setTemplates] = useState<{ id: string; name: string; system_prompt: string }[]>([])
   const [selectedTemplate, setSelectedTemplate] = useState<string>('sys_generic_it_v2')
@@ -305,6 +306,8 @@ export default function RecordingPage() {
       duration: duration > 0 ? `${Math.ceil(duration / 60)} min` : '—',
       lang: LANG_LABEL[language] ?? language,
       content: synthesis,
+      segments,
+      showTimestamps,
     }
   }
 
@@ -1117,6 +1120,8 @@ export default function RecordingPage() {
                         <TranscriptViewer
                           segments={segments}
                           rawText={transcript}
+                          showTimestamps={showTimestamps}
+                          onToggleTimestamps={setShowTimestamps}
                         />
                       </div>
                     )}

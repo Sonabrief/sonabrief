@@ -27,6 +27,7 @@ import PrivacyPage from './pages/PrivacyPage';
 import ProfilePage from './pages/ProfilePage';
 import { AppFooter } from './components/AppFooter';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
+import { Toaster } from 'sonner';
 
 const pageVariants = {
   initial: { opacity: 0, y: 6 },
@@ -129,6 +130,7 @@ export default function App() {
         <AppFooter />
         <PWAInstallPrompt />
       </div>
+      <Toaster richColors position="bottom-right" />
     </BrowserRouter>
   );
 }

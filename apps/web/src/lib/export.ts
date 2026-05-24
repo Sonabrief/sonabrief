@@ -1,5 +1,7 @@
 import { jsPDF } from 'jspdf'
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from 'docx'
+import type { WhisperSegment } from '../components/TranscriptViewer'
+import { segmentsToText } from '../components/TranscriptViewer'
 
 export interface ExportData {
   title: string
@@ -7,6 +9,9 @@ export interface ExportData {
   duration: string
   lang: string
   content: string // Markdown plain text
+  segments?: WhisperSegment[]
+  showTimestamps?: boolean
+  isTranscript?: boolean
 }
 
 interface Section {
@@ -59,10 +64,17 @@ function stripInlineMarkdown(text: string): string {
     .trim()
 }
 
+function resolveContent(data: ExportData): string {
+  if (data.segments && data.segments.length > 0) {
+    return segmentsToText(data.segments, data.showTimestamps ?? false)
+  }
+  return data.content
+}
+
 // --- MARKDOWN ---
 export function exportMarkdown(data: ExportData): void {
   const header = `# ${data.title}\n\n_${data.date} · ${data.duration} · ${data.lang}_\n\n---\n\n`
-  download(header + data.content, `${slugify(data.title)}.md`, 'text/markdown')
+  download(header + resolveContent(data), `${slugify(data.title)}.md`, 'text/markdown')
 }
 
 // --- PDF ---
@@ -87,26 +99,36 @@ export function exportPDF(data: ExportData): void {
   y += 8
   doc.setTextColor(0)
 
-  for (const section of extractSections(data.content)) {
-    if (section.heading) {
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(11)
-      const headingLines = doc.splitTextToSize(section.heading, pageWidth)
-      if (y + headingLines.length * 6 > 270) { doc.addPage(); y = margin }
-      doc.text(headingLines, margin, y)
-      y += headingLines.length * 6 + 2
+  if (data.isTranscript) {
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(10)
+    for (const line of resolveContent(data).split('\n')) {
+      if (y > 270) { doc.addPage(); y = margin }
+      doc.text(line, margin, y)
+      y += 5
     }
-    if (section.body) {
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(10)
-      const bodyLines = doc.splitTextToSize(stripInlineMarkdown(section.body), pageWidth)
-      for (const line of bodyLines) {
-        if (y > 270) { doc.addPage(); y = margin }
-        doc.text(line, margin, y)
-        y += 5
+  } else {
+    for (const section of extractSections(data.content)) {
+      if (section.heading) {
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(11)
+        const headingLines = doc.splitTextToSize(section.heading, pageWidth)
+        if (y + headingLines.length * 6 > 270) { doc.addPage(); y = margin }
+        doc.text(headingLines, margin, y)
+        y += headingLines.length * 6 + 2
       }
+      if (section.body) {
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(10)
+        const bodyLines = doc.splitTextToSize(stripInlineMarkdown(section.body), pageWidth)
+        for (const line of bodyLines) {
+          if (y > 270) { doc.addPage(); y = margin }
+          doc.text(line, margin, y)
+          y += 5
+        }
+      }
+      y += 4
     }
-    y += 4
   }
 
   doc.save(`${slugify(data.title)}.pdf`)
@@ -122,16 +144,22 @@ export async function exportWord(data: ExportData): Promise<void> {
     new Paragraph({ text: '' }),
   ]
 
-  for (const section of extractSections(data.content)) {
-    if (section.heading) {
-      children.push(new Paragraph({ text: section.heading, heading: HeadingLevel.HEADING_2 }))
+  if (data.isTranscript) {
+    for (const line of resolveContent(data).split('\n')) {
+      children.push(new Paragraph({ children: [new TextRun(line)] }))
     }
-    if (section.body) {
-      for (const line of stripInlineMarkdown(section.body).split('\n')) {
-        children.push(new Paragraph({ children: [new TextRun(line)] }))
+  } else {
+    for (const section of extractSections(data.content)) {
+      if (section.heading) {
+        children.push(new Paragraph({ text: section.heading, heading: HeadingLevel.HEADING_2 }))
       }
+      if (section.body) {
+        for (const line of stripInlineMarkdown(section.body).split('\n')) {
+          children.push(new Paragraph({ children: [new TextRun(line)] }))
+        }
+      }
+      children.push(new Paragraph({ text: '' }))
     }
-    children.push(new Paragraph({ text: '' }))
   }
 
   const doc = new Document({ sections: [{ children }] })
@@ -141,9 +169,13 @@ export async function exportWord(data: ExportData): Promise<void> {
 // --- EMAIL preformattata ---
 export function exportEmail(data: ExportData): void {
   let body = `Riepilogo meeting: ${data.title}\n${data.date} · ${data.duration}\n\n`
-  for (const s of extractSections(data.content)) {
-    if (s.heading) body += `${s.heading.toUpperCase()}\n`
-    if (s.body) body += `${stripInlineMarkdown(s.body)}\n\n`
+  if (data.isTranscript) {
+    body += resolveContent(data)
+  } else {
+    for (const s of extractSections(data.content)) {
+      if (s.heading) body += `${s.heading.toUpperCase()}\n`
+      if (s.body) body += `${stripInlineMarkdown(s.body)}\n\n`
+    }
   }
   const mailto = `mailto:?subject=${encodeURIComponent(`Note meeting: ${data.title}`)}&body=${encodeURIComponent(body)}`
   window.open(mailto, '_blank')
@@ -151,7 +183,7 @@ export function exportEmail(data: ExportData): void {
 
 // --- COPY FORMATTED ---
 export async function copyFormatted(data: ExportData): Promise<void> {
-  const text = `${data.title}\n${data.date} · ${data.duration}\n\n` + data.content
+  const text = `${data.title}\n${data.date} · ${data.duration}\n\n` + resolveContent(data)
   await navigator.clipboard.writeText(text)
 }
 

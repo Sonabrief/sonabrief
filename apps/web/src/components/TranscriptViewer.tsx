@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useState, useMemo } from 'react'
 
 export interface WhisperSegment {
   timestamp: [number, number | null]
@@ -11,37 +11,78 @@ function formatTimestamp(seconds: number): string {
   return `${m}:${s}`
 }
 
+export function segmentsToText(segments: WhisperSegment[], withTimestamps: boolean): string {
+  if (!withTimestamps) return segments.map(s => s.text.trim()).filter(Boolean).join('\n')
+  return segments
+    .filter(s => s.text.trim())
+    .map(s => `${formatTimestamp(s.timestamp[0])}  ${s.text.trim()}`)
+    .join('\n')
+}
+
 interface Props {
   segments: WhisperSegment[]
   rawText?: string
+  showTimestamps?: boolean
+  onToggleTimestamps?: (val: boolean) => void
 }
 
-export function TranscriptViewer({ segments, rawText }: Props) {
+export function TranscriptViewer({ segments, rawText, showTimestamps, onToggleTimestamps }: Props) {
+  const [localShow, setLocalShow] = useState(false)
+  const controlled = showTimestamps !== undefined
+  const show = controlled ? showTimestamps : localShow
+
+  function toggle() {
+    const next = !show
+    if (controlled) onToggleTimestamps?.(next)
+    else setLocalShow(next)
+  }
+
   const lines = useMemo(() =>
     segments.map(s => ({ time: s.timestamp[0], text: s.text.trim() })).filter(s => s.text),
     [segments]
   )
 
-  if (lines.length === 0) {
-    return (
-      <div className="w-full max-w-xl bg-gray-50 rounded-lg p-4 text-sm text-gray-700 whitespace-pre-wrap">
-        {rawText ?? ''}
-      </div>
-    )
-  }
+  const hasSegments = lines.length > 0
 
   return (
-    <div className="w-full max-w-xl flex flex-col gap-2">
-      {lines.map((line, i) => (
-        <div key={i} className="flex gap-3">
-          <span className="text-xs text-gray-400 font-mono mt-0.5 shrink-0 w-10">
-            {formatTimestamp(line.time)}
-          </span>
-          <p className="flex-1 text-sm text-gray-700 leading-relaxed">
-            {line.text}
-          </p>
+    <div className="flex flex-col gap-3 w-full">
+      {hasSegments && (
+        <div className="flex justify-end">
+          <button
+            onClick={toggle}
+            className={`rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
+              show
+                ? 'border-primary bg-primary/10 text-primary'
+                : 'border-border bg-card text-muted-foreground hover:border-primary hover:text-primary'
+            }`}
+          >
+            {show ? 'Nascondi timestamp' : 'Mostra timestamp'}
+          </button>
         </div>
-      ))}
+      )}
+
+      {!hasSegments ? (
+        <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
+          {rawText ?? ''}
+        </div>
+      ) : show ? (
+        <div className="flex flex-col gap-2">
+          {lines.map((line, i) => (
+            <div key={i} className="flex gap-3">
+              <span className="text-xs text-muted-foreground font-mono mt-0.5 shrink-0 w-10">
+                {formatTimestamp(line.time)}
+              </span>
+              <p className="flex-1 text-sm text-foreground leading-relaxed">{line.text}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-1">
+          {lines.map((line, i) => (
+            <p key={i} className="text-sm text-foreground leading-relaxed">{line.text}</p>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

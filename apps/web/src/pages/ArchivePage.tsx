@@ -8,6 +8,7 @@ import { SynthesisEditor } from '../components/SynthesisEditor'
 import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
 import { TagInput, TagPill } from '../components/TagInput'
 import { ProGate } from '../components/ProGate'
+import { TranscriptViewer, type WhisperSegment } from '../components/TranscriptViewer'
 
 const LANG_LABEL: Record<string, string> = {
   it: 'Italiano',
@@ -37,6 +38,7 @@ export default function ArchivePage() {
   const [selectedNote, setSelectedNote] = useState<Note | null>(null)
   const [selectedTranscript, setSelectedTranscript] = useState<Transcript | null>(null)
   const [copyDone, setCopyDone] = useState(false)
+  const [showTimestamps, setShowTimestamps] = useState(false)
   const [editingClient, setEditingClient] = useState('')
   const [editingStream, setEditingStream] = useState('')
   const [filterTag, setFilterTag] = useState<string | null>(null)
@@ -96,6 +98,9 @@ export default function ArchivePage() {
       duration: formatMinutes(selectedMeeting!.durationSeconds),
       lang: LANG_LABEL[selectedMeeting!.lang ?? 'it'] ?? selectedMeeting!.lang ?? 'IT',
       content: selectedTranscript!.text,
+      isTranscript: true,
+      segments: (() => { try { return JSON.parse(selectedTranscript!.segments ?? '[]') as WhisperSegment[] } catch { return [] } })(),
+      showTimestamps,
     }
   }
 
@@ -292,9 +297,15 @@ export default function ArchivePage() {
                         Trascrizione
                       </p>
                       <div className="max-h-125 overflow-y-auto rounded-md border border-border bg-muted/30 p-4">
-                        <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
-                          {selectedTranscript.text}
-                        </pre>
+                        <TranscriptViewer
+                          segments={(() => {
+                            try { return JSON.parse(selectedTranscript.segments ?? '[]') as WhisperSegment[] }
+                            catch { return [] }
+                          })()}
+                          rawText={selectedTranscript.text}
+                          showTimestamps={showTimestamps}
+                          onToggleTimestamps={setShowTimestamps}
+                        />
                       </div>
                       <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
                         <button onClick={() => exportMarkdown(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Markdown</button>
@@ -343,9 +354,15 @@ export default function ArchivePage() {
                         selectedTranscript ? (
                           <>
                             <div className="max-h-125 overflow-y-auto rounded-md border border-border bg-muted/30 p-4">
-                              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
-                                {selectedTranscript.text}
-                              </pre>
+                              <TranscriptViewer
+                                segments={(() => {
+                                  try { return JSON.parse(selectedTranscript.segments ?? '[]') as WhisperSegment[] }
+                                  catch { return [] }
+                                })()}
+                                rawText={selectedTranscript.text}
+                                showTimestamps={showTimestamps}
+                                onToggleTimestamps={setShowTimestamps}
+                              />
                             </div>
                             <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
                               <button onClick={() => exportMarkdown(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Markdown</button>
