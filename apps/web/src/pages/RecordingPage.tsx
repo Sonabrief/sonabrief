@@ -10,7 +10,7 @@ import { Button } from '../components/ui/button'
 import { API_URL } from '../config'
 import { SynthesisEditor } from '../components/SynthesisEditor'
 import { TranscriptViewer } from '../components/TranscriptViewer'
-import type { WhisperSegment } from '../lib/speakers'
+import type { WhisperSegment } from '../components/TranscriptViewer'
 import { db } from '../lib/db'
 import { synthesizeWithOllama } from '../lib/ollama'
 import { syncMeetingNow } from '../lib/sync'
@@ -25,8 +25,6 @@ import { RecoveryBanner } from '../components/RecoveryBanner'
 import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
 import { useTier } from '../hooks/useTier'
 import { TagInput } from '../components/TagInput'
-import { diarization, mergeDiarizationWithTranscript, isDiarizationSupported } from '../lib/diarization'
-import type { DiarizedSegment } from '../lib/diarization'
 
 function ProGatedButton({ label, feature, onAction }: {
   label: string
@@ -226,7 +224,6 @@ function SourceButton({
 export default function RecordingPage() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { isFree } = useTier()
   const { state, duration, error, paused, start, stop, pause, resume, audioData, reset, stream, chunkSession } = useAudioRecorder(() => {
     setTriggerPiP(true)
   })
@@ -264,12 +261,6 @@ export default function RecordingPage() {
   const [clientName, setClientName] = useState('')
   const [projectStream, setProjectStream] = useState('')
   const [meetingTags, setMeetingTags] = useState<string[]>([])
-  const [diarizationEnabled, setDiarizationEnabled] = useState(false)
-  const [numParticipants, setNumParticipants] = useState<number>(-1)
-  const [diarizationReady, setDiarizationReady] = useState(false)
-  const [diarizationLoading, setDiarizationLoading] = useState(false)
-  const [diarSegments, setDiarSegments] = useState<DiarizedSegment[]>([])
-  const diarizationSupported = isDiarizationSupported()
   const [clientSuggestion, setClientSuggestion] = useState<string | null>(null)
   const meetingIdRef = useRef('')
   const clientSuggestionLoadedRef = useRef(false)
@@ -424,24 +415,6 @@ export default function RecordingPage() {
   }, [])
 
   useEffect(() => {
-    if (!diarizationEnabled) return
-    if (diarizationReady) return
-    setDiarizationLoading(true)
-    const unsub = diarization.on((e) => {
-      if (e.type === 'ready') {
-        setDiarizationReady(true)
-        setDiarizationLoading(false)
-      }
-      if (e.type === 'error') {
-        setDiarizationLoading(false)
-        console.error('[diarization]', e.message)
-      }
-    })
-    diarization.load()
-    return () => { unsub() }
-  }, [diarizationEnabled])
-
-  useEffect(() => {
     fetch(`${API_URL}/v1/templates?language=${language}`, { credentials: 'include' })
       .then(r => r.ok ? r.json() : [])
       .then((data: { id: string; name: string; system_prompt: string }[]) => {
@@ -466,13 +439,6 @@ export default function RecordingPage() {
   useEffect(() => {
     if (!audioData || whisperState !== 'ready') return
     whisper.transcribe(audioData, language)
-    if (diarizationEnabled && diarizationReady) {
-      diarization.diarize(audioData, numParticipants, 0.5)
-        .then(result => {
-          if (result && result.length > 0) setDiarSegments(result)
-        })
-        .catch(e => console.error('[diar segments] catch:', e))
-    }
   }, [audioData, whisperState])
 
   // ── DB save
@@ -1004,61 +970,6 @@ export default function RecordingPage() {
               )}
             </AnimatePresence>
 
-            {/* Distinzione parlanti — solo Pro/Unlimited */}
-            <AnimatePresence mode="wait">
-              {state === 'idle' && !isFree && diarizationSupported && (
-                <motion.div key="diarization" {...fadeUp} className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">Distinzione parlanti</p>
-                      <p className="text-xs text-muted-foreground">Identifica chi parla — elaborato sul tuo computer</p>
-                    </div>
-                    <button
-                      onClick={() => setDiarizationEnabled(o => !o)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-                        diarizationEnabled ? 'bg-primary' : 'bg-muted'
-                      }`}
-                      role="switch"
-                      aria-checked={diarizationEnabled}
-                    >
-                      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform ${
-                        diarizationEnabled ? 'translate-x-5' : 'translate-x-0'
-                      }`} />
-                    </button>
-                  </div>
-
-                  {diarizationEnabled && (
-                    <div className="space-y-2">
-                      {diarizationLoading && (
-                        <p className="text-xs text-primary animate-pulse">Caricamento modello AI — solo al primo avvio...</p>
-                      )}
-                      <div>
-                        <label className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                          Partecipanti
-                        </label>
-                        <div className="flex gap-2 flex-wrap">
-                          {([[-1, 'Auto'], [1, '1'], [2, '2'], [3, '3'], [4, '4'], [5, '5+']] as [number, string][]).map(([val, label]) => (
-                            <button
-                              key={val}
-                              onClick={() => setNumParticipants(val)}
-                              className={`rounded-md border px-3 py-1.5 text-xs font-medium transition-colors ${
-                                numParticipants === val
-                                  ? 'border-primary bg-primary/10 text-primary'
-                                  : 'border-border bg-card text-foreground hover:bg-muted'
-                              }`}
-                            >
-                              {label}
-                            </button>
-                          ))}
-                        </div>
-                        <p className="mt-1 text-[10px] text-muted-foreground">Più preciso il numero, migliore il risultato</p>
-                      </div>
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
             {/* Session title prefill — visible when idle and prefillTitle passed */}
             {state === 'idle' && sessionTitle && (
               <div>
@@ -1203,15 +1114,10 @@ export default function RecordingPage() {
                         id="transcript-content"
                         className="border-t border-border px-4 pb-4 pt-3"
                       >
-                        <ProGate feature="Speaker labeling">
-                          <TranscriptViewer
-                            segments={diarSegments.length > 0
-                              ? mergeDiarizationWithTranscript(segments, diarSegments).map(s => ({ ...s, speaker: s.speaker }))
-                              : segments}
-                            rawText={transcript}
-                            diarSegments={diarSegments}
-                          />
-                        </ProGate>
+                        <TranscriptViewer
+                          segments={segments}
+                          rawText={transcript}
+                        />
                       </div>
                     )}
                   </div>
