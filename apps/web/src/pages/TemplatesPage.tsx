@@ -79,7 +79,6 @@ export default function TemplatesPage() {
       description: '',
       language: genericTemplate?.language ?? 'it',
       system_prompt: genericTemplate?.system_prompt ?? EMPTY_PROMPT,
-      parent_id: GENERIC_ID,
     })
   }
 
