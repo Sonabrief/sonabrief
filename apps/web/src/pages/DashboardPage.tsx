@@ -26,6 +26,7 @@ interface CalendarEvent {
   start: string
   end: string
   attendees: { email: string; name?: string }[]
+  meetingUrl?: string | null
 }
 
 interface CalendarState {
@@ -148,6 +149,71 @@ function LoadingShell() {
   )
 }
 
+// ── Attendees list ────────────────────────────────────────────────────────────
+
+function AttendeesList({ attendees }: { attendees: { email: string; name?: string }[] }) {
+  const [showAll, setShowAll] = useState(false)
+  const visible = showAll ? attendees : attendees.slice(0, 3)
+  return (
+    <p className="mt-0.5 text-xs text-muted-foreground">
+      {visible.map(a => a.name ?? a.email).join(', ')}
+      {!showAll && attendees.length > 3 && (
+        <button
+          onClick={e => { e.stopPropagation(); setShowAll(true) }}
+          className="ml-1 font-medium text-primary hover:underline"
+        >
+          +{attendees.length - 3}
+        </button>
+      )}
+    </p>
+  )
+}
+
+// ── Dashboard event card ──────────────────────────────────────────────────────
+
+function DashboardEventCard({ event, hasBriefing }: { event: CalendarEvent; hasBriefing: boolean }) {
+  const navigate = useNavigate()
+
+  function handleStart() {
+    navigate('/recording', {
+      state: {
+        prefillTitle: event.title,
+        source: 'both',
+        participants: event.attendees.map(a => a.name ?? a.email),
+        meetingUrl: event.meetingUrl ?? null,
+      },
+    })
+  }
+
+  return (
+    <div className="rounded-lg border border-border bg-card px-5 py-4">
+      <div className="flex items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="truncate text-sm font-medium text-foreground">{event.title}</p>
+            {hasBriefing && (
+              <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                Briefing
+              </span>
+            )}
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">{formatEventTime(event.start)}</p>
+          {event.attendees.length > 0 && (
+            <AttendeesList attendees={event.attendees} />
+          )}
+          <button
+            onClick={handleStart}
+            className="mt-3 flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+          >
+            <Mic className="h-3.5 w-3.5" aria-hidden="true" />
+            Avvia meeting e registrazione
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
@@ -242,9 +308,10 @@ export default function DashboardPage() {
     ...(calGoogle?.events ?? []),
     ...(calMicrosoft?.events ?? []),
   ]
-    .filter(e => new Date(e.start) > now)
+    .filter(e => new Date(e.end) > now)
     .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
     .slice(0, 3)
+  console.log('[cal] upcomingEvents', upcomingEvents, 'now', now, 'calGoogle', calGoogle)
 
   return (
     <div className="min-h-screen bg-background">
@@ -336,31 +403,7 @@ export default function DashboardPage() {
                 <ul className="space-y-2" role="list">
                   {upcomingEvents.map(event => (
                     <li key={event.id}>
-                      <div className="rounded-lg border border-border bg-card px-5 py-4">
-                        <div className="flex items-start gap-3">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2">
-                              <p className="truncate text-sm font-medium text-foreground">
-                                {event.title}
-                              </p>
-                              {hasBriefingData(event) && (
-                                <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                                  Briefing
-                                </span>
-                              )}
-                            </div>
-                            <p className="mt-1 text-xs text-muted-foreground">
-                              {formatEventTime(event.start)}
-                            </p>
-                            {event.attendees.length > 0 && (
-                              <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                                {event.attendees.slice(0, 3).map(a => a.name ?? a.email).join(', ')}
-                                {event.attendees.length > 3 && ` +${event.attendees.length - 3}`}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
+                      <DashboardEventCard event={event} hasBriefing={hasBriefingData(event)} />
                     </li>
                   ))}
                 </ul>

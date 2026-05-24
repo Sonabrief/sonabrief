@@ -73,7 +73,6 @@ export function useAudioRecorder(onStreamReady?: () => void): UseAudioRecorderRe
 
   const start = useCallback(async (source: AudioSource) => {
     try {
-      setState('recording')
       setError(null)
       setAudioData(null)
       setDuration(0)
@@ -115,6 +114,7 @@ export function useAudioRecorder(onStreamReady?: () => void): UseAudioRecorderRe
       setChunkSession(chunkSession)
       setChunkCount(0)
 
+      setState('recording')
       setStream(recordStream)
       onStreamReady?.()
       const recorder = new MediaRecorder(recordStream, mimeType ? { mimeType } : undefined)
@@ -146,6 +146,7 @@ export function useAudioRecorder(onStreamReady?: () => void): UseAudioRecorderRe
           setState('done')
           if (finalSession) await finalSession.deleteAll()
         } catch (err) {
+          if (finalSession) await finalSession.deleteAll()
           setError(err instanceof Error ? err.message : 'Errore conversione audio')
           setState('error')
         }

@@ -239,7 +239,10 @@ export default function RecordingPage() {
   const [segments, setSegments] = useState<WhisperSegment[]>([])
   const [synthesisState, setSynthesisState] = useState<'idle' | 'streaming' | 'done' | 'error'>('idle')
   const [synthesis, setSynthesis] = useState('')
-  const [language, setLanguage] = useState<'it' | 'en' | 'fr' | 'es' | 'de'>('it')
+  const [language, setLanguage] = useState<'it' | 'en' | 'fr' | 'es' | 'de'>(() => {
+    const l = (location.state as { language?: string } | null)?.language
+    return (l && ['it', 'en', 'fr', 'es', 'de'].includes(l) ? l : 'it') as 'it' | 'en' | 'fr' | 'es' | 'de'
+  })
   const [mode, setMode] = useState<'standard' | 'local'>('standard')
   const [source, setSource] = useState<AudioSource>(() => {
     const s = (location.state as { source?: AudioSource; prefillTitle?: string } | null)?.source
@@ -248,6 +251,8 @@ export default function RecordingPage() {
   const [sessionTitle, setSessionTitle] = useState<string>(
     (location.state as { prefillTitle?: string } | null)?.prefillTitle ?? ''
   )
+  const prefillMeetingUrl = (location.state as { meetingUrl?: string | null } | null)?.meetingUrl ?? null
+  const participants = (location.state as { participants?: string[] } | null)?.participants ?? []
   const [quickNotes, setQuickNotes] = useState<string[]>([])
   const [showQuickNoteInput, setShowQuickNoteInput] = useState(false)
   const [quickNoteInput, setQuickNoteInput] = useState('')
@@ -464,6 +469,7 @@ export default function RecordingPage() {
         ...(clientName.trim() && { clientName: clientName.trim() }),
         ...(projectStream.trim() && { projectStream: projectStream.trim() }),
         ...(meetingTags.length > 0 && { tags: meetingTags }),
+        ...(participants.length > 0 && { participants }),
         hasSynthesis: true,
         createdAt: now,
         updatedAt: now,
@@ -664,6 +670,7 @@ export default function RecordingPage() {
           ...(clientName.trim() && { clientName: clientName.trim() }),
           ...(projectStream.trim() && { projectStream: projectStream.trim() }),
           ...(meetingTags.length > 0 && { tags: meetingTags }),
+          ...(participants.length > 0 && { participants }),
           createdAt: now,
           updatedAt: now,
         })
@@ -987,10 +994,45 @@ export default function RecordingPage() {
               </div>
             )}
 
+            {/* Meeting URL link — visible when navigated from calendar */}
+            {prefillMeetingUrl && state === 'idle' && (
+              <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 space-y-3">
+                <p className="text-xs font-semibold text-foreground">Prima di avviare la registrazione</p>
+                <ol className="space-y-1.5 list-none">
+                  <li className="flex gap-2 text-xs text-muted-foreground">
+                    <span className="font-semibold text-primary shrink-0">1.</span>
+                    <span>Apri il link qui sotto — se il sistema ti chiede come aprirlo, seleziona <span className="font-medium text-foreground">"Apri nel browser"</span> e non nell'app desktop</span>
+                  </li>
+                  <li className="flex gap-2 text-xs text-muted-foreground">
+                    <span className="font-semibold text-primary shrink-0">2.</span>
+                    Torna su questa scheda di Sonabrief
+                  </li>
+                  <li className="flex gap-2 text-xs text-muted-foreground">
+                    <span className="font-semibold text-primary shrink-0">3.</span>
+                    Clicca "Avvia registrazione" e quando richiesto seleziona la scheda del meeting dal selettore del browser
+                  </li>
+                </ol>
+                <a
+                  href={prefillMeetingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-primary px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/10 motion-reduce:transition-none"
+                >
+                  <Video className="h-3.5 w-3.5" />
+                  Apri link meeting nel browser →
+                </a>
+              </div>
+            )}
+
             {/* Start button — idle + ready */}
             {canStart && (
               <Button
-                onClick={() => { localStorage.removeItem(NOTES_KEY); setNotes(''); start(source) }}
+                onClick={() => {
+                  console.log('[start] state:', state, 'whisperState:', whisperState, 'source:', source, 'canStart:', canStart)
+                  localStorage.removeItem(NOTES_KEY)
+                  setNotes('')
+                  start(source)
+                }}
                 className="w-full rounded-md hover:bg-(--primary-hover)"
               >
                 Avvia registrazione

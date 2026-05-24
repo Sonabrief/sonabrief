@@ -6,6 +6,12 @@ const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const GOOGLE_CALENDAR_URL = 'https://www.googleapis.com/calendar/v3'
 const SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
 
+function extractMeetingUrl(description?: string): string | null {
+  if (!description) return null
+  const match = description.match(/https:\/\/teams\.microsoft\.com\/[^\s"<]+/)
+  return match?.[0] ?? null
+}
+
 function getRedirectUri(req: Request): string {
   const host = req.headers.get('Host') ?? 'sonabrief-api.sonabrief-app.workers.dev'
   if (host.includes('localhost')) {
@@ -164,7 +170,7 @@ export async function handleCalendarEvents(req: Request, env: Env): Promise<Resp
       singleEvents: 'true',
       orderBy: 'startTime',
       maxResults: '10',
-      fields: 'items(id,summary,start,end,attendees)',
+      fields: 'items(id,summary,start,end,attendees,hangoutLink,description)',
     }),
     { headers: { Authorization: `Bearer ${accessToken}` } }
   )
@@ -183,6 +189,8 @@ export async function handleCalendarEvents(req: Request, env: Env): Promise<Resp
       start: { dateTime?: string; date?: string }
       end: { dateTime?: string; date?: string }
       attendees?: { email: string; displayName?: string }[]
+      hangoutLink?: string
+      description?: string
     }[]
   }
 
@@ -194,6 +202,7 @@ export async function handleCalendarEvents(req: Request, env: Env): Promise<Resp
       start: e.start.dateTime ?? e.start.date,
       end: e.end.dateTime ?? e.end.date,
       attendees: (e.attendees ?? []).map(a => ({ email: a.email, name: a.displayName })),
+      meetingUrl: e.hangoutLink ?? extractMeetingUrl(e.description) ?? null,
     })),
   }), {
     status: 200,
@@ -372,7 +381,7 @@ export async function handleMicrosoftCalendarEvents(req: Request, env: Env): Pro
     `${MS_CALENDAR_URL}?` + new URLSearchParams({
       startDateTime,
       endDateTime,
-      '$select': 'id,subject,start,end,attendees',
+      '$select': 'id,subject,start,end,attendees,onlineMeeting',
       '$orderby': 'start/dateTime',
       '$top': '10',
     }),
@@ -393,6 +402,7 @@ export async function handleMicrosoftCalendarEvents(req: Request, env: Env): Pro
       start: { dateTime: string }
       end: { dateTime: string }
       attendees?: { emailAddress: { address: string; name?: string } }[]
+      onlineMeeting?: { joinUrl?: string }
     }[]
   }
 
@@ -407,6 +417,7 @@ export async function handleMicrosoftCalendarEvents(req: Request, env: Env): Pro
         email: a.emailAddress.address,
         name: a.emailAddress.name,
       })),
+      meetingUrl: e.onlineMeeting?.joinUrl ?? null,
     })),
   }), {
     status: 200,
