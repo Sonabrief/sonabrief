@@ -467,7 +467,7 @@ export default function RecordingPage() {
     if (!audioData || whisperState !== 'ready') return
     whisper.transcribe(audioData, language)
     if (diarizationEnabled && diarizationReady) {
-      diarization.diarize(audioData, numParticipants, 0.5)
+      diarization.diarize(audioData, numParticipants === -1 ? 'auto' : numParticipants)
         .then(result => {
           if (result && result.length > 0) setDiarSegments(result)
         })
@@ -501,9 +501,13 @@ export default function RecordingPage() {
         createdAt: now,
         updatedAt: now,
       })
+      // Merge diarizzazione nei segmenti prima di salvare
+      const enrichedSegments = diarSegments.length > 0
+        ? mergeDiarizationWithTranscript(segments, diarSegments)
+        : segments
       await db.transcripts.add({
         id: crypto.randomUUID(), meetingId: id,
-        text: transcript, segments: JSON.stringify(segments), createdAt: now,
+        text: transcript, segments: JSON.stringify(enrichedSegments), createdAt: now,
       })
       await db.notes.add({
         id: crypto.randomUUID(), meetingId: id, content: synthesis,
@@ -703,9 +707,12 @@ export default function RecordingPage() {
           createdAt: now,
           updatedAt: now,
         })
+        const enrichedSegments = diarSegments.length > 0
+          ? mergeDiarizationWithTranscript(segments, diarSegments)
+          : segments
         await db.transcripts.add({
           id: crypto.randomUUID(), meetingId: id,
-          text: transcript, segments: JSON.stringify(segments), createdAt: now,
+          text: transcript, segments: JSON.stringify(enrichedSegments), createdAt: now,
         })
       })
       if (localStorage.getItem('sonabrief_sync_enabled') === 'true' && isUnlocked()) {

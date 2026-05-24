@@ -24,6 +24,8 @@ interface Props {
   segments: EnrichedSegment[]
   rawText?: string
   diarSegments?: { start: number; end: number; speaker: number }[]
+  initialSpeakerNames?: Record<number, string>
+  onSpeakerNamesChange?: (names: Record<number, string>) => void
 }
 
 function buildTurnsFromEnriched(segments: EnrichedSegment[]): SpeakerTurn[] {
@@ -81,8 +83,8 @@ function buildTurnsFromGap(segments: WhisperSegment[]): SpeakerTurn[] {
   return turns
 }
 
-export function TranscriptViewer({ segments, rawText, diarSegments = [] }: Props) {
-  const [speakerNames, setSpeakerNames] = useState<Record<number, string>>({})
+export function TranscriptViewer({ segments, rawText, diarSegments = [], initialSpeakerNames = {}, onSpeakerNamesChange }: Props) {
+  const [speakerNames, setSpeakerNames] = useState<Record<number, string>>(initialSpeakerNames)
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [editValue, setEditValue] = useState('')
 
@@ -104,7 +106,9 @@ export function TranscriptViewer({ segments, rawText, diarSegments = [] }: Props
 
   function commitEdit(index: number) {
     if (editValue.trim()) {
-      setSpeakerNames(prev => ({ ...prev, [index]: editValue.trim() }))
+      const updated = { ...speakerNames, [index]: editValue.trim() }
+      setSpeakerNames(updated)
+      onSpeakerNamesChange?.(updated)
     }
     setEditingIndex(null)
   }

@@ -5,6 +5,8 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { AppNav } from '../components/AppNav'
 import { db, type Meeting, type Note, type Transcript } from '../lib/db'
 import { SynthesisEditor } from '../components/SynthesisEditor'
+import { TranscriptViewer } from '../components/TranscriptViewer'
+import type { WhisperSegment } from '../lib/speakers'
 import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
 import { TagInput, TagPill } from '../components/TagInput'
 import { ProGate } from '../components/ProGate'
@@ -97,6 +99,14 @@ export default function ArchivePage() {
       lang: LANG_LABEL[selectedMeeting!.lang ?? 'it'] ?? selectedMeeting!.lang ?? 'IT',
       content: selectedTranscript!.text,
     }
+  }
+
+  async function saveSpeakerNames(names: Record<number, string>) {
+    if (!selectedTranscript) return
+    await db.transcripts.update(selectedTranscript.id, {
+      speakerNames: JSON.stringify(names),
+    })
+    setSelectedTranscript(prev => prev ? { ...prev, speakerNames: JSON.stringify(names) } : prev)
   }
 
   const exportActions = [
@@ -292,9 +302,35 @@ export default function ArchivePage() {
                         Trascrizione
                       </p>
                       <div className="max-h-125 overflow-y-auto rounded-md border border-border bg-muted/30 p-4">
-                        <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
-                          {selectedTranscript.text}
-                        </pre>
+                        {(() => {
+                          try {
+                            const segs = JSON.parse(selectedTranscript.segments ?? '[]') as (WhisperSegment & { speaker?: number })[]
+                            const hasDiar = segs.some(s => s.speaker !== undefined)
+                            const savedNames = selectedTranscript.speakerNames
+                              ? JSON.parse(selectedTranscript.speakerNames) as Record<number, string>
+                              : {}
+                            if (segs.length > 0) {
+                              return (
+                                <TranscriptViewer
+                                  segments={segs}
+                                  rawText={selectedTranscript.text}
+                                  initialSpeakerNames={savedNames}
+                                  onSpeakerNamesChange={saveSpeakerNames}
+                                  diarSegments={hasDiar ? segs.filter(s => s.speaker !== undefined).map(s => ({
+                                    start: s.timestamp[0],
+                                    end: s.timestamp[1] ?? s.timestamp[0],
+                                    speaker: s.speaker!,
+                                  })) : []}
+                                />
+                              )
+                            }
+                          } catch {}
+                          return (
+                            <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
+                              {selectedTranscript.text}
+                            </pre>
+                          )
+                        })()}
                       </div>
                       <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
                         <button onClick={() => exportMarkdown(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Markdown</button>
@@ -343,9 +379,35 @@ export default function ArchivePage() {
                         selectedTranscript ? (
                           <>
                             <div className="max-h-125 overflow-y-auto rounded-md border border-border bg-muted/30 p-4">
-                              <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
-                                {selectedTranscript.text}
-                              </pre>
+                              {(() => {
+                                try {
+                                  const segs = JSON.parse(selectedTranscript.segments ?? '[]') as (WhisperSegment & { speaker?: number })[]
+                                  const hasDiar = segs.some(s => s.speaker !== undefined)
+                                  const savedNames = selectedTranscript.speakerNames
+                                    ? JSON.parse(selectedTranscript.speakerNames) as Record<number, string>
+                                    : {}
+                                  if (segs.length > 0) {
+                                    return (
+                                      <TranscriptViewer
+                                        segments={segs}
+                                        rawText={selectedTranscript.text}
+                                        initialSpeakerNames={savedNames}
+                                        onSpeakerNamesChange={saveSpeakerNames}
+                                        diarSegments={hasDiar ? segs.filter(s => s.speaker !== undefined).map(s => ({
+                                          start: s.timestamp[0],
+                                          end: s.timestamp[1] ?? s.timestamp[0],
+                                          speaker: s.speaker!,
+                                        })) : []}
+                                      />
+                                    )
+                                  }
+                                } catch {}
+                                return (
+                                  <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground">
+                                    {selectedTranscript.text}
+                                  </pre>
+                                )
+                              })()}
                             </div>
                             <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
                               <button onClick={() => exportMarkdown(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Markdown</button>

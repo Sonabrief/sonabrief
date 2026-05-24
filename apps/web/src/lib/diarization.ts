@@ -1,3 +1,5 @@
+import type { DiarizationResult, SpeakerSegment } from '../workers/diarization.worker'
+
 export interface DiarizedSegment {
   start: number
   end: number
@@ -7,6 +9,7 @@ export interface DiarizedSegment {
 type DiarizationEvent =
   | { type: 'loading' }
   | { type: 'ready'; sampleRate: number }
+  | { type: 'progress'; value: number; label: string }
   | { type: 'result'; segments: DiarizedSegment[] }
   | { type: 'error'; message: string }
 
@@ -15,11 +18,10 @@ type DiarizationListener = (event: DiarizationEvent) => void
 const STORAGE_KEY = 'sonabrief_diarization_enabled'
 const MIN_MEMORY_GB = 8
 const MIN_CORES = 4
+const SAMPLE_RATE = 16000
 
-// Stato globale condiviso tra tutte le istanze
 const _global = {
-  sd: null as any,
-  sampleRate: 16000,
+  worker: null as Worker | null,
   loading: false,
   ready: false,
   listeners: new Set<DiarizationListener>(),
@@ -43,70 +45,73 @@ export function setDiarizationEnabled(val: boolean) {
   localStorage.setItem(STORAGE_KEY, val ? 'true' : 'false')
 }
 
-function loadScript(src: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return }
-    const s = document.createElement('script')
-    s.src = src
-    s.onload = () => resolve()
-    s.onerror = () => reject(new Error(`Failed to load ${src}`))
-    document.head.appendChild(s)
-  })
+function getWorker(): Worker {
+  if (_global.worker) return _global.worker
+  const w = new Worker(
+    new URL('../workers/diarization.worker.ts', import.meta.url),
+    { type: 'module' }
+  )
+  w.onmessage = (e: MessageEvent<DiarizationResult>) => {
+    const msg = e.data
+    if (msg.type === 'ready') {
+      _global.ready = true
+      _global.loading = false
+      post({ type: 'ready', sampleRate: SAMPLE_RATE })
+    } else if (msg.type === 'progress') {
+      post({ type: 'progress', value: msg.value, label: msg.label })
+    } else if (msg.type === 'result') {
+      const segments: DiarizedSegment[] = msg.segments.map((s: SpeakerSegment) => ({
+        start: s.start,
+        end: s.end,
+        speaker: parseInt(s.speaker.replace('Speaker ', '')) - 1,
+      }))
+      post({ type: 'result', segments })
+    } else if (msg.type === 'error') {
+      _global.loading = false
+      post({ type: 'error', message: msg.message })
+    }
+  }
+  w.onerror = (e) => {
+    _global.loading = false
+    post({ type: 'error', message: e.message })
+  }
+  _global.worker = w
+  return w
 }
 
 async function loadModels() {
   if (_global.ready || _global.loading) return
   _global.loading = true
   post({ type: 'loading' })
-
-  await new Promise(r => setTimeout(r, 50))
-
-  try {
-    await loadScript('/sherpa-diarization/sherpa-onnx-speaker-diarization.js')
-
-    await new Promise<void>((resolve, reject) => {
-      ;(window as any).Module = {
-        locateFile: (f: string) => `/sherpa-diarization/${f}`,
-        onRuntimeInitialized: () => {
-          try {
-            const sd = (window as any).createOfflineSpeakerDiarization((window as any).Module)
-            _global.sd = sd
-            _global.sampleRate = sd.sampleRate
-            _global.ready = true
-            resolve()
-          } catch (e) {
-            reject(e)
-          }
-        },
-        print: () => {},
-        printErr: () => {},
-      }
-      loadScript('/sherpa-diarization/sherpa-onnx-wasm-main-speaker-diarization.js').catch(reject)
-    })
-
-    post({ type: 'ready', sampleRate: _global.sampleRate })
-  } catch (err) {
-    _global.loading = false
-    post({ type: 'error', message: err instanceof Error ? err.message : 'Load failed' })
-  }
+  getWorker().postMessage({ type: 'init' })
 }
 
-async function diarize(audio: Float32Array, numSpeakers = -1, threshold = 0.5): Promise<DiarizedSegment[] | null> {
-  if (!_global.sd) { return null }
-  await new Promise(r => setTimeout(r, 0))
-  let raw
-  try {
-    raw = _global.sd.process(audio, numSpeakers, threshold)
-  } catch(e) {
-    console.error('[diarization] process error:', e)
-    return null
-  }
-  if (!raw || !Array.isArray(raw) || raw.length === 0) return null
-  return raw.map((s: any) => ({
-    start: Number(s.start),
-    end: Number(s.end),
-    speaker: Number(s.speaker),
-  }))
+async function diarize(
+  audio: Float32Array,
+  numSpeakers: number | 'auto' = 'auto'
+): Promise<DiarizedSegment[] | null> {
+  if (!_global.ready) return null
+  return new Promise((resolve) => {
+    const w = getWorker()
+    const handler = (e: MessageEvent<DiarizationResult>) => {
+      if (e.data.type === 'result') {
+        w.removeEventListener('message', handler)
+        const segments: DiarizedSegment[] = e.data.segments.map((s: SpeakerSegment) => ({
+          start: s.start,
+          end: s.end,
+          speaker: parseInt(s.speaker.replace('Speaker ', '')) - 1,
+        }))
+        resolve(segments)
+      } else if (e.data.type === 'error') {
+        w.removeEventListener('message', handler)
+        resolve(null)
+      }
+    }
+    w.addEventListener('message', handler)
+    // Transfer buffer for zero-copy
+    const copy = audio.slice()
+    w.postMessage({ type: 'process', audio: copy, sampleRate: SAMPLE_RATE, numSpeakers }, [copy.buffer])
+  })
 }
 
 function on(listener: DiarizationListener) {
@@ -114,13 +119,12 @@ function on(listener: DiarizationListener) {
   return () => _global.listeners.delete(listener)
 }
 
-// API pubblica
 export const diarization = {
   load: loadModels,
   diarize,
   on,
   get isReady() { return _global.ready },
-  get sampleRate() { return _global.sampleRate },
+  get sampleRate() { return SAMPLE_RATE },
 }
 
 export function mergeDiarizationWithTranscript(
