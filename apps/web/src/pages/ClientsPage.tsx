@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
 import { db, type Meeting } from '../lib/db'
 import { AppNav } from '../components/AppNav'
+import { SynthesisEditor } from '../components/SynthesisEditor'
 
 function formatDate(ms: number) {
   return new Date(ms).toLocaleString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -346,9 +347,7 @@ export default function ClientsPage() {
                                             <div className="px-5 py-4">
                                               {notesByMeeting[m.id] ? (
                                                 <>
-                                                  <div className="prose prose-sm max-w-none whitespace-pre-wrap text-sm leading-relaxed text-foreground">
-                                                    {notesByMeeting[m.id]}
-                                                  </div>
+                                                  <SynthesisEditor content={notesByMeeting[m.id]} readonly />
                                                   <button
                                                     onClick={() => navigate('/archive', { state: { meetingId: m.id } })}
                                                     className="mt-3 text-xs font-medium text-primary transition-colors hover:underline motion-reduce:transition-none"
