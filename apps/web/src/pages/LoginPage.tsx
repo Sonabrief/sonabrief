@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { KeyRound } from 'lucide-react'
+import { KeyRound, Mic, Brain, Archive } from 'lucide-react'
 import { API_URL } from '../config'
 import { isWebAuthnSupported, loginWithPasskey } from '../lib/webauthn'
 
@@ -64,6 +64,7 @@ export default function LoginPage() {
     setLoading(false)
   }
 
+  // — Stato: email inviata —
   if (sent) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -84,70 +85,128 @@ export default function LoginPage() {
     )
   }
 
+  // — Stato: form principale —
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm">
-        <img src="/logo.svg" alt="Sonabrief" className="mb-10 h-7 w-auto" />
+    <div className="flex min-h-screen">
 
-        <h1 className="mb-6 font-heading text-[clamp(1.875rem,4vw,3rem)] font-extrabold leading-[1.1] tracking-[-0.02em] text-foreground">
-          Accedi a Sonabrief
-        </h1>
+      {/* Colonna sinistra — pannello brand */}
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-[var(--color-primary,#1a5c5c)] px-16 py-14">
+        <img src="/sonabrief-logo.png" alt="Sonabrief" className="h-12 w-12 object-contain brightness-0 invert" />
 
-        {passkeySupported && (
-          <>
-            <button
-              type="button"
-              onClick={handlePasskeyLogin}
-              disabled={passkeyLoading}
-              aria-busy={passkeyLoading}
-              className="mb-4 flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 motion-reduce:transition-none"
-            >
-              <KeyRound className="h-4 w-4" aria-hidden="true" />
-              {passkeyLoading ? 'Verifica in corso…' : 'Accedi con passkey'}
-            </button>
+        <div>
+          <h2 className="font-heading text-[clamp(2rem,3.5vw,2.75rem)] font-extrabold leading-[1.15] tracking-[-0.02em] text-white">
+            I tuoi meeting.<br />
+            La tua memoria.<br />
+            Solo tua.
+          </h2>
 
-            <div className="my-4 flex items-center gap-3">
-              <div className="h-px flex-1 bg-border" />
-              <span className="text-xs uppercase tracking-widest text-muted-foreground">oppure</span>
-              <div className="h-px flex-1 bg-border" />
-            </div>
-          </>
-        )}
+          <ul className="mt-10 space-y-5">
+            {[
+              { icon: Mic,     text: 'Trascrizione locale, mai nel cloud' },
+              { icon: Brain,   text: 'Sintesi AI adattata al tuo settore' },
+              { icon: Archive, text: 'Archivio professionale per sempre' },
+            ].map(({ icon: Icon, text }) => (
+              <li key={text} className="flex items-center gap-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10">
+                  <Icon className="h-4 w-4 text-white" aria-hidden="true" />
+                </span>
+                <span className="text-sm text-white/80">{text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-        <form onSubmit={handleSubmit} noValidate>
-          <div>
-            <label
-              htmlFor="email"
-              className="mb-1.5 block text-sm font-medium text-foreground"
-            >
-              Indirizzo email
-            </label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="email"
-              placeholder="nome@esempio.it"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
-            />
-            {error && (
-              <p role="alert" className="mt-2 text-sm text-destructive">
-                {error}
-              </p>
+        <p className="text-sm leading-relaxed text-white/50 italic">
+          "Costruito per chi sa che la riservatezza professionale non è un'opzione."
+        </p>
+      </div>
+
+      {/* Colonna destra — form */}
+      <div className="flex w-full lg:w-1/2 flex-col items-center justify-center min-h-screen bg-background px-6 py-12">
+        {/* Logo visibile solo su mobile */}
+        <div className="mb-10 lg:hidden">
+          <img src="/logo.svg" alt="Sonabrief" className="h-7 w-auto" />
+        </div>
+
+        <div className="w-full max-w-sm">
+          <h1 className="font-heading text-[clamp(1.75rem,3vw,2.5rem)] font-extrabold leading-[1.1] tracking-[-0.02em] text-foreground">
+            Inizia.
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Inserisci la tua email — ti mandiamo un link di accesso. Niente password.
+          </p>
+
+          <div className="mt-8 space-y-4">
+            {passkeySupported && (
+              <>
+                <button
+                  type="button"
+                  onClick={handlePasskeyLogin}
+                  disabled={passkeyLoading}
+                  aria-busy={passkeyLoading}
+                  className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 motion-reduce:transition-none"
+                >
+                  <KeyRound className="h-4 w-4" aria-hidden="true" />
+                  {passkeyLoading ? 'Verifica in corso…' : 'Accedi con passkey'}
+                </button>
+
+                <div className="flex items-center gap-3">
+                  <div className="h-px flex-1 bg-border" />
+                  <span className="text-xs uppercase tracking-widest text-muted-foreground">oppure</span>
+                  <div className="h-px flex-1 bg-border" />
+                </div>
+              </>
             )}
+
+            <form onSubmit={handleSubmit} noValidate className="space-y-3">
+              <div>
+                <label
+                  htmlFor="email"
+                  className="mb-1.5 block text-sm font-medium text-foreground"
+                >
+                  Indirizzo email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="nome@esempio.it"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+                />
+                {error && (
+                  <p role="alert" className="mt-2 text-sm text-destructive">
+                    {error}
+                  </p>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                aria-busy={loading}
+                className="w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 motion-reduce:transition-none"
+              >
+                {loading ? 'Invio in corso...' : 'Inviami il link'}
+              </button>
+            </form>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            aria-busy={loading}
-            className="mt-4 w-full rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 motion-reduce:transition-none"
-          >
-            {loading ? 'Invio in corso...' : 'Invia link di accesso'}
-          </button>
-        </form>
+          <p className="mt-8 text-xs text-muted-foreground">
+            Continuando accetti i{' '}
+            <a href="/terms" className="underline underline-offset-2 hover:text-foreground transition-colors">
+              Termini di servizio
+            </a>{' '}
+            e la{' '}
+            <a href="/privacy" className="underline underline-offset-2 hover:text-foreground transition-colors">
+              Privacy policy
+            </a>
+            .
+          </p>
+        </div>
       </div>
+
     </div>
   )
 }

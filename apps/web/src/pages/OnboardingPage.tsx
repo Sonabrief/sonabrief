@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion, AnimatePresence } from 'motion/react'
+import { BorderBeam } from '../components/ui/border-beam'
 import { savePreferences } from '../lib/api'
 
 const PROFESSIONS: { category: string; items: string[] }[] = [
@@ -77,22 +79,9 @@ const LANGUAGES = [
   { code: 'de', label: 'Deutsch' },
 ]
 
-const MEETING_DURATIONS = [
-  { value: 'short', label: 'Meno di 30 minuti', sub: 'Call rapide, standup' },
-  { value: 'medium', label: '30–60 minuti', sub: 'Meeting standard' },
-  { value: 'long', label: '1–2 ore', sub: 'Workshop, consulenze' },
-  { value: 'very_long', label: 'Più di 2 ore', sub: 'Sessioni intensive' },
-]
+const TOTAL_STEPS = 4
 
-const CLIENT_VOLUMES = [
-  { value: 'few', label: '1–5 clienti / progetti' },
-  { value: 'medium', label: '5–15 clienti / progetti' },
-  { value: 'many', label: 'Più di 15 clienti / progetti' },
-]
-
-const TOTAL_STEPS = 6
-
-// ── Sub-components ────────────────────────────────────────────────────────────
+// ── Sub-components ─────────────────────────────────────────────────────────────
 
 function ProgressBar({ step }: { step: number }) {
   return (
@@ -131,24 +120,21 @@ function StepTitle({ title, sub, display }: { title: string; sub?: string; displ
 
 const optionCard = (active: boolean) =>
   `w-full text-left rounded-lg border px-5 py-3 transition-colors motion-reduce:transition-none ${
-    active
-      ? 'border-primary bg-secondary'
-      : 'border-border bg-card hover:bg-border'
+    active ? 'border-primary bg-secondary' : 'border-border bg-card hover:bg-border'
   }`
 
 const optionCardWide = (active: boolean) =>
   `w-full text-left rounded-lg border px-5 py-4 transition-colors motion-reduce:transition-none ${
-    active
-      ? 'border-primary bg-secondary'
-      : 'border-border bg-card hover:bg-border'
+    active ? 'border-primary bg-secondary' : 'border-border bg-card hover:bg-border'
   }`
 
-// ── Page ──────────────────────────────────────────────────────────────────────
+// ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function OnboardingPage() {
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
   const [saving, setSaving] = useState(false)
+  const [done, setDone] = useState(false)
 
   // Step 1 — lingua
   const [language, setLanguage] = useState('it')
@@ -158,17 +144,11 @@ export default function OnboardingPage() {
   const [professionCategory, setProfessionCategory] = useState('')
   const [professionSearch, setProfessionSearch] = useState('')
 
-  // Step 3 — contesto opzionale
+  // Step 3 — nome + contesto (unificati)
+  const [displayName, setDisplayName] = useState('')
   const [contextNote, setContextNote] = useState('')
 
-  // Step 4 — meeting + clienti
-  const [meetingDuration, setMeetingDuration] = useState('')
-  const [clientVolume, setClientVolume] = useState('')
-
-  // Step 5 — nome
-  const [displayName, setDisplayName] = useState('')
-
-  // Step 6 — modalità + sync
+  // Step 4 — modalità + sync
   const [synthesisMode, setSynthesisMode] = useState('standard')
   const [syncEnabled, setSyncEnabled] = useState(false)
 
@@ -188,14 +168,18 @@ export default function OnboardingPage() {
       profession: profession || null,
       profession_category: professionCategory || null,
       context_note: contextNote.trim() || null,
-      meeting_duration: meetingDuration || null,
-      client_volume: clientVolume || null,
+      meeting_duration: null,
+      client_volume: null,
       synthesis_mode: synthesisMode,
       sync_enabled: syncEnabled ? 1 : 0,
       onboarded: 1,
       display_name: displayName.trim() || null,
     })
     setSaving(false)
+    setDone(true)
+  }
+
+  function handleEnter() {
     if (syncEnabled) {
       navigate('/sync/setup')
     } else {
@@ -207,12 +191,72 @@ export default function OnboardingPage() {
     if (step === 1) return !!language
     if (step === 2) return !!profession
     if (step === 3) return true
-    if (step === 4) return !!meetingDuration && !!clientVolume
-    if (step === 5) return true
-    if (step === 6) return true
+    if (step === 4) return true
     return false
   }
 
+  // ── Schermata finale ─────────────────────────────────────────────────────────
+  if (done) {
+    const name = displayName.trim()
+    return (
+      <AnimatePresence>
+        <motion.div
+          key="done-screen"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="min-h-screen bg-background flex items-center justify-center px-6 py-12"
+        >
+        <div className="w-full max-w-lg text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            className="mb-10 flex justify-center"
+          >
+            <img src="/logo.svg" alt="Sonabrief" className="h-12 w-auto" />
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+            className="font-heading font-extrabold text-[clamp(1.875rem,4vw,2.5rem)] leading-[1.1] tracking-[-0.02em] text-foreground"
+          >
+            {name ? `Tutto pronto, ${name}.` : 'Tutto pronto.'}
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.35 }}
+            className="mt-3 text-sm text-muted-foreground"
+          >
+            Sonabrief è configurato per te. Puoi cambiare qualsiasi impostazione in qualsiasi momento dal tuo profilo.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.35 }}
+            className="mt-8 relative inline-block"
+          >
+            <BorderBeam size={80} duration={4} />
+            <button
+              type="button"
+              onClick={handleEnter}
+              className="relative rounded-md bg-primary px-8 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transition-none"
+            >
+              {syncEnabled ? 'Configura il sync cifrato' : 'Apri la dashboard'}
+            </button>
+          </motion.div>
+        </div>
+        </motion.div>
+      </AnimatePresence>
+    )
+  }
+
+  // ── Wizard ───────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-lg">
@@ -226,7 +270,7 @@ export default function OnboardingPage() {
             <StepTitle
               display
               title="Benvenuto su Sonabrief."
-              sub="Scegli la lingua in cui vuoi lavorare. Potrai cambiarla in qualsiasi momento."
+              sub="Il tuo archivio professionale, privato per sempre. Scegli la lingua in cui vuoi lavorare."
             />
             <div className="flex flex-col gap-2">
               {LANGUAGES.map(lang => (
@@ -291,100 +335,65 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Step 3 — Contesto opzionale */}
+        {/* Step 3 — Nome + Contesto */}
         {step === 3 && (
           <div>
             <StepTitle
-              title="Aggiungi contesto"
-              sub="Una frase sul tuo lavoro rende le sintesi ancora più precise. Puoi saltare questo step."
+              title="Parlaci di te."
+              sub="Due informazioni opzionali per rendere Sonabrief più preciso e personale."
             />
-            <textarea
-              aria-label="Contesto professionale"
-              placeholder='Es. "Seguo clienti PMI nel settore manifatturiero" oppure "Conduco interviste qualitative per ricerca accademica"'
-              value={contextNote}
-              onChange={e => setContextNote(e.target.value.slice(0, 200))}
-              rows={4}
-              className="w-full rounded-md border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary resize-none motion-reduce:transition-none"
-            />
-            <p className="mt-1 text-right text-xs text-muted-foreground">
-              {contextNote.length}/200
-            </p>
+
+            <div className="mb-5">
+              <label
+                htmlFor="displayName"
+                className="mb-1.5 block text-sm font-medium text-foreground"
+              >
+                Come ti chiami?
+              </label>
+              <input
+                id="displayName"
+                type="text"
+                placeholder="Es. Sofia"
+                value={displayName}
+                onChange={e => setDisplayName(e.target.value.slice(0, 50))}
+                className="w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+                autoFocus
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Ti chiameremo per nome in dashboard.
+              </p>
+            </div>
+
+            <div>
+              <label
+                htmlFor="contextNote"
+                className="mb-1.5 block text-sm font-medium text-foreground"
+              >
+                Aggiungi contesto <span className="text-muted-foreground font-normal">(facoltativo)</span>
+              </label>
+              <textarea
+                id="contextNote"
+                placeholder='Es. "Seguo clienti PMI nel settore manifatturiero" oppure "Conduco interviste qualitative per ricerca accademica"'
+                value={contextNote}
+                onChange={e => setContextNote(e.target.value.slice(0, 200))}
+                rows={3}
+                className="w-full rounded-md border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary resize-none motion-reduce:transition-none"
+              />
+              <p className="mt-1 text-right text-xs text-muted-foreground">
+                {contextNote.length}/200
+              </p>
+            </div>
           </div>
         )}
 
-        {/* Step 4 — Meeting & Clienti */}
+        {/* Step 4 — Modalità + Sync */}
         {step === 4 && (
-          <div>
-            <StepTitle
-              title="Come lavori?"
-              sub="Due impostazioni per ottimizzare la tua esperienza."
-            />
-            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Durata tipica dei tuoi meeting
-            </p>
-            <div className="mb-6 flex flex-col gap-2">
-              {MEETING_DURATIONS.map(d => (
-                <button
-                  key={d.value}
-                  type="button"
-                  onClick={() => setMeetingDuration(d.value)}
-                  aria-pressed={meetingDuration === d.value}
-                  className={optionCardWide(meetingDuration === d.value)}
-                >
-                  <p className={`text-sm font-medium ${meetingDuration === d.value ? 'text-primary' : 'text-foreground'}`}>
-                    {d.label}
-                  </p>
-                  <p className="text-xs text-muted-foreground">{d.sub}</p>
-                </button>
-              ))}
-            </div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Clienti / progetti gestiti in parallelo
-            </p>
-            <div className="flex flex-col gap-2">
-              {CLIENT_VOLUMES.map(v => (
-                <button
-                  key={v.value}
-                  type="button"
-                  onClick={() => setClientVolume(v.value)}
-                  aria-pressed={clientVolume === v.value}
-                  className={optionCard(clientVolume === v.value)}
-                >
-                  <span className={`text-sm ${clientVolume === v.value ? 'text-primary' : 'text-foreground'}`}>
-                    {v.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Step 5 — Nome */}
-        {step === 5 && (
-          <div>
-            <StepTitle
-              title="Come ti chiami?"
-              sub="Il tuo nome verrà usato per personalizzare l'esperienza. Puoi saltare questo step."
-            />
-            <input
-              type="text"
-              aria-label="Il tuo nome"
-              placeholder="Es. Sofia"
-              value={displayName}
-              onChange={e => setDisplayName(e.target.value.slice(0, 50))}
-              className="w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
-              autoFocus
-            />
-          </div>
-        )}
-
-        {/* Step 6 — Modalità + Sync */}
-        {step === 6 && (
           <div>
             <StepTitle
               title="Come vuoi usare Sonabrief?"
               sub="Puoi cambiare queste impostazioni per ogni meeting."
             />
+
             <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Modalità di sintesi predefinita
             </p>
@@ -399,7 +408,7 @@ export default function OnboardingPage() {
                   Standard
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Trascrizione locale + sintesi cloud EU. Qualità migliore, audio mai caricato.
+                  Trascrizione sul tuo dispositivo, sintesi AI via cloud EU. La qualità migliore.
                 </p>
               </button>
               <button
@@ -409,10 +418,10 @@ export default function OnboardingPage() {
                 className={optionCardWide(synthesisMode === 'local')}
               >
                 <p className={`text-sm font-medium ${synthesisMode === 'local' ? 'text-primary' : 'text-foreground'}`}>
-                  Local Only
+                  Solo locale
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Tutto sul tuo computer. Zero dati escono. Richiede Ollama installato.
+                  Tutto sul tuo dispositivo, zero connessioni esterne. Richiede configurazione iniziale.
                 </p>
               </button>
             </div>
@@ -428,10 +437,10 @@ export default function OnboardingPage() {
                 className={optionCardWide(!syncEnabled)}
               >
                 <p className={`text-sm font-medium ${!syncEnabled ? 'text-primary' : 'text-foreground'}`}>
-                  Solo locale
+                  Solo su questo dispositivo
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Le note restano su questo dispositivo.
+                  Le note restano qui. Semplice e privato.
                 </p>
               </button>
               <button
@@ -441,10 +450,10 @@ export default function OnboardingPage() {
                 className={optionCardWide(syncEnabled)}
               >
                 <p className={`text-sm font-medium ${syncEnabled ? 'text-primary' : 'text-foreground'}`}>
-                  Sync cifrato
+                  Sincronizza tra dispositivi
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Note sincronizzate tra dispositivi con crittografia zero-knowledge. Configuri la passphrase nel prossimo step.
+                  Accedi da qualsiasi dispositivo. Nessuno può leggere le tue note — nemmeno noi.
                 </p>
               </button>
             </div>
@@ -467,14 +476,25 @@ export default function OnboardingPage() {
           )}
 
           {step < TOTAL_STEPS ? (
-            <button
-              type="button"
-              onClick={() => setStep(s => s + 1)}
-              disabled={!canProceed()}
-              className="rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
-            >
-              {step === 3 && !contextNote.trim() ? 'Salta' : step === 5 && !displayName.trim() ? 'Salta' : 'Continua'}
-            </button>
+            <div className="flex flex-col items-end gap-2">
+              <button
+                type="button"
+                onClick={() => setStep(s => s + 1)}
+                disabled={!canProceed()}
+                className="rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
+              >
+                Continua
+              </button>
+              {step === 3 && (
+                <button
+                  type="button"
+                  onClick={() => setStep(s => s + 1)}
+                  className="text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
+                >
+                  Salta
+                </button>
+              )}
+            </div>
           ) : (
             <button
               type="button"
@@ -482,10 +502,11 @@ export default function OnboardingPage() {
               disabled={saving}
               className="rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-40 motion-reduce:transition-none"
             >
-              {saving ? 'Salvataggio...' : 'Apri la dashboard'}
+              {saving ? 'Salvataggio...' : 'Continua'}
             </button>
           )}
         </div>
+
       </div>
     </div>
   )
