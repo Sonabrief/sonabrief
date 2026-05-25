@@ -59,6 +59,11 @@ export async function handleGoogleCallback(req: Request, env: Env): Promise<Resp
 
   const appUrl = getAppUrl(req)
 
+  const session = await getUserFromSession(req, env)
+  if (!session || session.userId !== userId) {
+    return Response.redirect(`${appUrl}/dashboard?calendar_error=1`, 302)
+  }
+
   if (error || !code || !userId) {
     return Response.redirect(`${appUrl}/dashboard?calendar_error=1`, 302)
   }
@@ -271,6 +276,11 @@ export async function handleMicrosoftCallback(req: Request, env: Env): Promise<R
   const error = url.searchParams.get('error')
 
   const appUrl = getAppUrl(req)
+
+  const session = await getUserFromSession(req, env)
+  if (!session || session.userId !== userId) {
+    return Response.redirect(`${appUrl}/dashboard?calendar_error=1`, 302)
+  }
 
   if (error || !code || !userId) {
     return Response.redirect(`${appUrl}/dashboard?calendar_error=1`, 302)
