@@ -8,7 +8,7 @@ import type { Env } from "../lib/env";
 const BUDGET_CAP_USD = 30; // fase 1-2, PSD v2.0
 
 const QUOTA_CAP: Record<"free" | "pro" | "unlimited", number | null> = {
-  free: 300,
+  free: 180,
   pro: 3000,
   unlimited: null,
 };

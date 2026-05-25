@@ -300,7 +300,7 @@ export default function DashboardPage() {
 
   if (!ready) return <LoadingShell />
   const used = billing?.quota_used_minutes ?? 0
-  const cap = billing?.quota_cap_minutes ?? 300
+  const cap = billing?.quota_cap_minutes ?? 180
   const percentUsed = cap > 0 ? Math.min(100, Math.round((used / cap) * 100)) : 0
 
   const openCount = openItems?.length ?? 0

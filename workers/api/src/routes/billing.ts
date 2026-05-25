@@ -11,7 +11,7 @@ interface BillingStatus {
 }
 
 const QUOTA_CAP: Record<string, number | null> = {
-  free: 300,
+  free: 180,
   pro: 3000,
   unlimited: null,
 }

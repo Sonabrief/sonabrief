@@ -5,7 +5,7 @@ const BUDGET_CAP_USD_PHASE1 = 50
 
 // Limiti per tier (minuti di audio al mese)
 const TIER_QUOTA_MINUTES: Record<ModelTier, number> = {
-  free: 300,       // 5h
+  free: 180,       // 3h
   pro: 3000,       // 50h
   unlimited: 30000, // 500h (fair use)
 };
