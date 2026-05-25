@@ -158,6 +158,7 @@ export default function TemplatesPage() {
                 Definisci come Sonabrief struttura le sintesi per un tipo specifico di meeting: un formato legale, un briefing commerciale, un'intervista qualitativa.
               </p>
               {isFree ? (
+                <>
                 <div className="mt-4 rounded-md border border-border bg-muted/40 px-4 py-3 flex items-center justify-between gap-4">
                   <p className="text-sm text-muted-foreground">
                     I template personalizzati sono disponibili con il piano Pro.
@@ -197,6 +198,7 @@ export default function TemplatesPage() {
                     </p>
                   </div>
                 )}
+                </>
               ) : (
                 <div className="mt-4 flex gap-2">
                   <button
