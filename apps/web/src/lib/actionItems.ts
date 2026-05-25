@@ -12,22 +12,28 @@ export function extractActionItems(markdown: string): string[] {
 
   for (const line of lines) {
     const trimmed = line.trim()
+    if (!trimmed) continue
 
-    // Detect headings: **Heading:** or **Heading**
-    if (/^\*\*[^*]+\*\*:?$/.test(trimmed)) {
-      const headingText = trimmed.replace(/\*\*/g, '').replace(/:$/, '').toLowerCase()
+    // Detect headings: **Heading**, **Heading:**, ## Heading
+    const isHeading = /^\*\*[^*]+\*\*:?$/.test(trimmed) || /^#{1,4}\s+/.test(trimmed)
+    if (isHeading) {
+      const headingText = trimmed
+        .replace(/^#{1,4}\s+/, '')
+        .replace(/\*\*/g, '')
+        .replace(/:$/, '')
+        .toLowerCase()
       inSection = SECTION_KEYWORDS.some(kw => headingText.includes(kw))
       continue
     }
 
     if (inSection) {
-      // Bullet point: "- text" or "* text"
+      // Bullet con trattino: "- testo"
       const bullet = trimmed.match(/^[-*]\s+(.+)/)
       if (bullet) {
         items.push(bullet[1].trim())
-      } else if (trimmed.length > 0 && !trimmed.startsWith('-') && !trimmed.startsWith('*')) {
-        // Non-empty, non-bullet line ends the section
-        inSection = false
+      } else {
+        // Riga di testo semplice (senza bullet) — trattala come item
+        items.push(trimmed)
       }
     }
   }
