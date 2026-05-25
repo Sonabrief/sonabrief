@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { AppNav } from '../components/AppNav'
 import { db, type Meeting, type Note, type Transcript } from '../lib/db'
@@ -38,6 +38,7 @@ function isFallbackTitle(title: string): boolean {
 
 export default function ArchivePage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [search, setSearch] = useState('')
   const [selectedMeeting, setSelectedMeeting] = useState<Meeting | null>(null)
   const [selectedNote, setSelectedNote] = useState<Note | null>(null)
@@ -57,6 +58,13 @@ export default function ArchivePage() {
     () => db.meetings.orderBy('startedAt').reverse().toArray(),
     []
   )
+
+  useEffect(() => {
+    if (location.state?.meetingId && meetings) {
+      const meeting = meetings.find(m => m.id === location.state.meetingId)
+      if (meeting) handleSelect(meeting)
+    }
+  }, [meetings, location.state?.meetingId])
 
   const filtered = meetings?.filter(m =>
     m.title.toLowerCase().includes(search.toLowerCase()) &&

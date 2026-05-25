@@ -6,6 +6,7 @@ import { ChevronDown } from 'lucide-react'
 import { db, type Meeting } from '../lib/db'
 import { AppNav } from '../components/AppNav'
 import { SynthesisEditor } from '../components/SynthesisEditor'
+import { TranscriptViewer, type WhisperSegment } from '../components/TranscriptViewer'
 
 function formatDate(ms: number) {
   return new Date(ms).toLocaleString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -33,8 +34,12 @@ function UnassignedRow({
 
   return (
     <div className="border-b border-border px-5 py-3 last:border-0">
-      <p className="mb-1 text-sm font-medium text-foreground">{meeting.title}</p>
-      <p className="mb-2 text-xs text-muted-foreground">{formatDate(meeting.startedAt)}</p>
+      <div className="mb-2 flex items-baseline gap-2">
+        <p className="text-sm font-medium text-foreground">{meeting.title}</p>
+        <span className="text-xs text-muted-foreground">
+          {new Date(meeting.startedAt).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })}
+        </span>
+      </div>
       <div className="flex gap-2">
         <input
           type="text"
@@ -98,10 +103,17 @@ export default function ClientsPage() {
   const meetings = useLiveQuery(() => db.meetings.orderBy('startedAt').reverse().toArray(), [])
   const actionItems = useLiveQuery(() => db.action_items.where('completed').equals(0).toArray(), [])
   const notes = useLiveQuery(() => db.notes.toArray(), [])
+  const transcripts = useLiveQuery(() => db.transcripts.toArray(), [])
 
   const [expandedMeetingId, setExpandedMeetingId] = useState<string | null>(null)
   const [filterClient, setFilterClient] = useState<string>('all')
   const [filterStream, setFilterStream] = useState<string>('all')
+  const [searchClient, setSearchClient] = useState('')
+  const [unassignedExpanded, setUnassignedExpanded] = useState(false)
+  const [activeTab, setActiveTab] = useState<Record<string, 'synthesis' | 'transcript'>>({})
+  const [renamingClient, setRenamingClient] = useState<string | null>(null)
+  const [renameValue, setRenameValue] = useState('')
+  const UNASSIGNED_PREVIEW = 3
 
   useEffect(() => { setFilterStream('all') }, [filterClient])
 
@@ -110,6 +122,22 @@ export default function ClientsPage() {
     for (const n of notes ?? []) map[n.meetingId] = n.content
     return map
   }, [notes])
+
+  const transcriptByMeeting = useMemo(() => {
+    const map: Record<string, { text: string; segments: string }> = {}
+    for (const t of transcripts ?? []) map[t.meetingId] = { text: t.text, segments: t.segments ?? '[]' }
+    return map
+  }, [transcripts])
+
+  async function renameClient(oldName: string, newName: string) {
+    if (!newName.trim() || newName.trim() === oldName) {
+      setRenamingClient(null)
+      return
+    }
+    const toUpdate = (meetings ?? []).filter(m => m.clientName?.trim() === oldName)
+    await Promise.all(toUpdate.map(m => db.meetings.update(m.id, { clientName: newName.trim() })))
+    setRenamingClient(null)
+  }
 
   const assigned = useMemo(
     () => (meetings ?? []).filter(m => m.clientName?.trim()),
@@ -165,6 +193,9 @@ export default function ClientsPage() {
   const clientList = Object.entries(byClient).sort(([a], [b]) => a.localeCompare(b))
 
   const filteredClientList = clientList
+    .filter(([clientName]) =>
+      searchClient === '' || clientName.toLowerCase().includes(searchClient.toLowerCase())
+    )
     .filter(([clientName]) => filterClient === 'all' || clientName === filterClient)
     .map(([clientName, streams]) => {
       if (filterStream === 'all') return [clientName, streams] as const
@@ -182,9 +213,19 @@ export default function ClientsPage() {
       <AppNav />
 
       <main className="mx-auto max-w-4xl px-6 py-8">
-        <h1 className="mb-8 font-heading text-2xl font-bold leading-[1.2] tracking-[-0.015em] text-foreground">
+        <h1 className="mb-6 font-heading text-2xl font-bold leading-[1.2] tracking-[-0.015em] text-foreground">
           Clienti & Progetti
         </h1>
+
+        {clientList.length > 2 && (
+          <input
+            type="text"
+            placeholder="Cerca cliente..."
+            value={searchClient}
+            onChange={e => setSearchClient(e.target.value)}
+            className="mb-4 w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+          />
+        )}
 
         {isEmpty ? (
           <div className="py-12 text-center">
@@ -286,10 +327,28 @@ export default function ClientsPage() {
                         transition={{ duration: 0.18, delay: i * 0.05, ease: [0.4, 0, 0.2, 1] }}
                       >
                         <div className="overflow-hidden rounded-lg border border-border bg-card">
-                          <div className="flex items-center justify-between border-b border-border px-5 py-4">
-                            <span className="text-sm font-semibold text-foreground">
-                              {clientName}
-                            </span>
+                          <div className="flex items-center justify-between border-b border-border bg-muted/50 px-5 py-4">
+                            {renamingClient === clientName ? (
+                              <input
+                                autoFocus
+                                value={renameValue}
+                                onChange={e => setRenameValue(e.target.value)}
+                                onBlur={() => renameClient(clientName, renameValue)}
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter') renameClient(clientName, renameValue)
+                                  if (e.key === 'Escape') setRenamingClient(null)
+                                }}
+                                className="rounded border border-primary bg-card px-2 py-0.5 text-base font-bold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                              />
+                            ) : (
+                              <button
+                                onDoubleClick={() => { setRenamingClient(clientName); setRenameValue(clientName) }}
+                                className="text-base font-bold text-foreground transition-colors hover:text-primary motion-reduce:transition-none"
+                                title="Doppio click per rinominare"
+                              >
+                                {clientName}
+                              </button>
+                            )}
                             <div className="flex items-center gap-3">
                               <span className="text-xs text-muted-foreground">
                                 {allMeetingsInCard.length} meeting
@@ -306,7 +365,7 @@ export default function ClientsPage() {
                             <div key={streamName}>
                               {streamList.length > 1 && (
                                 <div className="border-b border-border bg-muted px-5 py-1.5">
-                                  <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                  <span className="text-xs font-semibold text-muted-foreground">
                                     {streamName}
                                   </span>
                                 </div>
@@ -345,18 +404,52 @@ export default function ClientsPage() {
                                             className="overflow-hidden border-t border-border"
                                           >
                                             <div className="px-5 py-4">
-                                              {notesByMeeting[m.id] ? (
-                                                <>
-                                                  <SynthesisEditor content={notesByMeeting[m.id]} readonly />
-                                                  <button
-                                                    onClick={() => navigate('/archive', { state: { meetingId: m.id } })}
-                                                    className="mt-3 text-xs font-medium text-primary transition-colors hover:underline motion-reduce:transition-none"
-                                                  >
-                                                    Apri in archivio →
-                                                  </button>
-                                                </>
+                                              <div className="mb-4 flex gap-1 border-b border-border pb-3">
+                                                <button
+                                                  onClick={() => setActiveTab(prev => ({ ...prev, [m.id]: 'synthesis' }))}
+                                                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors motion-reduce:transition-none ${
+                                                    (activeTab[m.id] ?? 'synthesis') === 'synthesis'
+                                                      ? 'bg-primary/10 text-primary'
+                                                      : 'text-muted-foreground hover:text-foreground'
+                                                  }`}
+                                                >Sintesi</button>
+                                                <button
+                                                  onClick={() => setActiveTab(prev => ({ ...prev, [m.id]: 'transcript' }))}
+                                                  className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors motion-reduce:transition-none ${
+                                                    activeTab[m.id] === 'transcript'
+                                                      ? 'bg-primary/10 text-primary'
+                                                      : 'text-muted-foreground hover:text-foreground'
+                                                  }`}
+                                                >Trascrizione</button>
+                                              </div>
+
+                                              {(activeTab[m.id] ?? 'synthesis') === 'synthesis' ? (
+                                                notesByMeeting[m.id] ? (
+                                                  <>
+                                                    <SynthesisEditor content={notesByMeeting[m.id]} readonly />
+                                                    <button
+                                                      onClick={() => navigate('/archive', { state: { meetingId: m.id } })}
+                                                      className="mt-3 text-xs font-medium text-primary transition-colors hover:underline motion-reduce:transition-none"
+                                                    >
+                                                      Apri in archivio →
+                                                    </button>
+                                                  </>
+                                                ) : (
+                                                  <p className="text-xs text-muted-foreground">Nessuna sintesi disponibile.</p>
+                                                )
                                               ) : (
-                                                <p className="text-xs text-muted-foreground">Nessuna sintesi disponibile.</p>
+                                                transcriptByMeeting[m.id] ? (
+                                                  <div className="max-h-60 overflow-y-auto rounded-md border border-border bg-muted/30 p-3">
+                                                    <TranscriptViewer
+                                                      segments={(() => { try { return JSON.parse(transcriptByMeeting[m.id].segments) as WhisperSegment[] } catch { return [] } })()}
+                                                      rawText={transcriptByMeeting[m.id].text}
+                                                      showTimestamps={false}
+                                                      onToggleTimestamps={() => {}}
+                                                    />
+                                                  </div>
+                                                ) : (
+                                                  <p className="text-xs text-muted-foreground">Trascrizione non disponibile.</p>
+                                                )
                                               )}
                                             </div>
                                           </motion.div>
@@ -385,12 +478,32 @@ export default function ClientsPage() {
                   </span>
                 </div>
                 <ul role="list">
-                  {unassigned.map(m => (
+                  {(unassigned.length <= UNASSIGNED_PREVIEW || unassignedExpanded
+                    ? unassigned
+                    : unassigned.slice(0, UNASSIGNED_PREVIEW)
+                  ).map(m => (
                     <li key={m.id}>
                       <UnassignedRow meeting={m} notesByMeeting={notesByMeeting} />
                     </li>
                   ))}
                 </ul>
+                {unassigned.length > UNASSIGNED_PREVIEW && (
+                  !unassignedExpanded ? (
+                    <button
+                      onClick={() => setUnassignedExpanded(true)}
+                      className="w-full border-t border-border py-2.5 text-xs text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
+                    >
+                      Mostra tutti ({unassigned.length - UNASSIGNED_PREVIEW} altri)
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setUnassignedExpanded(false)}
+                      className="w-full border-t border-border py-2.5 text-xs text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
+                    >
+                      Mostra meno
+                    </button>
+                  )
+                )}
               </div>
             )}
 
