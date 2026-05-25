@@ -170,13 +170,13 @@ export default function TemplatesPage() {
                     Passa a Pro
                   </a>
                 </div>
-                {templates.filter(t => t.is_system).length > 0 && (
+                {templates.filter(t => t.is_system && t.language === 'it').length > 0 && (
                   <div className="mt-6">
                     <p className="mb-3 text-xs font-semibold text-muted-foreground">
                       Template di sistema inclusi nel tuo piano
                     </p>
                     <ul className="flex flex-col gap-2" role="list">
-                      {templates.filter(t => t.is_system).map(t => (
+                      {templates.filter(t => t.is_system && t.language === 'it').map(t => (
                         <li
                           key={t.id}
                           className="flex items-center justify-between rounded-lg border border-border bg-card px-5 py-3"
