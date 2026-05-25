@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
-import { Mic } from 'lucide-react'
+import { Mic, RefreshCw } from 'lucide-react'
 import { SiGooglecalendar } from 'react-icons/si'
 import { BiLogoMicrosoft } from 'react-icons/bi'
 import { API_URL } from '../config'
@@ -36,6 +36,27 @@ function formatDuration(start: string, end: string): string {
   const h = Math.floor(min / 60)
   const m = min % 60
   return m > 0 ? `${h}h ${m}min` : `${h}h`
+}
+
+function groupByDay(events: (CalendarEvent & { provider: 'google' | 'microsoft' })[]) {
+  const groups: { label: string; date: string; events: typeof events }[] = []
+  for (const event of events) {
+    const day = new Date(event.start).toDateString()
+    const existing = groups.find(g => g.date === day)
+    if (existing) {
+      existing.events.push(event)
+    } else {
+      const d = new Date(event.start)
+      const today = new Date()
+      const tomorrow = new Date(); tomorrow.setDate(today.getDate() + 1)
+      let label: string
+      if (d.toDateString() === today.toDateString()) label = 'Oggi'
+      else if (d.toDateString() === tomorrow.toDateString()) label = 'Domani'
+      else label = d.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })
+      groups.push({ label, date: day, events: [event] })
+    }
+  }
+  return groups
 }
 
 // ── Provider card ─────────────────────────────────────────────────────────────
@@ -147,26 +168,26 @@ function EventCard({
       transition={{ duration: 0.16, delay: index * 0.05, ease: [0.4, 0, 0.2, 1] }}
     >
       <div className="rounded-lg border border-border bg-card px-5 py-4">
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1">
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5 mb-0.5">
+            {provider === 'google'
+              ? <SiGooglecalendar size={12} color="#1A73E8" />
+              : <BiLogoMicrosoft size={12} color="#0078D4" />}
             <p className="text-sm font-medium text-foreground">{event.title}</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {formatEventDate(event.start)} · {formatDuration(event.start, event.end)}
-            </p>
-            {event.attendees.length > 0 && (
-              <AttendeesList attendees={event.attendees} />
-            )}
-            <button
-              onClick={handleStart}
-              className="mt-3 flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
-            >
-              <Mic className="h-3.5 w-3.5" aria-hidden="true" />
-              Avvia meeting e registrazione
-            </button>
           </div>
-          {provider === 'google'
-            ? <SiGooglecalendar size={16} color="#1A73E8" className="shrink-0 mt-0.5" />
-            : <BiLogoMicrosoft size={16} color="#0078D4" className="shrink-0 mt-0.5" />}
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {formatEventDate(event.start)} · {formatDuration(event.start, event.end)}
+          </p>
+          {event.attendees.length > 0 && (
+            <AttendeesList attendees={event.attendees} />
+          )}
+          <button
+            onClick={handleStart}
+            className="mt-3 flex items-center gap-1.5 rounded-md border border-primary px-3 py-2 text-xs font-semibold text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+          >
+            <Mic className="h-3.5 w-3.5" aria-hidden="true" />
+            Avvia e registra il meeting
+          </button>
         </div>
       </div>
     </motion.li>
@@ -231,14 +252,24 @@ export default function CalendarPage() {
     <div className="min-h-screen bg-background">
       <AppNav />
       <main className="mx-auto max-w-2xl px-6 py-8">
-        <motion.h1
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-          className="mb-6 font-heading text-2xl font-bold leading-[1.2] tracking-[-0.015em] text-foreground"
-        >
-          Calendario
-        </motion.h1>
+        <div className="mb-6 flex items-center justify-between">
+          <motion.h1
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            className="font-heading text-2xl font-bold leading-[1.2] tracking-[-0.015em] text-foreground"
+          >
+            Calendario
+          </motion.h1>
+          <button
+            onClick={loadCalendars}
+            disabled={loading}
+            className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-border hover:text-foreground disabled:opacity-40 motion-reduce:transition-none"
+            aria-label="Aggiorna calendario"
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
 
         <div className="flex flex-col gap-6">
           {isConnected ? (
@@ -273,13 +304,17 @@ export default function CalendarPage() {
                 <p className="text-sm text-muted-foreground">Nessun meeting nei prossimi 7 giorni.</p>
               </motion.div>
             ) : (
-              <motion.div key="events" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }} className="flex flex-col gap-3">
-                <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Prossimi 7 giorni</p>
-                <ul className="flex flex-col gap-2" role="list">
-                  {allEvents.map((event, i) => (
-                    <EventCard key={`${event.provider}-${event.id}`} event={event} provider={event.provider} index={i} />
-                  ))}
-                </ul>
+              <motion.div key="events" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }} className="flex flex-col gap-5">
+                {groupByDay(allEvents).map(group => (
+                  <div key={group.date} className="flex flex-col gap-2">
+                    <p className="text-xs font-semibold text-muted-foreground capitalize">{group.label}</p>
+                    <ul className="flex flex-col gap-2" role="list">
+                      {group.events.map((event, i) => (
+                        <EventCard key={`${event.provider}-${event.id}`} event={event} provider={event.provider} index={i} />
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </motion.div>
             )}
           </AnimatePresence>
