@@ -8,7 +8,6 @@ import VerifyPage from './pages/VerifyPage';
 import DashboardPage from './pages/DashboardPage';
 import RecordingPage from './pages/RecordingPage';
 import ArchivePage from './pages/ArchivePage';
-import SyncSetupPage from './pages/SyncSetupPage';
 import SyncUnlockPage from './pages/SyncUnlockPage';
 import PricingPage from './pages/PricingPage';
 import BillingSuccessPage from './pages/BillingSuccessPage';
@@ -82,9 +81,6 @@ function AnimatedRoutes() {
         } />
         <Route path="/actions" element={
           <PageWrapper><RequireAuth><SyncGate><ProRoute feature="Dashboard Azioni"><ActionItemsPage /></ProRoute></SyncGate></RequireAuth></PageWrapper>
-        } />
-        <Route path="/sync/setup" element={
-          <PageWrapper><RequireAuth><SyncSetupPage /></RequireAuth></PageWrapper>
         } />
         <Route path="/sync/unlock" element={
           <PageWrapper><RequireAuth><SyncUnlockPage /></RequireAuth></PageWrapper>
