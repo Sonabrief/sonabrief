@@ -52,7 +52,7 @@ Sei responsabile della sicurezza del tuo account. In particolare:
 
 ### Pro Unlimited — €19/mese o €189/anno
 
-- Audio cloud fair-use
+- Sintesi illimitata — nessun limite mensile
 - **Retention archivio: per sempre**
 - Backup E2E automatico cifrato verso i nostri server (frequenza configurabile)
 - Licenza multi-device
@@ -152,5 +152,5 @@ Questi termini sono regolati dalla legge italiana. Per qualsiasi controversia, i
 
 ---
 
-*Versione 1.1 · Maggio 2026*  
+*Versione 1.2 · Maggio 2026*  
 *Versione precedente: 1.0 · Maggio 2026*

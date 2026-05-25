@@ -45,6 +45,7 @@ export default function ArchivePage() {
   const [editingTitle, setEditingTitle] = useState('')
   const [titleFocused, setTitleFocused] = useState(false)
   const [filterTag, setFilterTag] = useState<string | null>(null)
+  const [tagsExpanded, setTagsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'synthesis' | 'transcript'>('synthesis')
 
   const meetings = useLiveQuery(
@@ -156,9 +157,12 @@ export default function ArchivePage() {
             {(() => {
               const allTags = [...new Set(meetings?.flatMap(m => m.tags ?? []) ?? [])]
               if (allTags.length === 0) return null
+              const THRESHOLD = 8
+              const visible = tagsExpanded ? allTags : allTags.slice(0, THRESHOLD)
+              const hidden = allTags.length - THRESHOLD
               return (
                 <div className="flex flex-wrap gap-1.5">
-                  {allTags.map(tag => (
+                  {visible.map(tag => (
                     <button
                       key={tag}
                       onClick={() => setFilterTag(f => f === tag ? null : tag)}
@@ -171,6 +175,22 @@ export default function ArchivePage() {
                       {tag}
                     </button>
                   ))}
+                  {!tagsExpanded && hidden > 0 && (
+                    <button
+                      onClick={() => setTagsExpanded(true)}
+                      className="rounded-full border border-dashed border-border px-2.5 py-0.5 text-xs font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                    >
+                      +{hidden} altri
+                    </button>
+                  )}
+                  {tagsExpanded && allTags.length > THRESHOLD && (
+                    <button
+                      onClick={() => setTagsExpanded(false)}
+                      className="rounded-full border border-dashed border-border px-2.5 py-0.5 text-xs font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                    >
+                      Mostra meno
+                    </button>
+                  )}
                 </div>
               )
             })()}

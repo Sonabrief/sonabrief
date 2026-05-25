@@ -26,7 +26,7 @@ Il flusso di elaborazione è il seguente:
 
 1. `MediaRecorder` cattura chunk audio ogni 30 secondi
 2. Ogni chunk viene cifrato immediatamente con XChaCha20-Poly1305 (chiave session-scoped, vedi §1.2) e scritto nell'IndexedDB del browser
-3. Quando si accumulano circa 2 minuti di chunk, Whisper (in esecuzione in un Web Worker separato via WebAssembly) trascrive il batch con un overlap di 5 secondi sul batch precedente per preservare la qualità ai confini
+3. Quando si accumulano circa 2 minuti di chunk, Whisper (in esecuzione in un Web Worker separato via WebAssembly) trascrive il batch con un overlap di 30 secondi sul batch precedente per preservare la qualità ai confini
 4. Immediatamente dopo la trascrizione del batch, i chunk audio corrispondenti vengono eliminati dall'IndexedDB
 5. A fine meeting: l'IndexedDB non contiene alcun record audio. Resta solo la trascrizione testuale
 
@@ -42,7 +42,7 @@ La chiave di cifratura è **session-scoped**: viene generata al boot della sessi
 
 La scelta di usare chunk cifrati in IndexedDB invece di processare l'audio in streaming puro non è un compromesso sulla privacy — è una scelta tecnica necessaria per la qualità e la resilienza.
 
-**Qualità della trascrizione.** Whisper Large-v3-turbo ha una context window interna di 30 secondi indipendentemente dalla dimensione dell'input. Trascrivere batch da 2 minuti con overlap di 5 secondi produce una qualità misurata inferiore di meno dello 0.5% WER rispetto alla trascrizione monolitica dell'intero meeting. Lo streaming frame-by-frame degraderebbe la qualità in modo significativo.
+**Qualità della trascrizione.** Whisper Large — Alta qualità ha una context window interna di 30 secondi indipendentemente dalla dimensione dell'input. Trascrivere batch da 2 minuti con overlap di 30 secondi produce una qualità misurata inferiore di meno dello 0.5% WER rispetto alla trascrizione monolitica dell'intero meeting. Lo streaming frame-by-frame degraderebbe la qualità in modo significativo.
 
 **Resilienza ai crash.** Un meeting professionale di 60-90 minuti in un browser con decine di tab aperte è un contesto realistico. Senza persistenza temporanea, un crash del browser a 50 minuti farebbe perdere tutto. Con il chunking, al riavvio l'app rileva i chunk orfani e propone il recupero: "Registrazione del 21/05 14:30 (47 minuti). Premi per completare la trascrizione." I chunk vengono trascritti e poi eliminati.
 
@@ -68,15 +68,15 @@ Puoi anche verificare nel codice sorgente: il file che gestisce il chunking e la
 
 ### 2.1 Il modello gira sul tuo computer
 
-La trascrizione avviene interamente sul tuo dispositivo. Il modello attivo in produzione è **Whisper Large-v3-turbo** (`onnx-community/whisper-large-v3-turbo`, ~800 MB in formato ONNX), eseguito nel browser via WebAssembly in un Web Worker dedicato.
+La trascrizione avviene interamente sul tuo dispositivo. Il modello attivo in produzione è **Whisper Large — Alta qualità** (`onnx-community/whisper-large-v3-turbo (via @huggingface/transformers v4.2.0)`, ~800 MB in formato ONNX), eseguito nel browser via WebAssembly in un Web Worker dedicato.
 
 Il modello viene scaricato una sola volta al primo utilizzo e cachato tramite Cache API / IndexedDB del browser. Le sessioni successive usano il modello già presente localmente — nessun download aggiuntivo.
 
-Su hardware con risorse limitate (RAM < 8 GB o core < 4), l'app passa automaticamente a Whisper Small (~470 MB). La detection avviene tramite `navigator.deviceMemory` e `navigator.hardwareConcurrency`. L'utente può sovrascrivere manualmente la scelta in /impostazioni.
+Su hardware con risorse limitate (RAM < 8 GB o core < 4), l'app passa automaticamente a Whisper Small (~470 MB). La detection avviene tramite `navigator.deviceMemory` e `navigator.hardwareConcurrency`. L'utente può sovrascrivere manualmente la scelta in /profilo.
 
 ### 2.2 Qualità della trascrizione
 
-Whisper Large-v3-turbo è il modello di qualità più alta disponibile in esecuzione locale per uso professionale. WER (Word Error Rate) stimato sull'italiano professionale: 5-8%, contro il 10-12% di Whisper Small. Il modello gestisce bene nomi propri, gergo professionale, punteggiatura, e ha un tasso di allucinazioni sui silenzi significativamente inferiore ai modelli più piccoli.
+Whisper Large — Alta qualità è il modello di qualità più alta disponibile in esecuzione locale per uso professionale. WER (Word Error Rate) stimato sull'italiano professionale: 5-8%, contro il 10-12% di Whisper Small. Il modello gestisce bene nomi propri, gergo professionale, punteggiatura, e ha un tasso di allucinazioni sui silenzi significativamente inferiore ai modelli più piccoli.
 
 Lo stesso modello è attivo su tutti i tier (Free, Pro, Pro Unlimited). Non differenziamo la qualità della trascrizione per tier perché degradare la qualità sul Free danneggerebbe la percezione del prodotto per esattamente i professionisti che vogliamo convincere.
 
@@ -314,5 +314,5 @@ Per domande tecniche su questo documento o per richiedere informazioni aggiuntiv
 
 ---
 
-*Versione 2.0 · Maggio 2026*  
+*Versione 1.2 · Maggio 2026*  
 *Versione precedente: 1.0 · Maggio 2026*

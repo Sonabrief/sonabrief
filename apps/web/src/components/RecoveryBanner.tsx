@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { findOrphanChunks, deleteOrphanSession } from '../lib/chunkStore'
 import { db } from '../lib/db'
 import type { RecordingSession } from '../lib/db'
+import { formatMeetingTitle } from '../lib/locale'
 
 interface OrphanInfo {
   sessionId: string
@@ -15,7 +16,11 @@ export function RecoveryBanner() {
 
   useEffect(() => {
     findOrphanChunks().then(setOrphans).catch(() => {})
-    db.recording_sessions.toArray().then(setSavedSessions).catch(() => {})
+    db.recording_sessions
+      .filter(s => !s.status || s.status === 'interrupted')
+      .toArray()
+      .then(setSavedSessions)
+      .catch(() => {})
   }, [])
 
   if (!orphans.length && !savedSessions.length) return null
@@ -39,10 +44,41 @@ export function RecoveryBanner() {
                 Trascrizione parziale recuperabile
               </p>
               <p className="text-xs text-muted-foreground">
-                {date} · ~{words} parole trascritte
+                {date} · ~{words} parole · trascrizione parziale
               </p>
             </div>
             <div className="flex gap-2 shrink-0">
+              <button
+                onClick={async () => {
+                  const now = Date.now()
+                  const id = crypto.randomUUID()
+                  await db.transaction('rw', [db.meetings, db.transcripts], async () => {
+                    await db.meetings.add({
+                      id,
+                      title: formatMeetingTitle(new Date(s.updatedAt)),
+                      startedAt: s.startedAt,
+                      endedAt: s.updatedAt,
+                      durationSeconds: Math.round((s.updatedAt - s.startedAt) / 1000),
+                      mode: 'standard',
+                      lang: s.lang,
+                      hasSynthesis: false,
+                      createdAt: now,
+                      updatedAt: now,
+                    })
+                    await db.transcripts.add({
+                      id: crypto.randomUUID(),
+                      meetingId: id,
+                      text: s.partialText,
+                      createdAt: now,
+                    })
+                  })
+                  await db.recording_sessions.delete(s.sessionId)
+                  setSavedSessions(prev => prev.filter(x => x.sessionId !== s.sessionId))
+                }}
+                className="text-xs font-medium text-primary underline hover:text-primary/80"
+              >
+                Salva in archivio
+              </button>
               <button
                 onClick={() => {
                   navigator.clipboard.writeText(s.partialText)

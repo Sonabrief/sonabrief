@@ -25,6 +25,8 @@ export function useChunkedTranscription({
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const processingRef = useRef(false)
   const accumulatedRef = useRef('')
+  const isActiveRef = useRef(false)
+  const isRecordingRef = useRef(false)
   const lastOverlapTextRef = useRef('')
 
   const processBatch = useCallback(async () => {
@@ -78,6 +80,7 @@ export function useChunkedTranscription({
           lang: language,
           startedAt: session ? Date.now() : 0,
           updatedAt: Date.now(),
+          status: 'active',
         }).catch(() => {})
       }
 
@@ -121,9 +124,25 @@ export function useChunkedTranscription({
   }, [session, sessionId, language, onPartialTranscript])
 
   useEffect(() => {
+    isRecordingRef.current = isRecording
+  }, [isRecording])
+
+  useEffect(() => {
     if (!isRecording || !session) return
     accumulatedRef.current = ''
     lastOverlapTextRef.current = ''
+
+    if (sessionId) {
+      db.recording_sessions.put({
+        sessionId,
+        partialText: '',
+        lang: language,
+        startedAt: Date.now(),
+        updatedAt: Date.now(),
+        status: 'active',
+      }).catch(() => {})
+    }
+    isActiveRef.current = true
 
     // Prima esecuzione immediata (dopo 30s ci sono già chunk)
     // poi ogni 2 min
@@ -133,8 +152,15 @@ export function useChunkedTranscription({
     }, 35_000) // 35s: tempo minimo per avere almeno 1 chunk
 
     return () => {
+      isActiveRef.current = false
       clearTimeout(timeoutRef)
       intervalRef.current && clearInterval(intervalRef.current)
+      if (sessionId && isRecordingRef.current) {
+        db.recording_sessions.update(sessionId, {
+          status: 'interrupted',
+          updatedAt: Date.now(),
+        }).catch(() => {})
+      }
     }
   }, [isRecording, session, processBatch])
 

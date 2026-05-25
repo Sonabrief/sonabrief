@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { SiGooglecalendar } from 'react-icons/si'
+import { BiLogoMicrosoft } from 'react-icons/bi'
 import { toast } from 'sonner'
 import { motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
@@ -27,6 +29,7 @@ interface CalendarEvent {
   end: string
   attendees: { email: string; name?: string }[]
   meetingUrl?: string | null
+  provider?: 'google' | 'microsoft'
 }
 
 interface CalendarState {
@@ -171,7 +174,7 @@ function AttendeesList({ attendees }: { attendees: { email: string; name?: strin
 
 // ── Dashboard event card ──────────────────────────────────────────────────────
 
-function DashboardEventCard({ event, hasBriefing }: { event: CalendarEvent; hasBriefing: boolean }) {
+function DashboardEventCard({ event, hasBriefing, provider }: { event: CalendarEvent; hasBriefing: boolean; provider?: 'google' | 'microsoft' }) {
   const navigate = useNavigate()
 
   function handleStart() {
@@ -187,7 +190,7 @@ function DashboardEventCard({ event, hasBriefing }: { event: CalendarEvent; hasB
 
   return (
     <div className="rounded-lg border border-border bg-card px-5 py-4">
-      <div className="flex items-start gap-3">
+      <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <p className="truncate text-sm font-medium text-foreground">{event.title}</p>
@@ -209,6 +212,8 @@ function DashboardEventCard({ event, hasBriefing }: { event: CalendarEvent; hasB
             Avvia meeting e registrazione
           </button>
         </div>
+        {provider === 'google' && <SiGooglecalendar size={14} color="#1A73E8" className="mt-0.5 shrink-0" />}
+        {provider === 'microsoft' && <BiLogoMicrosoft size={14} color="#0078D4" className="mt-0.5 shrink-0" />}
       </div>
     </div>
   )
@@ -305,13 +310,12 @@ export default function DashboardPage() {
   const isCalConnected = !!(calGoogle?.connected || calMicrosoft?.connected)
   const now = new Date()
   const upcomingEvents = [
-    ...(calGoogle?.events ?? []),
-    ...(calMicrosoft?.events ?? []),
+    ...(calGoogle?.events ?? []).map(e => ({ ...e, provider: 'google' as const })),
+    ...(calMicrosoft?.events ?? []).map(e => ({ ...e, provider: 'microsoft' as const })),
   ]
     .filter(e => new Date(e.end) > now)
     .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
     .slice(0, 3)
-  console.log('[cal] upcomingEvents', upcomingEvents, 'now', now, 'calGoogle', calGoogle)
 
   return (
     <div className="min-h-screen bg-background">
@@ -403,7 +407,7 @@ export default function DashboardPage() {
                 <ul className="space-y-2" role="list">
                   {upcomingEvents.map(event => (
                     <li key={event.id}>
-                      <DashboardEventCard event={event} hasBriefing={hasBriefingData(event)} />
+                      <DashboardEventCard event={event} hasBriefing={hasBriefingData(event)} provider={event.provider} />
                     </li>
                   ))}
                 </ul>

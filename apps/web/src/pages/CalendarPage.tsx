@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { Mic } from 'lucide-react'
+import { SiGooglecalendar } from 'react-icons/si'
+import { BiLogoMicrosoft } from 'react-icons/bi'
 import { API_URL } from '../config'
 import { AppNav } from '../components/AppNav'
 
@@ -39,17 +41,20 @@ function formatDuration(start: string, end: string): string {
 // ── Provider card ─────────────────────────────────────────────────────────────
 
 function ProviderCard({
-  name, emoji, connected, connecting, onConnect, onDisconnect,
+  name, label, connected, connecting, onConnect, onDisconnect,
 }: {
-  name: string; emoji: string; connected: boolean
+  name: 'google' | 'microsoft'; label: string; connected: boolean
   connecting: boolean; onConnect: () => void; onDisconnect: () => void
 }) {
+  const icon = name === 'google'
+    ? <SiGooglecalendar size={20} color="#1A73E8" />
+    : <BiLogoMicrosoft size={20} color="#0078D4" />
   return (
     <div className="rounded-lg border border-border bg-card p-5">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-lg" aria-hidden="true">{emoji}</span>
-          <span className="text-sm font-medium text-foreground">{name}</span>
+          {icon}
+          <span className="text-sm font-medium text-foreground">{label}</span>
         </div>
         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
           connected ? 'bg-primary/10 text-primary' : 'bg-border text-muted-foreground'
@@ -66,8 +71,30 @@ function ProviderCard({
           onClick={onConnect} disabled={connecting}
           className="w-full rounded-md border border-primary px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50 motion-reduce:transition-none"
         >
-          {connecting ? 'Connessione...' : `Connetti ${name}`}
+          {connecting ? 'Connessione...' : `Connetti ${label}`}
         </button>
+      )}
+    </div>
+  )
+}
+
+function CompactProviderCard({
+  name, label, connected, onConnect, onDisconnect,
+}: {
+  name: 'google' | 'microsoft'; label: string; connected: boolean
+  onConnect: () => void; onDisconnect: () => void
+}) {
+  const icon = name === 'google'
+    ? <SiGooglecalendar size={14} color="#1A73E8" />
+    : <BiLogoMicrosoft size={14} color="#0078D4" />
+  return (
+    <div className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5">
+      {icon}
+      <span className="text-xs text-muted-foreground">{label}</span>
+      {connected ? (
+        <button onClick={onDisconnect} className="ml-1 text-xs text-destructive hover:underline">Disconnetti</button>
+      ) : (
+        <button onClick={onConnect} className="ml-1 text-xs text-primary hover:underline">Connetti</button>
       )}
     </div>
   )
@@ -137,11 +164,9 @@ function EventCard({
               Avvia meeting e registrazione
             </button>
           </div>
-          <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-            provider === 'google' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'
-          }`}>
-            {provider === 'google' ? 'Google' : 'Microsoft'}
-          </span>
+          {provider === 'google'
+            ? <SiGooglecalendar size={16} color="#1A73E8" className="shrink-0 mt-0.5" />
+            : <BiLogoMicrosoft size={16} color="#0078D4" className="shrink-0 mt-0.5" />}
         </div>
       </div>
     </motion.li>
@@ -216,15 +241,22 @@ export default function CalendarPage() {
         </motion.h1>
 
         <div className="flex flex-col gap-6">
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, delay: 0.05, ease: [0.4, 0, 0.2, 1] }}
-            className="grid grid-cols-1 gap-4 md:grid-cols-2"
-          >
-            <ProviderCard name="Google Calendar" emoji="📅" connected={!!google?.connected} connecting={connecting === 'google'} onConnect={connectGoogle} onDisconnect={disconnectGoogle} />
-            <ProviderCard name="Microsoft 365" emoji="📆" connected={!!microsoft?.connected} connecting={connecting === 'microsoft'} onConnect={connectMicrosoft} onDisconnect={disconnectMicrosoft} />
-          </motion.div>
+          {isConnected ? (
+            <div className="flex justify-end gap-2">
+              <CompactProviderCard name="google" label="Google Calendar" connected={!!google?.connected} onConnect={connectGoogle} onDisconnect={disconnectGoogle} />
+              <CompactProviderCard name="microsoft" label="Microsoft 365" connected={!!microsoft?.connected} onConnect={connectMicrosoft} onDisconnect={disconnectMicrosoft} />
+            </div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: 0.05, ease: [0.4, 0, 0.2, 1] }}
+              className="grid grid-cols-1 gap-4 md:grid-cols-2"
+            >
+              <ProviderCard name="google" label="Google Calendar" connected={!!google?.connected} connecting={connecting === 'google'} onConnect={connectGoogle} onDisconnect={disconnectGoogle} />
+              <ProviderCard name="microsoft" label="Microsoft 365" connected={!!microsoft?.connected} connecting={connecting === 'microsoft'} onConnect={connectMicrosoft} onDisconnect={disconnectMicrosoft} />
+            </motion.div>
+          )}
 
           <AnimatePresence mode="wait">
             {loading ? (

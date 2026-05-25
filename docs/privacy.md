@@ -102,7 +102,7 @@ Puoi verificarlo tu stesso: apri i DevTools del browser, vai su Application → 
 
 La trascrizione avviene interamente sul tuo computer tramite Whisper, il modello open source di OpenAI, eseguito nel browser via WebAssembly. L'audio non raggiunge mai un server per la trascrizione.
 
-Il modello attivo è Whisper Large-v3-turbo (~800 MB, scaricato una volta sola alla prima sessione e cachato nel browser). Su hardware con risorse limitate, l'app passa automaticamente a Whisper Small (~470 MB). Puoi gestire la preferenza in /impostazioni.
+Il modello attivo è Whisper Large — Alta qualità (~800 MB, scaricato una volta sola alla prima sessione e cachato nel browser). Su hardware con risorse limitate, l'app passa automaticamente a Whisper Small — Ottimizzato per hardware limitato (~470 MB). Puoi gestire la preferenza in /profilo.
 
 ### 3.3 Sintesi: Standard vs Local Only
 
@@ -259,5 +259,5 @@ Per qualsiasi domanda su questa policy, per esercitare i tuoi diritti GDPR, o pe
 
 ---
 
-*Versione 3.0 · Maggio 2026*  
+*Versione 1.2 · Maggio 2026*  
 *Versione precedente: 2.0 · Maggio 2026*

@@ -1028,7 +1028,6 @@ export default function RecordingPage() {
             {canStart && (
               <Button
                 onClick={() => {
-                  console.log('[start] state:', state, 'whisperState:', whisperState, 'source:', source, 'canStart:', canStart)
                   localStorage.removeItem(NOTES_KEY)
                   setNotes('')
                   start(source)

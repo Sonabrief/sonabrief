@@ -514,7 +514,7 @@ export default function ProfilePage() {
               )}
               {tier === 'unlimited' && (
                 <p className="text-sm text-muted-foreground">
-                  Sintesi cloud fair-use — nessun limite mensile.
+                  Sintesi illimitata — nessun limite mensile.
                 </p>
               )}
               <div className="pt-1">
@@ -683,10 +683,10 @@ export default function ProfilePage() {
                   className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
                   <option value="auto">
-                    Automatico (rilevato: {detectedModel === WHISPER_LARGE ? 'Large-v3-turbo' : 'Small'})
+                    Automatico (rilevato: {detectedModel === WHISPER_LARGE ? 'Whisper Large — Alta qualità' : 'Whisper Small — Ottimizzato per hardware limitato'})
                   </option>
-                  <option value={WHISPER_LARGE}>Large-v3-turbo — qualità massima (~800 MB)</option>
-                  <option value={WHISPER_SMALL}>Small — compatibile con hardware limitato (~470 MB)</option>
+                  <option value={WHISPER_LARGE}>Whisper Large — Alta qualità</option>
+                  <option value={WHISPER_SMALL}>Whisper Small — Ottimizzato per hardware limitato</option>
                 </select>
               </div>
               {whisperOverride && (

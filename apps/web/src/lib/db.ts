@@ -14,6 +14,7 @@ export interface Meeting {
   clientName?: string
   projectStream?: string
   tags?: string[]
+  participants?: string[]
   hasSynthesis?: boolean
 }
 
@@ -71,6 +72,7 @@ export interface RecordingSession {
   lang: string
   startedAt: number
   updatedAt: number
+  status?: 'active' | 'interrupted'
 }
 
 class SonabriefDB extends Dexie {
@@ -92,6 +94,7 @@ class SonabriefDB extends Dexie {
     this.version(6).stores({ meetings: '&id, startedAt, mode, clientName, projectStream', transcripts: '&id, meetingId', notes: '&id, meetingId', action_items: '&id, meetingId, completed, createdAt', embeddings: '&meetingId, createdAt', recording_chunks: '&id, sessionId, chunkIndex, status, createdAt' })
     this.version(7).stores({ meetings: '&id, startedAt, mode, clientName, projectStream', transcripts: '&id, meetingId', notes: '&id, meetingId', action_items: '&id, meetingId, completed, createdAt', embeddings: '&meetingId, createdAt', recording_chunks: '&id, sessionId, chunkIndex, status, createdAt', recording_sessions: '&sessionId, updatedAt' })
     this.version(8).stores({ meetings: '&id, startedAt, mode, clientName, projectStream, *tags', transcripts: '&id, meetingId', notes: '&id, meetingId', action_items: '&id, meetingId, completed, createdAt', embeddings: '&meetingId, createdAt', recording_chunks: '&id, sessionId, chunkIndex, status, createdAt', recording_sessions: '&sessionId, updatedAt' })
+    this.version(9).stores({ meetings: '&id, startedAt, mode, clientName, projectStream, *tags', transcripts: '&id, meetingId', notes: '&id, meetingId', action_items: '&id, meetingId, completed, createdAt', embeddings: '&meetingId, createdAt', recording_chunks: '&id, sessionId, chunkIndex, status, createdAt', recording_sessions: '&sessionId, updatedAt' })
   }
 }
 
