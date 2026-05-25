@@ -435,7 +435,7 @@ export default function DashboardPage() {
                       onClick={() => navigate('/pricing')}
                       className="text-xs font-medium text-primary hover:underline transition-colors"
                     >
-                      Scopri Pro → €9/mese →
+                      Scopri Pro →
                     </button>
                   </div>
                 ) : (
