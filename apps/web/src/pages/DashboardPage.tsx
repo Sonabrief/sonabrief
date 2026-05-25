@@ -4,7 +4,7 @@ import { BiLogoMicrosoft } from 'react-icons/bi'
 import { toast } from 'sonner'
 import { motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
-import { Mic } from 'lucide-react'
+import { Mic, Lock } from 'lucide-react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../lib/db'
 import { API_URL } from '../config'
@@ -306,6 +306,41 @@ export default function DashboardPage() {
   const openCount = openItems?.length ?? 0
   const topItems = openItems?.slice(0, 3) ?? []
 
+  const quotaSection = billing && tier !== 'unlimited' ? (
+    <section
+      className="relative rounded-lg border border-border bg-card px-4 py-3"
+      aria-labelledby="quota-heading"
+    >
+      {percentUsed > 80 && (
+        <BorderBeam
+          size={60}
+          duration={8}
+          colorFrom="#B84545"
+          colorTo="#C89868"
+          borderWidth={1.5}
+        />
+      )}
+      <div className="mb-2 flex items-center justify-between">
+        <h2
+          id="quota-heading"
+          className="text-xs font-semibold uppercase tracking-widest text-muted-foreground"
+        >
+          Sintesi cloud
+        </h2>
+        <TierBadge tier={tier} />
+      </div>
+      <QuotaBar used={used} cap={cap} percent={percentUsed} />
+      {tier === 'free' && (
+        <button
+          onClick={() => navigate('/pricing')}
+          className="mt-2 text-xs font-medium text-primary transition-colors hover:underline motion-reduce:transition-none"
+        >
+          Passa a Pro
+        </button>
+      )}
+    </section>
+  ) : null
+
   const isCalLoading = calGoogle === undefined && calMicrosoft === undefined
   const isCalConnected = !!(calGoogle?.connected || calMicrosoft?.connected)
   const now = new Date()
@@ -387,15 +422,28 @@ export default function DashboardPage() {
                   ))}
                 </div>
               ) : !isCalConnected ? (
-                <p className="text-sm text-muted-foreground">
-                  Nessun calendario collegato.{' '}
-                  <button
-                    onClick={() => navigate('/calendar')}
-                    className="font-medium text-primary transition-colors hover:underline motion-reduce:transition-none"
-                  >
-                    Collega calendario
-                  </button>
-                </p>
+                tier === 'free' ? (
+                  <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Lock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                    Calendario disponibile con{' '}
+                    <button
+                      onClick={() => navigate('/pricing')}
+                      className="font-medium text-primary hover:underline"
+                    >
+                      Pro →
+                    </button>
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Nessun calendario collegato.{' '}
+                    <button
+                      onClick={() => navigate('/calendar')}
+                      className="font-medium text-primary transition-colors hover:underline motion-reduce:transition-none"
+                    >
+                      Collega calendario
+                    </button>
+                  </p>
+                )
               ) : upcomingEvents.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
                   Nessun meeting in programma.
@@ -414,6 +462,8 @@ export default function DashboardPage() {
 
           {/* ── Right column ──────────────────────────────── */}
           <aside className="mt-10 space-y-4 lg:mt-0" aria-label="Riepilogo">
+
+            {tier === 'free' && quotaSection}
 
             {/* Recent meetings — compact, no preview */}
             <section
@@ -464,12 +514,28 @@ export default function DashboardPage() {
                             </p>
                           )}
                         </div>
-                        <time
-                          className="shrink-0 text-xs tabular-nums text-muted-foreground"
-                          dateTime={new Date(meeting.startedAt).toISOString()}
-                        >
-                          {formatDateShort(meeting.startedAt)}
-                        </time>
+                        <div className="flex shrink-0 flex-col items-end gap-1">
+                          <time
+                            className="text-xs tabular-nums text-muted-foreground"
+                            dateTime={new Date(meeting.startedAt).toISOString()}
+                          >
+                            {formatDateShort(meeting.startedAt)}
+                          </time>
+                          {tier === 'free' && (() => {
+                            const expiresAt = meeting.startedAt + 7 * 24 * 60 * 60 * 1000
+                            const daysLeft = Math.ceil((expiresAt - Date.now()) / (24 * 60 * 60 * 1000))
+                            if (daysLeft <= 0 || daysLeft > 7) return null
+                            return (
+                              <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
+                                daysLeft <= 3
+                                  ? 'bg-destructive/10 text-destructive'
+                                  : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
+                              }`}>
+                                {daysLeft === 1 ? 'scade oggi' : `scade in ${daysLeft}gg`}
+                              </span>
+                            )
+                          })()}
+                        </div>
                       </button>
                     </motion.li>
                   ))}
@@ -489,12 +555,19 @@ export default function DashboardPage() {
                 >
                   Azioni
                 </h2>
-                <button
-                  onClick={() => navigate('/actions')}
-                  className="text-xs text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
-                >
-                  Vedi tutte
-                </button>
+                {tier !== 'free' ? (
+                  <button
+                    onClick={() => navigate('/actions')}
+                    className="text-xs text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
+                  >
+                    Vedi tutte
+                  </button>
+                ) : (
+                  <span className="flex items-center gap-1 text-xs text-muted-foreground opacity-60">
+                    <Lock className="h-3 w-3" aria-hidden="true" />
+                    Pro
+                  </span>
+                )}
               </div>
 
               {openItems === undefined ? (
@@ -547,41 +620,7 @@ export default function DashboardPage() {
               )}
             </section>
 
-            {/* Quota — minimal */}
-            {billing && tier !== 'unlimited' && (
-              <section
-                className="relative rounded-lg border border-border bg-card px-4 py-3"
-                aria-labelledby="quota-heading"
-              >
-                {percentUsed > 80 && (
-                  <BorderBeam
-                    size={60}
-                    duration={8}
-                    colorFrom="#B84545"
-                    colorTo="#C89868"
-                    borderWidth={1.5}
-                  />
-                )}
-                <div className="mb-2 flex items-center justify-between">
-                  <h2
-                    id="quota-heading"
-                    className="text-xs font-semibold uppercase tracking-widest text-muted-foreground"
-                  >
-                    Sintesi cloud
-                  </h2>
-                  <TierBadge tier={tier} />
-                </div>
-                <QuotaBar used={used} cap={cap} percent={percentUsed} />
-                {tier === 'free' && (
-                  <button
-                    onClick={() => navigate('/pricing')}
-                    className="mt-2 text-xs font-medium text-primary transition-colors hover:underline motion-reduce:transition-none"
-                  >
-                    Passa a Pro
-                  </button>
-                )}
-              </section>
-            )}
+            {tier !== 'free' && quotaSection}
 
             {/* Account */}
             <section
