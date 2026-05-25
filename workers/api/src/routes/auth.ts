@@ -104,6 +104,21 @@ export async function handleAuthRequest(request: Request, env: Env): Promise<Res
     await recordSignupSignals(userId, ipHash, signals, fingerprintHash, env);
   }
 
+  if (existingUser) {
+    const activeTokens = await env.DB
+      .prepare(`SELECT COUNT(*) as count FROM magic_tokens
+                WHERE user_id = ? AND used = 0 AND expires_at > ?`)
+      .bind(userId, Date.now())
+      .first<{ count: number }>()
+
+    if ((activeTokens?.count ?? 0) >= 3) {
+      return new Response(JSON.stringify({ ok: false, error: "rate_limited" }), {
+        status: 429,
+        headers: { ...cors, "Content-Type": "application/json" },
+      })
+    }
+  }
+
   const token = crypto.randomUUID();
   const expiresAt = Date.now() + 1000 * 60 * 15;
 

@@ -9,12 +9,13 @@ export async function synthesizeWithOllama(
   onDone: () => void,
   onError: (msg: string) => void,
 ): Promise<void> {
+  const model = localStorage.getItem('sonabrief_ollama_model') ?? 'llama3.2:3b'
   try {
     const response = await fetch('http://localhost:11434/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'llama3.2',
+        model,
         stream: true,
         messages: [
           { role: 'system', content: systemPrompt },

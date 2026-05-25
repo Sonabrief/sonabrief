@@ -13,6 +13,7 @@ import { TranscriptViewer } from '../components/TranscriptViewer'
 import type { WhisperSegment } from '../components/TranscriptViewer'
 import { db } from '../lib/db'
 import { synthesizeWithOllama } from '../lib/ollama'
+import { OllamaSetupFlow } from '../components/local-mode'
 import { syncMeetingNow } from '../lib/sync'
 import { saveActionItemsFromNote } from '../lib/actionItems'
 import { saveEmbeddingForMeeting } from '../lib/semanticSearch'
@@ -269,6 +270,8 @@ export default function RecordingPage() {
   const [projectStream, setProjectStream] = useState('')
   const [meetingTags, setMeetingTags] = useState<string[]>([])
   const [clientSuggestion, setClientSuggestion] = useState<string | null>(null)
+  const [showOllamaModal, setShowOllamaModal] = useState(false)
+  const pendingSynthesisRef = useRef(false)
   const [showMetadata, setShowMetadata] = useState(false)
   const meetingIdRef = useRef('')
   const clientSuggestionLoadedRef = useRef(false)
@@ -591,6 +594,31 @@ export default function RecordingPage() {
   }, [state])
 
   // ── Save transcript without synthesis
+  // ── Ollama pre-flight check
+  async function checkOllamaReady(): Promise<boolean> {
+    try {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), 3000)
+      const res = await fetch('http://localhost:11434/api/version', { signal: controller.signal })
+      clearTimeout(timeout)
+      if (!res.ok) return false
+
+      const tagsController = new AbortController()
+      const tagsTimeout = setTimeout(() => tagsController.abort(), 3000)
+      const tagsRes = await fetch('http://localhost:11434/api/tags', { signal: tagsController.signal })
+      clearTimeout(tagsTimeout)
+      if (!tagsRes.ok) return false
+
+      const savedModel = localStorage.getItem('sonabrief_ollama_model')
+      if (!savedModel) return false
+
+      const tagsData = await tagsRes.json() as { models?: { name: string }[] }
+      return tagsData.models?.some(m => m.name === savedModel) ?? false
+    } catch {
+      return false
+    }
+  }
+
   // ── Synthesis
   async function generateSynthesis() {
     meetingIdRef.current = crypto.randomUUID()
@@ -600,6 +628,14 @@ export default function RecordingPage() {
     const combinedNotes = buildNotesForSynthesis()
 
     if (mode === 'local') {
+      const ready = await checkOllamaReady()
+      if (!ready) {
+        setSynthesisState('idle')
+        pendingSynthesisRef.current = true
+        setShowOllamaModal(true)
+        return
+      }
+
       await synthesizeWithOllama(
         transcript,
         language,
@@ -1167,12 +1203,15 @@ export default function RecordingPage() {
                       </span>
                       <div className="flex items-center gap-3">
                         {transcriptOpen && (
-                          <button
+                          <span
+                            role="button"
+                            tabIndex={0}
                             onClick={e => { e.stopPropagation(); setShowTimestamps(t => !t) }}
+                            onKeyDown={e => { if (e.key === 'Enter') { e.stopPropagation(); setShowTimestamps(t => !t) } }}
                             className="text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
                           >
                             {showTimestamps ? 'Nascondi timestamp' : 'Mostra timestamp'}
-                          </button>
+                          </span>
                         )}
                         <span className="text-xs text-muted-foreground">
                           {transcriptOpen ? 'Chiudi' : 'Mostra'}
@@ -1503,6 +1542,26 @@ export default function RecordingPage() {
           </aside>
         </div>
       </main>
+
+      {showOllamaModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-background shadow-xl">
+            <OllamaSetupFlow
+              onComplete={() => {
+                setShowOllamaModal(false)
+                if (pendingSynthesisRef.current) {
+                  pendingSynthesisRef.current = false
+                  generateSynthesis()
+                }
+              }}
+              onCancel={() => {
+                setShowOllamaModal(false)
+                pendingSynthesisRef.current = false
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

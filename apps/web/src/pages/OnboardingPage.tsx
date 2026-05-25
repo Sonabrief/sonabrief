@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { savePreferences } from '../lib/api'
 import { unlockWithPassphrase, persistKeyToSession } from '../lib/keystore'
 import { initCrypto, generateSalt, generateRecoveryPhrase } from '../lib/crypto'
+import { OllamaSetupFlow } from '../components/local-mode'
 
 const PROFESSIONS: { category: string; items: string[] }[] = [
   {
@@ -155,6 +156,7 @@ export default function OnboardingPage() {
   // Step 4 — modalità + sync
   const [synthesisMode, setSynthesisMode] = useState('standard')
   const [syncEnabled, setSyncEnabled] = useState(false)
+  const [showOllamaModal, setShowOllamaModal] = useState(false)
 
   // Step 5 — intro sync (solo testo, nessuno stato)
 
@@ -486,7 +488,7 @@ export default function OnboardingPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setSynthesisMode('local')}
+                onClick={() => setShowOllamaModal(true)}
                 aria-pressed={synthesisMode === 'local'}
                 className={optionCardWide(synthesisMode === 'local')}
               >
@@ -774,6 +776,24 @@ export default function OnboardingPage() {
         </div>
 
       </div>
+
+      {showOllamaModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-background shadow-xl">
+            <OllamaSetupFlow
+              autoDetect={false}
+              onComplete={() => {
+                setShowOllamaModal(false)
+                setSynthesisMode('local')
+              }}
+              onCancel={() => {
+                setShowOllamaModal(false)
+                setSynthesisMode('standard')
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

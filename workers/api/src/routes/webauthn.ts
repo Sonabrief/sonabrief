@@ -147,6 +147,10 @@ export async function handleWebAuthnRegisterVerify(
     });
   }
 
+  await env.DB.prepare(`DELETE FROM webauthn_challenges WHERE challenge = ?`)
+    .bind(expectedChallenge)
+    .run();
+
   let verification;
   try {
     verification = await verifyRegistrationResponse({
@@ -186,11 +190,6 @@ export async function handleWebAuthnRegisterVerify(
       body.deviceName ?? null,
       Date.now()
     )
-    .run();
-
-  // Pulisci challenge usato
-  await env.DB.prepare(`DELETE FROM webauthn_challenges WHERE challenge = ?`)
-    .bind(expectedChallenge)
     .run();
 
   return new Response(JSON.stringify({ ok: true }), {
@@ -281,6 +280,10 @@ export async function handleWebAuthnAuthenticateVerify(
     });
   }
 
+  await env.DB.prepare(`DELETE FROM webauthn_challenges WHERE challenge = ?`)
+    .bind(expectedChallenge)
+    .run();
+
   // Trova la credential dal credential_id ritornato dal browser
   const credRow = await env.DB.prepare(
     `SELECT id, user_id, public_key, counter FROM webauthn_credentials WHERE credential_id = ?`
@@ -337,11 +340,6 @@ export async function handleWebAuthnAuthenticateVerify(
     `UPDATE webauthn_credentials SET counter = ?, last_used_at = ? WHERE id = ?`
   )
     .bind(verification.authenticationInfo.newCounter, Date.now(), credRow.id)
-    .run();
-
-  // Pulisci challenge usato
-  await env.DB.prepare(`DELETE FROM webauthn_challenges WHERE challenge = ?`)
-    .bind(expectedChallenge)
     .run();
 
   // Crea sessione

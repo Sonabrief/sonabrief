@@ -21,6 +21,7 @@ import { ProGate } from '../components/ProGate'
 import { cn } from '@/lib/utils'
 import { setModelOverride, detectWhisperModel, WHISPER_LARGE, WHISPER_SMALL, type WhisperModelId } from '../lib/whisperModel'
 import { ChevronDown } from 'lucide-react'
+import { OllamaSetupFlow } from '../components/local-mode'
 const fadeUp = {
   initial: { opacity: 0, y: 8 },
   animate: { opacity: 1, y: 0 },
@@ -170,6 +171,7 @@ export default function ProfilePage() {
   const [calendarConnected, setCalendarConnected] = useState<{ google: boolean; microsoft: boolean }>({ google: false, microsoft: false })
   const [syncEnabled, setSyncEnabled] = useState(false)
   const [showSyncDisableConfirm, setShowSyncDisableConfirm] = useState(false)
+  const [showOllamaModal, setShowOllamaModal] = useState(false)
 
   useBackupScheduler(tier, backupFrequency, (at) => setLastBackupAt(at))
 
@@ -657,6 +659,15 @@ export default function ProfilePage() {
                     </option>
                   ))}
                 </select>
+                {defaultMode === 'standard' && (
+                  <button
+                    type="button"
+                    onClick={() => setShowOllamaModal(true)}
+                    className="mt-1 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                  >
+                    Attiva Privacy Engine
+                  </button>
+                )}
               </div>
 
               <div className="space-y-1.5">
@@ -1004,6 +1015,22 @@ export default function ProfilePage() {
 
         </div>
       </main>
+
+      {showOllamaModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-background shadow-xl">
+            <OllamaSetupFlow
+              onComplete={async () => {
+                setShowOllamaModal(false)
+                await updatePreferences({ synthesis_mode: 'local' })
+                setDefaultMode('local')
+                toast('Privacy Engine attivo')
+              }}
+              onCancel={() => setShowOllamaModal(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
