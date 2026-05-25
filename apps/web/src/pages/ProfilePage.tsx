@@ -17,10 +17,9 @@ import {
   type PasskeyCredential,
 } from '../lib/webauthn'
 import { useBackupScheduler, type BackupFrequency } from '../hooks/useBackupScheduler'
-import { ProGate } from '../components/ProGate'
 import { cn } from '@/lib/utils'
 import { setModelOverride, detectWhisperModel, WHISPER_LARGE, WHISPER_SMALL, type WhisperModelId } from '../lib/whisperModel'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Lock } from 'lucide-react'
 import { OllamaSetupFlow } from '../components/local-mode'
 const fadeUp = {
   initial: { opacity: 0, y: 8 },
@@ -792,7 +791,17 @@ export default function ProfilePage() {
                   <p className="text-sm font-medium text-foreground">Reminder action items settimanale</p>
                   <p className="text-xs text-muted-foreground mt-0.5">Ogni lunedì alle 8:00 ricevi un riepilogo degli action items aperti.</p>
                 </div>
-                <ProGate feature="Reminder email">
+                {tier === 'free' ? (
+                  <div className="flex items-center gap-1.5">
+                    <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                    <button
+                      onClick={() => navigate('/pricing')}
+                      className="text-xs font-medium text-primary hover:underline"
+                    >
+                      Pro →
+                    </button>
+                  </div>
+                ) : (
                   <button
                     role="switch"
                     aria-checked={weeklyReminder}
@@ -811,7 +820,7 @@ export default function ProfilePage() {
                       weeklyReminder ? 'translate-x-5' : 'translate-x-0'
                     )} />
                   </button>
-                </ProGate>
+                )}
               </div>
               {tier === 'unlimited' && (
                 <div className="border-t border-border pt-5 space-y-4">

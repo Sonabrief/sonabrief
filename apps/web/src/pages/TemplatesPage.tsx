@@ -158,47 +158,65 @@ export default function TemplatesPage() {
                 Definisci come Sonabrief struttura le sintesi per un tipo specifico di meeting: un formato legale, un briefing commerciale, un'intervista qualitativa.
               </p>
               {isFree ? (
-                <>
-                <div className="mt-4 rounded-md border border-border bg-muted/40 px-4 py-3 flex items-center justify-between gap-4">
-                  <p className="text-sm text-muted-foreground">
-                    I template personalizzati sono disponibili con il piano Pro.
-                  </p>
-                  <a
-                    href="/pricing"
-                    className="shrink-0 rounded-md bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90 transition-opacity"
-                  >
-                    Passa a Pro
-                  </a>
-                </div>
-                {templates.filter(t => t.is_system && t.language === 'it').length > 0 && (
-                  <div className="mt-6">
-                    <p className="mb-3 text-xs font-semibold text-muted-foreground">
-                      Template di sistema inclusi nel tuo piano
-                    </p>
-                    <ul className="flex flex-col gap-2" role="list">
-                      {templates.filter(t => t.is_system && t.language === 'it').map(t => (
-                        <li
-                          key={t.id}
-                          className="flex items-center justify-between rounded-lg border border-border bg-card px-5 py-3"
-                        >
-                          <div>
-                            <p className="text-sm font-medium text-foreground">{t.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {LANG_LABEL[t.language] ?? t.language}
-                            </p>
-                          </div>
-                          <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs text-muted-foreground">
-                            Incluso
-                          </span>
-                        </li>
+                <div className="mt-4 space-y-4">
+                  {/* Ghost card — form bloccato */}
+                  <div className="relative rounded-lg border border-dashed border-border bg-muted/20 px-5 py-4 select-none pointer-events-none opacity-50">
+                    <div className="flex gap-3 mb-3">
+                      <div className="flex-1 rounded-md border border-border bg-card px-3 py-1.5">
+                        <p className="text-xs text-muted-foreground">Nome template</p>
+                      </div>
+                      <div className="w-28 rounded-md border border-border bg-card px-3 py-1.5">
+                        <p className="text-xs text-muted-foreground">Lingua</p>
+                      </div>
+                    </div>
+                    <div className="rounded-md border border-border bg-card px-3 py-2 mb-3">
+                      <p className="text-xs text-muted-foreground">Prompt di sintesi...</p>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {['Sezione 1', 'Sezione 2', 'Sezione 3'].map(s => (
+                        <span key={s} className="rounded-full bg-secondary px-2.5 py-0.5 text-xs text-muted-foreground">{s}</span>
                       ))}
-                    </ul>
-                    <p className="mt-3 text-xs text-muted-foreground">
-                      Con Pro puoi creare template personalizzati per i tuoi meeting specifici.
-                    </p>
+                    </div>
                   </div>
-                )}
-                </>
+
+                  {/* CTA */}
+                  <div className="rounded-lg border border-primary/20 bg-primary/5 px-5 py-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Crea template su misura</p>
+                        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                          Oltre ai 7 template inclusi nel piano, con Pro puoi crearne di nuovi
+                          e adattare struttura e sezioni esattamente alle tue esigenze.
+                        </p>
+                      </div>
+                      <a
+                        href="/pricing"
+                        className="shrink-0 rounded-md bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90 transition-opacity"
+                      >
+                        Passa a Pro →
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Template di sistema — compatti */}
+                  {templates.filter(t => t.is_system && t.language === 'it').length > 0 && (
+                    <div>
+                      <p className="mb-2 text-xs text-muted-foreground">
+                        Template inclusi nel tuo piano
+                      </p>
+                      <ul className="flex flex-col gap-1.5" role="list">
+                        {templates.filter(t => t.is_system && t.language === 'it').map(t => (
+                          <li
+                            key={t.id}
+                            className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-2.5"
+                          >
+                            <p className="text-sm text-foreground">{t.name}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               ) : (
                 <div className="mt-4 flex gap-2">
                   <button
