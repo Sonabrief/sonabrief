@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { ChevronDown } from 'lucide-react'
 import { API_URL } from '../config'
 import { AppNav } from '../components/AppNav'
 import { getBillingStatus } from '../lib/api'
@@ -39,6 +40,11 @@ Regole:
 const inputClass =
   'w-full rounded-md border border-border bg-card px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none'
 
+function extractSections(prompt: string): string[] {
+  const matches = prompt.match(/\*\*([^*]+)\*\*/g) ?? []
+  return matches.map(m => m.replace(/\*\*/g, '').trim()).filter(Boolean)
+}
+
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function TemplatesPage() {
@@ -49,6 +55,7 @@ export default function TemplatesPage() {
   const [error, setError] = useState<string | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [isFree, setIsFree] = useState(false)
+  const [expandedPreview, setExpandedPreview] = useState<string | null>(null)
 
   useEffect(() => {
     getBillingStatus().then(status => {
@@ -165,17 +172,17 @@ export default function TemplatesPage() {
               ) : (
                 <div className="mt-4 flex gap-2">
                   <button
+                    onClick={startFromGeneric}
+                    disabled={!genericTemplate}
+                    className="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-40 motion-reduce:transition-none"
+                  >
+                    Usa struttura base
+                  </button>
+                  <button
                     onClick={startFromScratch}
                     className="flex-1 rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none"
                   >
                     Personalizza da zero
-                  </button>
-                  <button
-                    onClick={startFromGeneric}
-                    disabled={!genericTemplate}
-                    className="flex-1 rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground disabled:opacity-40 motion-reduce:transition-none"
-                  >
-                    Usa struttura base
                   </button>
                 </div>
               )}
@@ -185,7 +192,7 @@ export default function TemplatesPage() {
           {/* ── Saved templates ──────────────────────── */}
           {customTemplates.length > 0 && !editing && (
             <div className="flex flex-col gap-3">
-              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              <p className="text-xs font-semibold text-muted-foreground">
                 Salvati ({customTemplates.length})
               </p>
               <ul className="flex flex-col gap-2" role="list">
@@ -205,6 +212,40 @@ export default function TemplatesPage() {
                         {t.description && (
                           <p className="mt-1 text-xs text-muted-foreground">{t.description}</p>
                         )}
+                        {(() => {
+                          const sections = extractSections(t.system_prompt)
+                          if (sections.length === 0) return null
+                          return (
+                            <div className="mt-2">
+                              <button
+                                onClick={() => setExpandedPreview(id => id === t.id ? null : t.id)}
+                                className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
+                              >
+                                <ChevronDown className={`h-3 w-3 transition-transform duration-200 motion-reduce:transition-none ${expandedPreview === t.id ? 'rotate-180' : ''}`} />
+                                {expandedPreview === t.id ? 'Nascondi struttura' : 'Mostra struttura'}
+                              </button>
+                              <AnimatePresence>
+                                {expandedPreview === t.id && (
+                                  <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: 'auto', opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="overflow-hidden"
+                                  >
+                                    <div className="mt-2 flex flex-wrap gap-1.5">
+                                      {sections.map(s => (
+                                        <span key={s} className="rounded-full bg-secondary px-2.5 py-0.5 text-xs text-primary">
+                                          {s}
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          )
+                        })()}
                       </div>
                       <div className="flex shrink-0 gap-2">
                         <button
@@ -321,7 +362,7 @@ export default function TemplatesPage() {
                     value={editing.system_prompt ?? ''}
                     onChange={e => setEditing(prev => ({ ...prev!, system_prompt: e.target.value }))}
                     rows={14}
-                    className={`${inputClass} resize-y font-mono`}
+                    className={`${inputClass} resize-y`}
                   />
                 </div>
 

@@ -9,7 +9,7 @@ import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } fro
 import { TagInput, TagPill } from '../components/TagInput'
 import { ProGate } from '../components/ProGate'
 import { TranscriptViewer, type WhisperSegment } from '../components/TranscriptViewer'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Trash2 } from 'lucide-react'
 
 const LANG_LABEL: Record<string, string> = {
   it: 'Italiano',
@@ -53,6 +53,7 @@ export default function ArchivePage() {
   const [tagsExpanded, setTagsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'synthesis' | 'transcript'>('synthesis')
   const [showDetails, setShowDetails] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
 
   const meetings = useLiveQuery(
     () => db.meetings.orderBy('startedAt').reverse().toArray(),
@@ -83,6 +84,17 @@ export default function ArchivePage() {
     setEditingTitle(meeting.title)
     setTitleFocused(false)
     setShowDetails(!!(meeting.clientName || meeting.projectStream || meeting.tags?.length))
+    setDeleteConfirm(false)
+  }
+
+  async function deleteMeeting() {
+    if (!selectedMeeting) return
+    await db.meetings.delete(selectedMeeting.id)
+    await db.notes.where('meetingId').equals(selectedMeeting.id).delete()
+    await db.transcripts.where('meetingId').equals(selectedMeeting.id).delete()
+    await db.action_items.where('meetingId').equals(selectedMeeting.id).delete()
+    setSelectedMeeting(null)
+    setDeleteConfirm(false)
   }
 
   async function saveTags(tags: string[]) {
@@ -361,6 +373,33 @@ export default function ArchivePage() {
                       {selectedMeeting.durationSeconds ? ` · ${formatMinutes(selectedMeeting.durationSeconds)}` : ''}
                       {selectedMeeting.lang ? ` · ${LANG_LABEL[selectedMeeting.lang] ?? selectedMeeting.lang}` : ''}
                     </p>
+                    <div className="flex justify-end pt-2">
+                      {deleteConfirm ? (
+                        <div className="flex items-center gap-3 text-xs">
+                          <span className="text-muted-foreground">Eliminare questo meeting?</span>
+                          <button
+                            onClick={deleteMeeting}
+                            className="font-medium text-destructive hover:underline"
+                          >
+                            Elimina
+                          </button>
+                          <button
+                            onClick={() => setDeleteConfirm(false)}
+                            className="text-muted-foreground hover:text-foreground"
+                          >
+                            Annulla
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setDeleteConfirm(true)}
+                          className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-destructive motion-reduce:transition-none"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                          Elimina meeting
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <button

@@ -20,6 +20,7 @@ import { useBackupScheduler, type BackupFrequency } from '../hooks/useBackupSche
 import { ProGate } from '../components/ProGate'
 import { cn } from '@/lib/utils'
 import { setModelOverride, detectWhisperModel, WHISPER_LARGE, WHISPER_SMALL, type WhisperModelId } from '../lib/whisperModel'
+import { ChevronDown } from 'lucide-react'
 const fadeUp = {
   initial: { opacity: 0, y: 8 },
   animate: { opacity: 1, y: 0 },
@@ -114,7 +115,7 @@ const MODE_OPTIONS = [
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+    <h2 className="text-sm font-semibold text-foreground">
       {children}
     </h2>
   )
@@ -163,8 +164,30 @@ export default function ProfilePage() {
   const [weeklyReminder, setWeeklyReminder] = useState(false)
   const [whisperOverride, setWhisperOverride] = useState<WhisperModelId | null>(null)
   const detectedModel = useMemo(() => detectWhisperModel(), [])
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>(() =>
+    (localStorage.getItem('sb_theme') as 'light' | 'dark' | 'system') ?? 'system'
+  )
+  const [calendarConnected, setCalendarConnected] = useState<{ google: boolean; microsoft: boolean }>({ google: false, microsoft: false })
+  const [syncEnabled, setSyncEnabled] = useState(false)
+  const [showSyncDisableConfirm, setShowSyncDisableConfirm] = useState(false)
 
   useBackupScheduler(tier, backupFrequency, (at) => setLastBackupAt(at))
+
+  useEffect(() => {
+    const root = document.documentElement
+    if (theme === 'dark') {
+      root.classList.add('dark')
+      localStorage.setItem('sb_theme', 'dark')
+    } else if (theme === 'light') {
+      root.classList.remove('dark')
+      localStorage.setItem('sb_theme', 'light')
+    } else {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      if (prefersDark) root.classList.add('dark')
+      else root.classList.remove('dark')
+      localStorage.setItem('sb_theme', 'system')
+    }
+  }, [theme])
 
   async function refreshPasskeys() {
     try {
@@ -245,11 +268,18 @@ export default function ProfilePage() {
       setDefaultMode(p.synthesis_mode ?? 'standard')
       setProfession(p.profession ?? '')
       setWeeklyReminder(p.weekly_reminder_enabled === 1)
+      setSyncEnabled(p.sync_enabled === 1 || localStorage.getItem('sonabrief_sync_enabled') === 'true')
       setPrefsLoaded(true)
     })
     if (passkeySupported) {
       refreshPasskeys()
     }
+    Promise.all([
+      fetch(`${API_URL}/v1/calendar/events`, { credentials: 'include' }).then(r => r.json()).catch(() => null),
+      fetch(`${API_URL}/v1/calendar/microsoft/events`, { credentials: 'include' }).then(r => r.json()).catch(() => null),
+    ]).then(([g, m]) => {
+      setCalendarConnected({ google: !!g?.connected, microsoft: !!m?.connected })
+    })
   }, [passkeySupported])
 
   useEffect(() => {
@@ -347,7 +377,7 @@ export default function ProfilePage() {
           <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0 }} aria-labelledby="account-heading">
             <div className="mb-4">
               <SectionHeading>
-                <span id="account-heading">Account</span>
+                <span id="account-heading">Il tuo account</span>
               </SectionHeading>
             </div>
             <div className="rounded-lg border border-border bg-card px-5">
@@ -389,7 +419,15 @@ export default function ProfilePage() {
                 )}
               </Row>
               <Row label="Email">
-                <span className="text-muted-foreground">{email || '—'}</span>
+                <div className="flex flex-col items-end gap-0.5">
+                  <span className="text-muted-foreground">{email || '—'}</span>
+                  <span className="text-xs text-muted-foreground">
+                    Per cambiarla{' '}
+                    <a href="mailto:hello@sonabrief.com" className="text-primary hover:underline">
+                      contatta il supporto
+                    </a>
+                  </span>
+                </div>
               </Row>
               <Row label="Piano">
                 <span className="font-medium">{TIER_LABEL[tier] ?? tier}</span>
@@ -399,6 +437,28 @@ export default function ProfilePage() {
                   {billingCycle === 'monthly' ? 'Mensile' : 'Annuale'}
                 </Row>
               )}
+              <Row label="Calendario">
+                <div className="flex flex-col items-end gap-1">
+                  {!calendarConnected.google && !calendarConnected.microsoft ? (
+                    <span className="text-xs text-muted-foreground">Nessun calendario connesso</span>
+                  ) : (
+                    <>
+                      {calendarConnected.google && (
+                        <span className="text-xs text-foreground">Google Calendar ✓</span>
+                      )}
+                      {calendarConnected.microsoft && (
+                        <span className="text-xs text-foreground">Microsoft 365 ✓</span>
+                      )}
+                    </>
+                  )}
+                  <button
+                    onClick={() => navigate('/calendar')}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    Gestisci →
+                  </button>
+                </div>
+              </Row>
             </div>
           </motion.section>
 
@@ -406,7 +466,7 @@ export default function ProfilePage() {
           <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.03 }} aria-labelledby="passkey-heading">
             <div className="mb-4">
               <SectionHeading>
-                <span id="passkey-heading">Passkey</span>
+                <span id="passkey-heading">Accesso e sicurezza</span>
               </SectionHeading>
             </div>
             <div className="rounded-lg border border-border bg-card px-5 py-4 space-y-4">
@@ -483,7 +543,7 @@ export default function ProfilePage() {
           <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.06 }} aria-labelledby="piano-heading">
             <div className="mb-4">
               <SectionHeading>
-                <span id="piano-heading">Piano e quota</span>
+                <span id="piano-heading">Piano</span>
               </SectionHeading>
             </div>
             <div className="rounded-lg border border-border bg-card px-5 py-4 space-y-4">
@@ -529,9 +589,9 @@ export default function ProfilePage() {
                   <button
                     onClick={handlePortal}
                     disabled={portalLoading}
-                    className="text-sm font-medium text-primary transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none disabled:opacity-50"
+                    className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-border disabled:opacity-50 motion-reduce:transition-none"
                   >
-                    {portalLoading ? 'Apertura…' : 'Gestisci abbonamento'}
+                    {portalLoading ? 'Apertura…' : 'Gestisci abbonamento →'}
                   </button>
                 )}
               </div>
@@ -542,10 +602,29 @@ export default function ProfilePage() {
           <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.12 }} aria-labelledby="prefs-heading">
             <div className="mb-4">
               <SectionHeading>
-                <span id="prefs-heading">Preferenze</span>
+                <span id="prefs-heading">Impostazioni app</span>
               </SectionHeading>
             </div>
             <div className="rounded-lg border border-border bg-card px-5 py-4 space-y-5">
+              <div className="space-y-1.5">
+                <label className="text-sm text-muted-foreground">Tema</label>
+                <div className="flex gap-2">
+                  {(['light', 'system', 'dark'] as const).map(t => (
+                    <button
+                      key={t}
+                      onClick={() => setTheme(t)}
+                      className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition-colors motion-reduce:transition-none ${
+                        theme === t
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border bg-card text-muted-foreground hover:bg-border'
+                      }`}
+                    >
+                      {t === 'light' ? '☀️ Chiaro' : t === 'dark' ? '🌙 Scuro' : '💻 Sistema'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="space-y-1.5">
                 <label htmlFor="language-select" className="text-sm text-muted-foreground">
                   Lingua
@@ -595,9 +674,7 @@ export default function ProfilePage() {
                     placeholder="Cerca la tua professione..."
                     className="w-full rounded-md border border-border bg-background px-3 py-2 pr-8 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   />
-                  <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-                    ↓
-                  </span>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
                 {professionOpen && (
                   <div className="max-h-48 overflow-y-auto rounded-md border border-border bg-background">
@@ -631,6 +708,7 @@ export default function ProfilePage() {
                 <Button
                   onClick={handleSavePrefs}
                   disabled={saving || !prefsLoaded}
+                  variant="outline"
                   className="h-9 px-5 text-sm"
                 >
                   {saving ? 'Salvataggio…' : 'Salva preferenze'}
@@ -650,50 +728,43 @@ export default function ProfilePage() {
                   )}
                 </AnimatePresence>
               </div>
-            </div>
-          </motion.section>
-          {/* ── Trascrizione ────────────────────────────── */}
-          <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.14 }} aria-labelledby="transcription-heading">
-            <div className="mb-4">
-              <SectionHeading>
-                <span id="transcription-heading">Trascrizione</span>
-              </SectionHeading>
-            </div>
-            <div className="rounded-lg border border-border bg-card px-5 py-4 space-y-4">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Modello Whisper usato per trascrivere i tuoi meeting. Il rilevamento automatico sceglie in base all'hardware del tuo computer.
-              </p>
-              <div className="space-y-1.5">
-                <label htmlFor="whisper-model-select" className="text-sm text-muted-foreground">
-                  Modello di trascrizione
-                </label>
-                <select
-                  id="whisper-model-select"
-                  value={whisperOverride ?? 'auto'}
-                  onChange={e => {
-                    const v = e.target.value
-                    if (v === 'auto') {
-                      setModelOverride(null)
-                      setWhisperOverride(null)
-                    } else {
-                      setModelOverride(v as WhisperModelId)
-                      setWhisperOverride(v as WhisperModelId)
-                    }
-                  }}
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                >
-                  <option value="auto">
-                    Automatico (rilevato: {detectedModel === WHISPER_LARGE ? 'Whisper Large — Alta qualità' : 'Whisper Small — Ottimizzato per hardware limitato'})
-                  </option>
-                  <option value={WHISPER_LARGE}>Whisper Large — Alta qualità</option>
-                  <option value={WHISPER_SMALL}>Whisper Small — Ottimizzato per hardware limitato</option>
-                </select>
-              </div>
-              {whisperOverride && (
-                <p className="text-xs text-muted-foreground">
-                  Override manuale attivo. Le modifiche hanno effetto dalla prossima registrazione.
+
+              <div className="border-t border-border pt-5 space-y-4">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Modello Whisper usato per trascrivere i tuoi meeting. Il rilevamento automatico sceglie in base all'hardware del tuo computer.
                 </p>
-              )}
+                <div className="space-y-1.5">
+                  <label htmlFor="whisper-model-select" className="text-sm text-muted-foreground">
+                    Modello di trascrizione
+                  </label>
+                  <select
+                    id="whisper-model-select"
+                    value={whisperOverride ?? 'auto'}
+                    onChange={e => {
+                      const v = e.target.value
+                      if (v === 'auto') {
+                        setModelOverride(null)
+                        setWhisperOverride(null)
+                      } else {
+                        setModelOverride(v as WhisperModelId)
+                        setWhisperOverride(v as WhisperModelId)
+                      }
+                    }}
+                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    <option value="auto">
+                      Automatico (rilevato: {detectedModel === WHISPER_LARGE ? 'Whisper Large — Alta qualità' : 'Whisper Small — Ottimizzato per hardware limitato'})
+                    </option>
+                    <option value={WHISPER_LARGE}>Whisper Large — Alta qualità</option>
+                    <option value={WHISPER_SMALL}>Whisper Small — Ottimizzato per hardware limitato</option>
+                  </select>
+                </div>
+                {whisperOverride && (
+                  <p className="text-xs text-muted-foreground">
+                    Override manuale attivo. Le modifiche hanno effetto dalla prossima registrazione.
+                  </p>
+                )}
+              </div>
             </div>
           </motion.section>
 
@@ -701,7 +772,7 @@ export default function ProfilePage() {
           <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.16 }} aria-labelledby="notifications-heading">
             <div className="mb-4">
               <SectionHeading>
-                <span id="notifications-heading">Notifiche email</span>
+                <span id="notifications-heading">Automazioni</span>
               </SectionHeading>
             </div>
             <div className="rounded-lg border border-border bg-card px-5 py-4">
@@ -731,60 +802,49 @@ export default function ProfilePage() {
                   </button>
                 </ProGate>
               </div>
+              {tier === 'unlimited' && (
+                <div className="border-t border-border pt-5 space-y-4">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    I tuoi meeting vengono cifrati sul tuo computer e sincronizzati su cloud automaticamente.
+                    Nemmeno noi possiamo leggerli.
+                  </p>
+                  <div className="space-y-1.5">
+                    <label htmlFor="backup-freq" className="text-sm text-muted-foreground">
+                      Frequenza backup
+                    </label>
+                    <select
+                      id="backup-freq"
+                      value={backupFrequency}
+                      onChange={e => {
+                        const v = e.target.value as BackupFrequency
+                        setBackupFrequency(v)
+                        localStorage.setItem('sb_backup_frequency', v)
+                      }}
+                      className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    >
+                      <option value="1h">Ogni ora</option>
+                      <option value="6h">Ogni 6 ore</option>
+                      <option value="24h">Giornaliero (default)</option>
+                      <option value="off">Disattivato</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-sm text-muted-foreground">
+                      Ultimo backup: <span className="text-foreground">{formatBackupDate(lastBackupAt)}</span>
+                    </span>
+                    <Button
+                      onClick={handleManualBackup}
+                      disabled={backupRunning}
+                      className="h-9 px-4 text-sm"
+                      variant="outline"
+                    >
+                      {backupRunning ? 'Backup…' : 'Esegui ora'}
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.section>
-
-          {/* ── Backup automatico ───────────────────────── */}
-          {tier === 'unlimited' && (
-            <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.15 }} aria-labelledby="backup-heading">
-              <div className="mb-4">
-                <SectionHeading>
-                  <span id="backup-heading">Backup automatico</span>
-                </SectionHeading>
-              </div>
-              <div className="rounded-lg border border-border bg-card px-5 py-4 space-y-4">
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  I tuoi meeting vengono cifrati sul tuo computer e sincronizzati su cloud automaticamente.
-                  Nemmeno noi possiamo leggerli.
-                </p>
-
-                <div className="space-y-1.5">
-                  <label htmlFor="backup-freq" className="text-sm text-muted-foreground">
-                    Frequenza backup
-                  </label>
-                  <select
-                    id="backup-freq"
-                    value={backupFrequency}
-                    onChange={e => {
-                      const v = e.target.value as BackupFrequency
-                      setBackupFrequency(v)
-                      localStorage.setItem('sb_backup_frequency', v)
-                    }}
-                    className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  >
-                    <option value="1h">Ogni ora</option>
-                    <option value="6h">Ogni 6 ore</option>
-                    <option value="24h">Giornaliero (default)</option>
-                    <option value="off">Disattivato</option>
-                  </select>
-                </div>
-
-                <div className="flex items-center justify-between gap-4">
-                  <span className="text-sm text-muted-foreground">
-                    Ultimo backup: <span className="text-foreground">{formatBackupDate(lastBackupAt)}</span>
-                  </span>
-                  <Button
-                    onClick={handleManualBackup}
-                    disabled={backupRunning}
-                    className="h-9 px-4 text-sm"
-                    variant="outline"
-                  >
-                    {backupRunning ? 'Backup…' : 'Esegui ora'}
-                  </Button>
-                </div>
-              </div>
-            </motion.section>
-          )}
 
           {/* ── Privacy & Dati ──────────────────────────── */}
           <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.18 }} aria-labelledby="privacy-heading">
@@ -794,6 +854,79 @@ export default function ProfilePage() {
               </SectionHeading>
             </div>
             <div className="rounded-lg border border-border bg-card px-5 py-4 space-y-4">
+              <div className="pb-4 border-b border-border">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Modalità Synced</p>
+                    <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
+                      Cifra e sincronizza i tuoi meeting su cloud con zero-knowledge encryption.
+                      Le chiavi non lasciano mai il tuo dispositivo.
+                    </p>
+                  </div>
+                  <button
+                    role="switch"
+                    aria-checked={syncEnabled}
+                    onClick={() => {
+                      if (syncEnabled) {
+                        setShowSyncDisableConfirm(true)
+                      } else {
+                        navigate('/onboarding', { state: { startAtStep: 5, syncOnly: true } })
+                      }
+                    }}
+                    className={cn(
+                      'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                      syncEnabled ? 'bg-primary' : 'bg-muted'
+                    )}
+                  >
+                    <span className={cn(
+                      'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg transform transition-transform',
+                      syncEnabled ? 'translate-x-5' : 'translate-x-0'
+                    )} />
+                  </button>
+                </div>
+                {syncEnabled && (
+                  <p className="mt-2 text-xs text-primary">
+                    ✓ Synced attivo — i tuoi meeting sono cifrati e sincronizzati.
+                  </p>
+                )}
+                <AnimatePresence>
+                  {showSyncDisableConfirm && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.15 }}
+                      className="mt-3 rounded-lg border border-border bg-muted/50 px-4 py-3"
+                    >
+                      <p className="mb-1 text-sm font-medium text-foreground">
+                        Disattivare la sincronizzazione?
+                      </p>
+                      <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
+                        Disattivando la sincronizzazione i tuoi meeting resteranno solo su questo dispositivo. Non potrai più consultarli da altri dispositivi.
+                      </p>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={async () => {
+                            await updatePreferences({ sync_enabled: 0 })
+                            localStorage.removeItem('sonabrief_sync_enabled')
+                            setSyncEnabled(false)
+                            setShowSyncDisableConfirm(false)
+                          }}
+                          className="text-xs font-medium text-destructive hover:underline"
+                        >
+                          Sì, disattiva
+                        </button>
+                        <button
+                          onClick={() => setShowSyncDisableConfirm(false)}
+                          className="text-xs text-muted-foreground hover:text-foreground"
+                        >
+                          Annulla
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 I tuoi audio non lasciano mai il tuo computer. Le sintesi e le note
                 sono cifrate con zero-knowledge quando usi la modalità Synced.

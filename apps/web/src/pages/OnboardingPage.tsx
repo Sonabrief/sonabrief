@@ -3,7 +3,7 @@ await _sodium.ready
 const sodium = _sodium
 
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { savePreferences } from '../lib/api'
 import { unlockWithPassphrase, persistKeyToSession } from '../lib/keystore'
@@ -135,6 +135,7 @@ const optionCardWide = (active: boolean) =>
 
 export default function OnboardingPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [step, setStep] = useState(1)
   const [saving, setSaving] = useState(false)
   const [done, setDone] = useState(false)
@@ -176,6 +177,12 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     setPhrase(generateRecoveryPhrase())
+    if (location.state?.startAtStep) {
+      setStep(location.state.startAtStep)
+    }
+    if (location.state?.syncOnly) {
+      setSyncEnabled(true)
+    }
   }, [])
 
   useEffect(() => {

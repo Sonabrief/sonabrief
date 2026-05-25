@@ -83,6 +83,7 @@ export async function updatePreferences(prefs: {
   synthesis_mode?: string
   profession?: string
   weekly_reminder_enabled?: number
+  sync_enabled?: number
 }): Promise<boolean> {
   try {
     const res = await fetch(`${API_URL}/v1/preferences`, {

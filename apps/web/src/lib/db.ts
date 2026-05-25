@@ -45,6 +45,7 @@ export interface ActionItem {
   text: string
   completed: boolean
   dueDate?: number
+  deadline?: number
   createdAt: number
 }
 

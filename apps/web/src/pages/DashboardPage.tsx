@@ -513,17 +513,35 @@ export default function DashboardPage() {
                     <span className="ml-1 text-xs text-muted-foreground">in sospeso</span>
                   </p>
                   <ul className="space-y-2" role="list">
-                    {topItems.map(item => (
-                      <li key={item.id} className="flex gap-2">
-                        <span
-                          className="mt-1.25 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
-                          aria-hidden="true"
-                        />
-                        <p className="line-clamp-2 text-xs leading-snug text-foreground">
-                          {item.text}
-                        </p>
-                      </li>
-                    ))}
+                    {topItems.map(item => {
+                      const deadlineText = (() => {
+                        const dl = (item.deadline ?? item.dueDate)
+                        if (!dl) return null
+                        const now = Date.now()
+                        if (dl < now) return { text: 'Scaduto', className: 'text-destructive' }
+                        if (dl <= now + 3 * 24 * 60 * 60 * 1000)
+                          return {
+                            text: new Date(dl).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' }),
+                            className: 'text-amber-600 dark:text-amber-400',
+                          }
+                        return {
+                          text: new Date(dl).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }),
+                          className: 'text-primary',
+                        }
+                      })()
+
+                      return (
+                        <li key={item.id} className="flex items-start gap-2">
+                          <span className="mt-1.25 h-1.5 w-1.5 shrink-0 rounded-full bg-primary" aria-hidden="true" />
+                          <p className="line-clamp-2 text-xs leading-snug text-foreground">
+                            {item.text}
+                            {deadlineText && (
+                              <span className={`ml-1 ${deadlineText.className}`}>· {deadlineText.text}</span>
+                            )}
+                          </p>
+                        </li>
+                      )
+                    })}
                   </ul>
                 </>
               )}
