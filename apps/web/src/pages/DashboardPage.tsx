@@ -423,16 +423,21 @@ export default function DashboardPage() {
                 </div>
               ) : !isCalConnected ? (
                 tier === 'free' ? (
-                  <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <Lock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                    Calendario disponibile con{' '}
+                  <div className="rounded-lg border border-dashed border-border bg-card px-5 py-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Lock className="h-4 w-4 text-muted-foreground shrink-0" aria-hidden="true" />
+                      <p className="text-sm font-medium text-foreground">Prossimi meeting</p>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Collega Google o Microsoft Calendar per vedere i tuoi eventi e avviare la registrazione in un click.
+                    </p>
                     <button
                       onClick={() => navigate('/pricing')}
-                      className="font-medium text-primary hover:underline"
+                      className="text-xs font-medium text-primary hover:underline transition-colors"
                     >
-                      Pro →
+                      Scopri Pro → €9/mese →
                     </button>
-                  </p>
+                  </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">
                     Nessun calendario collegato.{' '}
