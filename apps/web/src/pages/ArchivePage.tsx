@@ -6,10 +6,10 @@ import { AppNav } from '../components/AppNav'
 import { db, type Meeting, type Note, type Transcript } from '../lib/db'
 import { SynthesisEditor } from '../components/SynthesisEditor'
 import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
+import { getBillingStatus } from '../lib/api'
 import { TagInput, TagPill } from '../components/TagInput'
-import { ProGate } from '../components/ProGate'
 import { TranscriptViewer, type WhisperSegment } from '../components/TranscriptViewer'
-import { ChevronDown, Trash2 } from 'lucide-react'
+import { ChevronDown, Lock, Trash2 } from 'lucide-react'
 
 const LANG_LABEL: Record<string, string> = {
   it: 'Italiano',
@@ -54,6 +54,11 @@ export default function ArchivePage() {
   const [activeTab, setActiveTab] = useState<'synthesis' | 'transcript'>('synthesis')
   const [showDetails, setShowDetails] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [tier, setTier] = useState<string>('free')
+
+  useEffect(() => {
+    getBillingStatus().then(b => { if (b) setTier(b.tier) })
+  }, [])
 
   const meetings = useLiveQuery(
     () => db.meetings.orderBy('startedAt').reverse().toArray(),
@@ -142,20 +147,24 @@ export default function ArchivePage() {
     }
   }
 
-  const exportActions = [
-    { label: 'Markdown', fn: () => exportMarkdown(buildExportData()) },
-    { label: 'PDF', fn: () => exportPDF(buildExportData()) },
-    { label: 'Word', fn: () => exportWord(buildExportData()) },
-    { label: 'Email', fn: () => exportEmail(buildExportData()) },
-    {
-      label: copyDone ? 'Copiato' : 'Copia testo',
-      fn: async () => {
-        await copyFormatted(buildExportData())
-        setCopyDone(true)
-        setTimeout(() => setCopyDone(false), 2000)
-      },
-    },
-  ]
+  function ExportButton({ label, fn, locked }: { label: string; fn: () => void; locked?: boolean }) {
+    if (locked) {
+      return (
+        <span className="flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground opacity-40 cursor-not-allowed select-none">
+          <Lock className="h-3 w-3" aria-hidden="true" />
+          {label}
+        </span>
+      )
+    }
+    return (
+      <button
+        onClick={fn}
+        className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none"
+      >
+        {label}
+      </button>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -292,6 +301,20 @@ export default function ArchivePage() {
                             Solo trascrizione
                           </span>
                         )}
+                        {tier === 'free' && (() => {
+                          const expiresAt = meeting.startedAt + 7 * 24 * 60 * 60 * 1000
+                          const daysLeft = Math.ceil((expiresAt - Date.now()) / (24 * 60 * 60 * 1000))
+                          if (daysLeft <= 0 || daysLeft > 7) return null
+                          return (
+                            <span className={`mt-1 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                              daysLeft <= 3
+                                ? 'bg-destructive/10 text-destructive'
+                                : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
+                            }`}>
+                              {daysLeft === 1 ? 'scade oggi' : `scade in ${daysLeft}gg`}
+                            </span>
+                          )
+                        })()}
                       </button>
                     </motion.li>
                   )
@@ -439,12 +462,25 @@ export default function ArchivePage() {
                             />
                           </div>
                           <div className="pt-2">
-                            <ProGate feature="Tag meeting">
+                            {tier === 'free' ? (
+                              <div className="flex items-center gap-1.5 rounded-md border border-dashed border-border px-3 py-2">
+                                <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                                <span className="text-xs text-muted-foreground">
+                                  Tag disponibili con{' '}
+                                  <button
+                                    onClick={() => navigate('/pricing')}
+                                    className="font-medium text-primary hover:underline"
+                                  >
+                                    Pro →
+                                  </button>
+                                </span>
+                              </div>
+                            ) : (
                               <TagInput
                                 value={selectedMeeting.tags ?? []}
                                 onChange={saveTags}
                               />
-                            </ProGate>
+                            )}
                           </div>
                         </motion.div>
                       )}
@@ -471,11 +507,11 @@ export default function ArchivePage() {
                       <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
                         <p className="text-xs font-medium text-muted-foreground">Esporta come:</p>
                         <div className="flex flex-wrap gap-2">
-                          <button onClick={() => exportMarkdown(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Markdown</button>
-                          <button onClick={() => exportPDF(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">PDF</button>
-                          <button onClick={() => exportWord(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Word</button>
-                          <button onClick={() => exportEmail(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Email</button>
-                          <button onClick={() => navigator.clipboard.writeText(selectedTranscript!.text)} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Copia testo</button>
+                          <ExportButton label="Markdown" fn={() => exportMarkdown(buildTranscriptExportData())} />
+                          <ExportButton label="PDF" fn={() => exportPDF(buildTranscriptExportData())} locked={tier === 'free'} />
+                          <ExportButton label="Word" fn={() => exportWord(buildTranscriptExportData())} locked={tier === 'free'} />
+                          <ExportButton label="Email" fn={() => exportEmail(buildTranscriptExportData())} locked={tier === 'free'} />
+                          <ExportButton label="Copia testo" fn={() => navigator.clipboard.writeText(selectedTranscript!.text)} />
                         </div>
                       </div>
                     </div>
@@ -504,15 +540,11 @@ export default function ArchivePage() {
                           <div className="flex flex-col gap-2 border-t border-border pt-4">
                             <p className="text-xs font-medium text-muted-foreground">Esporta come:</p>
                             <div className="flex flex-wrap gap-2">
-                              {exportActions.map(btn => (
-                                <button
-                                  key={btn.label}
-                                  onClick={btn.fn}
-                                  className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none"
-                                >
-                                  {btn.label}
-                                </button>
-                              ))}
+                              <ExportButton label="Markdown" fn={() => exportMarkdown(buildExportData())} />
+                              <ExportButton label="PDF" fn={() => exportPDF(buildExportData())} locked={tier === 'free'} />
+                              <ExportButton label="Word" fn={() => exportWord(buildExportData())} locked={tier === 'free'} />
+                              <ExportButton label="Email" fn={() => exportEmail(buildExportData())} locked={tier === 'free'} />
+                              <ExportButton label={copyDone ? 'Copiato' : 'Copia testo'} fn={async () => { await copyFormatted(buildExportData()); setCopyDone(true); setTimeout(() => setCopyDone(false), 2000) }} />
                             </div>
                           </div>
                         </>
@@ -534,11 +566,11 @@ export default function ArchivePage() {
                             <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
                               <p className="text-xs font-medium text-muted-foreground">Esporta come:</p>
                               <div className="flex flex-wrap gap-2">
-                                <button onClick={() => exportMarkdown(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Markdown</button>
-                                <button onClick={() => exportPDF(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">PDF</button>
-                                <button onClick={() => exportWord(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Word</button>
-                                <button onClick={() => exportEmail(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Email</button>
-                                <button onClick={() => navigator.clipboard.writeText(selectedTranscript!.text)} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Copia testo</button>
+                                <ExportButton label="Markdown" fn={() => exportMarkdown(buildTranscriptExportData())} />
+                                <ExportButton label="PDF" fn={() => exportPDF(buildTranscriptExportData())} locked={tier === 'free'} />
+                                <ExportButton label="Word" fn={() => exportWord(buildTranscriptExportData())} locked={tier === 'free'} />
+                                <ExportButton label="Email" fn={() => exportEmail(buildTranscriptExportData())} locked={tier === 'free'} />
+                                <ExportButton label="Copia testo" fn={() => navigator.clipboard.writeText(selectedTranscript!.text)} />
                               </div>
                             </div>
                           </>
