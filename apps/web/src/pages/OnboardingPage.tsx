@@ -1,8 +1,13 @@
-import { useState } from 'react'
+import _sodium from 'libsodium-wrappers-sumo'
+await _sodium.ready
+const sodium = _sodium
+
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
-import { BorderBeam } from '../components/ui/border-beam'
 import { savePreferences } from '../lib/api'
+import { unlockWithPassphrase, persistKeyToSession } from '../lib/keystore'
+import { initCrypto, generateSalt, generateRecoveryPhrase } from '../lib/crypto'
 
 const PROFESSIONS: { category: string; items: string[] }[] = [
   {
@@ -79,16 +84,16 @@ const LANGUAGES = [
   { code: 'de', label: 'Deutsch' },
 ]
 
-const TOTAL_STEPS = 4
+// Step 1-4 sempre presenti, 5-8 solo se syncEnabled
+const BASE_STEPS = 4
+const SYNC_STEPS = 4
 
-// ── Sub-components ─────────────────────────────────────────────────────────────
-
-function ProgressBar({ step }: { step: number }) {
+function ProgressBar({ step, totalSteps }: { step: number; totalSteps: number }) {
   return (
     <div className="mb-8">
-      <span className="sr-only">Passo {step} di {TOTAL_STEPS}</span>
+      <span className="sr-only">Passo {step} di {totalSteps}</span>
       <div className="flex gap-1.5" aria-hidden="true">
-        {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
+        {Array.from({ length: totalSteps }).map((_, i) => (
           <div
             key={i}
             className={`h-1 flex-1 rounded-full transition-colors motion-reduce:transition-none ${
@@ -128,8 +133,6 @@ const optionCardWide = (active: boolean) =>
     active ? 'border-primary bg-secondary' : 'border-border bg-card hover:bg-border'
   }`
 
-// ── Page ───────────────────────────────────────────────────────────────────────
-
 export default function OnboardingPage() {
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
@@ -144,13 +147,48 @@ export default function OnboardingPage() {
   const [professionCategory, setProfessionCategory] = useState('')
   const [professionSearch, setProfessionSearch] = useState('')
 
-  // Step 3 — nome + contesto (unificati)
+  // Step 3 — nome + contesto
   const [displayName, setDisplayName] = useState('')
   const [contextNote, setContextNote] = useState('')
 
   // Step 4 — modalità + sync
   const [synthesisMode, setSynthesisMode] = useState('standard')
   const [syncEnabled, setSyncEnabled] = useState(false)
+
+  // Step 5 — intro sync (solo testo, nessuno stato)
+
+  // Step 6 — passphrase
+  const [passphrase, setPassphrase] = useState('')
+  const [passphraseConfirm, setPassphraseConfirm] = useState('')
+  const [passphraseTouched, setPassphraseTouched] = useState({ passphrase: false, confirm: false })
+  const [passphraseSubmitting, setPassphraseSubmitting] = useState(false)
+
+  // Step 7 — recovery phrase
+  const [phrase, setPhrase] = useState<string[]>([])
+  const [copied, setCopied] = useState(false)
+
+  // Step 8 — verifica parole
+  const [checkIndices, setCheckIndices] = useState<[number, number, number]>([3, 6, 10])
+  const [checkInputs, setCheckInputs] = useState<[string, string, string]>(['', '', ''])
+  const [step8Attempted, setStep8Attempted] = useState(false)
+
+  const totalSteps = syncEnabled ? BASE_STEPS + SYNC_STEPS : BASE_STEPS
+
+  useEffect(() => {
+    setPhrase(generateRecoveryPhrase())
+  }, [])
+
+  useEffect(() => {
+    if (step !== 8) return
+    const pool = Array.from({ length: 12 }, (_, i) => i)
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]]
+    }
+    const sorted = pool.slice(0, 3).sort((a, b) => a - b) as [number, number, number]
+    setCheckIndices(sorted)
+    setCheckInputs(['', '', ''])
+  }, [step])
 
   const filteredProfessions = professionSearch.trim()
     ? PROFESSIONS.map(cat => ({
@@ -161,7 +199,44 @@ export default function OnboardingPage() {
       })).filter(cat => cat.items.length > 0)
     : PROFESSIONS
 
-  async function handleFinish() {
+  const passphraseErrMsg =
+    passphraseTouched.passphrase && passphrase.length < 12 ? 'Minimo 12 caratteri' : ''
+  const confirmErrMsg =
+    passphraseTouched.confirm && passphrase !== passphraseConfirm ? 'Le passphrase non coincidono' : ''
+  const step6Valid = passphrase.length >= 12 && passphrase === passphraseConfirm
+
+  const step8Valid = checkIndices.every(
+    (idx, i) => checkInputs[i].trim().toLowerCase() === phrase[idx]?.toLowerCase()
+  )
+
+  async function handleStep6() {
+    setPassphraseTouched({ passphrase: true, confirm: true })
+    if (!step6Valid) return
+    setPassphraseSubmitting(true)
+    try {
+      await initCrypto()
+      const salt = generateSalt()
+      await unlockWithPassphrase(passphrase, salt)
+      localStorage.setItem('sonabrief_sync_salt', sodium.to_base64(salt))
+      setStep(7)
+    } finally {
+      setPassphraseSubmitting(false)
+    }
+  }
+
+  function handleCopy() {
+    navigator.clipboard.writeText(phrase.join(' '))
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  async function handleActivate() {
+    await persistKeyToSession()
+    localStorage.setItem('sonabrief_sync_enabled', 'true')
+    await handleSaveAndFinish()
+  }
+
+  async function handleSaveAndFinish() {
     setSaving(true)
     await savePreferences({
       language,
@@ -179,23 +254,28 @@ export default function OnboardingPage() {
     setDone(true)
   }
 
-  function handleEnter() {
-    if (syncEnabled) {
-      navigate('/sync/setup')
-    } else {
-      navigate('/dashboard')
-    }
-  }
-
   function canProceed(): boolean {
     if (step === 1) return !!language
     if (step === 2) return !!profession
     if (step === 3) return true
     if (step === 4) return true
+    if (step === 5) return true
+    if (step === 6) return step6Valid
+    if (step === 7) return true
+    if (step === 8) return true
     return false
   }
 
-  // ── Schermata finale ─────────────────────────────────────────────────────────
+  function handleNext() {
+    // Step 4: se non sync, salva e vai alla schermata finale
+    if (step === 4 && !syncEnabled) {
+      handleSaveAndFinish()
+      return
+    }
+    setStep(s => s + 1)
+  }
+
+  // ── Schermata finale ──────────────────────────────────────────────────────
   if (done) {
     const name = displayName.trim()
     return (
@@ -207,62 +287,61 @@ export default function OnboardingPage() {
           transition={{ duration: 0.4 }}
           className="min-h-screen bg-background flex items-center justify-center px-6 py-12"
         >
-        <div className="w-full max-w-lg text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="mb-10 flex justify-center"
-          >
-            <img src="/logo.svg" alt="Sonabrief" className="h-12 w-auto" />
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-            className="font-heading font-extrabold text-[clamp(1.875rem,4vw,2.5rem)] leading-[1.1] tracking-[-0.02em] text-foreground"
-          >
-            {name ? `Tutto pronto, ${name}.` : 'Tutto pronto.'}
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.35 }}
-            className="mt-3 text-sm text-muted-foreground"
-          >
-            Sonabrief è configurato per te. Puoi cambiare qualsiasi impostazione in qualsiasi momento dal tuo profilo.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.35 }}
-            className="mt-8 relative inline-block"
-          >
-            <BorderBeam size={80} duration={4} />
-            <button
-              type="button"
-              onClick={handleEnter}
-              className="relative rounded-md bg-primary px-8 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transition-none"
+          <div className="w-full max-w-lg text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
+              className="mb-10 flex justify-center"
             >
-              {syncEnabled ? 'Configura il sync cifrato' : 'Apri la dashboard'}
-            </button>
-          </motion.div>
-        </div>
+              <img src="/logo.svg" alt="Sonabrief" className="h-12 w-auto" />
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+              className="font-heading font-extrabold text-[clamp(1.875rem,4vw,2.5rem)] leading-[1.1] tracking-[-0.02em] text-foreground"
+            >
+              {name ? `Tutto pronto, ${name}.` : 'Tutto pronto.'}
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.35 }}
+              className="mt-3 text-sm text-muted-foreground"
+            >
+              Sonabrief è configurato per te. Puoi cambiare qualsiasi impostazione in qualsiasi momento dal tuo profilo.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.35 }}
+              className="mt-8"
+            >
+              <button
+                type="button"
+                onClick={() => navigate('/dashboard')}
+                className="rounded-md bg-primary px-8 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transition-none"
+              >
+                Apri la dashboard
+              </button>
+            </motion.div>
+          </div>
         </motion.div>
       </AnimatePresence>
     )
   }
 
-  // ── Wizard ───────────────────────────────────────────────────────────────────
+  // ── Wizard ────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-lg">
         <img src="/logo.svg" alt="Sonabrief" className="mb-10 h-7 w-auto" />
 
-        <ProgressBar step={step} />
+        <ProgressBar step={step} totalSteps={totalSteps} />
 
         {/* Step 1 — Lingua */}
         {step === 1 && (
@@ -342,12 +421,8 @@ export default function OnboardingPage() {
               title="Parlaci di te."
               sub="Due informazioni opzionali per rendere Sonabrief più preciso e personale."
             />
-
             <div className="mb-5">
-              <label
-                htmlFor="displayName"
-                className="mb-1.5 block text-sm font-medium text-foreground"
-              >
+              <label htmlFor="displayName" className="mb-1.5 block text-sm font-medium text-foreground">
                 Come ti chiami?
               </label>
               <input
@@ -359,16 +434,10 @@ export default function OnboardingPage() {
                 className="w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
                 autoFocus
               />
-              <p className="mt-1 text-xs text-muted-foreground">
-                Ti chiameremo per nome in dashboard.
-              </p>
+              <p className="mt-1 text-xs text-muted-foreground">Ti chiameremo per nome in dashboard.</p>
             </div>
-
             <div>
-              <label
-                htmlFor="contextNote"
-                className="mb-1.5 block text-sm font-medium text-foreground"
-              >
+              <label htmlFor="contextNote" className="mb-1.5 block text-sm font-medium text-foreground">
                 Aggiungi contesto <span className="text-muted-foreground font-normal">(facoltativo)</span>
               </label>
               <textarea
@@ -379,9 +448,7 @@ export default function OnboardingPage() {
                 rows={3}
                 className="w-full rounded-md border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary resize-none motion-reduce:transition-none"
               />
-              <p className="mt-1 text-right text-xs text-muted-foreground">
-                {contextNote.length}/200
-              </p>
+              <p className="mt-1 text-right text-xs text-muted-foreground">{contextNote.length}/200</p>
             </div>
           </div>
         )}
@@ -393,7 +460,6 @@ export default function OnboardingPage() {
               title="Come vuoi usare Sonabrief?"
               sub="Puoi cambiare queste impostazioni per ogni meeting."
             />
-
             <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Modalità di sintesi predefinita
             </p>
@@ -408,7 +474,7 @@ export default function OnboardingPage() {
                   Standard
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Trascrizione sul tuo dispositivo, sintesi AI via cloud EU. La qualità migliore.
+                  Trascrizione locale. Sintesi AI europea. Testo inviato, subito eliminato.
                 </p>
               </button>
               <button
@@ -425,7 +491,6 @@ export default function OnboardingPage() {
                 </p>
               </button>
             </div>
-
             <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Sincronizzazione note
             </p>
@@ -439,9 +504,7 @@ export default function OnboardingPage() {
                 <p className={`text-sm font-medium ${!syncEnabled ? 'text-primary' : 'text-foreground'}`}>
                   Solo su questo dispositivo
                 </p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  Le note restano qui. Semplice e privato.
-                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">Le note restano qui. Semplice e privato.</p>
               </button>
               <button
                 type="button"
@@ -460,13 +523,185 @@ export default function OnboardingPage() {
           </div>
         )}
 
+        {/* Step 5 — Intro sync */}
+        {step === 5 && (
+          <div>
+            <StepTitle
+              title="Configuriamo il sync."
+              sub="Due minuti, una volta sola. Poi accedi da qualsiasi dispositivo."
+            />
+
+            <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 flex gap-3">
+              <span className="text-amber-500 mt-0.5 shrink-0">⚠️</span>
+              <p className="text-sm text-amber-800 leading-relaxed">
+                Le tue note sono cifrate in modo che <strong>nemmeno noi possiamo leggerle</strong>. Significa che se perdi la passphrase e le 12 parole di recupero, nessuno — incluso il nostro team — può aiutarti a rientrare.
+              </p>
+            </div>
+
+            <ul className="space-y-4">
+              {[
+                { n: '1', text: 'Crei una passphrase personale — solo tua, non la vediamo noi.' },
+                { n: '2', text: 'Ricevi 12 parole di recupero — salvale in un posto sicuro.' },
+                { n: '3', text: 'Confermi 3 parole per assicurarti di averle salvate.' },
+              ].map(item => (
+                <li key={item.n} className="flex items-start gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                    {item.n}
+                  </span>
+                  <span className="text-sm text-muted-foreground">{item.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Step 6 — Passphrase */}
+        {step === 6 && (
+          <div>
+            <StepTitle
+              title="Crea la tua passphrase."
+              sub="Almeno 12 caratteri. Sceglila con cura."
+            />
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="passphrase" className="mb-1.5 block text-sm font-medium text-foreground">
+                  Passphrase
+                </label>
+                <input
+                  id="passphrase"
+                  type="password"
+                  value={passphrase}
+                  onChange={e => setPassphrase(e.target.value)}
+                  onBlur={() => setPassphraseTouched(t => ({ ...t, passphrase: true }))}
+                  placeholder="Almeno 12 caratteri"
+                  className="w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+                />
+                {passphraseErrMsg && <p className="mt-1 text-xs text-destructive">{passphraseErrMsg}</p>}
+              </div>
+              <div>
+                <label htmlFor="passphraseConfirm" className="mb-1.5 block text-sm font-medium text-foreground">
+                  Conferma passphrase
+                </label>
+                <input
+                  id="passphraseConfirm"
+                  type="password"
+                  value={passphraseConfirm}
+                  onChange={e => setPassphraseConfirm(e.target.value)}
+                  onBlur={() => setPassphraseTouched(t => ({ ...t, confirm: true }))}
+                  placeholder="Ripeti la passphrase"
+                  className="w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+                />
+                {confirmErrMsg && <p className="mt-1 text-xs text-destructive">{confirmErrMsg}</p>}
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 flex gap-3">
+              <span className="text-amber-500 mt-0.5 shrink-0">⚠️</span>
+              <p className="text-sm text-amber-800 leading-relaxed">
+                Annotala subito in un posto sicuro. Se la dimentichi, le 12 parole di recupero sono l'unica alternativa.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Step 7 — Recovery phrase */}
+        {step === 7 && (
+          <div>
+            <StepTitle
+              title="Salva queste 12 parole."
+              sub="Servono per recuperare l'accesso se dimentichi la passphrase."
+            />
+
+            <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 flex gap-3">
+              <span className="text-amber-500 mt-0.5 shrink-0">⚠️</span>
+              <p className="text-sm text-amber-800 leading-relaxed">
+                <strong>Queste parole non saranno mai più mostrate.</strong> Senza di esse non potrai accedere all'app se dimentichi la passphrase.
+              </p>
+            </div>
+
+            <div
+              className="grid grid-cols-3 gap-2 rounded-lg border p-4 mb-4"
+              style={{ backgroundColor: '#FAF7F0', borderColor: '#C8986866' }}
+            >
+              {phrase.map((word, i) => (
+                <div key={i} className="flex items-baseline gap-1.5">
+                  <span className="w-5 shrink-0 text-right font-mono text-xs text-muted-foreground">
+                    {i + 1}.
+                  </span>
+                  <span className="font-mono text-sm text-foreground">{word}</span>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none mb-5"
+            >
+              {copied ? 'Copiato!' : 'Copia tutto'}
+            </button>
+
+          </div>
+        )}
+
+        {/* Step 8 — Verifica parole */}
+        {step === 8 && (
+          <div>
+            <StepTitle
+              title="Conferma le tue parole."
+              sub="Inserisci le parole richieste per assicurarti di averle salvate."
+            />
+            <div className="space-y-4">
+              {checkIndices.map((idx, i) => (
+                <div key={idx}>
+                  <label className="mb-1.5 block text-sm font-medium text-foreground">
+                    Parola n. {idx + 1}
+                  </label>
+                  <input
+                    type="text"
+                    value={checkInputs[i]}
+                    onChange={e =>
+                      setCheckInputs(prev => {
+                        const next: [string, string, string] = [...prev] as [string, string, string]
+                        next[i] = e.target.value
+                        return next
+                      })
+                    }
+                    className={`w-full rounded-md border px-4 py-2.5 font-mono text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary transition-colors motion-reduce:transition-none ${
+                      step8Attempted && checkInputs[i].trim().toLowerCase() !== phrase[idx]?.toLowerCase()
+                        ? 'border-destructive bg-destructive/5'
+                        : 'border-border bg-card'
+                    }`}
+                    autoComplete="off"
+                    autoCorrect="off"
+                    spellCheck={false}
+                  />
+                  {step8Attempted && checkInputs[i].trim().toLowerCase() !== phrase[idx]?.toLowerCase() && (
+                    <p className="mt-1 text-xs text-destructive">Parola non corretta</p>
+                  )}
+                </div>
+              ))}
+            </div>
+            {step8Attempted && !step8Valid && (
+              <p className="mt-4 text-sm text-destructive text-center">
+                Alcune parole non corrispondono. Torna indietro per ricontrollare.
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Navigation */}
         <div className="mt-8 flex items-center justify-between">
           {step > 1 ? (
             <button
               type="button"
-              onClick={() => setStep(s => s - 1)}
-              aria-label="Torna al passo precedente"
+              onClick={() => {
+                if (step === 8) {
+                  setStep8Attempted(false)
+                  setCheckInputs(['', '', ''])
+                }
+                setStep(s => s - 1)
+              }}
               className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
             >
               ← Indietro
@@ -475,8 +710,39 @@ export default function OnboardingPage() {
             <div />
           )}
 
-          {step < TOTAL_STEPS ? (
-            <div className="flex flex-col items-end gap-2">
+          <div className="flex flex-col items-end gap-2">
+            {/* Bottone principale */}
+            {step === 6 ? (
+              <button
+                type="button"
+                onClick={handleStep6}
+                disabled={!step6Valid || passphraseSubmitting}
+                className="rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none"
+              >
+                {passphraseSubmitting ? 'Derivazione chiave…' : 'Continua'}
+              </button>
+            ) : step === 8 ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setStep8Attempted(true)
+                  if (step8Valid) handleActivate()
+                }}
+                disabled={saving}
+                className="rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-40 motion-reduce:transition-none"
+              >
+                {saving ? 'Salvataggio...' : 'Attiva sync'}
+              </button>
+            ) : step === 4 ? (
+              <button
+                type="button"
+                onClick={handleNext}
+                disabled={saving}
+                className="rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-40 motion-reduce:transition-none"
+              >
+                {saving ? 'Salvataggio...' : syncEnabled ? 'Continua' : 'Apri la dashboard'}
+              </button>
+            ) : (
               <button
                 type="button"
                 onClick={() => setStep(s => s + 1)}
@@ -485,26 +751,19 @@ export default function OnboardingPage() {
               >
                 Continua
               </button>
-              {step === 3 && (
-                <button
-                  type="button"
-                  onClick={() => setStep(s => s + 1)}
-                  className="text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
-                >
-                  Salta
-                </button>
-              )}
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={handleFinish}
-              disabled={saving}
-              className="rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-40 motion-reduce:transition-none"
-            >
-              {saving ? 'Salvataggio...' : 'Continua'}
-            </button>
-          )}
+            )}
+
+            {/* Salta — solo step 3 */}
+            {step === 3 && (
+              <button
+                type="button"
+                onClick={() => setStep(s => s + 1)}
+                className="text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
+              >
+                Salta
+              </button>
+            )}
+          </div>
         </div>
 
       </div>
