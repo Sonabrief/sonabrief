@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Mic, Monitor, Video } from 'lucide-react'
+import { Mic, Monitor, Video, Lock } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAudioRecorder } from '../hooks/useAudioRecorder'
 import { useChunkedTranscription } from '../hooks/useChunkedTranscription'
@@ -20,7 +20,6 @@ import { saveEmbeddingForMeeting } from '../lib/semanticSearch'
 import { embeddingsService } from '../lib/embeddings'
 import { isUnlocked } from '../lib/keystore'
 import { MeetingBriefing } from '../components/MeetingBriefing'
-import { ProGate } from '../components/ProGate'
 import { AppNav } from '../components/AppNav'
 import { RecoveryBanner } from '../components/RecoveryBanner'
 import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
@@ -224,6 +223,7 @@ function SourceButton({
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function RecordingPage() {
+  const { isFree } = useTier()
   const navigate = useNavigate()
   const location = useLocation()
   const { state, duration, error, paused, start, stop, pause, resume, audioData, reset, stream, chunkSession } = useAudioRecorder(() => {
@@ -1330,9 +1330,22 @@ export default function RecordingPage() {
                             <label className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground">
                               Tag <span className="normal-case tracking-normal text-muted-foreground/60">(opzionale)</span>
                             </label>
-                            <ProGate feature="Tag meeting">
+                            {isFree ? (
+                              <div className="flex items-center gap-1.5 rounded-md border border-dashed border-border px-3 py-2">
+                                <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                                <span className="text-xs text-muted-foreground">
+                                  Tag disponibili con{' '}
+                                  <button
+                                    onClick={() => navigate('/pricing')}
+                                    className="font-medium text-primary hover:underline"
+                                  >
+                                    Pro →
+                                  </button>
+                                </span>
+                              </div>
+                            ) : (
                               <TagInput value={meetingTags} onChange={setMeetingTags} />
-                            </ProGate>
+                            )}
                           </div>
                         </div>
                       )}
@@ -1445,9 +1458,22 @@ export default function RecordingPage() {
           >
 
             {/* Briefing context — always visible */}
-            <ProGate feature="Briefing pre-meeting">
+            {isFree ? (
+              <div className="flex items-center gap-1.5">
+                <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <span className="text-xs text-muted-foreground">
+                  Briefing pre-meeting · disponibile con{' '}
+                  <button
+                    onClick={() => navigate('/pricing')}
+                    className="font-medium text-primary hover:underline"
+                  >
+                    Pro →
+                  </button>
+                </span>
+              </div>
+            ) : (
               <MeetingBriefing />
-            </ProGate>
+            )}
 
 
             {/* Quick notes — during recording */}
