@@ -269,6 +269,7 @@ export default function RecordingPage() {
   const [projectStream, setProjectStream] = useState('')
   const [meetingTags, setMeetingTags] = useState<string[]>([])
   const [clientSuggestion, setClientSuggestion] = useState<string | null>(null)
+  const [showMetadata, setShowMetadata] = useState(false)
   const meetingIdRef = useRef('')
   const clientSuggestionLoadedRef = useRef(false)
   const notesTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -835,6 +836,15 @@ export default function RecordingPage() {
       <AppNav />
 
       <main className="mx-auto max-w-4xl px-6 py-10">
+        {state === 'idle' && (
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="mb-6 flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
+          >
+            <span aria-hidden="true">←</span>
+            Dashboard
+          </button>
+        )}
         {state === 'idle' && <RecoveryBanner />}
         <div className="lg:grid lg:grid-cols-[3fr_2fr] lg:gap-10">
 
@@ -893,6 +903,12 @@ export default function RecordingPage() {
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {whisperState === 'loading' && !showLoadingBanner && (
+              <p className="text-xs text-muted-foreground animate-pulse motion-reduce:animate-none">
+                Preparazione in corso...
+              </p>
+            )}
 
             {/* Source selector — visible when idle */}
             <AnimatePresence mode="wait">
@@ -1026,16 +1042,18 @@ export default function RecordingPage() {
 
             {/* Start button — idle + ready */}
             {canStart && (
-              <Button
-                onClick={() => {
-                  localStorage.removeItem(NOTES_KEY)
-                  setNotes('')
-                  start(source)
-                }}
-                className="w-full rounded-md hover:bg-(--primary-hover)"
-              >
-                Avvia registrazione
-              </Button>
+              <div className="flex justify-center">
+                <Button
+                  onClick={() => {
+                    localStorage.removeItem(NOTES_KEY)
+                    setNotes('')
+                    start(source)
+                  }}
+                  className="rounded-md px-8 hover:bg-(--primary-hover)"
+                >
+                  Avvia registrazione
+                </Button>
+              </div>
             )}
 
             {/* Recording: timer + waveform + pause/stop */}
@@ -1118,6 +1136,9 @@ export default function RecordingPage() {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">Potrebbe richiedere qualche minuto</p>
+                <p className="text-xs text-muted-foreground/70">
+                  L'audio viene analizzato localmente — nessun dato viene inviato.
+                </p>
               </motion.div>
               )}
             </AnimatePresence>
@@ -1144,9 +1165,19 @@ export default function RecordingPage() {
                       <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                         Trascrizione
                       </span>
-                      <span className="text-xs text-muted-foreground">
-                        {transcriptOpen ? 'Chiudi' : 'Mostra'}
-                      </span>
+                      <div className="flex items-center gap-3">
+                        {transcriptOpen && (
+                          <button
+                            onClick={e => { e.stopPropagation(); setShowTimestamps(t => !t) }}
+                            className="text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
+                          >
+                            {showTimestamps ? 'Nascondi timestamp' : 'Mostra timestamp'}
+                          </button>
+                        )}
+                        <span className="text-xs text-muted-foreground">
+                          {transcriptOpen ? 'Chiudi' : 'Mostra'}
+                        </span>
+                      </div>
                     </button>
                     {transcriptOpen && (
                       <div
@@ -1171,18 +1202,14 @@ export default function RecordingPage() {
                   >
                     Titolo sessione <span className="normal-case tracking-normal text-muted-foreground/60">(opzionale)</span>
                   </label>
-                  <div className="relative flex items-center gap-1.5">
-                    <input
-                      id="session-title-done"
-                      type="text"
-                      value={sessionTitle}
-                      onChange={e => setSessionTitle(e.target.value)}
-                      placeholder="Aggiungi un titolo..."
-                      className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-                    />
-                    <Pencil className="absolute right-3 h-3.5 w-3.5 text-muted-foreground pointer-events-none" aria-hidden="true" />
-                  </div>
-                  <p className="text-xs text-muted-foreground">Puoi modificarlo anche dopo in archivio</p>
+                  <input
+                    id="session-title-done"
+                    type="text"
+                    value={sessionTitle}
+                    onChange={e => setSessionTitle(e.target.value)}
+                    placeholder="Aggiungi un titolo..."
+                    className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
                 </div>
 
                 {/* Template selector + client/project + generate */}
@@ -1200,7 +1227,7 @@ export default function RecordingPage() {
                           id="template-select"
                           value={selectedTemplate}
                           onChange={e => setSelectedTemplate(e.target.value)}
-                          className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                          className="max-w-xs w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                         >
                           {templates.map(t => (
                             <option key={t.id} value={t.id}>{t.name}</option>
@@ -1209,56 +1236,67 @@ export default function RecordingPage() {
                       </div>
                     )}
 
-                    {/* Client / project */}
-                    <div className="space-y-2.5">
-                      <div>
-                        <label
-                          htmlFor="client-name"
-                          className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground"
-                        >
-                          Cliente <span className="normal-case tracking-normal text-muted-foreground/60">(opzionale)</span>
-                        </label>
-                        {clientSuggestion && !clientName && (
-                          <button
-                            onClick={() => setClientName(clientSuggestion)}
-                            className="mb-1.5 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20 motion-reduce:transition-none"
-                          >
-                            Usa: {clientSuggestion}
-                          </button>
-                        )}
-                        <input
-                          id="client-name"
-                          type="text"
-                          value={clientName}
-                          onChange={e => setClientName(e.target.value)}
-                          placeholder="es. Acme Srl"
-                          className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-                        />
-                      </div>
-                      <div>
-                        <label
-                          htmlFor="project-stream"
-                          className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground"
-                        >
-                          Progetto / Stream <span className="normal-case tracking-normal text-muted-foreground/60">(opzionale)</span>
-                        </label>
-                        <input
-                          id="project-stream"
-                          type="text"
-                          value={projectStream}
-                          onChange={e => setProjectStream(e.target.value)}
-                          placeholder="es. Lancio Q3"
-                          className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-                        />
-                      </div>
-                      <div>
-                        <label className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                          Tag <span className="normal-case tracking-normal text-muted-foreground/60">(opzionale)</span>
-                        </label>
-                        <ProGate feature="Tag meeting">
-                          <TagInput value={meetingTags} onChange={setMeetingTags} />
-                        </ProGate>
-                      </div>
+                    {/* Client / project / tags — collapsible */}
+                    <div>
+                      <button
+                        onClick={() => setShowMetadata(o => !o)}
+                        className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      >
+                        <span>{showMetadata ? '−' : '+'}</span>
+                        {showMetadata ? 'Nascondi dettagli' : 'Aggiungi dettagli (cliente, progetto, tag)'}
+                      </button>
+                      {showMetadata && (
+                        <div className="mt-3 space-y-2.5">
+                          <div>
+                            <label
+                              htmlFor="client-name"
+                              className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground"
+                            >
+                              Cliente <span className="normal-case tracking-normal text-muted-foreground/60">(opzionale)</span>
+                            </label>
+                            {clientSuggestion && !clientName && (
+                              <button
+                                onClick={() => setClientName(clientSuggestion)}
+                                className="mb-1.5 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20 motion-reduce:transition-none"
+                              >
+                                Usa: {clientSuggestion}
+                              </button>
+                            )}
+                            <input
+                              id="client-name"
+                              type="text"
+                              value={clientName}
+                              onChange={e => setClientName(e.target.value)}
+                              placeholder="es. Acme Srl"
+                              className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                            />
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="project-stream"
+                              className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground"
+                            >
+                              Progetto / Stream <span className="normal-case tracking-normal text-muted-foreground/60">(opzionale)</span>
+                            </label>
+                            <input
+                              id="project-stream"
+                              type="text"
+                              value={projectStream}
+                              onChange={e => setProjectStream(e.target.value)}
+                              placeholder="es. Lancio Q3"
+                              className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                              Tag <span className="normal-case tracking-normal text-muted-foreground/60">(opzionale)</span>
+                            </label>
+                            <ProGate feature="Tag meeting">
+                              <TagInput value={meetingTags} onChange={setMeetingTags} />
+                            </ProGate>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <Button
@@ -1267,13 +1305,12 @@ export default function RecordingPage() {
                     >
                       Genera sintesi
                     </Button>
-                    <Button
-                      variant="outline"
+                    <button
                       onClick={saveTranscriptOnly}
-                      className="w-full rounded-md"
+                      className="w-full text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
                     >
                       Salva solo trascrizione
-                    </Button>
+                    </button>
                   </div>
                 )}
 
@@ -1335,13 +1372,16 @@ export default function RecordingPage() {
                 )}
 
                 {/* Post-recording navigation */}
-                <div className="flex gap-3 pt-2">
-                  <Button variant="outline" onClick={handleNewRecording} className="rounded-md">
+                <div className="flex flex-col items-center gap-2 pt-2">
+                  <Button variant="outline" onClick={handleNewRecording} className="w-full rounded-md">
                     Nuova registrazione
                   </Button>
-                  <Button variant="outline" onClick={() => navigate('/archive')} className="rounded-md">
-                    Archivio
-                  </Button>
+                  <button
+                    onClick={() => navigate('/archive')}
+                    className="text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
+                  >
+                    Vai all'archivio
+                  </button>
                 </div>
               </motion.div>
               )}

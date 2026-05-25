@@ -41,7 +41,7 @@ interface CalendarState {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function formatDateShort(ts: number): string {
-  return new Date(ts).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' })
+  return new Date(ts).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 }
 
 function formatEventTime(start: string): string {
@@ -209,7 +209,7 @@ function DashboardEventCard({ event, hasBriefing, provider }: { event: CalendarE
             className="mt-3 flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
           >
             <Mic className="h-3.5 w-3.5" aria-hidden="true" />
-            Avvia meeting e registrazione
+            Avvia e registra
           </button>
         </div>
         {provider === 'google' && <SiGooglecalendar size={14} color="#1A73E8" className="mt-0.5 shrink-0" />}
@@ -339,9 +339,6 @@ export default function DashboardPage() {
                 className="rounded-2xl border border-border px-7 py-8"
                 style={{ background: 'color-mix(in srgb, var(--accent) 6%, var(--card))' }}
               >
-                <p className="mb-5 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-                  Nuova sessione
-                </p>
                 <Mic className="mb-5 h-8 w-8 text-primary" strokeWidth={1.5} />
                 <h2
                   id="nuova-sessione-heading"

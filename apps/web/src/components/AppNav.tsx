@@ -205,7 +205,7 @@ export function AppNav() {
                   title={locked ? `${label} è disponibile con Pro` : undefined}
                   className={`relative rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none ${
                     location.pathname === path
-                      ? 'bg-secondary text-primary'
+                      ? 'text-primary after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:bg-primary'
                       : locked
                       ? 'text-muted-foreground/50 hover:bg-border'
                       : 'text-foreground hover:bg-border'

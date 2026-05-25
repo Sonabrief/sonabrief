@@ -46,7 +46,7 @@ export function TranscriptViewer({ segments, rawText, showTimestamps, onToggleTi
 
   return (
     <div className="flex flex-col gap-3 w-full">
-      {hasSegments && (
+      {hasSegments && !controlled && (
         <div className="flex justify-end">
           <button
             onClick={toggle}
