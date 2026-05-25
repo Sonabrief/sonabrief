@@ -22,6 +22,7 @@ async function loadModel() {
 
 async function embed(id: string, text: string) {
   if (!embedder) throw new Error('Model not loaded')
+  // @ts-ignore
   const output = await embedder(text, { pooling: 'mean', normalize: true })
   const vector = Array.from((output as any).data as Float32Array)
   self.postMessage({ type: 'result', id, vector } satisfies EmbeddingStatus)

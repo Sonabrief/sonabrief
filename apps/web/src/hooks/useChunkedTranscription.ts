@@ -86,7 +86,7 @@ export function useChunkedTranscription({
           startedAt: session ? Date.now() : 0,
           updatedAt: Date.now(),
           status: 'active',
-        }).catch(() => {})
+        }).catch((e) => console.warn('[chunked-transcription] persist failed', e))
       }
 
       // Cancella chunk trascritti (escludi chunk 0 header)

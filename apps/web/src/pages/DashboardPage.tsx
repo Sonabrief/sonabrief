@@ -515,7 +515,7 @@ export default function DashboardPage() {
                   <ul className="space-y-2" role="list">
                     {topItems.map(item => {
                       const deadlineText = (() => {
-                        const dl = (item.deadline ?? item.dueDate)
+                        const dl = item.dueDate
                         if (!dl) return null
                         const now = Date.now()
                         if (dl < now) return { text: 'Scaduto', className: 'text-destructive' }

@@ -47,8 +47,8 @@ export async function synthesizeWithOllama(
           const event = JSON.parse(line)
           if (event.done === false && event.message?.content) onChunk(event.message.content)
           if (event.done === true) onDone()
-        } catch {
-          // ignora righe NDJSON malformate
+        } catch (e) {
+          console.debug('[ollama ndjson]', e instanceof Error ? e.message : e)
         }
       }
     }

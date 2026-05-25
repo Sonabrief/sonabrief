@@ -33,6 +33,6 @@ export function useRetentionCleanup(tier: Tier, loading: boolean) {
       console.info(`[retention] eliminati ${ids.length} meeting Free scaduti`)
     }
 
-    run()
+    run().catch((e) => console.warn('[retention-cleanup]', e))
   }, [tier, loading])
 }

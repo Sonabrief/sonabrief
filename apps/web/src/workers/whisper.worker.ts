@@ -69,6 +69,7 @@ self.onmessage = async (e: MessageEvent) => {
     if (action === 'transcribe_chunk') {
       const { audio, language, batchId } = payload
       if (!transcriber) throw new Error('Model not loaded')
+      // @ts-ignore
       const result = await transcriber(audio, {
         return_timestamps: true,
         language,

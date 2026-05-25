@@ -15,12 +15,12 @@ export function RecoveryBanner() {
   const [savedSessions, setSavedSessions] = useState<RecordingSession[]>([])
 
   useEffect(() => {
-    findOrphanChunks().then(setOrphans).catch(() => {})
+    findOrphanChunks().then(setOrphans).catch((e) => console.warn('[recovery]', e))
     db.recording_sessions
       .filter(s => !s.status || s.status === 'interrupted')
       .toArray()
       .then(setSavedSessions)
-      .catch(() => {})
+      .catch((e) => console.warn('[recovery]', e))
   }, [])
 
   if (!orphans.length && !savedSessions.length) return null
