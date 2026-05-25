@@ -9,7 +9,7 @@ import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } fro
 import { TagInput, TagPill } from '../components/TagInput'
 import { ProGate } from '../components/ProGate'
 import { TranscriptViewer, type WhisperSegment } from '../components/TranscriptViewer'
-import { Pencil } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 
 const LANG_LABEL: Record<string, string> = {
   it: 'Italiano',
@@ -32,6 +32,10 @@ function formatMinutes(seconds?: number): string {
   return `${m} min`
 }
 
+function isFallbackTitle(title: string): boolean {
+  return /alle ore|at \d+:\d+/i.test(title)
+}
+
 export default function ArchivePage() {
   const navigate = useNavigate()
   const [search, setSearch] = useState('')
@@ -47,6 +51,7 @@ export default function ArchivePage() {
   const [filterTag, setFilterTag] = useState<string | null>(null)
   const [tagsExpanded, setTagsExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'synthesis' | 'transcript'>('synthesis')
+  const [showDetails, setShowDetails] = useState(false)
 
   const meetings = useLiveQuery(
     () => db.meetings.orderBy('startedAt').reverse().toArray(),
@@ -69,6 +74,7 @@ export default function ArchivePage() {
     setEditingStream(meeting.projectStream ?? '')
     setEditingTitle(meeting.title)
     setTitleFocused(false)
+    setShowDetails(!!(meeting.clientName || meeting.projectStream || meeting.tags?.length))
   }
 
   async function saveTags(tags: string[]) {
@@ -143,7 +149,8 @@ export default function ArchivePage() {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_2fr] md:gap-8">
 
           {/* ── List ──────────────────────────────────────── */}
-          <div className="flex flex-col gap-3">
+          <div className={`flex flex-col gap-3 ${selectedMeeting ? 'hidden md:flex' : 'flex'}`}>
+            <div className="sticky top-4 z-10 bg-background pb-2 flex flex-col gap-3">
             <input
               type="text"
               aria-label="Cerca per titolo"
@@ -194,6 +201,7 @@ export default function ArchivePage() {
                 </div>
               )
             })()}
+            </div>
 
             {meetings === undefined ? (
               <div className="animate-pulse space-y-2 pt-1">
@@ -240,7 +248,9 @@ export default function ArchivePage() {
                             : 'border-border bg-card hover:bg-border'
                         }`}
                       >
-                        <p className={`text-sm font-semibold leading-snug ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                        <p className={`text-sm leading-snug ${
+                          isSelected ? 'text-primary' : 'text-foreground'
+                        } ${isFallbackTitle(meeting.title) ? 'font-normal text-muted-foreground' : 'font-semibold'}`}>
                           {meeting.title}
                         </p>
                         {(meeting.clientName || meeting.projectStream) && (
@@ -271,7 +281,16 @@ export default function ArchivePage() {
           </div>
 
           {/* ── Detail ────────────────────────────────────── */}
-          <div className="rounded-lg border border-border bg-card">
+          <div className={`rounded-lg border border-border bg-card ${!selectedMeeting ? 'hidden md:block' : 'block'}`}>
+            {selectedMeeting && (
+              <button
+                onClick={() => setSelectedMeeting(null)}
+                className="flex items-center gap-1.5 px-4 pt-4 text-sm text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none md:hidden"
+              >
+                <span aria-hidden="true">←</span>
+                Lista
+              </button>
+            )}
             <AnimatePresence mode="wait">
               {!selectedMeeting ? (
                 <motion.div
@@ -297,7 +316,7 @@ export default function ArchivePage() {
                   className="flex flex-col gap-5 p-6"
                 >
                   <div className="flex flex-col gap-1 pb-2 border-b border-border">
-                    <div className="relative flex items-center gap-1.5">
+                    <div>
                       <input
                         type="text"
                         aria-label="Titolo meeting"
@@ -328,9 +347,6 @@ export default function ArchivePage() {
                             : 'border border-border bg-muted/40 hover:border-primary/50'
                         }`}
                       />
-                      {!titleFocused && (
-                        <Pencil className="h-3.5 w-3.5 shrink-0 text-muted-foreground pointer-events-none" aria-hidden="true" />
-                      )}
                     </div>
                     <p className="px-2 text-xs text-muted-foreground">
                       {formatDate(selectedMeeting.startedAt)}
@@ -338,32 +354,55 @@ export default function ArchivePage() {
                       {selectedMeeting.lang ? ` · ${LANG_LABEL[selectedMeeting.lang] ?? selectedMeeting.lang}` : ''}
                     </p>
                   </div>
-                  <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
-                    <input
-                      type="text"
-                      placeholder="Nome cliente"
-                      value={editingClient}
-                      onChange={e => setEditingClient(e.target.value)}
-                      onBlur={saveClientFields}
-                      onKeyDown={e => e.key === 'Enter' && saveClientFields()}
-                      className="flex-1 rounded-md border border-border bg-card px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Stream / progetto"
-                      value={editingStream}
-                      onChange={e => setEditingStream(e.target.value)}
-                      onBlur={saveClientFields}
-                      onKeyDown={e => e.key === 'Enter' && saveClientFields()}
-                      className="flex-1 rounded-md border border-border bg-card px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
-                    />
+                  <div>
+                    <button
+                      onClick={() => setShowDetails(o => !o)}
+                      className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
+                    >
+                      <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 motion-reduce:transition-none ${showDetails ? 'rotate-180' : ''}`} aria-hidden="true" />
+                      {showDetails ? 'Nascondi dettagli' : 'Aggiungi dettagli'}
+                    </button>
+                    <AnimatePresence>
+                      {showDetails && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                          className="overflow-hidden"
+                        >
+                          <div className="flex flex-col gap-2 pt-3 sm:flex-row sm:gap-3">
+                            <input
+                              type="text"
+                              placeholder="Nome cliente"
+                              value={editingClient}
+                              onChange={e => setEditingClient(e.target.value)}
+                              onBlur={saveClientFields}
+                              onKeyDown={e => e.key === 'Enter' && saveClientFields()}
+                              className="flex-1 rounded-md border border-border bg-card px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+                            />
+                            <input
+                              type="text"
+                              placeholder="Stream / progetto"
+                              value={editingStream}
+                              onChange={e => setEditingStream(e.target.value)}
+                              onBlur={saveClientFields}
+                              onKeyDown={e => e.key === 'Enter' && saveClientFields()}
+                              className="flex-1 rounded-md border border-border bg-card px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
+                            />
+                          </div>
+                          <div className="pt-2">
+                            <ProGate feature="Tag meeting">
+                              <TagInput
+                                value={selectedMeeting.tags ?? []}
+                                onChange={saveTags}
+                              />
+                            </ProGate>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
-                  <ProGate feature="Tag meeting">
-                    <TagInput
-                      value={selectedMeeting.tags ?? []}
-                      onChange={saveTags}
-                    />
-                  </ProGate>
 
                   {selectedMeeting.hasSynthesis === false ? (
                     selectedTranscript ? (
@@ -382,12 +421,15 @@ export default function ArchivePage() {
                           onToggleTimestamps={setShowTimestamps}
                         />
                       </div>
-                      <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
-                        <button onClick={() => exportMarkdown(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Markdown</button>
-                        <button onClick={() => exportPDF(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">PDF</button>
-                        <button onClick={() => exportWord(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Word</button>
-                        <button onClick={() => exportEmail(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Email</button>
-                        <button onClick={() => navigator.clipboard.writeText(selectedTranscript!.text)} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Copia testo</button>
+                      <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
+                        <p className="text-xs font-medium text-muted-foreground">Esporta come:</p>
+                        <div className="flex flex-wrap gap-2">
+                          <button onClick={() => exportMarkdown(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Markdown</button>
+                          <button onClick={() => exportPDF(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">PDF</button>
+                          <button onClick={() => exportWord(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Word</button>
+                          <button onClick={() => exportEmail(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Email</button>
+                          <button onClick={() => navigator.clipboard.writeText(selectedTranscript!.text)} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Copia testo</button>
+                        </div>
                       </div>
                     </div>
                     ) : (
@@ -412,16 +454,19 @@ export default function ArchivePage() {
                       {activeTab === 'synthesis' && (
                         <>
                           <SynthesisEditor content={selectedNote.content} readonly />
-                          <div className="flex flex-wrap gap-2 border-t border-border pt-4">
-                            {exportActions.map(btn => (
-                              <button
-                                key={btn.label}
-                                onClick={btn.fn}
-                                className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none"
-                              >
-                                {btn.label}
-                              </button>
-                            ))}
+                          <div className="flex flex-col gap-2 border-t border-border pt-4">
+                            <p className="text-xs font-medium text-muted-foreground">Esporta come:</p>
+                            <div className="flex flex-wrap gap-2">
+                              {exportActions.map(btn => (
+                                <button
+                                  key={btn.label}
+                                  onClick={btn.fn}
+                                  className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none"
+                                >
+                                  {btn.label}
+                                </button>
+                              ))}
+                            </div>
                           </div>
                         </>
                       )}
@@ -439,12 +484,15 @@ export default function ArchivePage() {
                                 onToggleTimestamps={setShowTimestamps}
                               />
                             </div>
-                            <div className="mt-3 flex flex-wrap gap-2 border-t border-border pt-3">
-                              <button onClick={() => exportMarkdown(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Markdown</button>
-                              <button onClick={() => exportPDF(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">PDF</button>
-                              <button onClick={() => exportWord(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Word</button>
-                              <button onClick={() => exportEmail(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Email</button>
-                              <button onClick={() => navigator.clipboard.writeText(selectedTranscript!.text)} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Copia testo</button>
+                            <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
+                              <p className="text-xs font-medium text-muted-foreground">Esporta come:</p>
+                              <div className="flex flex-wrap gap-2">
+                                <button onClick={() => exportMarkdown(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Markdown</button>
+                                <button onClick={() => exportPDF(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">PDF</button>
+                                <button onClick={() => exportWord(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Word</button>
+                                <button onClick={() => exportEmail(buildTranscriptExportData())} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Email</button>
+                                <button onClick={() => navigator.clipboard.writeText(selectedTranscript!.text)} className="rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none">Copia testo</button>
+                              </div>
                             </div>
                           </>
                         ) : (

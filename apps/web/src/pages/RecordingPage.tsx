@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Mic, Monitor, Video, Pencil } from 'lucide-react'
+import { Mic, Monitor, Video } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAudioRecorder } from '../hooks/useAudioRecorder'
 import { useChunkedTranscription } from '../hooks/useChunkedTranscription'
