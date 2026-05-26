@@ -27,25 +27,30 @@ function PiPWaveform({ stream, frozen }: { stream: MediaStream | null; frozen: b
     const BAR_COUNT = 16
     const GAP = 2
 
-    function draw() {
-      if (!frozenRef.current) {
-        analyser.getByteFrequencyData(data)
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        const barW = (canvas.width - GAP * (BAR_COUNT - 1)) / BAR_COUNT
-        for (let i = 0; i < BAR_COUNT; i++) {
-          const val = data[Math.floor(i * data.length / BAR_COUNT)] / 255
-          const h = Math.max(3, val * canvas.height)
-          const x = i * (barW + GAP)
-          const y = (canvas.height - h) / 2
-          ctx.fillStyle = `rgba(26, 77, 82, ${0.4 + val * 0.6})`
-          ctx.beginPath()
-          ctx.roundRect(x, y, barW, h, 2)
-          ctx.fill()
+    let lastFrame = 0
+    const FRAME_INTERVAL = 1000 / 15
+    function draw(timestamp: number) {
+      if (timestamp - lastFrame >= FRAME_INTERVAL) {
+        lastFrame = timestamp
+        if (!frozenRef.current) {
+          analyser.getByteFrequencyData(data)
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          const barW = (canvas.width - GAP * (BAR_COUNT - 1)) / BAR_COUNT
+          for (let i = 0; i < BAR_COUNT; i++) {
+            const val = data[Math.floor(i * data.length / BAR_COUNT)] / 255
+            const h = Math.max(3, val * canvas.height)
+            const x = i * (barW + GAP)
+            const y = (canvas.height - h) / 2
+            ctx.fillStyle = `rgba(26, 77, 82, ${0.4 + val * 0.6})`
+            ctx.beginPath()
+            ctx.roundRect(x, y, barW, h, 2)
+            ctx.fill()
+          }
         }
       }
       rafRef.current = requestAnimationFrame(draw)
     }
-    draw()
+    rafRef.current = requestAnimationFrame(draw)
 
     return () => {
       cancelAnimationFrame(rafRef.current)

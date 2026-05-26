@@ -4,7 +4,6 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { Mic, Monitor, Video, Lock } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAudioRecorder } from '../hooks/useAudioRecorder'
-import { useChunkedTranscription } from '../hooks/useChunkedTranscription'
 import { whisper } from '../lib/whisper'
 import { Button } from '../components/ui/button'
 import { API_URL } from '../config'
@@ -109,25 +108,32 @@ function Waveform({ stream, frozen }: { stream: MediaStream | null; frozen: bool
     const BAR_COUNT = 20
     const GAP = 3
 
-    function draw() {
-      if (!frozenRef.current) {
-        analyser.getByteFrequencyData(data)
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-        const barW = (canvas.width - GAP * (BAR_COUNT - 1)) / BAR_COUNT
-        for (let i = 0; i < BAR_COUNT; i++) {
-          const val = data[Math.floor(i * data.length / BAR_COUNT)] / 255
-          const h = Math.max(3, val * canvas.height)
-          const x = i * (barW + GAP)
-          const y = (canvas.height - h) / 2
-          ctx.fillStyle = `rgba(26, 77, 82, ${0.4 + val * 0.6})`
-          ctx.beginPath()
-          ctx.roundRect(x, y, barW, h, 2)
-          ctx.fill()
+    let lastFrame = 0
+    const TARGET_FPS = 15
+    const FRAME_INTERVAL = 1000 / TARGET_FPS
+
+    function draw(timestamp: number) {
+      if (timestamp - lastFrame >= FRAME_INTERVAL) {
+        lastFrame = timestamp
+        if (!frozenRef.current) {
+          analyser.getByteFrequencyData(data)
+          ctx.clearRect(0, 0, canvas.width, canvas.height)
+          const barW = (canvas.width - GAP * (BAR_COUNT - 1)) / BAR_COUNT
+          for (let i = 0; i < BAR_COUNT; i++) {
+            const val = data[Math.floor(i * data.length / BAR_COUNT)] / 255
+            const h = Math.max(3, val * canvas.height)
+            const x = i * (barW + GAP)
+            const y = (canvas.height - h) / 2
+            ctx.fillStyle = `rgba(26, 77, 82, ${0.4 + val * 0.6})`
+            ctx.beginPath()
+            ctx.roundRect(x, y, barW, h, 2)
+            ctx.fill()
+          }
         }
       }
       rafRef.current = requestAnimationFrame(draw)
     }
-    draw()
+    rafRef.current = requestAnimationFrame(draw)
 
     return () => {
       cancelAnimationFrame(rafRef.current)
@@ -284,13 +290,12 @@ export default function RecordingPage() {
   const showNotesArea = isRecording || isProcessing || isTranscribing || isDone
   const shortcutLabel = IS_MAC ? '⌘E' : 'Ctrl+E'
 
-  const { reset: resetChunked } = useChunkedTranscription({
-    session: chunkSession,
-    sessionId: chunkSession?.sessionId ?? null,
-    language,
-    isRecording,
-    onPartialTranscript: setPartialTranscript,
-  })
+  const resetChunked = useCallback(() => {}, [])
+  useEffect(() => {
+    if (!isRecording || !chunkSession) return
+    // Chunked transcription disabilitata — reintrodurre in Fase G (Tauri)
+    // con sherpa-onnx nativo che non compete con Whisper WASM
+  }, [isRecording, chunkSession])
 
   // ── Export data builder
   function buildExportData() {
@@ -520,13 +525,17 @@ export default function RecordingPage() {
     setTranscribeProgress(0)
     const estimated = Math.max(2000, duration * 0.5 * 1000)
     const startTime = Date.now()
-    const timer = setInterval(() => {
+    let rafId: number
+    function tick() {
       const elapsed = Date.now() - startTime
-      const pct = Math.min(95, Math.round((elapsed / estimated) * 95))
+      const pct = Math.min(90, Math.round((elapsed / estimated) * 90))
       setTranscribeProgress(pct)
-      if (pct >= 95) clearInterval(timer)
-    }, 200)
-    return () => clearInterval(timer)
+      if (pct < 90) {
+        rafId = requestIdleCallback(() => tick(), { timeout: 2000 })
+      }
+    }
+    rafId = requestIdleCallback(() => tick(), { timeout: 2000 })
+    return () => cancelIdleCallback(rafId)
   }, [isTranscribing])
 
   useEffect(() => {

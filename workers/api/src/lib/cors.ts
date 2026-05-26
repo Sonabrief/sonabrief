@@ -4,6 +4,7 @@ const ALLOWED_ORIGINS = [
   "https://sonabrief.com",
   "https://www.sonabrief.com",
   "https://app.sonabrief.com",
+  "https://7f4917c7.sonabrief-app.pages.dev",
   "http://localhost:5173",
   "http://localhost:1420",
 ];

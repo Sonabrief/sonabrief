@@ -4,6 +4,11 @@ import { blobToFloat32ArrayChunk } from '../lib/audio'
 import type { ChunkStoreSession } from '../lib/chunkStore'
 import { db } from '../lib/db'
 
+// TODO Fase G: riabilitare con Worker dedicato post-Tauri
+// Issue: transcribeChunk compete con Whisper WASM sul main thread
+// causando freeze su hardware < 16GB RAM
+const CHUNKED_TRANSCRIPTION_ENABLED = false
+
 const BATCH_SIZE = 4        // 4 chunk × 30s = 2 min
 
 interface UseChunkedTranscriptionOptions {
@@ -106,7 +111,7 @@ export function useChunkedTranscription({
   }, [isRecording])
 
   useEffect(() => {
-    if (!isRecording || !session) return
+    if (!CHUNKED_TRANSCRIPTION_ENABLED || !isRecording || !session) return
     accumulatedRef.current = ''
     lastTranscribedIndexRef.current = -1
 
