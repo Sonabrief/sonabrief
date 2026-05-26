@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'motion/react'
 import { savePreferences } from '../lib/api'
-import { unlockWithPassphrase, persistKeyToSession } from '../lib/keystore'
+import { unlockWithPassphrase, persistKeyToSession, saveVerificationBlob, getCurrentKey } from '../lib/keystore'
 import { initCrypto, generateSalt, generateRecoveryPhrase } from '../lib/crypto'
 import { OllamaSetupFlow } from '../components/local-mode'
 
@@ -226,6 +226,7 @@ export default function OnboardingPage() {
       await initCrypto()
       const salt = generateSalt()
       await unlockWithPassphrase(passphrase, salt)
+      await saveVerificationBlob(getCurrentKey()!)
       localStorage.setItem('sonabrief_sync_salt', sodium.to_base64(salt))
       setStep(7)
     } finally {

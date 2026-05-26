@@ -2,7 +2,7 @@ import _sodium from 'libsodium-wrappers-sumo'
 await _sodium.ready
 const sodium = _sodium
 
-import { deriveKey, recoveryPhraseToKey } from './crypto'
+import { deriveKey, recoveryPhraseToKey, encrypt, decrypt } from './crypto'
 
 const SESSION_KEY = 'sb_session_key_'
 
@@ -55,4 +55,31 @@ export async function restoreKeyFromSession(): Promise<boolean> {
 
 export function clearSessionKey(): void {
   sessionStorage.removeItem(SESSION_KEY)
+}
+
+export async function saveVerificationBlob(key: Uint8Array): Promise<void> {
+  await sodium.ready
+  const { ciphertext, nonce } = encrypt('sonabrief-verify-v1', key)
+  const blob = {
+    ciphertext: sodium.to_base64(ciphertext, sodium.base64_variants.ORIGINAL),
+    nonce: sodium.to_base64(nonce, sodium.base64_variants.ORIGINAL),
+  }
+  localStorage.setItem('sonabrief_verify_blob', JSON.stringify(blob))
+}
+
+export async function verifyKey(key: Uint8Array): Promise<boolean> {
+  await sodium.ready
+  const raw = localStorage.getItem('sonabrief_verify_blob')
+  if (!raw) return true // primo accesso, niente da verificare
+  try {
+    const { ciphertext, nonce } = JSON.parse(raw)
+    decrypt(
+      sodium.from_base64(ciphertext, sodium.base64_variants.ORIGINAL),
+      sodium.from_base64(nonce, sodium.base64_variants.ORIGINAL),
+      key,
+    )
+    return true
+  } catch {
+    return false
+  }
 }

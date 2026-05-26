@@ -4,7 +4,7 @@ const sodium = _sodium
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { unlockWithPassphrase, unlockWithRecoveryPhrase, persistKeyToSession } from '../lib/keystore'
+import { unlockWithPassphrase, unlockWithRecoveryPhrase, persistKeyToSession, verifyKey, getCurrentKey } from '../lib/keystore'
 import { Button } from '../components/ui/button'
 
 export default function SyncUnlockPage() {
@@ -28,6 +28,8 @@ export default function SyncUnlockPage() {
       if (!saltB64) throw new Error('Salt non trovato')
       const salt = sodium.from_base64(saltB64)
       await unlockWithPassphrase(passphrase, salt)
+      const valid = await verifyKey(getCurrentKey()!)
+      if (!valid) throw new Error('wrong passphrase')
       await persistKeyToSession()
       navigate('/dashboard')
     } catch {
