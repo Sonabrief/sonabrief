@@ -70,10 +70,7 @@ const TIER_LABEL: Record<string, string> = {
 function TierBadge({ tier }: { tier: string }) {
   if (tier === 'unlimited') {
     return (
-      <span
-        className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-        style={{ background: '#F5EFE4', color: '#7A5C30' }}
-      >
+      <span className="inline-flex items-center rounded-full border border-amber-200 dark:border-amber-800 bg-amber-100 dark:bg-amber-900/30 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-300">
         {TIER_LABEL.unlimited}
       </span>
     )

@@ -36,8 +36,8 @@ export function SynthesisEditor({ content, readonly = false, isStreaming = false
   const wrapperClass = 'w-full rounded-xl px-6 py-5 text-sm'
   const wrapperStyle = {
     fontFamily: "'Manrope Variable', 'Manrope', sans-serif",
-    color: '#1A1A1F',
-    backgroundColor: '#FAF7F0',
+    color: 'var(--foreground)',
+    backgroundColor: 'var(--card)',
   }
 
   if (isStreaming) {

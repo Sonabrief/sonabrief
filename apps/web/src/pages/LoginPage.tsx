@@ -90,7 +90,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen">
 
       {/* Colonna sinistra — pannello brand */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-(--color-primary,#1a5c5c) px-16 py-14">
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-[#1a5c5c] px-16 py-14">
         <img src="/sonabrief-logo.png" alt="Sonabrief" className="h-12 w-12 object-contain brightness-0 invert" />
 
         <div>

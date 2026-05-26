@@ -13,6 +13,17 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      (function() {
+        try {
+          var prefs = JSON.parse(localStorage.getItem('sb_preferences') || '{}');
+          var theme = prefs.theme || 'system';
+          if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch(e) {}
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
