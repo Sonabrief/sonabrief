@@ -25,7 +25,7 @@ function getAppUrl(req: Request): string {
   if (host.includes('localhost')) {
     return 'http://localhost:5173'
   }
-  return 'https://sonabrief.com'
+  return 'https://app.sonabrief.com'
 }
 
 export async function handleGoogleStart(req: Request, env: Env): Promise<Response> {
