@@ -3,6 +3,7 @@ import type { Env } from "./env";
 const ALLOWED_ORIGINS = [
   "https://sonabrief.com",
   "https://www.sonabrief.com",
+  "https://app.sonabrief.com",
   "http://localhost:5173",
   "http://localhost:1420",
 ];

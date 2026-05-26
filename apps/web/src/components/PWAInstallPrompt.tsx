@@ -57,7 +57,7 @@ export function PWAInstallPrompt() {
           className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-sm"
         >
           <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4 shadow-lg">
-            <img src="/icons/icon-192.png" alt="Sonabrief" className="h-10 w-10 rounded-xl" />
+            <img src="/sonabrief-logo.svg" alt="Sonabrief" className="h-10 w-10 rounded-xl" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-foreground">{t('pwa_install.title')}</p>
               <p className="text-xs text-muted-foreground">{t('pwa_install.hint')}</p>
