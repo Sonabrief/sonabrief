@@ -78,7 +78,7 @@ function UserMenu({
         className="flex cursor-pointer items-center gap-2 rounded-full px-2.5 py-1 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
       >
         <span
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-white"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#1a5c5c] text-xs font-semibold text-white"
           aria-hidden="true"
         >
           {getInitials(email)}
