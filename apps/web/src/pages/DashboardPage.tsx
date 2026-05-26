@@ -105,7 +105,7 @@ function QuotaBar({ used, cap, percent }: { used: number; cap: number; percent: 
         className="h-1.5 w-full overflow-hidden rounded-full bg-border"
       >
         <div
-          className={`h-full rounded-full transition-[width] duration-300 ease-out motion-reduce:transition-none ${
+          className={`h-full rounded-full opacity-100 transition-[width] duration-300 ease-out motion-reduce:transition-none ${
             warning ? 'bg-destructive' : 'bg-primary'
           }`}
           style={{ width: `${percent}%` }}
