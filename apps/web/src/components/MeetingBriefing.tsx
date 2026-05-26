@@ -1,17 +1,20 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { useMeetingBriefing } from '../hooks/useMeetingBriefing'
 import { db } from '../lib/db'
 
-function formatRelativeDate(ts: number): string {
+function formatRelativeDate(ts: number, t: TFunction): string {
   const days = Math.floor((Date.now() - ts) / (1000 * 60 * 60 * 24))
-  if (days === 0) return 'oggi'
-  if (days === 1) return 'ieri'
-  if (days < 7) return `${days} giorni fa`
-  if (days < 30) return `${Math.floor(days / 7)} sett. fa`
-  return `${Math.floor(days / 30)} mesi fa`
+  if (days === 0) return t('meeting_briefing.today')
+  if (days === 1) return t('meeting_briefing.yesterday')
+  if (days < 7) return t('meeting_briefing.days_ago', { days })
+  if (days < 30) return t('meeting_briefing.weeks_ago', { weeks: Math.floor(days / 7) })
+  return t('meeting_briefing.months_ago', { months: Math.floor(days / 30) })
 }
 
 export function MeetingBriefing() {
+  const { t } = useTranslation()
   const { briefing, loading } = useMeetingBriefing()
   const [panelOpen, setPanelOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -51,13 +54,13 @@ export function MeetingBriefing() {
 
   if (loading) return (
     <div className="animate-pulse rounded-lg border border-border bg-card px-4 py-3 text-xs text-muted-foreground">
-      Caricamento contesto...
+      {t('meeting_briefing.loading')}
     </div>
   )
 
   if (!briefing || totalCount === 0) return (
     <div className="rounded-lg border border-dashed border-border px-4 py-3 text-xs text-muted-foreground">
-      Nessun meeting precedente — questo e il tuo primo briefing.
+      {t('meeting_briefing.no_history')}
     </div>
   )
 
@@ -71,13 +74,13 @@ export function MeetingBriefing() {
         aria-expanded={panelOpen}
       >
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold text-foreground">Briefing pre-meeting</span>
+          <span className="text-xs font-semibold text-foreground">{t('meeting_briefing.title')}</span>
           <span className="rounded-full bg-border px-2 py-0.5 text-[10px] text-muted-foreground">
-            {briefing.recentMeetings.length} meeting · {briefing.openActionItems.length} azioni
+            {t('meeting_briefing.badge', { recent: briefing.recentMeetings.length, open: briefing.openActionItems.length })}
           </span>
         </div>
         <span className="text-xs text-muted-foreground">
-          {panelOpen ? 'Chiudi' : 'Espandi'}
+          {panelOpen ? t('meeting_briefing.close') : t('meeting_briefing.expand')}
         </span>
       </button>
 
@@ -92,7 +95,7 @@ export function MeetingBriefing() {
           ))}
           {briefing.openActionItems.length > 3 && (
             <span className="pl-3.5 text-xs text-muted-foreground">
-              +{briefing.openActionItems.length - 3} altri
+              {t('meeting_briefing.more_items', { count: briefing.openActionItems.length - 3 })}
             </span>
           )}
         </div>
@@ -105,7 +108,7 @@ export function MeetingBriefing() {
           <div className="border-t border-border px-3 py-2">
             <input
               type="search"
-              placeholder="Cerca nei meeting passati..."
+              placeholder={t('meeting_briefing.search_placeholder')}
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -119,7 +122,7 @@ export function MeetingBriefing() {
             {filteredActions.length > 0 && (
               <div className="px-4 py-3">
                 <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  Azioni aperte ({filteredActions.length})
+                  {t('meeting_briefing.open_actions', { count: filteredActions.length })}
                 </p>
                 <div className="flex flex-col gap-2">
                   {filteredActions.map(item => (
@@ -128,7 +131,7 @@ export function MeetingBriefing() {
                       <div className="min-w-0 flex-1">
                         <p className="text-xs text-foreground">{item.text}</p>
                         <p className="text-[10px] text-muted-foreground">
-                          {item.meetingTitle} · {formatRelativeDate(item.meetingDate)}
+                          {item.meetingTitle} · {formatRelativeDate(item.meetingDate, t)}
                         </p>
                       </div>
                     </div>
@@ -141,7 +144,7 @@ export function MeetingBriefing() {
             {filteredMeetings.length > 0 && (
               <div className={`px-4 py-3 ${filteredActions.length > 0 ? 'border-t border-border' : ''}`}>
                 <p className="mb-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  Ultimi meeting (90 giorni)
+                  {t('meeting_briefing.recent_meetings')}
                 </p>
                 <div className="flex flex-col gap-1">
                   {filteredMeetings.map(m => (
@@ -154,7 +157,7 @@ export function MeetingBriefing() {
                           <p className="truncate text-xs font-medium text-foreground">{m.title}</p>
                           <div className="flex shrink-0 items-center gap-1.5">
                             <span className="text-[10px] text-muted-foreground">
-                              {formatRelativeDate(m.date)}
+                              {formatRelativeDate(m.date, t)}
                             </span>
                             <span className="text-[10px] text-muted-foreground">
                               {expandedId === m.id ? '▲' : '▼'}
@@ -174,7 +177,7 @@ export function MeetingBriefing() {
                           <div className="max-h-48 overflow-y-auto px-3 pt-3">
                             {loadingNote ? (
                               <p className="animate-pulse text-xs text-muted-foreground">
-                                Caricamento sintesi...
+                                {t('meeting_briefing.loading_synthesis')}
                               </p>
                             ) : expandedNote ? (
                               <p className="whitespace-pre-wrap text-xs leading-relaxed text-foreground">
@@ -185,7 +188,7 @@ export function MeetingBriefing() {
                               </p>
                             ) : (
                               <p className="text-xs text-muted-foreground">
-                                Nessuna sintesi disponibile per questo meeting.
+                                {t('meeting_briefing.no_synthesis')}
                               </p>
                             )}
                           </div>
@@ -194,7 +197,7 @@ export function MeetingBriefing() {
                               onClick={collapseNote}
                               className="text-[10px] font-medium text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
                             >
-                              Chiudi sintesi
+                              {t('meeting_briefing.close_synthesis')}
                             </button>
                           </div>
                         </div>
@@ -208,7 +211,7 @@ export function MeetingBriefing() {
             {/* Empty search state */}
             {filteredMeetings.length === 0 && filteredActions.length === 0 && (
               <p className="px-4 py-3 text-xs text-muted-foreground">
-                Nessun risultato per &ldquo;{search}&rdquo;
+                {t('meeting_briefing.no_search_results', { search })}
               </p>
             )}
           </div>

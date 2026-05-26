@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import {
   getMe, getBillingStatus, getBillingPortalUrl,
   getPreferences, updatePreferences, updateDisplayName,
@@ -21,78 +22,13 @@ import { cn } from '@/lib/utils'
 import { setModelOverride, detectWhisperModel, WHISPER_LARGE, WHISPER_SMALL, type WhisperModelId } from '../lib/whisperModel'
 import { ChevronDown, Lock } from 'lucide-react'
 import { OllamaSetupFlow } from '../components/local-mode'
+import i18n from '../i18n'
 const fadeUp = {
   initial: { opacity: 0, y: 8 },
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.2, ease: [0.4, 0, 0.2, 1] as const },
 }
 
-const PROFESSIONS: { category: string; items: string[] }[] = [
-  {
-    category: 'Consulenza & Finanza',
-    items: [
-      'Consulente finanziario / Wealth manager',
-      'Commercialista / Revisore contabile',
-      'Consulente aziendale / Management consultant',
-      'Analista finanziario / Investment analyst',
-    ],
-  },
-  {
-    category: 'Legal',
-    items: ['Avvocato / Legale', 'Notaio', 'Consulente legale in-house'],
-  },
-  {
-    category: 'Salute & Benessere',
-    items: [
-      'Medico / Specialista',
-      'Psicologo / Psicoterapeuta',
-      'Assistente sociale / Case manager',
-      'Nutrizionista / Fisioterapista',
-    ],
-  },
-  {
-    category: 'Tecnologia & Prodotto',
-    items: [
-      'Product Manager',
-      'Project Manager',
-      'Engineering Manager / CTO',
-      'Consulente IT / System integrator',
-    ],
-  },
-  {
-    category: 'Marketing & Comunicazione',
-    items: [
-      'Account / Client Manager',
-      'Consulente marketing / PR',
-      'Responsabile comunicazione',
-    ],
-  },
-  {
-    category: 'Vendite & Business Development',
-    items: ['Sales Manager / Account Executive', 'Business Developer', 'Recruiter / HR Manager'],
-  },
-  {
-    category: 'Ricerca & Formazione',
-    items: [
-      'Ricercatore / Accademico',
-      'Giornalista investigativo',
-      'Formatore / Coach / Trainer',
-      'Studente universitario / Dottorando',
-    ],
-  },
-  {
-    category: 'Nonprofit & Pubblico',
-    items: ['Manager nonprofit / ONG', 'Funzionario pubblico / PA'],
-  },
-  {
-    category: 'Founder & Management',
-    items: ['Founder / CEO', 'Dirigente aziendale / C-suite'],
-  },
-  {
-    category: 'Altro',
-    items: ['Libero professionista (altro settore)', 'Dipendente aziendale (altro ruolo)'],
-  },
-]
 
 const TIER_LABEL: Record<string, string> = {
   free: 'Free',
@@ -108,10 +44,7 @@ const LANGUAGE_OPTIONS = [
   { value: 'de', label: 'Deutsch' },
 ]
 
-const MODE_OPTIONS = [
-  { value: 'standard', label: 'Standard', description: 'Trascrizione locale, sintesi cloud' },
-  { value: 'local', label: 'Solo locale', description: 'Tutto sul tuo computer' },
-]
+// MODE_OPTIONS built inside the component to use t()
 
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
@@ -131,7 +64,15 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
 }
 
 export default function ProfilePage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
+
+  const MODE_OPTIONS = [
+    { value: 'standard', label: t('profile.mode_standard_label'), description: t('profile.mode_standard') },
+    { value: 'local', label: t('profile.mode_local_label'), description: t('profile.mode_local') },
+  ]
+
+  const PROFESSIONS = t('onboarding.professions', { returnObjects: true }) as { category: string; items: string[] }[]
   const [email, setEmail] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [editingName, setEditingName] = useState(false)
@@ -141,7 +82,7 @@ export default function ProfilePage() {
   const [billingCycle, setBillingCycle] = useState<string | null>(null)
   const [quotaUsed, setQuotaUsed] = useState(0)
   const [quotaCap, setQuotaCap] = useState(300)
-  const [language, setLanguage] = useState('it')
+  const [language, setLanguage] = useState(i18n.language)
   const [defaultMode, setDefaultMode] = useState('standard')
   const [profession, setProfession] = useState('')
   const [professionSearch, setProfessionSearch] = useState('')
@@ -211,27 +152,27 @@ export default function ProfilePage() {
       console.error('[passkey register]', err)
       const name = (err as Error & { name?: string })?.name
       if (name === 'NotAllowedError') {
-        setPasskeyError('Operazione annullata')
+        setPasskeyError(t('profile.passkey_error_cancelled'))
       } else {
-        setPasskeyError('Impossibile aggiungere la passkey. Riprova.')
+        setPasskeyError(t('profile.passkey_error_add'))
       }
     }
     setPasskeyAdding(false)
   }
 
   async function handleDeletePasskey(id: string) {
-    if (!window.confirm('Eliminare questa passkey?')) return
+    if (!window.confirm(t('profile.passkey_delete_confirm'))) return
     try {
       await deletePasskey(id)
       await refreshPasskeys()
     } catch {
-      setPasskeyError('Impossibile eliminare la passkey. Riprova.')
+      setPasskeyError(t('profile.passkey_error_delete'))
     }
   }
 
   function formatPasskeyDate(ts: number | null): string {
     if (!ts) return '—'
-    return new Date(ts).toLocaleDateString('it-IT', {
+    return new Date(ts).toLocaleDateString(i18n.language, {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
@@ -295,6 +236,7 @@ export default function ProfilePage() {
   async function handleSavePrefs() {
     setSaving(true)
     await updatePreferences({ language, synthesis_mode: defaultMode, profession })
+    i18n.changeLanguage(language)
     setSaving(false)
     setSaveSuccess(true)
     setTimeout(() => setSaveSuccess(false), 2500)
@@ -316,12 +258,12 @@ export default function ProfilePage() {
     if (url) {
       window.open(url, '_blank')
     } else {
-      toast.error('Errore', { description: 'Impossibile aprire il portale. Riprova o contatta il supporto.' })
+      toast.error(t('profile.error'), { description: t('profile.billing_portal_error') })
     }
   }
 
   async function handleDeleteAccount() {
-    if (deleteInput.toLowerCase() !== 'elimina') return
+    if (deleteInput.toLowerCase() !== t('profile.delete_confirm_word')) return
     setDeleting(true)
     try {
       await fetch(`${API_URL}/v1/account`, {
@@ -345,8 +287,8 @@ export default function ProfilePage() {
   const percentUsed = quotaCap > 0 ? Math.min(100, Math.round((quotaUsed / quotaCap) * 100)) : 0
 
   function formatBackupDate(ts: number | null): string {
-    if (!ts) return 'Mai'
-    return new Date(ts).toLocaleString('it-IT', {
+    if (!ts) return t('profile.never')
+    return new Date(ts).toLocaleString(i18n.language, {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit',
     })
@@ -369,7 +311,7 @@ export default function ProfilePage() {
       <AppNav />
       <main className="mx-auto max-w-2xl px-6 py-10">
         <h1 className="font-heading text-2xl font-semibold text-foreground mb-8">
-          Profilo
+          {t('profile.title')}
         </h1>
 
         <div className="space-y-8">
@@ -378,11 +320,11 @@ export default function ProfilePage() {
           <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0 }} aria-labelledby="account-heading">
             <div className="mb-4">
               <SectionHeading>
-                <span id="account-heading">Il tuo account</span>
+                <span id="account-heading">{t('profile.account_section')}</span>
               </SectionHeading>
             </div>
             <div className="rounded-lg border border-border bg-card px-5">
-              <Row label="Nome">
+              <Row label={t('profile.name_label')}>
                 {editingName ? (
                   <div className="flex items-center gap-2">
                     <input
@@ -398,13 +340,13 @@ export default function ProfilePage() {
                       disabled={nameSaving || !nameInput.trim()}
                       className="text-sm font-medium text-primary hover:underline disabled:opacity-50"
                     >
-                      {nameSaving ? 'Salvo…' : 'Salva'}
+                      {nameSaving ? t('profile.saving') : t('profile.save')}
                     </button>
                     <button
                       onClick={() => setEditingName(false)}
                       className="text-sm text-muted-foreground hover:text-foreground"
                     >
-                      Annulla
+                      {t('profile.cancel')}
                     </button>
                   </div>
                 ) : (
@@ -414,34 +356,34 @@ export default function ProfilePage() {
                       onClick={() => { setNameInput(displayName); setEditingName(true) }}
                       className="text-xs text-muted-foreground hover:text-primary transition-colors"
                     >
-                      Modifica
+                      {t('profile.edit')}
                     </button>
                   </div>
                 )}
               </Row>
-              <Row label="Email">
+              <Row label={t('profile.email_label')}>
                 <div className="flex flex-col items-end gap-0.5">
                   <span className="text-muted-foreground">{email || '—'}</span>
                   <span className="text-xs text-muted-foreground">
-                    Per cambiarla{' '}
+                    {t('profile.email_change_hint')}{' '}
                     <a href="mailto:hello@sonabrief.com" className="text-primary hover:underline">
-                      contatta il supporto
+                      {t('profile.email_change_link')}
                     </a>
                   </span>
                 </div>
               </Row>
-              <Row label="Piano">
+              <Row label={t('profile.plan_label')}>
                 <span className="font-medium">{TIER_LABEL[tier] ?? tier}</span>
               </Row>
               {billingCycle && tier !== 'free' && (
-                <Row label="Ciclo">
-                  {billingCycle === 'monthly' ? 'Mensile' : 'Annuale'}
+                <Row label={t('profile.billing_cycle_label')}>
+                  {billingCycle === 'monthly' ? t('profile.monthly') : t('profile.annual')}
                 </Row>
               )}
-              <Row label="Calendario">
+              <Row label={t('profile.calendar_label')}>
                 <div className="flex flex-col items-end gap-1">
                   {!calendarConnected.google && !calendarConnected.microsoft ? (
-                    <span className="text-xs text-muted-foreground">Nessun calendario connesso</span>
+                    <span className="text-xs text-muted-foreground">{t('profile.no_calendar')}</span>
                   ) : (
                     <>
                       {calendarConnected.google && (
@@ -456,7 +398,7 @@ export default function ProfilePage() {
                     onClick={() => navigate('/calendar')}
                     className="text-xs text-primary hover:underline"
                   >
-                    Gestisci →
+                    {t('profile.manage_link')}
                   </button>
                 </div>
               </Row>
@@ -467,18 +409,18 @@ export default function ProfilePage() {
           <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.03 }} aria-labelledby="passkey-heading">
             <div className="mb-4">
               <SectionHeading>
-                <span id="passkey-heading">Accesso e sicurezza</span>
+                <span id="passkey-heading">{t('profile.security_section')}</span>
               </SectionHeading>
             </div>
             <div className="rounded-lg border border-border bg-card px-5 py-4 space-y-4">
               {!passkeySupported ? (
                 <p className="text-sm text-muted-foreground">
-                  Le passkey non sono supportate su questo browser.
+                  {t('profile.passkey_unsupported')}
                 </p>
               ) : (
                 <>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Accedi senza email con il riconoscimento biometrico del tuo dispositivo.
+                    {t('profile.passkey_hint')}
                   </p>
 
                   {passkeys.length > 0 && (
@@ -490,18 +432,18 @@ export default function ProfilePage() {
                         >
                           <div className="min-w-0">
                             <p className="truncate text-sm font-medium text-foreground">
-                              {pk.device_name || 'Dispositivo senza nome'}
+                              {pk.device_name || t('profile.passkey_unnamed')}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              Aggiunta il {formatPasskeyDate(pk.created_at)}
-                              {pk.last_used_at && ` · Ultimo uso ${formatPasskeyDate(pk.last_used_at)}`}
+                              {t('profile.passkey_added_at', { date: formatPasskeyDate(pk.created_at) })}
+                              {pk.last_used_at && ` · ${t('profile.passkey_last_used', { date: formatPasskeyDate(pk.last_used_at) })}`}
                             </p>
                           </div>
                           <button
                             onClick={() => handleDeletePasskey(pk.id)}
                             className="shrink-0 text-sm text-destructive transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive motion-reduce:transition-none"
                           >
-                            Elimina
+                            {t('profile.delete')}
                           </button>
                         </li>
                       ))}
@@ -510,7 +452,7 @@ export default function ProfilePage() {
 
                   <div className="space-y-2">
                     <label htmlFor="passkey-device-name" className="text-sm text-muted-foreground">
-                      Nome dispositivo
+                      {t('profile.passkey_name_label')}
                     </label>
                     <div className="flex items-center gap-2">
                       <input
@@ -518,7 +460,7 @@ export default function ProfilePage() {
                         type="text"
                         value={passkeyDeviceName}
                         onChange={e => setPasskeyDeviceName(e.target.value)}
-                        placeholder="MacBook Pro, iPhone…"
+                        placeholder={t('profile.passkey_name_placeholder')}
                         className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                       />
                       <Button
@@ -526,7 +468,7 @@ export default function ProfilePage() {
                         disabled={passkeyAdding || !passkeyDeviceName.trim()}
                         className="h-9 px-4 text-sm"
                       >
-                        {passkeyAdding ? 'Aggiunta…' : 'Aggiungi passkey'}
+                        {passkeyAdding ? t('profile.adding_passkey') : t('profile.add_passkey')}
                       </Button>
                     </div>
                     {passkeyError && (
@@ -544,14 +486,14 @@ export default function ProfilePage() {
           <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.06 }} aria-labelledby="piano-heading">
             <div className="mb-4">
               <SectionHeading>
-                <span id="piano-heading">Piano</span>
+                <span id="piano-heading">{t('profile.plan_section')}</span>
               </SectionHeading>
             </div>
             <div className="rounded-lg border border-border bg-card px-5 py-4 space-y-4">
               {tier !== 'unlimited' && (
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-muted-foreground">Sintesi cloud questo mese</span>
+                    <span className="text-sm text-muted-foreground">{t('profile.cloud_usage')}</span>
                     <span className="text-sm tabular-nums text-foreground">
                       {formatMinutes(quotaUsed)} / {formatMinutes(quotaCap)}
                     </span>
@@ -561,7 +503,7 @@ export default function ProfilePage() {
                     aria-valuenow={percentUsed}
                     aria-valuemin={0}
                     aria-valuemax={100}
-                    aria-label={`${percentUsed}% della quota utilizzata`}
+                    aria-label={t('dashboard.quota_aria', { percent: percentUsed, remaining: formatMinutes(quotaCap - quotaUsed), cap: formatMinutes(quotaCap) })}
                     className="h-1.5 w-full overflow-hidden rounded-full bg-border"
                   >
                     <div
@@ -575,7 +517,7 @@ export default function ProfilePage() {
               )}
               {tier === 'unlimited' && (
                 <p className="text-sm text-muted-foreground">
-                  Sintesi illimitata — nessun limite mensile.
+                  {t('profile.unlimited_usage')}
                 </p>
               )}
               <div className="pt-1">
@@ -584,7 +526,7 @@ export default function ProfilePage() {
                     onClick={() => navigate('/pricing')}
                     className="h-9 px-5 text-sm"
                   >
-                    Passa a un piano superiore
+                    {t('profile.upgrade_plan')}
                   </Button>
                 ) : (
                   <button
@@ -592,7 +534,7 @@ export default function ProfilePage() {
                     disabled={portalLoading}
                     className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-border disabled:opacity-50 motion-reduce:transition-none"
                   >
-                    {portalLoading ? 'Apertura…' : 'Gestisci abbonamento →'}
+                    {portalLoading ? t('profile.opening') : t('profile.manage_subscription')}
                   </button>
                 )}
               </div>
@@ -603,24 +545,24 @@ export default function ProfilePage() {
           <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.12 }} aria-labelledby="prefs-heading">
             <div className="mb-4">
               <SectionHeading>
-                <span id="prefs-heading">Impostazioni app</span>
+                <span id="prefs-heading">{t('profile.app_settings')}</span>
               </SectionHeading>
             </div>
             <div className="rounded-lg border border-border bg-card px-5 py-4 space-y-5">
               <div className="space-y-1.5">
-                <label className="text-sm text-muted-foreground">Tema</label>
+                <label className="text-sm text-muted-foreground">{t('profile.theme_label')}</label>
                 <div className="flex gap-2">
-                  {(['light', 'system', 'dark'] as const).map(t => (
+                  {(['light', 'system', 'dark'] as const).map(themeKey => (
                     <button
-                      key={t}
-                      onClick={() => setTheme(t)}
+                      key={themeKey}
+                      onClick={() => setTheme(themeKey)}
                       className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition-colors motion-reduce:transition-none ${
-                        theme === t
+                        theme === themeKey
                           ? 'border-primary bg-primary/10 text-primary'
                           : 'border-border bg-card text-muted-foreground hover:bg-border'
                       }`}
                     >
-                      {t === 'light' ? '☀️ Chiaro' : t === 'dark' ? '🌙 Scuro' : '💻 Sistema'}
+                      {themeKey === 'light' ? `☀️ ${t('profile.theme_light')}` : themeKey === 'dark' ? `🌙 ${t('profile.theme_dark')}` : `💻 ${t('profile.theme_system')}`}
                     </button>
                   ))}
                 </div>
@@ -628,7 +570,7 @@ export default function ProfilePage() {
 
               <div className="space-y-1.5">
                 <label htmlFor="language-select" className="text-sm text-muted-foreground">
-                  Lingua
+                  {t('profile.language_label')}
                 </label>
                 <select
                   id="language-select"
@@ -644,7 +586,7 @@ export default function ProfilePage() {
 
               <div className="space-y-1.5">
                 <label htmlFor="mode-select" className="text-sm text-muted-foreground">
-                  Modalità sintesi predefinita
+                  {t('profile.synthesis_mode_label')}
                 </label>
                 <select
                   id="mode-select"
@@ -658,20 +600,20 @@ export default function ProfilePage() {
                     </option>
                   ))}
                 </select>
-                {defaultMode === 'standard' && (
+                {defaultMode === 'local' && (
                   <button
                     type="button"
                     onClick={() => setShowOllamaModal(true)}
                     className="mt-1 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
                   >
-                    Attiva Privacy Engine
+                    {t('profile.privacy_engine')}
                   </button>
                 )}
               </div>
 
               <div className="space-y-1.5">
                 <label htmlFor="profession-search" className="text-sm text-muted-foreground">
-                  Professione
+                  {t('profile.profession_label')}
                 </label>
                 <div className="relative">
                   <input
@@ -681,7 +623,7 @@ export default function ProfilePage() {
                     onFocus={() => { setProfessionOpen(true); setProfessionSearch('') }}
                     onBlur={() => setTimeout(() => setProfessionOpen(false), 150)}
                     onChange={e => setProfessionSearch(e.target.value)}
-                    placeholder="Cerca la tua professione..."
+                    placeholder={t('profile.profession_placeholder')}
                     className="w-full rounded-md border border-border bg-background px-3 py-2 pr-8 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   />
                   <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -721,7 +663,7 @@ export default function ProfilePage() {
                   variant="outline"
                   className="h-9 px-5 text-sm"
                 >
-                  {saving ? 'Salvataggio…' : 'Salva preferenze'}
+                  {saving ? t('profile.saving_prefs') : t('profile.save_preferences')}
                 </Button>
                 <AnimatePresence>
                   {saveSuccess && (
@@ -733,7 +675,7 @@ export default function ProfilePage() {
                       transition={{ duration: 0.15 }}
                       className="text-sm text-muted-foreground"
                     >
-                      Salvato.
+                      {t('profile.saved')}
                     </motion.span>
                   )}
                 </AnimatePresence>
@@ -741,11 +683,11 @@ export default function ProfilePage() {
 
               <div className="border-t border-border pt-5 space-y-4">
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Modello Whisper usato per trascrivere i tuoi meeting. Il rilevamento automatico sceglie in base all'hardware del tuo computer.
+                  {t('profile.whisper_model_hint')}
                 </p>
                 <div className="space-y-1.5">
                   <label htmlFor="whisper-model-select" className="text-sm text-muted-foreground">
-                    Modello di trascrizione
+                    {t('profile.whisper_model_label')}
                   </label>
                   <select
                     id="whisper-model-select"
@@ -763,15 +705,15 @@ export default function ProfilePage() {
                     className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                   >
                     <option value="auto">
-                      Automatico (rilevato: {detectedModel === WHISPER_LARGE ? 'Whisper Large — Alta qualità' : 'Whisper Small — Ottimizzato per hardware limitato'})
+                      {t('profile.whisper_auto', { model: detectedModel === WHISPER_LARGE ? t('profile.whisper_large') : t('profile.whisper_small') })}
                     </option>
-                    <option value={WHISPER_LARGE}>Whisper Large — Alta qualità</option>
-                    <option value={WHISPER_SMALL}>Whisper Small — Ottimizzato per hardware limitato</option>
+                    <option value={WHISPER_LARGE}>{t('profile.whisper_large')}</option>
+                    <option value={WHISPER_SMALL}>{t('profile.whisper_small')}</option>
                   </select>
                 </div>
                 {whisperOverride && (
                   <p className="text-xs text-muted-foreground">
-                    Override manuale attivo. Le modifiche hanno effetto dalla prossima registrazione.
+                    {t('profile.whisper_override_note')}
                   </p>
                 )}
               </div>
@@ -782,14 +724,14 @@ export default function ProfilePage() {
           <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.16 }} aria-labelledby="notifications-heading">
             <div className="mb-4">
               <SectionHeading>
-                <span id="notifications-heading">Automazioni</span>
+                <span id="notifications-heading">{t('profile.automations_section')}</span>
               </SectionHeading>
             </div>
             <div className="rounded-lg border border-border bg-card px-5 py-4">
               <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-medium text-foreground">Reminder action items settimanale</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">Ogni lunedì alle 8:00 ricevi un riepilogo degli action items aperti.</p>
+                  <p className="text-sm font-medium text-foreground">{t('profile.weekly_reminder')}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{t('profile.weekly_reminder_desc')}</p>
                 </div>
                 {tier === 'free' ? (
                   <div className="flex items-center gap-1.5">
@@ -825,12 +767,11 @@ export default function ProfilePage() {
               {tier === 'unlimited' && (
                 <div className="border-t border-border pt-5 space-y-4">
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    I tuoi meeting vengono cifrati sul tuo computer e sincronizzati su cloud automaticamente.
-                    Nemmeno noi possiamo leggerli.
+                    {t('profile.backup_encrypt_desc')}
                   </p>
                   <div className="space-y-1.5">
                     <label htmlFor="backup-freq" className="text-sm text-muted-foreground">
-                      Frequenza backup
+                      {t('profile.backup_frequency')}
                     </label>
                     <select
                       id="backup-freq"
@@ -842,15 +783,15 @@ export default function ProfilePage() {
                       }}
                       className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     >
-                      <option value="1h">Ogni ora</option>
-                      <option value="6h">Ogni 6 ore</option>
-                      <option value="24h">Giornaliero (default)</option>
-                      <option value="off">Disattivato</option>
+                      <option value="1h">{t('profile.backup_hourly')}</option>
+                      <option value="6h">{t('profile.backup_6h')}</option>
+                      <option value="24h">{t('profile.backup_daily')}</option>
+                      <option value="off">{t('profile.backup_disabled')}</option>
                     </select>
                   </div>
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-sm text-muted-foreground">
-                      Ultimo backup: <span className="text-foreground">{formatBackupDate(lastBackupAt)}</span>
+                      {t('profile.last_backup', { date: formatBackupDate(lastBackupAt) })}
                     </span>
                     <Button
                       onClick={handleManualBackup}
@@ -858,7 +799,7 @@ export default function ProfilePage() {
                       className="h-9 px-4 text-sm"
                       variant="outline"
                     >
-                      {backupRunning ? 'Backup…' : 'Esegui ora'}
+                      {backupRunning ? t('profile.backup_running') : t('profile.backup_now')}
                     </Button>
                   </div>
                 </div>
@@ -870,17 +811,16 @@ export default function ProfilePage() {
           <motion.section {...fadeUp} transition={{ ...fadeUp.transition, delay: 0.18 }} aria-labelledby="privacy-heading">
             <div className="mb-4">
               <SectionHeading>
-                <span id="privacy-heading">Privacy e dati</span>
+                <span id="privacy-heading">{t('profile.privacy_section')}</span>
               </SectionHeading>
             </div>
             <div className="rounded-lg border border-border bg-card px-5 py-4 space-y-4">
               <div className="pb-4 border-b border-border">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-sm font-medium text-foreground">Modalità Synced</p>
+                    <p className="text-sm font-medium text-foreground">{t('profile.sync_mode')}</p>
                     <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                      Cifra e sincronizza i tuoi meeting su cloud con zero-knowledge encryption.
-                      Le chiavi non lasciano mai il tuo dispositivo.
+                      {t('profile.sync_desc')}
                     </p>
                   </div>
                   <button
@@ -906,7 +846,7 @@ export default function ProfilePage() {
                 </div>
                 {syncEnabled && (
                   <p className="mt-2 text-xs text-primary">
-                    ✓ Synced attivo — i tuoi meeting sono cifrati e sincronizzati.
+                    {t('profile.sync_active')}
                   </p>
                 )}
                 <AnimatePresence>
@@ -919,10 +859,10 @@ export default function ProfilePage() {
                       className="mt-3 rounded-lg border border-border bg-muted/50 px-4 py-3"
                     >
                       <p className="mb-1 text-sm font-medium text-foreground">
-                        Disattivare la sincronizzazione?
+                        {t('profile.sync_disable_confirm')}
                       </p>
                       <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
-                        Disattivando la sincronizzazione i tuoi meeting resteranno solo su questo dispositivo. Non potrai più consultarli da altri dispositivi.
+                        {t('profile.sync_disable_warning')}
                       </p>
                       <div className="flex gap-3">
                         <button
@@ -934,13 +874,13 @@ export default function ProfilePage() {
                           }}
                           className="text-xs font-medium text-destructive hover:underline"
                         >
-                          Sì, disattiva
+                          {t('profile.sync_disable_confirm_btn')}
                         </button>
                         <button
                           onClick={() => setShowSyncDisableConfirm(false)}
                           className="text-xs text-muted-foreground hover:text-foreground"
                         >
-                          Annulla
+                          {t('profile.cancel')}
                         </button>
                       </div>
                     </motion.div>
@@ -948,15 +888,14 @@ export default function ProfilePage() {
                 </AnimatePresence>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                I tuoi audio non lasciano mai il tuo computer. Le sintesi e le note
-                sono cifrate con zero-knowledge quando usi la modalità Synced.
+                {t('profile.privacy_note')}
               </p>
               <a
                 href="/docs/whitepaper-privacy.md"
                 download="Sonabrief-Whitepaper-Privacy.md"
                 className="text-sm text-muted-foreground underline hover:text-foreground transition-colors"
               >
-                Scarica whitepaper architettura privacy (PDF)
+                {t('profile.privacy_whitepaper')}
               </a>
               <div className="border-t border-border pt-4">
                 <AnimatePresence mode="wait">
@@ -972,7 +911,7 @@ export default function ProfilePage() {
                         onClick={() => setDeleteConfirm(true)}
                         className="text-sm text-destructive transition-colors hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive motion-reduce:transition-none"
                       >
-                        Elimina account
+                        {t('profile.delete_account')}
                       </button>
                     </motion.div>
                   ) : (
@@ -985,34 +924,33 @@ export default function ProfilePage() {
                       className="space-y-3"
                     >
                       <p className="text-sm text-foreground font-medium">
-                        Questa azione è irreversibile.
+                        {t('profile.delete_account_warning')}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        Tutti i tuoi dati verranno eliminati permanentemente.
-                        Scrivi <strong className="text-foreground">elimina</strong> per confermare.
+                        {t('profile.delete_account_confirm_msg')}
                       </p>
                       <input
                         type="text"
                         value={deleteInput}
                         onChange={e => setDeleteInput(e.target.value)}
-                        placeholder="elimina"
+                        placeholder={t('profile.delete_account_placeholder')}
                         autoComplete="off"
                         className="w-full rounded-md border border-destructive bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive"
-                        aria-label="Conferma eliminazione account"
+                        aria-label={t('profile.delete_account_aria')}
                       />
                       <div className="flex items-center gap-3">
                         <button
                           onClick={handleDeleteAccount}
-                          disabled={deleteInput.toLowerCase() !== 'elimina' || deleting}
+                          disabled={deleteInput.toLowerCase() !== t('profile.delete_confirm_word') || deleting}
                           className="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive disabled:opacity-40 motion-reduce:transition-none"
                         >
-                          {deleting ? 'Eliminazione…' : 'Elimina definitivamente'}
+                          {deleting ? t('profile.deleting') : t('profile.delete_account_btn')}
                         </button>
                         <button
                           onClick={() => { setDeleteConfirm(false); setDeleteInput('') }}
                           className="text-sm text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
                         >
-                          Annulla
+                          {t('profile.cancel')}
                         </button>
                       </div>
                     </motion.div>
@@ -1027,15 +965,19 @@ export default function ProfilePage() {
 
       {showOllamaModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-background shadow-xl">
+          <div className="relative w-full max-w-lg rounded-2xl bg-background shadow-xl">
             <OllamaSetupFlow
               onComplete={async () => {
                 setShowOllamaModal(false)
                 await updatePreferences({ synthesis_mode: 'local' })
                 setDefaultMode('local')
-                toast('Privacy Engine attivo')
+                toast(t('profile.privacy_engine_active'))
               }}
               onCancel={() => setShowOllamaModal(false)}
+              onBack={() => {
+                setShowOllamaModal(false)
+                setDefaultMode('standard')
+              }}
             />
           </div>
         </div>

@@ -26,6 +26,8 @@ import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } fro
 import { useTier } from '../hooks/useTier'
 import { TagInput } from '../components/TagInput'
 import { formatMeetingTitle } from '../lib/locale'
+import { useTranslation } from 'react-i18next'
+import i18n from '../i18n'
 
 function ProGatedButton({ label, feature, onAction }: {
   label: string
@@ -33,21 +35,22 @@ function ProGatedButton({ label, feature, onAction }: {
   onAction: () => void
 }) {
   const { isFree } = useTier()
+  const { t } = useTranslation()
   const [showTooltip, setShowTooltip] = useState(false)
 
   if (isFree) {
     return (
       <div className="relative">
         <button
-          onClick={() => setShowTooltip(t => !t)}
+          onClick={() => setShowTooltip(prev => !prev)}
           className="rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground opacity-50 cursor-not-allowed"
         >
           {label} ✦
         </button>
         {showTooltip && (
           <div className="absolute bottom-full left-0 mb-2 w-48 rounded-lg border border-border bg-card p-3 shadow-lg z-10">
-            <p className="text-xs font-semibold text-foreground mb-1">{feature} è Pro</p>
-            <a href="/pricing" className="text-xs text-primary hover:underline">Vedi i piani →</a>
+            <p className="text-xs font-semibold text-foreground mb-1">{t('recording.pro_feature_label', { feature })}</p>
+            <a href="/pricing" className="text-xs text-primary hover:underline">{t('recording.see_plans')}</a>
           </div>
         )}
       </div>
@@ -153,37 +156,11 @@ interface SourceOption {
   icon: LucideIcon
 }
 
-const SOURCE_OPTIONS: SourceOption[] = [
-  {
-    id: 'microphone',
-    label: 'Microfono',
-    subtitle: 'Solo la tua voce, ideale per meeting in presenza',
-    icon: Mic,
-  },
-  {
-    id: 'both',
-    label: 'Videochiamata',
-    subtitle: 'Tua voce + audio della scheda, ideale per call online',
-    icon: Video,
-  },
-  {
-    id: 'tab',
-    label: 'Solo scheda',
-    subtitle: "Solo l'audio in riproduzione, ideale per webinar o presentazioni",
-    icon: Monitor,
-  },
-]
-
 interface ModeOption {
   id: 'standard' | 'local'
   label: string
   desc: string
 }
-
-const MODE_OPTIONS: ModeOption[] = [
-  { id: 'standard', label: 'Standard', desc: 'Trascrizione locale, sintesi tramite AI' },
-  { id: 'local', label: 'Solo locale', desc: 'Tutto sul tuo computer, nessun dato inviato' },
-]
 
 // ─── Source selector button ────────────────────────────────────────────────────
 
@@ -224,7 +201,19 @@ function SourceButton({
 
 export default function RecordingPage() {
   const { isFree } = useTier()
+  const { t } = useTranslation()
   const navigate = useNavigate()
+
+  const SOURCE_OPTIONS: SourceOption[] = [
+    { id: 'microphone', label: t('recording.source_mic'), subtitle: t('recording.source_mic_desc'), icon: Mic },
+    { id: 'both', label: t('recording.source_call'), subtitle: t('recording.source_call_desc'), icon: Video },
+    { id: 'tab', label: t('recording.source_tab'), subtitle: t('recording.source_tab_desc'), icon: Monitor },
+  ]
+
+  const MODE_OPTIONS: ModeOption[] = [
+    { id: 'standard', label: t('recording.mode_standard'), desc: t('recording.mode_standard_desc') },
+    { id: 'local', label: t('recording.mode_local'), desc: t('recording.mode_local_desc') },
+  ]
   const location = useLocation()
   const { state, duration, error, paused, start, stop, pause, resume, audioData, reset, stream, chunkSession } = useAudioRecorder(() => {
     setTriggerPiP(true)
@@ -306,7 +295,7 @@ export default function RecordingPage() {
   // ── Export data builder
   function buildExportData() {
     const now = Date.now()
-    const date = new Date(now).toLocaleString('it-IT', {
+    const date = new Date(now).toLocaleString(i18n.language, {
       day: 'numeric', month: 'long', year: 'numeric',
       hour: '2-digit', minute: '2-digit',
     })
@@ -731,7 +720,7 @@ export default function RecordingPage() {
 
   async function openPiP() {
     if (!('documentPictureInPicture' in window)) {
-      alert('Il tuo browser non supporta questa funzione. Usa Chrome 116+.')
+      alert(t('recording.pip_not_supported'))
       return
     }
     try {
@@ -855,12 +844,10 @@ export default function RecordingPage() {
       <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center">
         <div className="text-4xl mb-4">🎙️</div>
         <h2 className="font-heading text-xl font-semibold text-foreground mb-2">
-          Registrazione non ancora disponibile su mobile
+          {t('recording.mobile_title')}
         </h2>
         <p className="text-muted-foreground text-sm max-w-sm">
-          Stiamo lavorando all'app mobile. Per ora la registrazione
-          richiede un computer. Da qui puoi consultare l'archivio,
-          gestire le azioni e cercare nei tuoi meeting.
+          {t('recording.mobile_hint')}
         </p>
       </div>
     );
@@ -868,7 +855,7 @@ export default function RecordingPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <h1 className="sr-only">Nuovo meeting — Sonabrief</h1>
+      <h1 className="sr-only">{t('recording.title')} — Sonabrief</h1>
       <AppNav />
 
       <main className="mx-auto max-w-4xl px-6 py-10">
@@ -888,7 +875,7 @@ export default function RecordingPage() {
           <div className="space-y-7">
 
             <h2 className="font-heading text-2xl font-bold text-foreground tracking-[-0.015em]">
-              Nuovo meeting
+              {t('recording.title')}
             </h2>
 
             {/* Banner download modello */}
@@ -914,8 +901,8 @@ export default function RecordingPage() {
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z" />
                     </svg>
                     <div>
-                      <p className="text-sm font-semibold text-primary">Sonabrief AI si sta preparando</p>
-                      <p className="text-xs text-primary/70">Solo al primo avvio — ci vuole qualche minuto, poi è sempre immediato</p>
+                      <p className="text-sm font-semibold text-primary">{t('recording.ai_preparing')}</p>
+                      <p className="text-xs text-primary/70">{t('recording.ai_preparing_hint')}</p>
                     </div>
                   </div>
                   <div className="h-1 w-full overflow-hidden rounded-full bg-primary/20">
@@ -935,14 +922,14 @@ export default function RecordingPage() {
                   <svg className="h-4 w-4 shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
-                  <p className="text-sm font-semibold text-green-700 dark:text-green-400">Pronto. Puoi avviare la registrazione.</p>
+                  <p className="text-sm font-semibold text-green-700 dark:text-green-400">{t('recording.ready')}</p>
                 </motion.div>
               )}
             </AnimatePresence>
 
             {whisperState === 'loading' && !showLoadingBanner && (
               <p className="text-xs text-muted-foreground animate-pulse motion-reduce:animate-none">
-                Preparazione in corso...
+                {t('recording.preparing')}
               </p>
             )}
 
@@ -954,7 +941,7 @@ export default function RecordingPage() {
                     id="source-heading"
                     className="mb-2.5 text-xs font-medium uppercase tracking-widest text-muted-foreground"
                   >
-                    Sorgente audio
+                    {t('recording.audio_source')}
                   </p>
                   <div className="flex gap-2">
                     {SOURCE_OPTIONS.map(opt => (
@@ -980,7 +967,7 @@ export default function RecordingPage() {
                     htmlFor="language-select"
                     className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground"
                   >
-                    Lingua del meeting
+                    {t('recording.language_label')}
                   </label>
                   <select
                     id="language-select"
@@ -999,7 +986,7 @@ export default function RecordingPage() {
 
                 <fieldset>
                   <legend className="mb-2 text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                    Modalità sintesi
+                    {t('recording.synthesis_mode')}
                   </legend>
                   <div className="flex gap-2">
                     {MODE_OPTIONS.map(m => (
@@ -1034,7 +1021,7 @@ export default function RecordingPage() {
                   htmlFor="session-title"
                   className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground"
                 >
-                  Titolo sessione
+                  {t('recording.session_title_label')}
                 </label>
                 <input
                   id="session-title"
@@ -1049,19 +1036,19 @@ export default function RecordingPage() {
             {/* Meeting URL link — visible when navigated from calendar */}
             {prefillMeetingUrl && state === 'idle' && (
               <div className="rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 space-y-3">
-                <p className="text-xs font-semibold text-foreground">Prima di avviare la registrazione</p>
+                <p className="text-xs font-semibold text-foreground">{t('recording.tab_instruction_title')}</p>
                 <ol className="space-y-1.5 list-none">
                   <li className="flex gap-2 text-xs text-muted-foreground">
                     <span className="font-semibold text-primary shrink-0">1.</span>
-                    <span>Apri il link qui sotto — se il sistema ti chiede come aprirlo, seleziona <span className="font-medium text-foreground">"Apri nel browser"</span> e non nell'app desktop</span>
+                    <span>{t('recording.tab_instruction_1')}</span>
                   </li>
                   <li className="flex gap-2 text-xs text-muted-foreground">
                     <span className="font-semibold text-primary shrink-0">2.</span>
-                    Torna su questa scheda di Sonabrief
+                    {t('recording.tab_instruction_2')}
                   </li>
                   <li className="flex gap-2 text-xs text-muted-foreground">
                     <span className="font-semibold text-primary shrink-0">3.</span>
-                    Clicca "Avvia registrazione" e quando richiesto seleziona la scheda del meeting dal selettore del browser
+                    {t('recording.tab_instruction_3')}
                   </li>
                 </ol>
                 <a
@@ -1071,7 +1058,7 @@ export default function RecordingPage() {
                   className="inline-flex items-center gap-1.5 rounded-md border border-primary px-3 py-1.5 text-xs font-semibold text-primary transition-colors hover:bg-primary/10 motion-reduce:transition-none"
                 >
                   <Video className="h-3.5 w-3.5" />
-                  Apri link meeting nel browser →
+                  {t('recording.open_meeting_link')}
                 </a>
               </div>
             )}
@@ -1087,7 +1074,7 @@ export default function RecordingPage() {
                   }}
                   className="rounded-md px-8 hover:bg-(--primary-hover)"
                 >
-                  Avvia registrazione
+                  {t('recording.start_btn')}
                 </Button>
               </div>
             )}
@@ -1104,7 +1091,7 @@ export default function RecordingPage() {
                   <span className="font-mono text-4xl tabular-nums text-foreground">
                     {paused ? (
                       <span className="text-muted-foreground">
-                        {formatDuration(duration)} <span className="text-2xl font-sans font-normal">— in pausa</span>
+                        {formatDuration(duration)} <span className="text-2xl font-sans font-normal">{t('recording.paused_suffix')}</span>
                       </span>
                     ) : (
                       formatDuration(duration)
@@ -1115,7 +1102,7 @@ export default function RecordingPage() {
                 <Waveform stream={stream ?? null} frozen={paused} />
 
                 <p className="text-sm text-muted-foreground">
-                  {paused ? 'Registrazione in pausa' : 'Registrazione in corso'}
+                  {paused ? t('recording.paused') : t('recording.in_progress')}
                 </p>
 
                 <div className="flex gap-3">
@@ -1124,23 +1111,23 @@ export default function RecordingPage() {
                     onClick={stop}
                     className="rounded-md"
                   >
-                    Ferma registrazione
+                    {t('recording.stop_btn')}
                   </Button>
                   <Button
                     variant="outline"
                     onClick={paused ? resume : pause}
                     className="rounded-md"
                   >
-                    {paused ? 'Riprendi' : 'Pausa'}
+                    {paused ? t('recording.resume_btn') : t('recording.pause_btn')}
                   </Button>
                 </div>
                 <Button
                   variant="outline"
                   onClick={pipActive ? () => { pipWindowRef.current?.close(); setPipActive(false) } : openPiP}
                   className="rounded-md text-xs"
-                  title="Apre un pannello che rimane sopra la tua videochiamata"
+                  title={t('recording.pip_title')}
                 >
-                  {pipActive ? 'Chiudi pannello' : '⧉ Sempre visibile'}
+                  {pipActive ? t('recording.pip_close') : t('recording.pip_btn')}
                 </Button>
               </motion.div>
               )}
@@ -1148,7 +1135,7 @@ export default function RecordingPage() {
 
             {/* Processing: audio conversion */}
             {isProcessing && (
-              <p className="text-sm text-muted-foreground">Conversione audio...</p>
+              <p className="text-sm text-muted-foreground">{t('recording.converting')}</p>
             )}
 
             {/* Transcribing: simulated progress bar */}
@@ -1156,14 +1143,14 @@ export default function RecordingPage() {
               {isTranscribing && (
               <motion.div key="transcribing" {...fadeUp} className="space-y-2">
                 <p className="text-sm font-medium text-foreground">
-                  Trascrizione in corso... {transcribeProgress}%
+                  {t('recording.transcribing', { progress: transcribeProgress })}
                 </p>
                 <div
                   role="progressbar"
                   aria-valuenow={transcribeProgress}
                   aria-valuemin={0}
                   aria-valuemax={100}
-                  aria-label={`Trascrizione: ${transcribeProgress}%`}
+                  aria-label={t('recording.transcribing', { progress: transcribeProgress })}
                   className="h-1.5 w-full overflow-hidden rounded-full bg-border"
                 >
                   <div
@@ -1171,9 +1158,9 @@ export default function RecordingPage() {
                     style={{ width: `${transcribeProgress}%` }}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">Potrebbe richiedere qualche minuto</p>
+                <p className="text-xs text-muted-foreground">{t('recording.transcribing_hint')}</p>
                 <p className="text-xs text-muted-foreground/70">
-                  L'audio viene analizzato localmente — nessun dato viene inviato.
+                  {t('recording.transcribing_local')}
                 </p>
               </motion.div>
               )}
@@ -1181,7 +1168,7 @@ export default function RecordingPage() {
 
             {/* Transcription complete flash */}
             {isDone && showTranscribeComplete && (
-              <p className="text-sm font-medium text-primary">Trascrizione completata</p>
+              <p className="text-sm font-medium text-primary">{t('recording.transcript_done')}</p>
             )}
 
             {/* Done: transcript + synthesis flow */}
@@ -1199,22 +1186,22 @@ export default function RecordingPage() {
                       aria-controls="transcript-content"
                     >
                       <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                        Trascrizione
+                        {t('recording.transcript_label')}
                       </span>
                       <div className="flex items-center gap-3">
                         {transcriptOpen && (
                           <span
                             role="button"
                             tabIndex={0}
-                            onClick={e => { e.stopPropagation(); setShowTimestamps(t => !t) }}
-                            onKeyDown={e => { if (e.key === 'Enter') { e.stopPropagation(); setShowTimestamps(t => !t) } }}
+                            onClick={e => { e.stopPropagation(); setShowTimestamps(prev => !prev) }}
+                            onKeyDown={e => { if (e.key === 'Enter') { e.stopPropagation(); setShowTimestamps(prev => !prev) } }}
                             className="text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
                           >
-                            {showTimestamps ? 'Nascondi timestamp' : 'Mostra timestamp'}
+                            {showTimestamps ? t('recording.hide_timestamps') : t('recording.show_timestamps')}
                           </span>
                         )}
                         <span className="text-xs text-muted-foreground">
-                          {transcriptOpen ? 'Chiudi' : 'Mostra'}
+                          {transcriptOpen ? t('recording.hide_transcript') : t('recording.show_transcript')}
                         </span>
                       </div>
                     </button>
@@ -1227,7 +1214,6 @@ export default function RecordingPage() {
                           segments={segments}
                           rawText={transcript}
                           showTimestamps={showTimestamps}
-                          onToggleTimestamps={setShowTimestamps}
                         />
                       </div>
                     )}
@@ -1239,14 +1225,14 @@ export default function RecordingPage() {
                     htmlFor="session-title-done"
                     className="block text-xs font-medium uppercase tracking-widest text-muted-foreground"
                   >
-                    Titolo sessione <span className="normal-case tracking-normal text-muted-foreground/60">(opzionale)</span>
+                    {t('recording.session_title_label')} <span className="normal-case tracking-normal text-muted-foreground/60">{t('recording.optional')}</span>
                   </label>
                   <input
                     id="session-title-done"
                     type="text"
                     value={sessionTitle}
                     onChange={e => setSessionTitle(e.target.value)}
-                    placeholder="Aggiungi un titolo..."
+                    placeholder={t('recording.title_placeholder')}
                     className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
                 </div>
@@ -1260,7 +1246,7 @@ export default function RecordingPage() {
                           htmlFor="template-select"
                           className="mb-1.5 block text-xs font-medium text-muted-foreground"
                         >
-                          Tipo di meeting
+                          {t('recording.meeting_type_label')}
                         </label>
                         <select
                           id="template-select"
@@ -1282,7 +1268,7 @@ export default function RecordingPage() {
                         className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                       >
                         <span>{showMetadata ? '−' : '+'}</span>
-                        {showMetadata ? 'Nascondi dettagli' : 'Aggiungi dettagli (cliente, progetto, tag)'}
+                        {showMetadata ? t('recording.hide_details') : t('recording.add_details')}
                       </button>
                       {showMetadata && (
                         <div className="mt-3 space-y-2.5">
@@ -1291,14 +1277,14 @@ export default function RecordingPage() {
                               htmlFor="client-name"
                               className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground"
                             >
-                              Cliente <span className="normal-case tracking-normal text-muted-foreground/60">(opzionale)</span>
+                              {t('recording.client_label')} <span className="normal-case tracking-normal text-muted-foreground/60">{t('recording.optional')}</span>
                             </label>
                             {clientSuggestion && !clientName && (
                               <button
                                 onClick={() => setClientName(clientSuggestion)}
                                 className="mb-1.5 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20 motion-reduce:transition-none"
                               >
-                                Usa: {clientSuggestion}
+                                {t('recording.suggestion_use', { suggestion: clientSuggestion })}
                               </button>
                             )}
                             <input
@@ -1306,7 +1292,7 @@ export default function RecordingPage() {
                               type="text"
                               value={clientName}
                               onChange={e => setClientName(e.target.value)}
-                              placeholder="es. Acme Srl"
+                              placeholder={t('recording.client_placeholder')}
                               className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                             />
                           </div>
@@ -1315,31 +1301,31 @@ export default function RecordingPage() {
                               htmlFor="project-stream"
                               className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground"
                             >
-                              Progetto / Stream <span className="normal-case tracking-normal text-muted-foreground/60">(opzionale)</span>
+                              {t('recording.project_label')} <span className="normal-case tracking-normal text-muted-foreground/60">{t('recording.optional')}</span>
                             </label>
                             <input
                               id="project-stream"
                               type="text"
                               value={projectStream}
                               onChange={e => setProjectStream(e.target.value)}
-                              placeholder="es. Lancio Q3"
+                              placeholder={t('recording.project_placeholder')}
                               className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                             />
                           </div>
                           <div>
                             <label className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                              Tag <span className="normal-case tracking-normal text-muted-foreground/60">(opzionale)</span>
+                              {t('recording.tag_label')} <span className="normal-case tracking-normal text-muted-foreground/60">{t('recording.optional')}</span>
                             </label>
                             {isFree ? (
                               <div className="flex items-center gap-1.5 rounded-md border border-dashed border-border px-3 py-2">
                                 <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
                                 <span className="text-xs text-muted-foreground">
-                                  Tag disponibili con{' '}
+                                  {t('recording.tags_pro_hint')}{' '}
                                   <button
                                     onClick={() => navigate('/pricing')}
                                     className="font-medium text-primary hover:underline"
                                   >
-                                    Pro →
+                                    {t('recording.pro_link')}
                                   </button>
                                 </span>
                               </div>
@@ -1355,13 +1341,13 @@ export default function RecordingPage() {
                       onClick={generateSynthesis}
                       className="w-full rounded-md hover:bg-(--primary-hover)"
                     >
-                      Genera sintesi
+                      {t('recording.generate_synthesis')}
                     </Button>
                     <button
                       onClick={saveTranscriptOnly}
                       className="w-full text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
                     >
-                      Salva solo trascrizione
+                      {t('recording.save_transcript_only')}
                     </button>
                   </div>
                 )}
@@ -1370,7 +1356,7 @@ export default function RecordingPage() {
                 {(synthesisState === 'streaming' || synthesisState === 'done') && (
                   <div className="space-y-3">
                     <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                      Sintesi
+                      {t('recording.synthesis_label')}
                     </p>
                     <SynthesisEditor
                       content={synthesis}
@@ -1387,7 +1373,7 @@ export default function RecordingPage() {
                           onClick={() => exportMarkdown(buildExportData())}
                           className="rounded-md border border-border px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary hover:text-primary motion-reduce:transition-none"
                         >
-                          Markdown
+                          {t('recording.export_markdown')}
                         </button>
                         <ProGatedButton
                           label="PDF"
@@ -1412,7 +1398,7 @@ export default function RecordingPage() {
                           }}
                           className="rounded-md border border-border px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary hover:text-primary motion-reduce:transition-none"
                         >
-                          {copyDone ? 'Copiato' : 'Copia testo'}
+                          {copyDone ? t('recording.copied') : t('recording.copy_text')}
                         </button>
                       </div>
                     )}
@@ -1420,19 +1406,19 @@ export default function RecordingPage() {
                 )}
 
                 {synthesisState === 'error' && (
-                  <p className="text-sm text-destructive">Errore durante la sintesi. Riprova.</p>
+                  <p className="text-sm text-destructive">{t('recording.synthesis_error')}</p>
                 )}
 
                 {/* Post-recording navigation */}
                 <div className="flex flex-col items-center gap-2 pt-2">
                   <Button variant="outline" onClick={handleNewRecording} className="w-full rounded-md">
-                    Nuova registrazione
+                    {t('recording.new_recording')}
                   </Button>
                   <button
                     onClick={() => navigate('/archive')}
                     className="text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
                   >
-                    Vai all'archivio
+                    {t('recording.go_archive')}
                   </button>
                 </div>
               </motion.div>
@@ -1442,9 +1428,9 @@ export default function RecordingPage() {
             {/* Error: recorder failed */}
             {state === 'error' && (
               <div className="space-y-3">
-                <p className="text-sm text-destructive">Errore: {error}</p>
+                <p className="text-sm text-destructive">{t('recording.error_prefix', { error })}</p>
                 <Button variant="outline" onClick={handleNewRecording} className="rounded-md">
-                  Riprova
+                  {t('recording.retry')}
                 </Button>
               </div>
             )}
@@ -1454,7 +1440,7 @@ export default function RecordingPage() {
           {/* ── Right sidebar ─────────────────────────────────────── */}
           <aside
             className="mt-8 space-y-6 lg:mt-0"
-            aria-label="Contesto e note"
+            aria-label={t('recording.notes_aside_aria')}
           >
 
             {/* Briefing context — always visible */}
@@ -1462,12 +1448,12 @@ export default function RecordingPage() {
               <div className="flex items-center gap-1.5">
                 <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
                 <span className="text-xs text-muted-foreground">
-                  Briefing pre-meeting · disponibile con{' '}
+                  {t('recording.briefing_pro_hint')}{' '}
                   <button
                     onClick={() => navigate('/pricing')}
                     className="font-medium text-primary hover:underline"
                   >
-                    Pro →
+                    {t('recording.pro_link')}
                   </button>
                 </span>
               </div>
@@ -1481,14 +1467,14 @@ export default function RecordingPage() {
               <div>
                 <div className="mb-2 flex items-center justify-between">
                   <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                    Note rapide
+                    {t('recording.quick_notes_label')}
                   </p>
                   <button
                     onClick={triggerQuickNote}
                     className="flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                    aria-label={`Aggiungi nota rapida (${shortcutLabel})`}
+                    aria-label={`${t('recording.add_note')} (${shortcutLabel})`}
                   >
-                    <span className="text-xs text-muted-foreground">Aggiungi</span>
+                    <span className="text-xs text-muted-foreground">{t('recording.add_note')}</span>
                     <span className="rounded bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                       {shortcutLabel}
                     </span>
@@ -1507,18 +1493,18 @@ export default function RecordingPage() {
                         if (e.key === 'Escape') { setShowQuickNoteInput(false); setQuickNoteInput('') }
                       }}
                       maxLength={100}
-                      placeholder="Nota rapida..."
+                      placeholder={t('recording.note_placeholder')}
                       className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                     />
                     <p className="mt-1 text-[10px] text-muted-foreground">
-                      Invio per salvare · Esc per annullare · autosalvataggio in 8s
+                      {t('recording.note_hint')}
                     </p>
                   </div>
                 )}
 
                 {quickNotes.length === 0 && !showQuickNoteInput && (
                   <p className="text-xs leading-relaxed text-muted-foreground">
-                    Premi ⌘E (Mac) o Ctrl+E (Windows) per segnare un tema chiave in questo momento — verrà evidenziato come punto importante nella sintesi finale.
+                    {t('recording.highlight_hint')}
                   </p>
                 )}
 
@@ -1551,17 +1537,17 @@ export default function RecordingPage() {
                   htmlFor="recording-notes"
                   className="mb-1.5 block text-xs font-medium uppercase tracking-widest text-muted-foreground"
                 >
-                  Note
+                  {t('recording.notes_label')}
                 </label>
                 <textarea
                   id="recording-notes"
                   value={notes}
                   onChange={e => handleNotesChange(e.target.value)}
-                  placeholder="Quello che scrivi qui verrà integrato nella sintesi AI insieme alle note rapide."
+                  placeholder={t('recording.notes_placeholder')}
                   className="w-full resize-none rounded-md border border-border bg-card px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                   style={{ minHeight: '160px' }}
                 />
-                <p className="mt-1 text-xs text-muted-foreground">Autosalvataggio attivo</p>
+                <p className="mt-1 text-xs text-muted-foreground">{t('recording.autosave')}</p>
               </div>
             )}
 

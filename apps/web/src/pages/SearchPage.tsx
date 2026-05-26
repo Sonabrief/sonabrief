@@ -1,17 +1,20 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'motion/react'
 import { semanticSearch } from '../lib/semanticSearch'
 import { embeddingsService } from '../lib/embeddings'
 import { AppNav } from '../components/AppNav'
+import i18n from '../i18n'
 
 function formatDate(ts: number): string {
-  return new Date(ts).toLocaleDateString('it-IT', {
+  return new Date(ts).toLocaleDateString(i18n.language, {
     day: 'numeric', month: 'long', year: 'numeric'
   })
 }
 
 export default function SearchPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<
@@ -44,7 +47,7 @@ export default function SearchPage() {
 
       <main className="mx-auto max-w-2xl px-6 py-10">
         <h1 className="mb-8 font-heading text-2xl font-bold tracking-[-0.015em] text-foreground">
-          Ricerca semantica
+          {t('search.title')}
         </h1>
 
         {/* Search bar */}
@@ -55,8 +58,8 @@ export default function SearchPage() {
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={handleKey}
-            placeholder='Es. "accordo con cliente", "decisione budget"…'
-            aria-label="Cerca nei tuoi meeting per significato"
+            placeholder={t('search.placeholder')}
+            aria-label={t('search.aria')}
             className="flex-1 rounded-md border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
             autoFocus
           />
@@ -65,7 +68,7 @@ export default function SearchPage() {
             disabled={state === 'searching' || !query.trim()}
             className="rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-40 motion-reduce:transition-none"
           >
-            {state === 'searching' ? '…' : 'Cerca'}
+            {state === 'searching' ? '…' : t('search.btn')}
           </button>
         </div>
 
@@ -80,7 +83,7 @@ export default function SearchPage() {
                 exit={{ opacity: 0 }}
                 className="animate-pulse text-sm text-muted-foreground motion-reduce:animate-none"
               >
-                Analisi semantica in corso…
+                {t('search.searching')}
               </motion.p>
             )}
 
@@ -93,9 +96,9 @@ export default function SearchPage() {
                 transition={{ duration: 0.18 }}
                 className="py-12 text-center"
               >
-                <p className="text-sm font-semibold text-foreground">Nessun risultato</p>
+                <p className="text-sm font-semibold text-foreground">{t('search.no_results')}</p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Prova con termini diversi o frasi più specifiche.
+                  {t('search.no_results_hint')}
                 </p>
               </motion.div>
             )}
@@ -108,7 +111,7 @@ export default function SearchPage() {
                 exit={{ opacity: 0 }}
                 className="text-sm text-destructive"
               >
-                Errore durante la ricerca. Riprova.
+                {t('search.error')}
               </motion.p>
             )}
 
@@ -120,7 +123,7 @@ export default function SearchPage() {
                 transition={{ duration: 0.18 }}
               >
                 <p className="mb-3 text-xs text-muted-foreground">
-                  {results.length} risultati per &ldquo;{query}&rdquo;
+                  {t('search.results_count', { count: results.length, query })}
                 </p>
                 <ul className="flex flex-col gap-2" role="list">
                   {results.map((r, i) => (
@@ -138,7 +141,7 @@ export default function SearchPage() {
                           <p className="text-sm font-medium text-foreground">{r.title}</p>
                           <div className="flex shrink-0 items-center gap-2">
                             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
-                              {Math.round(r.score * 100)}% match
+                              {t('search.match_score', { score: Math.round(r.score * 100) })}
                             </span>
                             <span className="text-xs text-muted-foreground">{formatDate(r.date)}</span>
                           </div>

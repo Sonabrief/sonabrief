@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { useTranslation } from 'react-i18next'
 import { db } from '../lib/db'
 
 const TAG_COLORS = [
@@ -17,6 +18,7 @@ function colorForTag(tag: string) {
 }
 
 export function TagPill({ tag, onRemove }: { tag: string; onRemove?: () => void }) {
+  const { t } = useTranslation()
   const c = colorForTag(tag)
   return (
     <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${c.bg} ${c.text} ${c.border}`}>
@@ -25,7 +27,7 @@ export function TagPill({ tag, onRemove }: { tag: string; onRemove?: () => void 
         <button
           onClick={onRemove}
           className="ml-0.5 opacity-60 hover:opacity-100"
-          aria-label={`Rimuovi tag ${tag}`}
+          aria-label={t('tag_input.remove_aria', { tag })}
         >
           ×
         </button>
@@ -41,6 +43,7 @@ interface TagInputProps {
 }
 
 export function TagInput({ value, onChange, disabled }: TagInputProps) {
+  const { t } = useTranslation()
   const [input, setInput] = useState('')
   const [open, setOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -103,7 +106,7 @@ export function TagInput({ value, onChange, disabled }: TagInputProps) {
             onChange={e => { setInput(e.target.value); setOpen(true) }}
             onKeyDown={handleKeyDown}
             onFocus={() => setOpen(true)}
-            placeholder={value.length === 0 ? 'Aggiungi tag...' : ''}
+            placeholder={value.length === 0 ? t('tag_input.add_placeholder') : ''}
             className="min-w-[100px] flex-1 bg-transparent text-xs text-foreground placeholder:text-muted-foreground outline-none"
             maxLength={32}
           />
@@ -125,7 +128,7 @@ export function TagInput({ value, onChange, disabled }: TagInputProps) {
               onMouseDown={e => { e.preventDefault(); addTag(input) }}
               className="flex w-full items-center gap-2 px-3 py-2 text-xs text-muted-foreground hover:bg-border"
             >
-              Crea tag "<span className="font-medium text-foreground">{input.trim()}</span>"
+              {t('tag_input.create_tag', { tag: input.trim() })}
             </button>
           )}
         </div>

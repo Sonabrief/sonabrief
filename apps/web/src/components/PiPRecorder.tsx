@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
@@ -77,6 +78,7 @@ export function PiPRecorder({
   duration, paused, initialNotes, stream = null,
   onPause, onResume, onStop, onNotesChange,
 }: PiPRecorderProps) {
+  const { t } = useTranslation()
   const [notesValue, setNotesValue] = useState(initialNotes)
 
   return (
@@ -91,7 +93,7 @@ export function PiPRecorder({
           {formatDuration(duration)}
         </span>
         {paused
-          ? <span className="text-xs text-muted-foreground">— in pausa</span>
+          ? <span className="text-xs text-muted-foreground">{t('pip_recorder.paused')}</span>
           : <PiPWaveform stream={stream} frozen={paused} />
         }
       </div>
@@ -102,23 +104,23 @@ export function PiPRecorder({
           onClick={paused ? onResume : onPause}
           className="flex-1 rounded-lg border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-border"
         >
-          {paused ? '▶ Riprendi' : '⏸ Pausa'}
+          {paused ? t('pip_recorder.resume') : t('pip_recorder.pause')}
         </button>
         <button
           onClick={onStop}
           className="flex-1 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/20"
         >
-          ⏹ Stop
+          {t('pip_recorder.stop')}
         </button>
       </div>
 
       {/* Notes */}
       <div className="flex flex-col gap-1.5 flex-1 min-h-0">
-        <span className="text-xs font-medium text-muted-foreground">Note</span>
+        <span className="text-xs font-medium text-muted-foreground">{t('pip_recorder.notes_label')}</span>
         <textarea
           value={notesValue}
           onChange={e => { setNotesValue(e.target.value); onNotesChange(e.target.value) }}
-          placeholder="Quello che scrivi qui verrà integrato nella sintesi AI."
+          placeholder={t('pip_recorder.notes_placeholder')}
           className="flex-1 resize-none rounded-md border border-border bg-card px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </div>

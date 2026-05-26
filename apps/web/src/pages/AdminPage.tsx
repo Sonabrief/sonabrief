@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { API_URL } from '../config'
 import { fetchWhitelist, addToWhitelist, removeFromWhitelist, type WhitelistEntry } from '../lib/admin'
+import i18n from '../i18n'
 
 interface AdminStats {
   overview: {
@@ -45,7 +46,7 @@ interface AdminStats {
 }
 
 function formatDate(ms: number): string {
-  return new Date(ms).toLocaleString('it-IT', {
+  return new Date(ms).toLocaleString(i18n.language, {
     day: 'numeric', month: 'short', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   })
@@ -192,7 +193,7 @@ export default function AdminPage() {
             </h1>
             {lastUpdated && (
               <p className="text-xs text-gray-400 mt-0.5">
-                Aggiornato alle {lastUpdated.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
+                Aggiornato alle {lastUpdated.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })}
               </p>
             )}
           </div>

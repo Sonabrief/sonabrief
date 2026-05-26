@@ -36,7 +36,7 @@ export async function handleGetPreferences(req: Request, env: Env): Promise<Resp
       client_volume: null,
       synthesis_mode: 'standard',
       sync_enabled: 0,
-      onboarded: 0,
+      onboarded: null,
       display_name: null,
     }), { status: 200, headers: { 'Content-Type': 'application/json' } })
   }
@@ -57,6 +57,12 @@ export async function handleSavePreferences(req: Request, env: Env): Promise<Res
   if (!body) {
     return new Response(JSON.stringify({ error: 'invalid_body' }), { status: 400 })
   }
+
+  const existing = await env.DB
+    .prepare('SELECT onboarded FROM user_preferences WHERE user_id = ?')
+    .bind(session.userId)
+    .first<{ onboarded: number }>()
+  const currentOnboarded = existing?.onboarded ?? 0
 
   const now = Date.now()
 
@@ -92,7 +98,7 @@ export async function handleSavePreferences(req: Request, env: Env): Promise<Res
       body.client_volume ?? null,
       body.synthesis_mode ?? 'standard',
       body.sync_enabled ?? 0,
-      body.onboarded ?? 0,
+      body.onboarded ?? currentOnboarded,
       body.display_name ?? null,
       body.weekly_reminder_enabled ?? 0,
       now,

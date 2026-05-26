@@ -2,14 +2,17 @@ import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { ChevronDown } from 'lucide-react'
 import { db, type Meeting } from '../lib/db'
 import { AppNav } from '../components/AppNav'
 import { SynthesisEditor } from '../components/SynthesisEditor'
 import { TranscriptViewer, type WhisperSegment } from '../components/TranscriptViewer'
+import i18n from '../i18n'
 
 function formatDate(ms: number) {
-  return new Date(ms).toLocaleString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' })
+  return new Date(ms).toLocaleString(i18n.language, { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
 // ── UnassignedRow ─────────────────────────────────────────────────────────────
@@ -17,9 +20,11 @@ function formatDate(ms: number) {
 function UnassignedRow({
   meeting,
   notesByMeeting,
+  t,
 }: {
   meeting: Meeting
   notesByMeeting: Record<string, string>
+  t: TFunction
 }) {
   const [client, setClient] = useState(meeting.clientName ?? '')
   const [stream, setStream] = useState(meeting.projectStream ?? '')
@@ -37,14 +42,14 @@ function UnassignedRow({
       <div className="mb-2 flex items-baseline gap-2">
         <p className="text-sm font-medium text-foreground">{meeting.title}</p>
         <span className="text-xs text-muted-foreground">
-          {new Date(meeting.startedAt).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })}
+          {new Date(meeting.startedAt).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' })}
         </span>
       </div>
       <div className="flex gap-2">
         <input
           type="text"
-          aria-label="Nome cliente"
-          placeholder="Nome cliente..."
+          aria-label={t('clients.client_name_aria')}
+          placeholder={t('clients.client_placeholder')}
           value={client}
           onChange={e => setClient(e.target.value)}
           onBlur={save}
@@ -53,8 +58,8 @@ function UnassignedRow({
         />
         <input
           type="text"
-          aria-label="Stream / progetto"
-          placeholder="Stream (es. Cause civili)..."
+          aria-label={t('clients.stream_aria')}
+          placeholder={t('clients.stream_placeholder')}
           value={stream}
           onChange={e => setStream(e.target.value)}
           onBlur={save}
@@ -68,7 +73,7 @@ function UnassignedRow({
         className="mt-2 flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
       >
         <ChevronDown className={`h-3 w-3 transition-transform duration-200 motion-reduce:transition-none ${expanded ? 'rotate-180' : ''}`} />
-        {expanded ? 'Chiudi sintesi' : 'Mostra sintesi'}
+        {expanded ? t('clients.hide_synthesis') : t('clients.show_synthesis')}
       </button>
 
       <AnimatePresence>
@@ -86,7 +91,7 @@ function UnassignedRow({
                   {notesByMeeting[meeting.id]}
                 </p>
               ) : (
-                <p className="text-xs text-muted-foreground">Nessuna sintesi disponibile.</p>
+                <p className="text-xs text-muted-foreground">{t('clients.no_synthesis')}</p>
               )}
             </div>
           </motion.div>
@@ -99,6 +104,7 @@ function UnassignedRow({
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function ClientsPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const meetings = useLiveQuery(() => db.meetings.orderBy('startedAt').reverse().toArray(), [])
   const actionItems = useLiveQuery(() => db.action_items.where('completed').equals(0).toArray(), [])
@@ -214,13 +220,13 @@ export default function ClientsPage() {
 
       <main className="mx-auto max-w-4xl px-6 py-8">
         <h1 className="mb-6 font-heading text-2xl font-bold leading-[1.2] tracking-[-0.015em] text-foreground">
-          Clienti & Progetti
+          {t('clients.title')}
         </h1>
 
         {clientList.length > 2 && (
           <input
             type="text"
-            placeholder="Cerca cliente..."
+            placeholder={t('clients.search_placeholder')}
             value={searchClient}
             onChange={e => setSearchClient(e.target.value)}
             className="mb-4 w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
@@ -229,15 +235,15 @@ export default function ClientsPage() {
 
         {isEmpty ? (
           <div className="py-12 text-center">
-            <p className="text-sm font-semibold text-foreground">Nessun meeting ancora</p>
+            <p className="text-sm font-semibold text-foreground">{t('clients.empty_title')}</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Dopo la prima registrazione potrai assegnare i meeting a clienti e progetti.
+              {t('clients.empty_hint')}
             </p>
             <button
               onClick={() => navigate('/recording')}
               className="mt-4 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transition-none"
             >
-              Avvia registrazione
+              {t('clients.start_recording')}
             </button>
           </div>
         ) : (
@@ -249,7 +255,7 @@ export default function ClientsPage() {
                 {/* Filtri cliente / stream */}
                 {clientList.length > 1 && (
                   <div className="mb-2 flex flex-wrap gap-2">
-                    <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filtra per cliente">
+                    <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('clients.filter_client_aria')}>
                       <button
                         onClick={() => setFilterClient('all')}
                         aria-pressed={filterClient === 'all'}
@@ -259,7 +265,7 @@ export default function ClientsPage() {
                             : 'border border-border bg-card text-muted-foreground hover:bg-border'
                         }`}
                       >
-                        Tutti
+                        {t('clients.filter_all')}
                       </button>
                       {allClients.map(c => (
                         <button
@@ -278,7 +284,7 @@ export default function ClientsPage() {
                     </div>
 
                     {filterClient !== 'all' && allStreams.length > 1 && (
-                      <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filtra per stream">
+                      <div className="flex flex-wrap gap-1.5" role="group" aria-label={t('clients.filter_stream_aria')}>
                         <button
                           onClick={() => setFilterStream('all')}
                           aria-pressed={filterStream === 'all'}
@@ -288,7 +294,7 @@ export default function ClientsPage() {
                               : 'border border-border bg-card text-muted-foreground hover:bg-border'
                           }`}
                         >
-                          Tutti gli stream
+                          {t('clients.filter_all_streams')}
                         </button>
                         {allStreams.map(s => (
                           <button
@@ -344,18 +350,18 @@ export default function ClientsPage() {
                               <button
                                 onDoubleClick={() => { setRenamingClient(clientName); setRenameValue(clientName) }}
                                 className="text-base font-bold text-foreground transition-colors hover:text-primary motion-reduce:transition-none"
-                                title="Doppio click per rinominare"
+                                title={t('clients.rename_title')}
                               >
                                 {clientName}
                               </button>
                             )}
                             <div className="flex items-center gap-3">
                               <span className="text-xs text-muted-foreground">
-                                {allMeetingsInCard.length} meeting
+                                {t('clients.meeting_count', { count: allMeetingsInCard.length })}
                               </span>
                               {totalOpen > 0 && (
                                 <span className="rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-primary">
-                                  {totalOpen} azioni aperte
+                                  {t('clients.open_actions_count', { count: totalOpen })}
                                 </span>
                               )}
                             </div>
@@ -383,7 +389,7 @@ export default function ClientsPage() {
                                             <p className="text-sm font-medium text-foreground">{m.title}</p>
                                             <p className="mt-0.5 text-xs text-muted-foreground">
                                               {formatDate(m.startedAt)}
-                                              {openByMeeting[m.id] ? ` · ${openByMeeting[m.id]} azioni aperte` : ''}
+                                              {openByMeeting[m.id] ? ` · ${t('clients.open_actions_count', { count: openByMeeting[m.id] })}` : ''}
                                             </p>
                                           </div>
                                           <ChevronDown
@@ -412,7 +418,7 @@ export default function ClientsPage() {
                                                       ? 'bg-primary/10 text-primary'
                                                       : 'text-muted-foreground hover:text-foreground'
                                                   }`}
-                                                >Sintesi</button>
+                                                >{t('clients.synthesis_tab')}</button>
                                                 <button
                                                   onClick={() => setActiveTab(prev => ({ ...prev, [m.id]: 'transcript' }))}
                                                   className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors motion-reduce:transition-none ${
@@ -420,7 +426,7 @@ export default function ClientsPage() {
                                                       ? 'bg-primary/10 text-primary'
                                                       : 'text-muted-foreground hover:text-foreground'
                                                   }`}
-                                                >Trascrizione</button>
+                                                >{t('clients.transcript_tab')}</button>
                                               </div>
 
                                               {(activeTab[m.id] ?? 'synthesis') === 'synthesis' ? (
@@ -431,11 +437,11 @@ export default function ClientsPage() {
                                                       onClick={() => navigate('/archive', { state: { meetingId: m.id } })}
                                                       className="mt-3 text-xs font-medium text-primary transition-colors hover:underline motion-reduce:transition-none"
                                                     >
-                                                      Apri in archivio →
+                                                      {t('clients.open_in_archive')}
                                                     </button>
                                                   </>
                                                 ) : (
-                                                  <p className="text-xs text-muted-foreground">Nessuna sintesi disponibile.</p>
+                                                  <p className="text-xs text-muted-foreground">{t('clients.no_synthesis')}</p>
                                                 )
                                               ) : (
                                                 transcriptByMeeting[m.id] ? (
@@ -444,11 +450,10 @@ export default function ClientsPage() {
                                                       segments={(() => { try { return JSON.parse(transcriptByMeeting[m.id].segments) as WhisperSegment[] } catch { return [] } })()}
                                                       rawText={transcriptByMeeting[m.id].text}
                                                       showTimestamps={false}
-                                                      onToggleTimestamps={() => {}}
                                                     />
                                                   </div>
                                                 ) : (
-                                                  <p className="text-xs text-muted-foreground">Trascrizione non disponibile.</p>
+                                                  <p className="text-xs text-muted-foreground">{t('clients.no_transcript')}</p>
                                                 )
                                               )}
                                             </div>
@@ -474,7 +479,7 @@ export default function ClientsPage() {
               <div className="overflow-hidden rounded-lg border border-border bg-card">
                 <div className="border-b border-border px-5 py-4">
                   <span className="text-sm font-medium text-muted-foreground">
-                    Non assegnati ({unassigned.length})
+                    {t('clients.unassigned', { count: unassigned.length })}
                   </span>
                 </div>
                 <ul role="list">
@@ -483,7 +488,7 @@ export default function ClientsPage() {
                     : unassigned.slice(0, UNASSIGNED_PREVIEW)
                   ).map(m => (
                     <li key={m.id}>
-                      <UnassignedRow meeting={m} notesByMeeting={notesByMeeting} />
+                      <UnassignedRow meeting={m} notesByMeeting={notesByMeeting} t={t} />
                     </li>
                   ))}
                 </ul>
@@ -493,14 +498,14 @@ export default function ClientsPage() {
                       onClick={() => setUnassignedExpanded(true)}
                       className="w-full border-t border-border py-2.5 text-xs text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
                     >
-                      Mostra tutti ({unassigned.length - UNASSIGNED_PREVIEW} altri)
+                      {t('clients.show_all', { count: unassigned.length - UNASSIGNED_PREVIEW })}
                     </button>
                   ) : (
                     <button
                       onClick={() => setUnassignedExpanded(false)}
                       className="w-full border-t border-border py-2.5 text-xs text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
                     >
-                      Mostra meno
+                      {t('clients.show_less')}
                     </button>
                   )
                 )}

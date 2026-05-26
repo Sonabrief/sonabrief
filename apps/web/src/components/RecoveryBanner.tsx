@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { findOrphanChunks, deleteOrphanSession } from '../lib/chunkStore'
 import { db } from '../lib/db'
 import type { RecordingSession } from '../lib/db'
 import { formatMeetingTitle } from '../lib/locale'
+import i18n from '../i18n'
 
 interface OrphanInfo {
   sessionId: string
@@ -11,6 +13,7 @@ interface OrphanInfo {
 }
 
 export function RecoveryBanner() {
+  const { t } = useTranslation()
   const [orphans, setOrphans] = useState<OrphanInfo[]>([])
   const [savedSessions, setSavedSessions] = useState<RecordingSession[]>([])
 
@@ -33,7 +36,7 @@ export function RecoveryBanner() {
   return (
     <div className="mb-4 space-y-2">
       {savedSessions.map(s => {
-        const date = new Date(s.updatedAt).toLocaleString('it-IT', {
+        const date = new Date(s.updatedAt).toLocaleString(i18n.language, {
           day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
         })
         const words = s.partialText.split(' ').length
@@ -41,10 +44,10 @@ export function RecoveryBanner() {
           <div key={s.sessionId} className="flex items-start justify-between gap-4 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
             <div>
               <p className="text-sm font-medium text-foreground">
-                Trascrizione parziale recuperabile
+                {t('recovery_banner.transcript_title')}
               </p>
               <p className="text-xs text-muted-foreground">
-                {date} · ~{words} parole · trascrizione parziale
+                {t('recovery_banner.transcript_info', { date, words })}
               </p>
             </div>
             <div className="flex gap-2 shrink-0">
@@ -77,7 +80,7 @@ export function RecoveryBanner() {
                 }}
                 className="text-xs font-medium text-primary underline hover:text-primary/80"
               >
-                Salva in archivio
+                {t('recovery_banner.save_archive')}
               </button>
               <button
                 onClick={() => {
@@ -87,7 +90,7 @@ export function RecoveryBanner() {
                 }}
                 className="text-xs font-medium text-primary underline hover:text-primary/80"
               >
-                Copia testo
+                {t('recovery_banner.copy_text')}
               </button>
               <button
                 onClick={() => {
@@ -96,14 +99,14 @@ export function RecoveryBanner() {
                 }}
                 className="text-xs font-medium text-muted-foreground underline hover:text-foreground"
               >
-                Elimina
+                {t('recovery_banner.delete')}
               </button>
             </div>
           </div>
         )
       })}
       {orphans.map(o => {
-        const date = new Date(o.oldestMs).toLocaleString('it-IT', {
+        const date = new Date(o.oldestMs).toLocaleString(i18n.language, {
           day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
         })
         const minutes = Math.round((o.count * 30) / 60)
@@ -114,17 +117,17 @@ export function RecoveryBanner() {
           >
             <div>
               <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
-                Registrazione interrotta trovata
+                {t('recovery_banner.recording_title')}
               </p>
               <p className="text-xs text-amber-700 dark:text-amber-300">
-                {date} · circa {minutes} min registrati · l'audio temporaneo non è recuperabile dopo un crash, ma puoi eliminarlo.
+                {t('recovery_banner.recording_info', { date, minutes })}
               </p>
             </div>
             <button
               onClick={() => dismiss(o.sessionId)}
               className="shrink-0 text-xs font-medium text-amber-700 underline hover:text-amber-900 dark:text-amber-300"
             >
-              Elimina
+              {t('recovery_banner.delete')}
             </button>
           </div>
         )

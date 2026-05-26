@@ -1,4 +1,5 @@
 import { ShieldAlert } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface Props {
   onDismiss: () => void
@@ -7,6 +8,7 @@ interface Props {
 const DISMISSED_KEY = 'itp_warning_dismissed'
 
 export function ITPWarningBanner({ onDismiss }: Props) {
+  const { t } = useTranslation()
   if (localStorage.getItem(DISMISSED_KEY) === '1') return null
 
   function handleDismiss() {
@@ -20,17 +22,17 @@ export function ITPWarningBanner({ onDismiss }: Props) {
         <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-amber-700 dark:text-amber-300" aria-hidden="true" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
-            Safari potrebbe cancellare i tuoi dati dopo 7 giorni di inattività
+            {t('itp_warning.title')}
           </p>
           <p className="mt-0.5 text-xs text-amber-700 dark:text-amber-300">
-            Per proteggere le tue trascrizioni, aggiungi Sonabrief alla schermata Home o ai Preferiti, oppure accedi da Chrome, Firefox o Edge
+            {t('itp_warning.hint')}
           </p>
         </div>
         <button
           onClick={handleDismiss}
           className="shrink-0 text-xs font-medium text-amber-700 underline hover:text-amber-900 dark:text-amber-300 dark:hover:text-amber-100"
         >
-          Ok, non mostrare più
+          {t('itp_warning.dismiss')}
         </button>
       </div>
     </div>

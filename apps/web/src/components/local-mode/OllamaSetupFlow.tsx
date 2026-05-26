@@ -1,11 +1,13 @@
 import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { CheckCircle, Download, Cpu, AlertTriangle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useOllamaSetup, MODELS, type ModelKey } from './useOllamaSetup'
 
 interface Props {
   onComplete: () => void
   onCancel: () => void
+  onBack?: () => void
   autoDetect?: boolean
 }
 
@@ -16,7 +18,8 @@ const fade = {
   transition: { duration: 0.2 },
 }
 
-export function OllamaSetupFlow({ onComplete, onCancel, autoDetect = true }: Props) {
+export function OllamaSetupFlow({ onComplete, onCancel, onBack, autoDetect = true }: Props) {
+  const { t } = useTranslation()
   const setup = useOllamaSetup({ autoDetect })
 
   // Pre-select suggested model on mount / when model-select step activates
@@ -28,11 +31,22 @@ export function OllamaSetupFlow({ onComplete, onCancel, autoDetect = true }: Pro
 
   return (
     <div className="flex min-h-100 flex-col items-center justify-center px-4 py-8">
+      {onBack && (
+        <div className="absolute top-4 left-4">
+          <button
+            type="button"
+            onClick={onBack}
+            className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {t('ollama.back_to_standard')}
+          </button>
+        </div>
+      )}
       <AnimatePresence mode="wait">
         {setup.step === 'detecting' && (
           <motion.div key="detecting" {...fade} className="flex flex-col items-center gap-4">
             <div className="size-10 animate-spin rounded-full border-3 border-border border-t-primary" />
-            <p className="text-sm text-muted-foreground">Verifica in corso…</p>
+            <p className="text-sm text-muted-foreground">{t('ollama.detecting')}</p>
           </motion.div>
         )}
 
@@ -43,10 +57,10 @@ export function OllamaSetupFlow({ onComplete, onCancel, autoDetect = true }: Pro
                 <Cpu className="size-6 text-primary" />
               </div>
               <h2 className="font-heading text-xl font-semibold text-foreground">
-                Attiva Privacy Engine
+                {t('ollama.not_found_title')}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Sonabrief Privacy Engine gira sul tuo computer. Nessun dato esce mai.
+                {t('ollama.not_found_desc')}
               </p>
             </div>
 
@@ -54,7 +68,7 @@ export function OllamaSetupFlow({ onComplete, onCancel, autoDetect = true }: Pro
               {([
                 {
                   n: 1,
-                  title: 'Scarica Ollama',
+                  title: t('ollama.step_download_title'),
                   content: (
                     <a
                       href="https://ollama.com/download"
@@ -63,41 +77,43 @@ export function OllamaSetupFlow({ onComplete, onCancel, autoDetect = true }: Pro
                       className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
                     >
                       <Download className="size-3.5" />
-                      Scarica
+                      {t('ollama.step_download_btn')}
                     </a>
                   ),
                 },
                 {
                   n: 2,
-                  title: 'Installalo',
+                  title: t('ollama.step_install_title'),
                   content: (
                     <p className="text-sm text-muted-foreground">
-                      Apri il file scaricato e segui le istruzioni. Ci vogliono 2 minuti.
+                      {t('ollama.step_install_desc')}
                     </p>
                   ),
                 },
                 {
                   n: 3,
-                  title: 'Torna qui',
+                  title: t('ollama.step_return_title'),
                   content: (
                     <p className="text-sm text-muted-foreground">
-                      Dopo l'installazione, torna su questa pagina.
+                      {t('ollama.step_return_desc')}
                     </p>
                   ),
                 },
                 {
                   n: 4,
-                  title: 'Avvia Ollama',
+                  title: t('ollama.step_start_title'),
                   content: (
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">
-                        Dopo l'installazione, avvia Ollama come faresti con qualsiasi altra app. Su Mac compare un'icona nella barra menu in alto. Su Windows nell'area di notifica in basso a destra. Su Linux esegui <code className="rounded bg-muted px-1 py-0.5 text-xs font-mono">ollama serve</code> nel terminale.
+                        {t('ollama.step_start_desc_before')}{' '}
+                        <code className="rounded bg-muted px-1 py-0.5 text-xs font-mono">ollama serve</code>{' '}
+                        {t('ollama.step_start_desc_after')}
                       </p>
                       <button
                         onClick={setup.retry}
                         className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
                       >
-                        Ho avviato Ollama
+                        {t('ollama.started_btn')}
                       </button>
                     </div>
                   ),
@@ -122,13 +138,13 @@ export function OllamaSetupFlow({ onComplete, onCancel, autoDetect = true }: Pro
                 rel="noopener noreferrer"
                 className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
               >
-                Cos'è Ollama?
+                {t('ollama.what_is')}
               </a>
               <button
                 onClick={onCancel}
                 className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
               >
-                Annulla
+                {t('ollama.cancel')}
               </button>
             </div>
           </motion.div>
@@ -138,10 +154,10 @@ export function OllamaSetupFlow({ onComplete, onCancel, autoDetect = true }: Pro
           <motion.div key="model-select" {...fade} className="w-full max-w-md space-y-5">
             <div className="text-center">
               <h2 className="font-heading text-xl font-semibold text-foreground">
-                Scegli il tuo Privacy Engine
+                {t('ollama.model_select_title')}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Gira tutto sul tuo computer. Nessun dato esce mai.
+                {t('ollama.model_select_desc')}
               </p>
             </div>
 
@@ -163,11 +179,11 @@ export function OllamaSetupFlow({ onComplete, onCancel, autoDetect = true }: Pro
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-sm font-semibold text-foreground">
-                          {model.label}
+                          {t(`ollama.model_${key}_label` as const)}
                         </span>
                         {isSuggested && (
                           <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                            Suggerito per il tuo dispositivo
+                            {t('ollama.suggested')}
                           </span>
                         )}
                       </div>
@@ -176,8 +192,8 @@ export function OllamaSetupFlow({ onComplete, onCancel, autoDetect = true }: Pro
                         <span>·</span>
                         <span>{model.ramGB} GB RAM</span>
                       </div>
-                      <p className="mt-1.5 text-xs text-muted-foreground">{model.description}</p>
-                      <p className="mt-0.5 text-xs text-muted-foreground/70">{model.compatible}</p>
+                      <p className="mt-1.5 text-xs text-muted-foreground">{t(`ollama.model_${key}_desc` as const)}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground/70">{t(`ollama.model_${key}_compatible` as const)}</p>
                     </button>
                   )
                 }
@@ -189,7 +205,7 @@ export function OllamaSetupFlow({ onComplete, onCancel, autoDetect = true }: Pro
               disabled={!setup.selectedModel}
               className="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Scarica e attiva
+              {t('ollama.download_start_btn')}
             </button>
           </motion.div>
         )}
@@ -198,10 +214,10 @@ export function OllamaSetupFlow({ onComplete, onCancel, autoDetect = true }: Pro
           <motion.div key="downloading" {...fade} className="w-full max-w-sm space-y-6 text-center">
             <div>
               <h2 className="font-heading text-xl font-semibold text-foreground">
-                Download in corso
+                {t('ollama.downloading_title')}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                {MODELS[setup.selectedModel].label} · {MODELS[setup.selectedModel].sizeGB} GB
+                {t(`ollama.model_${setup.selectedModel}_label` as const)} · {MODELS[setup.selectedModel].sizeGB} GB
               </p>
             </div>
 
@@ -220,7 +236,7 @@ export function OllamaSetupFlow({ onComplete, onCancel, autoDetect = true }: Pro
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Solo al primo avvio — poi è sempre immediato
+              {t('ollama.download_first_time')}
             </p>
           </motion.div>
         )}
@@ -238,10 +254,10 @@ export function OllamaSetupFlow({ onComplete, onCancel, autoDetect = true }: Pro
 
             <div>
               <h2 className="font-heading text-xl font-semibold text-foreground">
-                Privacy Engine attivo
+                {t('ollama.ready_title')}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Il tuo modello AI è pronto. Tutto gira sul tuo computer.
+                {t('ollama.ready_desc')}
               </p>
             </div>
 
@@ -249,7 +265,7 @@ export function OllamaSetupFlow({ onComplete, onCancel, autoDetect = true }: Pro
               onClick={onComplete}
               className="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
             >
-              Inizia a registrare
+              {t('ollama.start_recording_btn')}
             </button>
           </motion.div>
         )}
@@ -262,7 +278,7 @@ export function OllamaSetupFlow({ onComplete, onCancel, autoDetect = true }: Pro
 
             <div>
               <h2 className="font-heading text-base font-semibold text-foreground">
-                Qualcosa è andato storto
+                {t('ollama.error_title')}
               </h2>
               {setup.errorMessage && (
                 <p className="mt-1 text-xs text-muted-foreground">{setup.errorMessage}</p>
@@ -273,7 +289,7 @@ export function OllamaSetupFlow({ onComplete, onCancel, autoDetect = true }: Pro
               onClick={setup.retry}
               className="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
             >
-              Riprova
+              {t('ollama.retry')}
             </button>
           </motion.div>
         )}

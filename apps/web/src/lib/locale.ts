@@ -1,7 +1,7 @@
-export const APP_LOCALE = 'it-IT'
+import i18n from '../i18n'
 
 export function formatMeetingTitle(date: Date): string {
-  return date.toLocaleString(APP_LOCALE, {
+  return date.toLocaleString(i18n.language, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',

@@ -4,10 +4,12 @@ const sodium = _sodium
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { unlockWithPassphrase, unlockWithRecoveryPhrase, persistKeyToSession, verifyKey, getCurrentKey } from '../lib/keystore'
 import { Button } from '../components/ui/button'
 
 export default function SyncUnlockPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   const [passphrase, setPassphrase] = useState('')
@@ -33,7 +35,7 @@ export default function SyncUnlockPage() {
       await persistKeyToSession()
       navigate('/dashboard')
     } catch {
-      setPassphraseError('Passphrase errata')
+      setPassphraseError(t('sync_unlock.error_wrong'))
     } finally {
       setSubmitting(false)
     }
@@ -47,7 +49,7 @@ export default function SyncUnlockPage() {
       await persistKeyToSession()
       navigate('/dashboard')
     } catch {
-      setRecoveryError('Recovery phrase non valida')
+      setRecoveryError(t('sync_unlock.error_invalid_recovery'))
     } finally {
       setRecoverySubmitting(false)
     }
@@ -68,14 +70,14 @@ export default function SyncUnlockPage() {
           <>
             <div className="space-y-1">
               <h1 className="text-2xl font-semibold text-[#1A4D52]">
-                Sblocca il tuo archivio cifrato
+                {t('sync_unlock.title')}
               </h1>
               <p className="text-sm text-gray-500">
-                Inserisci la tua passphrase per accedere ai meeting sincronizzati
+                {t('sync_unlock.hint')}
               </p>
             </div>
             <div className="space-y-1">
-              <label className="text-sm font-medium text-gray-700">Passphrase</label>
+              <label className="text-sm font-medium text-gray-700">{t('sync_unlock.passphrase_label')}</label>
               <input
                 type="password"
                 value={passphrase}
@@ -93,21 +95,21 @@ export default function SyncUnlockPage() {
               onClick={handleUnlock}
               disabled={!passphrase || submitting}
             >
-              {submitting ? 'Sblocco in corso…' : 'Sblocca'}
+              {submitting ? t('sync_unlock.unlocking') : t('sync_unlock.unlock_btn')}
             </Button>
             <button
               onClick={() => setShowRecovery(true)}
               className="w-full text-center text-sm text-[#1A4D52] underline underline-offset-4"
             >
-              Ho perso la passphrase → usa recovery phrase
+              {t('sync_unlock.recovery_link')}
             </button>
           </>
         ) : (
           <>
             <div className="space-y-1">
-              <h1 className="text-2xl font-semibold text-[#1A4D52]">Recovery phrase</h1>
+              <h1 className="text-2xl font-semibold text-[#1A4D52]">{t('sync_unlock.recovery_title')}</h1>
               <p className="text-sm text-gray-500">
-                Inserisci le 12 parole nell'ordine corretto
+                {t('sync_unlock.recovery_hint')}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -136,13 +138,13 @@ export default function SyncUnlockPage() {
               onClick={handleRecoveryUnlock}
               disabled={recoveryWords.some(w => !w) || recoverySubmitting}
             >
-              {recoverySubmitting ? 'Ripristino in corso…' : 'Ripristina accesso'}
+              {recoverySubmitting ? t('sync_unlock.restoring') : t('sync_unlock.restore_btn')}
             </Button>
             <button
               onClick={() => setShowRecovery(false)}
               className="w-full text-center text-sm text-gray-400 underline underline-offset-4"
             >
-              Torna alla passphrase
+              {t('sync_unlock.back_to_passphrase')}
             </button>
           </>
         )}

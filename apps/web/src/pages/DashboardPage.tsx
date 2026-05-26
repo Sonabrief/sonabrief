@@ -4,6 +4,7 @@ import { BiLogoMicrosoft } from 'react-icons/bi'
 import { toast } from 'sonner'
 import { motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Mic, Lock } from 'lucide-react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../lib/db'
@@ -19,6 +20,7 @@ import { ShimmerButton } from '../components/ui/shimmer-button'
 import { useRetentionCleanup } from '../hooks/useRetentionCleanup'
 import { useWeeklyReminder } from '../hooks/useWeeklyReminder'
 import type { Tier } from '../hooks/useTier'
+import i18n from '../i18n'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -41,11 +43,11 @@ interface CalendarState {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function formatDateShort(ts: number): string {
-  return new Date(ts).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+  return new Date(ts).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 }
 
 function formatEventTime(start: string): string {
-  return new Date(start).toLocaleString('it-IT', {
+  return new Date(start).toLocaleString(i18n.language, {
     weekday: 'short', day: 'numeric', month: 'short',
     hour: '2-digit', minute: '2-digit',
   })
@@ -92,6 +94,7 @@ function TierBadge({ tier }: { tier: string }) {
 // ── Quota bar ─────────────────────────────────────────────────────────────────
 
 function QuotaBar({ used, cap, percent }: { used: number; cap: number; percent: number }) {
+  const { t } = useTranslation()
   const remaining = Math.max(0, cap - used)
   const warning = percent > 80
   return (
@@ -101,7 +104,7 @@ function QuotaBar({ used, cap, percent }: { used: number; cap: number; percent: 
         aria-valuenow={percent}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label={`Quota sintesi cloud: ${percent}% utilizzata, ${formatMinutes(remaining)} rimanenti su ${formatMinutes(cap)}`}
+        aria-label={t('dashboard.quota_aria', { percent, remaining: formatMinutes(remaining), cap: formatMinutes(cap) })}
         className="h-1.5 w-full overflow-hidden rounded-full bg-border"
       >
         <div
@@ -112,7 +115,7 @@ function QuotaBar({ used, cap, percent }: { used: number; cap: number; percent: 
         />
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
-        {formatMinutes(used)} usati &middot; {formatMinutes(remaining)} rimanenti
+        {t('dashboard.quota_used_remaining', { used: formatMinutes(used), remaining: formatMinutes(remaining) })}
       </p>
     </div>
   )
@@ -172,6 +175,7 @@ function AttendeesList({ attendees }: { attendees: { email: string; name?: strin
 // ── Dashboard event card ──────────────────────────────────────────────────────
 
 function DashboardEventCard({ event, hasBriefing, provider }: { event: CalendarEvent; hasBriefing: boolean; provider?: 'google' | 'microsoft' }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
 
   function handleStart() {
@@ -193,7 +197,7 @@ function DashboardEventCard({ event, hasBriefing, provider }: { event: CalendarE
             <p className="truncate text-sm font-medium text-foreground">{event.title}</p>
             {hasBriefing && (
               <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                Briefing
+                {t('dashboard.briefing_badge')}
               </span>
             )}
           </div>
@@ -206,7 +210,7 @@ function DashboardEventCard({ event, hasBriefing, provider }: { event: CalendarE
             className="mt-3 flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
           >
             <Mic className="h-3.5 w-3.5" aria-hidden="true" />
-            Avvia e registra
+            {t('dashboard.start_record')}
           </button>
         </div>
         {provider === 'google' && <SiGooglecalendar size={14} color="#1A73E8" className="mt-0.5 shrink-0" />}
@@ -219,6 +223,7 @@ function DashboardEventCard({ event, hasBriefing, provider }: { event: CalendarE
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [billing, setBilling] = useState<BillingStatus | null>(null)
@@ -276,7 +281,7 @@ export default function DashboardPage() {
     if (url) {
       window.open(url, '_blank')
     } else {
-      toast.error('Errore', { description: 'Impossibile aprire il portale. Riprova o contatta il supporto.' })
+      toast.error(t('dashboard.error'), { description: t('dashboard.portal_error') })
     }
   }
 
@@ -322,7 +327,7 @@ export default function DashboardPage() {
           id="quota-heading"
           className="text-xs font-semibold uppercase tracking-widest text-muted-foreground"
         >
-          Sintesi cloud
+          {t('dashboard.cloud_synthesis')}
         </h2>
         <TierBadge tier={tier} />
       </div>
@@ -332,7 +337,7 @@ export default function DashboardPage() {
           onClick={() => navigate('/pricing')}
           className="mt-2 text-xs font-medium text-primary transition-colors hover:underline motion-reduce:transition-none"
         >
-          Passa a Pro
+          {t('dashboard.upgrade_pro')}
         </button>
       )}
     </section>
@@ -376,21 +381,21 @@ export default function DashboardPage() {
                   id="nuova-sessione-heading"
                   className="font-heading mb-1.5 text-xl font-semibold tracking-[-0.015em] text-foreground"
                 >
-                  {displayName ? `Ciao, ${displayName}` : 'Registra, trascrivi, archivia'}
+                  {displayName ? t('dashboard.greeting', { name: displayName }) : t('dashboard.tagline')}
                 </h2>
                 {displayName && (
                   <p className="font-heading mb-1 text-sm text-muted-foreground">
-                    Registra, trascrivi, archivia
+                    {t('dashboard.tagline')}
                   </p>
                 )}
                 <p className="mb-8 text-sm text-muted-foreground">
-                  Tutto elaborato sul tuo computer. Mai nel cloud.
+                  {t('dashboard.privacy_note')}
                 </p>
                 <ShimmerButton
                   onClick={() => navigate('/recording')}
                   className="h-10 px-6 text-sm font-semibold"
                 >
-                  Avvia registrazione
+                  {t('dashboard.start_recording')}
                 </ShimmerButton>
               </div>
             </motion.section>
@@ -402,13 +407,13 @@ export default function DashboardPage() {
                   id="calendario-heading"
                   className="text-xs font-semibold uppercase tracking-widest text-muted-foreground"
                 >
-                  Prossimi meeting
+                  {t('dashboard.upcoming_meetings')}
                 </h2>
                 <button
                   onClick={() => navigate('/calendar')}
                   className="text-xs text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
                 >
-                  Calendario
+                  {t('dashboard.calendar_section')}
                 </button>
               </div>
 
@@ -423,32 +428,32 @@ export default function DashboardPage() {
                   <div className="rounded-lg border border-dashed border-border bg-card px-5 py-4">
                     <div className="flex items-center gap-2 mb-2">
                       <Lock className="h-4 w-4 text-muted-foreground shrink-0" aria-hidden="true" />
-                      <p className="text-sm font-medium text-foreground">Prossimi meeting</p>
+                      <p className="text-sm font-medium text-foreground">{t('dashboard.calendar_locked_title')}</p>
                     </div>
                     <p className="text-sm text-muted-foreground mb-3">
-                      Collega Google o Microsoft Calendar per vedere i tuoi eventi e avviare la registrazione in un click.
+                      {t('dashboard.calendar_connect_hint')}
                     </p>
                     <button
                       onClick={() => navigate('/pricing')}
                       className="text-xs font-medium text-primary hover:underline transition-colors"
                     >
-                      Scopri Pro →
+                      {t('dashboard.discover_pro')}
                     </button>
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    Nessun calendario collegato.{' '}
+                    {t('dashboard.no_calendar')}{' '}
                     <button
                       onClick={() => navigate('/calendar')}
                       className="font-medium text-primary transition-colors hover:underline motion-reduce:transition-none"
                     >
-                      Collega calendario
+                      {t('dashboard.connect_calendar')}
                     </button>
                   </p>
                 )
               ) : upcomingEvents.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  Nessun meeting in programma.
+                  {t('dashboard.no_upcoming')}
                 </p>
               ) : (
                 <ul className="space-y-2" role="list">
@@ -463,7 +468,7 @@ export default function DashboardPage() {
           </div>
 
           {/* ── Right column ──────────────────────────────── */}
-          <aside className="mt-10 space-y-4 lg:mt-0" aria-label="Riepilogo">
+          <aside className="mt-10 space-y-4 lg:mt-0" aria-label={t('dashboard.summary_aria')}>
 
             {tier === 'free' && quotaSection}
 
@@ -477,13 +482,13 @@ export default function DashboardPage() {
                   id="recenti-heading"
                   className="text-xs font-semibold uppercase tracking-widest text-muted-foreground"
                 >
-                  Recenti
+                  {t('dashboard.recent')}
                 </h2>
                 <button
                   onClick={() => navigate('/archive')}
                   className="text-xs text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
                 >
-                  Vedi tutti
+                  {t('dashboard.view_all')}
                 </button>
               </div>
 
@@ -492,7 +497,7 @@ export default function DashboardPage() {
                   {[0, 1, 2].map(i => <div key={i} className="h-8 rounded bg-border" />)}
                 </div>
               ) : recentMeetings.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Nessun meeting.</p>
+                <p className="text-xs text-muted-foreground">{t('dashboard.no_meetings')}</p>
               ) : (
                 <ul className="divide-y divide-border" role="list">
                   {recentMeetings.map((meeting, i) => (
@@ -533,7 +538,7 @@ export default function DashboardPage() {
                                   ? 'bg-destructive/10 text-destructive'
                                   : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
                               }`}>
-                                {daysLeft === 1 ? 'scade oggi' : `scade in ${daysLeft}gg`}
+                                {daysLeft === 1 ? t('dashboard.expires_today') : t('dashboard.expires_in_days', { days: daysLeft })}
                               </span>
                             )
                           })()}
@@ -555,14 +560,14 @@ export default function DashboardPage() {
                   id="azioni-heading"
                   className="text-xs font-semibold uppercase tracking-widest text-muted-foreground"
                 >
-                  Azioni
+                  {t('dashboard.actions')}
                 </h2>
                 {tier !== 'free' ? (
                   <button
                     onClick={() => navigate('/actions')}
                     className="text-xs text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
                   >
-                    Vedi tutte
+                    {t('dashboard.view_all_actions')}
                   </button>
                 ) : (
                   <span className="flex items-center gap-1 text-xs text-muted-foreground opacity-60">
@@ -577,7 +582,7 @@ export default function DashboardPage() {
                   {[0, 1].map(i => <div key={i} className="h-6 rounded bg-border" />)}
                 </div>
               ) : openCount === 0 ? (
-                <p className="text-xs text-muted-foreground">Nessuna azione in sospeso.</p>
+                <p className="text-xs text-muted-foreground">{t('dashboard.no_actions')}</p>
               ) : (
                 <>
                   <p className="mb-2.5">
@@ -585,7 +590,7 @@ export default function DashboardPage() {
                       value={openCount}
                       className="text-xl font-semibold text-foreground"
                     />
-                    <span className="ml-1 text-xs text-muted-foreground">in sospeso</span>
+                    <span className="ml-1 text-xs text-muted-foreground">{t('dashboard.pending')}</span>
                   </p>
                   <ul className="space-y-2" role="list">
                     {topItems.map(item => {
@@ -593,14 +598,14 @@ export default function DashboardPage() {
                         const dl = item.dueDate
                         if (!dl) return null
                         const now = Date.now()
-                        if (dl < now) return { text: 'Scaduto', className: 'text-destructive' }
+                        if (dl < now) return { text: t('dashboard.expired'), className: 'text-destructive' }
                         if (dl <= now + 3 * 24 * 60 * 60 * 1000)
                           return {
-                            text: new Date(dl).toLocaleDateString('it-IT', { day: 'numeric', month: 'short' }),
+                            text: new Date(dl).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' }),
                             className: 'text-amber-600 dark:text-amber-400',
                           }
                         return {
-                          text: new Date(dl).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' }),
+                          text: new Date(dl).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' }),
                           className: 'text-primary',
                         }
                       })()
@@ -633,7 +638,7 @@ export default function DashboardPage() {
                 id="account-heading"
                 className="mb-2.5 text-xs font-semibold uppercase tracking-widest text-muted-foreground"
               >
-                Account
+                {t('dashboard.account_section')}
               </h2>
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
@@ -642,7 +647,7 @@ export default function DashboardPage() {
                 </div>
                 {billing?.billing_cycle && tier !== 'free' && (
                   <p className="text-xs text-muted-foreground">
-                    {billing.billing_cycle === 'monthly' ? 'Piano mensile' : 'Piano annuale'}
+                    {billing.billing_cycle === 'monthly' ? t('dashboard.plan_monthly') : t('dashboard.plan_annual')}
                   </p>
                 )}
                 {tier !== 'free' ? (
@@ -650,14 +655,14 @@ export default function DashboardPage() {
                     onClick={handleManageSubscription}
                     className="text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
                   >
-                    Gestisci abbonamento
+                    {t('dashboard.manage_subscription')}
                   </button>
                 ) : (
                   <button
                     onClick={() => navigate('/pricing')}
                     className="text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
                   >
-                    Passa a un piano superiore
+                    {t('dashboard.upgrade_plan')}
                   </button>
                 )}
               </div>

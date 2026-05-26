@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next'
 import { API_URL } from '../config';
 
 export default function VerifyPage() {
+  const { t } = useTranslation()
   const [searchParams] = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'ok' | 'error'>('loading');
   const navigate = useNavigate();
@@ -25,22 +27,22 @@ export default function VerifyPage() {
 
   if (status === 'loading') return (
     <div className="flex min-h-screen items-center justify-center">
-      <p className="text-gray-500">Verifica in corso...</p>
+      <p className="text-gray-500">{t('verify.loading')}</p>
     </div>
   );
   if (status === 'ok') return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="text-center">
-        <h1 className="text-2xl font-semibold mb-2">Accesso effettuato</h1>
-        <p className="text-gray-500">Reindirizzamento...</p>
+        <h1 className="text-2xl font-semibold mb-2">{t('verify.ok_title')}</h1>
+        <p className="text-gray-500">{t('verify.ok_redirecting')}</p>
       </div>
     </div>
   );
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="text-center">
-        <h1 className="text-2xl font-semibold mb-2">Link non valido</h1>
-        <p className="text-gray-500">Il link è scaduto o già utilizzato.</p>
+        <h1 className="text-2xl font-semibold mb-2">{t('verify.error_title')}</h1>
+        <p className="text-gray-500">{t('verify.error_msg')}</p>
       </div>
     </div>
   );

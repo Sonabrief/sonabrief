@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { getBillingStatus } from '../lib/api'
 
 export default function BillingSuccessPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [tier, setTier] = useState<string | null>(null)
   const [attempts, setAttempts] = useState(0)
@@ -38,22 +40,20 @@ export default function BillingSuccessPage() {
           className="text-3xl text-[#1A4D52]"
           style={{ fontFamily: '"Instrument Serif", serif' }}
         >
-          Pagamento completato
+          {t('billing_success.title')}
         </h1>
 
         {tier ? (
           <p className="text-gray-600 text-sm">
-            Il tuo piano <strong>{tierLabel[tier] ?? tier}</strong> è attivo.
-            Benvenuto.
+            {t('billing_success.active_msg', { tier: tierLabel[tier] ?? tier })}
           </p>
         ) : attempts >= 10 ? (
           <p className="text-gray-500 text-sm">
-            Il piano si attiverà a breve — potrebbe richiedere qualche minuto.
-            Ricarica la dashboard se non vedi il cambiamento.
+            {t('billing_success.pending_msg')}
           </p>
         ) : (
           <p className="text-gray-400 text-sm">
-            Attivazione in corso…
+            {t('billing_success.activating')}
           </p>
         )}
 
@@ -61,7 +61,7 @@ export default function BillingSuccessPage() {
           onClick={() => navigate('/dashboard')}
           className="w-full rounded-lg bg-[#1A4D52] px-4 py-3 text-sm font-medium text-white hover:bg-[#143a3e] transition-colors"
         >
-          Vai alla dashboard
+          {t('billing_success.go_dashboard')}
         </button>
 
       </div>

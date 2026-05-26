@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export type ModelKey = 'base' | 'advanced' | 'professional' | 'max'
 
@@ -12,46 +13,15 @@ export type SetupStep =
 
 export interface ModelConfig {
   id: string
-  label: string
   sizeGB: number
   ramGB: number
-  description: string
-  compatible: string
 }
 
 export const MODELS: Record<ModelKey, ModelConfig> = {
-  base: {
-    id: 'llama3.2:3b',
-    label: 'Base',
-    sizeGB: 2,
-    ramGB: 8,
-    description: 'Meeting brevi, linguaggio quotidiano',
-    compatible: 'Qualsiasi PC/Mac recente',
-  },
-  advanced: {
-    id: 'llama3.1:8b',
-    label: 'Avanzato',
-    sizeGB: 5,
-    ramGB: 16,
-    description: 'Meeting lunghi, terminologia professionale',
-    compatible: 'PC/Mac con 16 GB RAM',
-  },
-  professional: {
-    id: 'qwen2.5:14b',
-    label: 'Professionale',
-    sizeGB: 9,
-    ramGB: 16,
-    description: 'Documenti complessi, alta precisione',
-    compatible: 'PC/Mac con 16 GB RAM',
-  },
-  max: {
-    id: 'qwen2.5:32b',
-    label: 'Massimo',
-    sizeGB: 20,
-    ramGB: 32,
-    description: 'Qualità equivalente ai migliori servizi cloud',
-    compatible: 'Solo workstation/Mac Pro',
-  },
+  base: { id: 'llama3.2:3b', sizeGB: 2, ramGB: 8 },
+  advanced: { id: 'llama3.1:8b', sizeGB: 5, ramGB: 16 },
+  professional: { id: 'qwen2.5:14b', sizeGB: 9, ramGB: 16 },
+  max: { id: 'qwen2.5:32b', sizeGB: 20, ramGB: 32 },
 }
 
 function getSuggestedModel(ram: number): ModelKey {
@@ -79,6 +49,7 @@ export interface OllamaSetupActions {
 }
 
 export function useOllamaSetup({ autoDetect = true }: { autoDetect?: boolean } = {}): OllamaSetupState & OllamaSetupActions {
+  const { t } = useTranslation()
   const detectedRAM = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 8
   const suggestedModel = getSuggestedModel(detectedRAM)
 
@@ -172,7 +143,7 @@ export function useOllamaSetup({ autoDetect = true }: { autoDetect?: boolean } =
       localStorage.setItem('sonabrief_ollama_model', modelId)
       setStep('ready')
     } catch (e) {
-      setErrorMessage(e instanceof Error ? e.message : 'Download fallito')
+      setErrorMessage(e instanceof Error ? e.message : t('ollama.download_failed'))
       setStep('error')
     }
   }, [selectedModel])

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { API_URL } from '../config'
 
 type Tier = 'pro_monthly' | 'pro_annual' | 'unlimited_monthly' | 'unlimited_annual'
@@ -15,6 +16,7 @@ interface PlanCard {
 }
 
 export default function PricingPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly')
   const [loading, setLoading] = useState<Tier | null>(null)
@@ -24,30 +26,30 @@ export default function PricingPage() {
     {
       name: 'Free',
       price: '€0',
-      cycle: 'forever',
-      description: 'Per provare Sonabrief senza impegno.',
+      cycle: t('pricing.cycle_forever'),
+      description: t('pricing.free_desc'),
       features: [
-        '3 ore di sintesi cloud / mese',
-        'Modalità Local Only illimitata',
-        'Sync E2E fino a 100 MB',
-        'Archivio 7 giorni',
-        'Export solo Markdown',
+        t('pricing.free_feature_1'),
+        t('pricing.free_feature_2'),
+        t('pricing.free_feature_3'),
+        t('pricing.free_feature_4'),
+        t('pricing.free_feature_5'),
       ],
       tier: null,
     },
     {
       name: 'Pro',
       price: billing === 'monthly' ? '€9' : '€89',
-      cycle: billing === 'monthly' ? '/ mese' : '/ anno',
-      description: 'Per il professionista che lavora ogni giorno con i clienti.',
+      cycle: billing === 'monthly' ? t('pricing.per_month') : t('pricing.per_year'),
+      description: t('pricing.pro_desc'),
       features: [
-        '30 ore di sintesi cloud / mese',
-        'Mistral Large 3 (EU-hosted)',
-        'Sync E2E fino a 5 GB',
-        'Dashboard action items',
-        'Briefing pre-meeting',
-        'Template personalizzati (5)',
-        'Archivio sintesi 12 mesi',
+        t('pricing.pro_feature_1'),
+        t('pricing.pro_feature_2'),
+        t('pricing.pro_feature_3'),
+        t('pricing.pro_feature_4'),
+        t('pricing.pro_feature_5'),
+        t('pricing.pro_feature_6'),
+        t('pricing.pro_feature_7'),
       ],
       tier: billing === 'monthly' ? 'pro_monthly' : 'pro_annual',
       highlight: true,
@@ -55,16 +57,16 @@ export default function PricingPage() {
     {
       name: 'Pro Unlimited',
       price: billing === 'monthly' ? '€19' : '€189',
-      cycle: billing === 'monthly' ? '/ mese' : '/ anno',
-      description: 'Per chi gestisce volumi alti senza limiti.',
+      cycle: billing === 'monthly' ? t('pricing.per_month') : t('pricing.per_year'),
+      description: t('pricing.unlimited_desc'),
       features: [
-        'Sintesi cloud illimitata',
-        'Mistral Large 3 (EU-hosted)',
-        'Sync E2E fino a 25 GB',
-        'Backup automatico',
-        'Template personalizzati illimitati',
-        'Supporto prioritario',
-        'Archivio sintesi illimitato',
+        t('pricing.unlimited_feature_1'),
+        t('pricing.unlimited_feature_mistral'),
+        t('pricing.unlimited_feature_2'),
+        t('pricing.unlimited_feature_3'),
+        t('pricing.unlimited_feature_4'),
+        t('pricing.unlimited_feature_5'),
+        t('pricing.unlimited_feature_6'),
       ],
       tier: billing === 'monthly' ? 'unlimited_monthly' : 'unlimited_annual',
     },
@@ -91,7 +93,7 @@ export default function PricingPage() {
       const data = await res.json() as { url: string }
       window.location.href = data.url
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Errore imprevisto')
+      setError(e instanceof Error ? e.message : t('pricing.error_unexpected'))
       setLoading(null)
     }
   }
@@ -104,7 +106,7 @@ export default function PricingPage() {
             onClick={() => navigate('/dashboard')}
             className="text-sm text-gray-500 underline hover:text-[#1A4D52]"
           >
-            ← Dashboard
+            {t('pricing.back')}
           </button>
         </div>
 
@@ -113,10 +115,10 @@ export default function PricingPage() {
             className="text-5xl text-[#1A4D52]"
             style={{ fontFamily: '"Instrument Serif", serif' }}
           >
-            Scegli il tuo piano
+            {t('pricing.title')}
           </h1>
           <p className="mt-4 text-base text-gray-600">
-            Cambialo o cancellalo quando vuoi. Nessun lock-in.
+            {t('pricing.subtitle')}
           </p>
         </div>
 
@@ -130,7 +132,7 @@ export default function PricingPage() {
                   : 'text-gray-600'
               }`}
             >
-              Mensile
+              {t('pricing.monthly')}
             </button>
             <button
               onClick={() => setBilling('annual')}
@@ -140,9 +142,9 @@ export default function PricingPage() {
                   : 'text-gray-600'
               }`}
             >
-              Annuale
+              {t('pricing.annual')}
               <span className="ml-2 rounded-full bg-[#C89868] px-2 py-0.5 text-xs text-white">
-                -17%
+                {t('pricing.annual_discount')}
               </span>
             </button>
           </div>
@@ -166,7 +168,7 @@ export default function PricingPage() {
             >
               {plan.highlight && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#C89868] px-3 py-1 text-xs font-medium text-white">
-                  Più scelto
+                  {t('pricing.most_popular')}
                 </div>
               )}
               <h2
@@ -203,14 +205,14 @@ export default function PricingPage() {
                         : 'border border-[#1A4D52] text-[#1A4D52] hover:bg-[#1A4D52] hover:text-white'
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
-                    {loading === plan.tier ? 'Caricamento...' : 'Inizia ora'}
+                    {loading === plan.tier ? t('pricing.loading') : t('pricing.start_now')}
                   </button>
                 ) : (
                   <button
                     disabled
                     className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-400 cursor-default"
                   >
-                    Piano attuale
+                    {t('pricing.current_plan')}
                   </button>
                 )}
               </div>
@@ -219,7 +221,7 @@ export default function PricingPage() {
         </div>
 
         <p className="mt-12 text-center text-xs text-gray-500">
-          Pagamenti gestiti da Polar (Merchant of Record). IVA inclusa automaticamente.
+          {t('pricing.payment_note')}
         </p>
       </div>
     </div>

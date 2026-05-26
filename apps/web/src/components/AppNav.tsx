@@ -2,14 +2,15 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { ChevronDown, LogOut, Menu, User, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { getMe, getBillingStatus, logout } from '../lib/api'
 
 const NAV_ITEMS = [
-  { label: 'Archivio', path: '/archive', proOnly: false },
-  { label: 'Calendario', path: '/calendar', proOnly: true },
-  { label: 'Azioni', path: '/actions', proOnly: true },
-  { label: 'Clienti', path: '/clients', proOnly: true },
-  { label: 'Template', path: '/templates', proOnly: false },
+  { key: 'app_nav.archive', path: '/archive', proOnly: false },
+  { key: 'app_nav.calendar', path: '/calendar', proOnly: true },
+  { key: 'app_nav.actions', path: '/actions', proOnly: true },
+  { key: 'app_nav.clients', path: '/clients', proOnly: true },
+  { key: 'app_nav.templates', path: '/templates', proOnly: false },
 ]
 
 function getInitials(email: string): string {
@@ -52,6 +53,7 @@ function UserMenu({
   tier: string
   onLogout: () => void
 }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -123,7 +125,7 @@ function UserMenu({
                 className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-foreground transition-colors hover:bg-muted motion-reduce:transition-none"
               >
                 <User className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                Il tuo profilo
+                {t('app_nav.profile')}
               </button>
 
               <div className="border-t border-border" />
@@ -134,7 +136,7 @@ function UserMenu({
                 className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-destructive transition-colors hover:bg-destructive/5 motion-reduce:transition-none"
               >
                 <LogOut className="h-4 w-4" aria-hidden="true" />
-                Esci
+                {t('app_nav.logout')}
               </button>
             </div>
           </motion.div>
@@ -145,6 +147,7 @@ function UserMenu({
 }
 
 export function AppNav() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const [email, setEmail] = useState('')
@@ -175,13 +178,13 @@ export function AppNav() {
   return (
     <nav
       className="sticky top-0 z-10 border-b border-border bg-card"
-      aria-label="Navigazione principale"
+      aria-label={t('app_nav.main_nav_aria')}
     >
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-8 px-6">
         <button
           onClick={() => navigate('/dashboard')}
           className="shrink-0 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          aria-label="Torna alla dashboard"
+          aria-label={t('app_nav.back_home_aria')}
         >
           <img src="/logo.svg" alt="Sonabrief" className="h-7 w-auto" />
         </button>
@@ -189,20 +192,21 @@ export function AppNav() {
         <button
           className="flex items-center justify-center rounded-md p-2 text-foreground hover:bg-muted md:hidden"
           onClick={() => setMobileOpen(o => !o)}
-          aria-label={mobileOpen ? 'Chiudi menu' : 'Apri menu'}
+          aria-label={mobileOpen ? t('app_nav.close_menu_aria') : t('app_nav.open_menu_aria')}
         >
           {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
 
         <ul className="hidden items-center gap-0.5 md:flex" role="list">
-          {NAV_ITEMS.map(({ label, path, proOnly }) => {
+          {NAV_ITEMS.map(({ key, path, proOnly }) => {
             const locked = proOnly && isFree
+            const label = t(key)
             return (
               <li key={path}>
                 <button
                   onClick={() => navigate(path)}
                   aria-current={location.pathname === path ? 'page' : undefined}
-                  title={locked ? `${label} è disponibile con Pro` : undefined}
+                  title={locked ? t('app_nav.locked_title', { label }) : undefined}
                   className={`relative rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none ${
                     location.pathname === path
                       ? 'text-primary after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:bg-primary'
@@ -243,7 +247,7 @@ export function AppNav() {
             className="overflow-hidden border-t border-border bg-card md:hidden"
           >
             <ul className="flex flex-col px-4 py-2" role="list">
-              {NAV_ITEMS.map(({ label, path, proOnly }) => {
+              {NAV_ITEMS.map(({ key, path, proOnly }) => {
                 const locked = proOnly && isFree
                 return (
                   <li key={path}>
@@ -258,7 +262,7 @@ export function AppNav() {
                           : 'text-foreground hover:bg-muted'
                       }`}
                     >
-                      {label}
+                      {t(key)}
                       {locked && <span className="ml-1 text-[10px] text-muted-foreground/50">✦</span>}
                     </button>
                   </li>

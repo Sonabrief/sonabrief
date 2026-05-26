@@ -1,23 +1,26 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { Calendar as CalendarIcon, Pencil, Trash2 } from 'lucide-react'
 import { it } from 'date-fns/locale'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Calendar } from '@/components/ui/calendar'
 import { db, type ActionItem } from '../lib/db'
 import { AppNav } from '../components/AppNav'
+import i18n from '../i18n'
 
 type Filter = 'all' | 'todo' | 'done'
 
 function formatDate(ts: number): string {
-  return new Date(ts).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })
+  return new Date(ts).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 function formatDateLong(ts: number): string {
   const d = new Date(ts)
-  const date = d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' })
-  const time = d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+  const date = d.toLocaleDateString(i18n.language, { day: 'numeric', month: 'long', year: 'numeric' })
+  const time = d.toLocaleTimeString(i18n.language, { hour: '2-digit', minute: '2-digit' })
   return `${date} alle ore ${time}`
 }
 
@@ -25,16 +28,16 @@ function isFallbackTitle(title: string): boolean {
   return /alle ore|at \d+:\d+/i.test(title)
 }
 
-function DeadlineBadge({ item }: { item: ActionItem }) {
+function DeadlineBadge({ item, t }: { item: ActionItem; t: TFunction }) {
   if (!item.dueDate) return null
   const now = Date.now()
   const threeDays = 3 * 24 * 60 * 60 * 1000
-  const dateStr = new Date(item.dueDate).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })
+  const dateStr = new Date(item.dueDate).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' })
   if (!item.completed && item.dueDate < now) {
-    return <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-700 dark:bg-red-900/30 dark:text-red-400">Scaduto · {dateStr}</span>
+    return <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-700 dark:bg-red-900/30 dark:text-red-400">{t('action_items.expired_label', { date: dateStr })}</span>
   }
   if (!item.completed && item.dueDate <= now + threeDays) {
-    return <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Scade · {dateStr}</span>
+    return <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{t('action_items.due_label', { date: dateStr })}</span>
   }
   if (!item.completed) {
     return <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{dateStr}</span>
@@ -43,6 +46,7 @@ function DeadlineBadge({ item }: { item: ActionItem }) {
 }
 
 export default function ActionItemsPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [items, setItems] = useState<ActionItem[]>([])
   const [filter, setFilter] = useState<Filter>('all')
@@ -99,7 +103,7 @@ export default function ActionItemsPage() {
 
   async function exportActions() {
     const open = items.filter(i => !i.completed)
-    const lines = ['# Azioni aperte', '']
+    const lines = [t('action_items.export_open_header'), '']
     const grouped: Record<string, typeof open> = {}
     for (const item of open) {
       const key = meetings[item.meetingId]?.title ?? formatDateLong(item.meetingDate)
@@ -109,7 +113,7 @@ export default function ActionItemsPage() {
     for (const [meetingTitle, actions] of Object.entries(grouped)) {
       lines.push(`## ${meetingTitle}`)
       for (const a of actions) {
-        const deadline = a.dueDate ? ` (scadenza: ${new Date(a.dueDate).toLocaleDateString('it-IT')})` : ''
+        const deadline = a.dueDate ? t('action_items.export_deadline', { date: new Date(a.dueDate).toLocaleDateString(i18n.language) }) : ''
         lines.push(`- [ ] ${a.text}${deadline}`)
       }
       lines.push('')
@@ -145,9 +149,9 @@ export default function ActionItemsPage() {
   }
 
   const filterLabels: Record<Filter, string> = {
-    all: `Tutti (${counts.all})`,
-    todo: `Da fare (${counts.todo})`,
-    done: `Completati (${counts.done})`,
+    all: t('action_items.filter_all', { count: counts.all }),
+    todo: t('action_items.filter_todo', { count: counts.todo }),
+    done: t('action_items.filter_done', { count: counts.done }),
   }
 
   function groupByMeeting(actions: ActionItem[]) {
@@ -174,14 +178,14 @@ export default function ActionItemsPage() {
       <main className="mx-auto max-w-4xl px-6 py-8">
         <div className="mb-8 flex items-center justify-between">
           <h1 className="font-heading text-2xl font-bold leading-[1.2] tracking-[-0.015em] text-foreground">
-            Azioni
+            {t('action_items.title')}
           </h1>
           {counts.todo > 0 && (
             <button
               onClick={exportActions}
               className="text-xs text-primary transition-colors hover:underline motion-reduce:transition-none"
             >
-              Esporta aperte
+              {t('action_items.export_open')}
             </button>
           )}
         </div>
@@ -189,8 +193,8 @@ export default function ActionItemsPage() {
         {/* Controls */}
         <input
           type="text"
-          aria-label="Cerca azioni"
-          placeholder="Cerca azioni..."
+          aria-label={t('action_items.search_aria')}
+          placeholder={t('action_items.search_placeholder')}
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="w-full rounded-md border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
@@ -198,7 +202,7 @@ export default function ActionItemsPage() {
 
         <div className="mt-2 flex justify-end">
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-muted-foreground">Ordina:</span>
+            <span className="text-xs text-muted-foreground">{t('action_items.sort_label')}</span>
             {(['date', 'deadline'] as const).map(s => (
               <button key={s}
                 onClick={() => setSortBy(s)}
@@ -208,13 +212,13 @@ export default function ActionItemsPage() {
                     : 'border border-border bg-card text-muted-foreground hover:bg-border'
                 }`}
               >
-                {s === 'date' ? 'Data meeting' : 'Scadenza'}
+                {s === 'date' ? t('action_items.sort_meeting_date') : t('action_items.sort_due_date')}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="mt-2 flex gap-2" role="group" aria-label="Filtra per stato">
+        <div className="mt-2 flex gap-2" role="group" aria-label={t('action_items.filter_status_aria')}>
           {(['all', 'todo', 'done'] as Filter[]).map(f => (
             <button
               key={f}
@@ -232,7 +236,7 @@ export default function ActionItemsPage() {
         </div>
 
         {clientOptions.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="Filtra per cliente">
+          <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label={t('action_items.filter_client_aria')}>
             <button
               onClick={() => setFilterClient('all')}
               aria-pressed={filterClient === 'all'}
@@ -242,7 +246,7 @@ export default function ActionItemsPage() {
                   : 'border border-border bg-card text-muted-foreground hover:bg-border'
               }`}
             >
-              Tutti i clienti
+              {t('action_items.filter_all_clients')}
             </button>
             {clientOptions.map(c => (
               <button
@@ -268,13 +272,13 @@ export default function ActionItemsPage() {
                 onClick={() => setShowClearConfirm(true)}
                 className="text-xs text-muted-foreground transition-colors hover:text-destructive motion-reduce:transition-none"
               >
-                Cancella tutti i completati
+                {t('action_items.clear_completed')}
               </button>
             ) : (
               <div className="flex items-center gap-2 text-xs">
-                <span className="text-muted-foreground">Eliminerai {counts.done} azioni completate.</span>
-                <button onClick={clearCompleted} className="text-destructive hover:underline">Conferma</button>
-                <button onClick={() => setShowClearConfirm(false)} className="text-muted-foreground hover:underline">Annulla</button>
+                <span className="text-muted-foreground">{t('action_items.clear_confirm_msg', { count: counts.done })}</span>
+                <button onClick={clearCompleted} className="text-destructive hover:underline">{t('action_items.confirm')}</button>
+                <button onClick={() => setShowClearConfirm(false)} className="text-muted-foreground hover:underline">{t('action_items.cancel')}</button>
               </div>
             )}
           </div>
@@ -286,22 +290,22 @@ export default function ActionItemsPage() {
             <div className="py-12 text-center">
               {items.length === 0 ? (
                 <>
-                  <p className="text-sm font-semibold text-foreground">Nessuna azione ancora</p>
+                  <p className="text-sm font-semibold text-foreground">{t('action_items.empty_title')}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Le azioni vengono estratte automaticamente dalle sintesi dei meeting.
+                    {t('action_items.empty_desc')}
                   </p>
                   <button
                     onClick={() => navigate('/recording')}
                     className="mt-4 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 motion-reduce:transition-none"
                   >
-                    Avvia registrazione
+                    {t('action_items.start_recording')}
                   </button>
                 </>
               ) : (
                 <>
-                  <p className="text-sm font-semibold text-foreground">Nessun risultato</p>
+                  <p className="text-sm font-semibold text-foreground">{t('action_items.no_results')}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Prova con un termine diverso o cambia il filtro.
+                    {t('action_items.no_results_hint')}
                   </p>
                 </>
               )}
@@ -350,7 +354,7 @@ export default function ActionItemsPage() {
                             type="checkbox"
                             checked={item.completed}
                             onChange={() => toggleCompleted(item)}
-                            aria-label={`Segna come ${item.completed ? 'da fare' : 'completato'}: ${item.text}`}
+                            aria-label={t('action_items.toggle_aria', { text: item.text })}
                             className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-primary"
                           />
                           <div className="min-w-0 flex-1">
@@ -378,8 +382,8 @@ export default function ActionItemsPage() {
                             <div className="mt-1 flex flex-wrap items-center gap-2">
                               {item.dueDate ? (
                                 <Popover open={openPickerId === item.id} onOpenChange={(open) => setOpenPickerId(open ? item.id : null)}>
-                                  <PopoverTrigger className="cursor-pointer" aria-label="Modifica scadenza">
-                                    <DeadlineBadge item={item} />
+                                  <PopoverTrigger className="cursor-pointer" aria-label={t('action_items.edit_due_aria')}>
+                                    <DeadlineBadge item={item} t={t} />
                                   </PopoverTrigger>
                                   <PopoverContent className="w-auto p-0" align="start">
                                     <Calendar
@@ -395,7 +399,7 @@ export default function ActionItemsPage() {
                                       onClick={() => { saveDueDate(item.id, undefined); setOpenPickerId(null) }}
                                       className="w-full border-t border-border py-1 text-xs text-muted-foreground hover:text-destructive"
                                     >
-                                      Rimuovi scadenza
+                                      {t('action_items.remove_due')}
                                     </button>
                                   </PopoverContent>
                                 </Popover>
@@ -408,7 +412,7 @@ export default function ActionItemsPage() {
                               <Popover open={openPickerId === item.id} onOpenChange={(open) => setOpenPickerId(open ? item.id : null)}>
                                 <PopoverTrigger
                                   className="rounded p-1 text-muted-foreground opacity-40 transition-opacity hover:opacity-100 motion-reduce:transition-none"
-                                  aria-label="Imposta scadenza"
+                                  aria-label={t('action_items.set_due_aria')}
                                 >
                                   <CalendarIcon className="h-3.5 w-3.5" />
                                 </PopoverTrigger>
@@ -428,14 +432,14 @@ export default function ActionItemsPage() {
                             <button
                               onClick={() => { setEditingId(item.id); setEditingText(item.text) }}
                               className="rounded p-1 text-muted-foreground opacity-40 transition-opacity hover:opacity-100 motion-reduce:transition-none"
-                              aria-label="Modifica"
+                              aria-label={t('action_items.edit_aria')}
                             >
                               <Pencil className="h-3.5 w-3.5" />
                             </button>
                             <button
                               onClick={() => setShowDeleteConfirm(item.id)}
                               className="rounded p-1 text-muted-foreground opacity-40 transition-opacity hover:opacity-100 hover:text-destructive motion-reduce:transition-none"
-                              aria-label="Elimina"
+                              aria-label={t('action_items.delete_aria')}
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
@@ -444,9 +448,9 @@ export default function ActionItemsPage() {
 
                         {showDeleteConfirm === item.id && (
                           <div className="mt-1 flex items-center gap-2 pl-8 text-xs">
-                            <span className="text-muted-foreground">Eliminare questa azione?</span>
-                            <button onClick={() => deleteItem(item.id)} className="text-destructive hover:underline">Elimina</button>
-                            <button onClick={() => setShowDeleteConfirm(null)} className="text-muted-foreground hover:underline">Annulla</button>
+                            <span className="text-muted-foreground">{t('action_items.delete_confirm')}</span>
+                            <button onClick={() => deleteItem(item.id)} className="text-destructive hover:underline">{t('action_items.delete_aria')}</button>
+                            <button onClick={() => setShowDeleteConfirm(null)} className="text-muted-foreground hover:underline">{t('action_items.cancel')}</button>
                           </div>
                         )}
                       </motion.li>

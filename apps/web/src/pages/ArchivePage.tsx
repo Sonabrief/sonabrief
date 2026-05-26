@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import i18n from '../i18n'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { AppNav } from '../components/AppNav'
 import { db, type Meeting, type Note, type Transcript } from '../lib/db'
@@ -20,7 +22,7 @@ const LANG_LABEL: Record<string, string> = {
 }
 
 function formatDate(ms: number): string {
-  return new Date(ms).toLocaleString('it-IT', {
+  return new Date(ms).toLocaleString(i18n.language, {
     day: 'numeric', month: 'long', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   })
@@ -37,6 +39,7 @@ function isFallbackTitle(title: string): boolean {
 }
 
 export default function ArchivePage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const [search, setSearch] = useState('')
@@ -178,7 +181,7 @@ export default function ArchivePage() {
 
       <main className="mx-auto max-w-6xl px-6 py-8">
         <h1 className="mb-8 font-heading text-[clamp(1.875rem,4vw,3rem)] font-extrabold leading-[1.1] tracking-[-0.02em] text-foreground">
-          Archivio
+          {t('archive.title')}
         </h1>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_2fr] md:gap-8">
@@ -188,8 +191,8 @@ export default function ArchivePage() {
             <div className="sticky top-4 z-10 bg-background pb-2 flex flex-col gap-3">
             <input
               type="text"
-              aria-label="Cerca per titolo"
-              placeholder="Cerca per titolo..."
+              aria-label={t('archive.search_aria')}
+              placeholder={t('archive.search_placeholder')}
               value={search}
               onChange={e => setSearch(e.target.value)}
               className="w-full rounded-md border border-border bg-card px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none"
@@ -222,7 +225,7 @@ export default function ArchivePage() {
                       onClick={() => setTagsExpanded(true)}
                       className="rounded-full border border-dashed border-border px-2.5 py-0.5 text-xs font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                     >
-                      +{hidden} altri
+                      {t('archive.more_tags', { count: hidden })}
                     </button>
                   )}
                   {tagsExpanded && allTags.length > THRESHOLD && (
@@ -230,7 +233,7 @@ export default function ArchivePage() {
                       onClick={() => setTagsExpanded(false)}
                       className="rounded-full border border-dashed border-border px-2.5 py-0.5 text-xs font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                     >
-                      Mostra meno
+                      {t('archive.show_less_tags')}
                     </button>
                   )}
                 </div>
@@ -247,19 +250,17 @@ export default function ArchivePage() {
             ) : filtered.length === 0 ? (
               <div className="pt-4">
                 <p className="text-sm font-semibold text-foreground">
-                  {search ? 'Nessun risultato' : 'Archivio vuoto'}
+                  {search ? t('archive.no_results') : t('archive.empty_title')}
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {search
-                    ? 'Prova con un termine diverso.'
-                    : 'Registra il tuo primo meeting per iniziare.'}
+                  {search ? t('archive.no_results_hint') : t('archive.empty_hint')}
                 </p>
                 {!search && (
                   <button
                     onClick={() => navigate('/recording')}
                     className="mt-4 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) motion-reduce:transition-none"
                   >
-                    Avvia registrazione
+                    {t('archive.start_recording')}
                   </button>
                 )}
               </div>
@@ -294,7 +295,7 @@ export default function ArchivePage() {
                           </p>
                         )}
                         <p className="mt-0.5 text-xs text-muted-foreground">
-                          {new Date(meeting.startedAt).toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          {new Date(meeting.startedAt).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' })}
                           {meeting.durationSeconds ? ` · ${Math.ceil(meeting.durationSeconds / 60)} min` : ''}
                         </p>
                         {meeting.tags && meeting.tags.length > 0 && (
@@ -304,7 +305,7 @@ export default function ArchivePage() {
                         )}
                         {!meeting.hasSynthesis && (
                           <span className="mt-1.5 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                            Solo trascrizione
+                            {t('archive.transcript_only_badge')}
                           </span>
                         )}
                         {tier === 'free' && (() => {
@@ -317,7 +318,7 @@ export default function ArchivePage() {
                                 ? 'bg-destructive/10 text-destructive'
                                 : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
                             }`}>
-                              {daysLeft === 1 ? 'scade oggi' : `scade in ${daysLeft}gg`}
+                              {daysLeft === 1 ? t('archive.expires_today') : t('archive.expires_in_days', { days: daysLeft })}
                             </span>
                           )
                         })()}
@@ -337,7 +338,7 @@ export default function ArchivePage() {
                 className="flex items-center gap-1.5 px-4 pt-4 text-sm text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none md:hidden"
               >
                 <span aria-hidden="true">←</span>
-                Lista
+                {t('archive.back_to_list')}
               </button>
             )}
             <AnimatePresence mode="wait">
@@ -350,9 +351,9 @@ export default function ArchivePage() {
                   transition={{ duration: 0.15 }}
                   className="flex min-h-80 flex-col items-center justify-center p-8 text-center"
                 >
-                  <p className="text-sm font-semibold text-foreground">Seleziona un meeting</p>
+                  <p className="text-sm font-semibold text-foreground">{t('archive.select_meeting')}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    La sintesi del meeting selezionato verrà mostrata qui.
+                    {t('archive.select_meeting_hint')}
                   </p>
                 </motion.div>
               ) : (
@@ -368,7 +369,7 @@ export default function ArchivePage() {
                     <div>
                       <input
                         type="text"
-                        aria-label="Titolo meeting"
+                        aria-label={t('archive.title_aria')}
                         value={editingTitle}
                         onChange={e => setEditingTitle(e.target.value)}
                         onFocus={() => setTitleFocused(true)}
@@ -389,7 +390,7 @@ export default function ArchivePage() {
                             e.currentTarget.blur()
                           }
                         }}
-                        placeholder="Aggiungi un titolo..."
+                        placeholder={t('archive.title_placeholder')}
                         className={`w-full rounded-md px-3 py-1.5 font-heading text-base font-bold text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none motion-reduce:transition-none ${
                           titleFocused
                             ? 'border border-primary bg-muted/40 focus-visible:ring-2 focus-visible:ring-primary'
@@ -405,18 +406,18 @@ export default function ArchivePage() {
                     <div className="flex justify-end pt-2">
                       {deleteConfirm ? (
                         <div className="flex items-center gap-3 text-xs">
-                          <span className="text-muted-foreground">Eliminare questo meeting?</span>
+                          <span className="text-muted-foreground">{t('archive.delete_confirm')}</span>
                           <button
                             onClick={deleteMeeting}
                             className="font-medium text-destructive hover:underline"
                           >
-                            Elimina
+                            {t('archive.delete')}
                           </button>
                           <button
                             onClick={() => setDeleteConfirm(false)}
                             className="text-muted-foreground hover:text-foreground"
                           >
-                            Annulla
+                            {t('archive.cancel')}
                           </button>
                         </div>
                       ) : (
@@ -425,7 +426,7 @@ export default function ArchivePage() {
                           className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-destructive motion-reduce:transition-none"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
-                          Elimina meeting
+                          {t('archive.delete_btn')}
                         </button>
                       )}
                     </div>
@@ -436,7 +437,7 @@ export default function ArchivePage() {
                       className="flex items-center gap-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground motion-reduce:transition-none"
                     >
                       <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 motion-reduce:transition-none ${showDetails ? 'rotate-180' : ''}`} aria-hidden="true" />
-                      {showDetails ? 'Nascondi dettagli' : 'Aggiungi dettagli'}
+                      {showDetails ? t('archive.hide_details') : t('archive.add_details')}
                     </button>
                     <AnimatePresence>
                       {showDetails && (
@@ -450,7 +451,7 @@ export default function ArchivePage() {
                           <div className="flex flex-col gap-2 pt-3 sm:flex-row sm:gap-3">
                             <input
                               type="text"
-                              placeholder="Nome cliente"
+                              placeholder={t('archive.client_placeholder')}
                               value={editingClient}
                               onChange={e => setEditingClient(e.target.value)}
                               onBlur={saveClientFields}
@@ -459,7 +460,7 @@ export default function ArchivePage() {
                             />
                             <input
                               type="text"
-                              placeholder="Stream / progetto"
+                              placeholder={t('archive.stream_placeholder')}
                               value={editingStream}
                               onChange={e => setEditingStream(e.target.value)}
                               onBlur={saveClientFields}
@@ -472,12 +473,12 @@ export default function ArchivePage() {
                               <div className="flex items-center gap-1.5 rounded-md border border-dashed border-border px-3 py-2">
                                 <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
                                 <span className="text-xs text-muted-foreground">
-                                  Tag disponibili con{' '}
+                                  {t('archive.tags_pro_hint')}{' '}
                                   <button
                                     onClick={() => navigate('/pricing')}
                                     className="font-medium text-primary hover:underline"
                                   >
-                                    Pro →
+                                    {t('archive.pro_link')}
                                   </button>
                                 </span>
                               </div>
@@ -498,13 +499,13 @@ export default function ArchivePage() {
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                          Trascrizione
+                          {t('archive.transcript_label')}
                         </p>
                         <button
                           onClick={() => setShowTimestamps(t => !t)}
                           className="rounded-full border px-2.5 py-0.5 text-xs font-medium border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                         >
-                          {showTimestamps ? 'Nascondi timestamp' : 'Mostra timestamp'}
+                          {showTimestamps ? t('archive.hide_timestamps') : t('archive.show_timestamps')}
                         </button>
                       </div>
                       <div className="max-h-125 overflow-y-auto rounded-md border border-border bg-muted/30 p-4">
@@ -518,18 +519,18 @@ export default function ArchivePage() {
                         />
                       </div>
                       <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
-                        <p className="text-xs font-medium text-muted-foreground">Esporta come:</p>
+                        <p className="text-xs font-medium text-muted-foreground">{t('archive.export_as')}</p>
                         <div className="flex flex-wrap gap-2">
-                          <ExportButton label="Markdown" fn={() => exportMarkdown(buildTranscriptExportData())} />
-                          <ExportButton label="PDF" fn={() => exportPDF(buildTranscriptExportData())} locked={tier === 'free'} />
-                          <ExportButton label="Word" fn={() => exportWord(buildTranscriptExportData())} locked={tier === 'free'} />
-                          <ExportButton label="Email" fn={() => exportEmail(buildTranscriptExportData())} locked={tier === 'free'} />
-                          <ExportButton label="Copia testo" fn={() => navigator.clipboard.writeText(selectedTranscript!.text)} />
+                          <ExportButton label={t('archive.export_markdown')} fn={() => exportMarkdown(buildTranscriptExportData())} />
+                          <ExportButton label={t('archive.export_pdf')} fn={() => exportPDF(buildTranscriptExportData())} locked={tier === 'free'} />
+                          <ExportButton label={t('archive.export_word')} fn={() => exportWord(buildTranscriptExportData())} locked={tier === 'free'} />
+                          <ExportButton label={t('archive.export_email')} fn={() => exportEmail(buildTranscriptExportData())} locked={tier === 'free'} />
+                          <ExportButton label={t('archive.copy_text')} fn={() => navigator.clipboard.writeText(selectedTranscript!.text)} />
                         </div>
                       </div>
                     </div>
                     ) : (
-                      <p className="text-sm text-muted-foreground">Nessun contenuto disponibile.</p>
+                      <p className="text-sm text-muted-foreground">{t('archive.no_content')}</p>
                     )
                   ) : selectedNote ? (
                     <>
@@ -538,26 +539,26 @@ export default function ArchivePage() {
                           onClick={() => setActiveTab('synthesis')}
                           className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${activeTab === 'synthesis' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                         >
-                          Sintesi
+                          {t('archive.synthesis_tab')}
                         </button>
                         <button
                           onClick={() => setActiveTab('transcript')}
                           className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${activeTab === 'transcript' ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
                         >
-                          Trascrizione
+                          {t('archive.transcript_tab')}
                         </button>
                       </div>
                       {activeTab === 'synthesis' && (
                         <>
                           <SynthesisEditor content={selectedNote.content} readonly />
                           <div className="flex flex-col gap-2 border-t border-border pt-4">
-                            <p className="text-xs font-medium text-muted-foreground">Esporta come:</p>
+                            <p className="text-xs font-medium text-muted-foreground">{t('archive.export_as')}</p>
                             <div className="flex flex-wrap gap-2">
-                              <ExportButton label="Markdown" fn={() => exportMarkdown(buildExportData())} />
-                              <ExportButton label="PDF" fn={() => exportPDF(buildExportData())} locked={tier === 'free'} />
-                              <ExportButton label="Word" fn={() => exportWord(buildExportData())} locked={tier === 'free'} />
-                              <ExportButton label="Email" fn={() => exportEmail(buildExportData())} locked={tier === 'free'} />
-                              <ExportButton label={copyDone ? 'Copiato' : 'Copia testo'} fn={async () => { await copyFormatted(buildExportData()); setCopyDone(true); setTimeout(() => setCopyDone(false), 2000) }} />
+                              <ExportButton label={t('archive.export_markdown')} fn={() => exportMarkdown(buildExportData())} />
+                              <ExportButton label={t('archive.export_pdf')} fn={() => exportPDF(buildExportData())} locked={tier === 'free'} />
+                              <ExportButton label={t('archive.export_word')} fn={() => exportWord(buildExportData())} locked={tier === 'free'} />
+                              <ExportButton label={t('archive.export_email')} fn={() => exportEmail(buildExportData())} locked={tier === 'free'} />
+                              <ExportButton label={copyDone ? t('archive.copied') : t('archive.copy_text')} fn={async () => { await copyFormatted(buildExportData()); setCopyDone(true); setTimeout(() => setCopyDone(false), 2000) }} />
                             </div>
                           </div>
                         </>
@@ -567,13 +568,13 @@ export default function ArchivePage() {
                           <>
                             <div className="flex items-center justify-between mb-2">
                               <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                                Trascrizione
+                                {t('archive.transcript_label')}
                               </p>
                               <button
                                 onClick={() => setShowTimestamps(t => !t)}
                                 className="rounded-full border px-2.5 py-0.5 text-xs font-medium border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
                               >
-                                {showTimestamps ? 'Nascondi timestamp' : 'Mostra timestamp'}
+                                {showTimestamps ? t('archive.hide_timestamps') : t('archive.show_timestamps')}
                               </button>
                             </div>
                             <div className="max-h-125 overflow-y-auto rounded-md border border-border bg-muted/30 p-4">
@@ -587,23 +588,23 @@ export default function ArchivePage() {
                               />
                             </div>
                             <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
-                              <p className="text-xs font-medium text-muted-foreground">Esporta come:</p>
+                              <p className="text-xs font-medium text-muted-foreground">{t('archive.export_as')}</p>
                               <div className="flex flex-wrap gap-2">
-                                <ExportButton label="Markdown" fn={() => exportMarkdown(buildTranscriptExportData())} />
-                                <ExportButton label="PDF" fn={() => exportPDF(buildTranscriptExportData())} locked={tier === 'free'} />
-                                <ExportButton label="Word" fn={() => exportWord(buildTranscriptExportData())} locked={tier === 'free'} />
-                                <ExportButton label="Email" fn={() => exportEmail(buildTranscriptExportData())} locked={tier === 'free'} />
-                                <ExportButton label="Copia testo" fn={() => navigator.clipboard.writeText(selectedTranscript!.text)} />
+                                <ExportButton label={t('archive.export_markdown')} fn={() => exportMarkdown(buildTranscriptExportData())} />
+                                <ExportButton label={t('archive.export_pdf')} fn={() => exportPDF(buildTranscriptExportData())} locked={tier === 'free'} />
+                                <ExportButton label={t('archive.export_word')} fn={() => exportWord(buildTranscriptExportData())} locked={tier === 'free'} />
+                                <ExportButton label={t('archive.export_email')} fn={() => exportEmail(buildTranscriptExportData())} locked={tier === 'free'} />
+                                <ExportButton label={t('archive.copy_text')} fn={() => navigator.clipboard.writeText(selectedTranscript!.text)} />
                               </div>
                             </div>
                           </>
                         ) : (
-                          <p className="text-sm text-muted-foreground">Trascrizione non disponibile.</p>
+                          <p className="text-sm text-muted-foreground">{t('archive.no_transcript')}</p>
                         )
                       )}
                     </>
                   ) : (
-                    <p className="text-sm text-muted-foreground">Nessuna sintesi disponibile.</p>
+                    <p className="text-sm text-muted-foreground">{t('archive.no_synthesis')}</p>
                   )}
                 </motion.div>
               )}

@@ -1,6 +1,7 @@
 // @ts-ignore
 import '@fontsource-variable/manrope'
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Typography from '@tiptap/extension-typography'
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function SynthesisEditor({ content, readonly = false, isStreaming = false }: Props) {
+  const { t } = useTranslation()
   const editor = useEditor({
     extensions: [StarterKit, Typography, Markdown],
     content: '',
@@ -65,7 +67,7 @@ export function SynthesisEditor({ content, readonly = false, isStreaming = false
             color: '#1A4D52',
           }}
         >
-          Modificabile
+          {t('synthesis_editor.editable_badge')}
         </span>
       )}
       <div className={wrapperClass} style={wrapperStyle}>

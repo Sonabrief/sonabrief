@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { ChevronDown } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import i18n from '../i18n'
 import { API_URL } from '../config'
 import { AppNav } from '../components/AppNav'
 import { getBillingStatus } from '../lib/api'
@@ -21,21 +23,13 @@ const LANG_LABEL: Record<string, string> = {
 
 const LANG_OPTIONS = ['it', 'en', 'fr', 'es', 'de'] as const
 
-const GENERIC_ID = 'sys_generic_it_v2'
-
-const EMPTY_PROMPT = `Sei un assistente esperto nella redazione di verbali professionali.
-Analizza la trascrizione e produci un resoconto strutturato con le seguenti sezioni.
-
-**Sezione 1**
-Descrivi qui cosa deve contenere questa sezione.
-
-**Sezione 2**
-Descrivi qui cosa deve contenere questa sezione.
-
-Regole:
-- Non inventare mai contenuto non presente nella trascrizione
-- Se una sezione non ha contenuto reale, omettila completamente
-- Niente frasi di chiusura o saluti`
+const GENERIC_IDS: Record<string, string> = {
+  it: 'sys_generic_it_v2',
+  en: 'sys_generic_en_v1',
+  fr: 'sys_generic_fr_v1',
+  es: 'sys_generic_es_v1',
+  de: 'sys_generic_de_v1',
+}
 
 const inputClass =
   'w-full rounded-md border border-border bg-card px-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none'
@@ -48,6 +42,7 @@ function extractSections(prompt: string): string[] {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function TemplatesPage() {
+  const { t } = useTranslation()
   const [templates, setTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<Partial<Template> | null>(null)
@@ -71,12 +66,13 @@ export default function TemplatesPage() {
 
   useEffect(() => { load() }, [])
 
-  const genericTemplate = templates.find(t => t.id === GENERIC_ID)
+  const genericTemplate = templates.find(t => t.id === GENERIC_IDS[i18n.language])
+    ?? templates.find(t => t.id === GENERIC_IDS['it'])
   const customTemplates = templates.filter(t => !t.is_system)
 
   function startFromScratch() {
     setError(null)
-    setEditing({ name: '', description: '', language: 'it', system_prompt: EMPTY_PROMPT })
+    setEditing({ name: '', description: '', language: i18n.language, system_prompt: '' })
   }
 
   function startFromGeneric() {
@@ -84,8 +80,8 @@ export default function TemplatesPage() {
     setEditing({
       name: '',
       description: '',
-      language: genericTemplate?.language ?? 'it',
-      system_prompt: genericTemplate?.system_prompt ?? EMPTY_PROMPT,
+      language: genericTemplate?.language ?? i18n.language,
+      system_prompt: genericTemplate?.system_prompt ?? '',
     })
   }
 
@@ -118,13 +114,13 @@ export default function TemplatesPage() {
     if (r.status === 403) {
       const body = await r.json() as { error: string; limit?: number }
       if (body.error === 'custom_templates_not_allowed')
-        setError('I template personalizzati richiedono il piano Pro.')
+        setError(t('templates.error_pro_required'))
       else if (body.error === 'template_limit_reached')
-        setError(`Hai raggiunto il limite di ${body.limit} template per il tuo piano.`)
-      else setError('Errore durante il salvataggio.')
+        setError(t('templates.error_limit', { limit: body.limit }))
+      else setError(t('templates.error_save'))
       return
     }
-    if (!r.ok) { setError('Errore durante il salvataggio.'); return }
+    if (!r.ok) { setError(t('templates.error_save')); return }
     setEditing(null)
     load()
   }
@@ -141,11 +137,11 @@ export default function TemplatesPage() {
 
       <main className="mx-auto max-w-3xl px-6 py-8">
         <h1 className="mb-8 font-heading text-2xl font-bold leading-[1.2] tracking-[-0.015em] text-foreground">
-          I tuoi template
+          {t('templates.title')}
         </h1>
 
         {loading && (
-          <p className="text-sm text-muted-foreground">Caricamento...</p>
+          <p className="text-sm text-muted-foreground">{t('templates.loading')}</p>
         )}
 
         <div className="flex flex-col gap-5">
@@ -153,9 +149,9 @@ export default function TemplatesPage() {
           {/* ── Create card ──────────────────────────── */}
           {!editing && (
             <div className="rounded-lg border border-border p-5">
-              <p className="text-sm font-semibold text-foreground">Crea un nuovo template</p>
+              <p className="text-sm font-semibold text-foreground">{t('templates.create_new')}</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Definisci come Sonabrief struttura le sintesi per un tipo specifico di meeting: un formato legale, un briefing commerciale, un'intervista qualitativa.
+                {t('templates.create_hint')}
               </p>
               {isFree ? (
                 <div className="mt-4 space-y-4">
@@ -163,14 +159,14 @@ export default function TemplatesPage() {
                   <div className="relative rounded-lg border border-dashed border-border bg-muted/20 px-5 py-4 select-none pointer-events-none opacity-50">
                     <div className="flex gap-3 mb-3">
                       <div className="flex-1 rounded-md border border-border bg-card px-3 py-1.5">
-                        <p className="text-xs text-muted-foreground">Nome template</p>
+                        <p className="text-xs text-muted-foreground">{t('templates.name_label')}</p>
                       </div>
                       <div className="w-28 rounded-md border border-border bg-card px-3 py-1.5">
-                        <p className="text-xs text-muted-foreground">Lingua</p>
+                        <p className="text-xs text-muted-foreground">{t('templates.language_label')}</p>
                       </div>
                     </div>
                     <div className="rounded-md border border-border bg-card px-3 py-2 mb-3">
-                      <p className="text-xs text-muted-foreground">Prompt di sintesi...</p>
+                      <p className="text-xs text-muted-foreground">{t('templates.prompt_placeholder')}</p>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {['Sezione 1', 'Sezione 2', 'Sezione 3'].map(s => (
@@ -183,29 +179,28 @@ export default function TemplatesPage() {
                   <div className="rounded-lg border border-primary/20 bg-primary/5 px-5 py-4">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-sm font-medium text-foreground">Crea template su misura</p>
+                        <p className="text-sm font-medium text-foreground">{t('templates.pro_upsell_title')}</p>
                         <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-                          Oltre ai 7 template inclusi nel piano, con Pro puoi crearne di nuovi
-                          e adattare struttura e sezioni esattamente alle tue esigenze.
+                          {t('templates.pro_upsell_hint')}
                         </p>
                       </div>
                       <a
                         href="/pricing"
                         className="shrink-0 rounded-md bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90 transition-opacity"
                       >
-                        Passa a Pro →
+                        {t('templates.upgrade_pro')}
                       </a>
                     </div>
                   </div>
 
                   {/* Template di sistema — compatti */}
-                  {templates.filter(t => t.is_system && t.language === 'it').length > 0 && (
+                  {templates.filter(t => t.is_system && t.language === i18n.language).length > 0 && (
                     <div>
                       <p className="mb-2 text-xs text-muted-foreground">
-                        Template inclusi nel tuo piano
+                        {t('templates.included_label')}
                       </p>
                       <ul className="flex flex-col gap-1.5" role="list">
-                        {templates.filter(t => t.is_system && t.language === 'it').map(t => (
+                        {templates.filter(t => t.is_system && t.language === i18n.language).map(t => (
                           <li
                             key={t.id}
                             className="flex items-center justify-between rounded-md border border-border bg-card px-4 py-2.5"
@@ -224,13 +219,13 @@ export default function TemplatesPage() {
                     disabled={!genericTemplate}
                     className="flex-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-40 motion-reduce:transition-none"
                   >
-                    Usa struttura base
+                    {t('templates.use_base')}
                   </button>
                   <button
                     onClick={startFromScratch}
                     className="flex-1 rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none"
                   >
-                    Personalizza da zero
+                    {t('templates.customize')}
                   </button>
                 </div>
               )}
@@ -241,39 +236,39 @@ export default function TemplatesPage() {
           {customTemplates.length > 0 && !editing && (
             <div className="flex flex-col gap-3">
               <p className="text-xs font-semibold text-muted-foreground">
-                Salvati ({customTemplates.length})
+                {t('templates.saved_label', { count: customTemplates.length })}
               </p>
               <ul className="flex flex-col gap-2" role="list">
-                {customTemplates.map((t, i) => (
+                {customTemplates.map((tmpl, i) => (
                   <motion.li
-                    key={t.id}
+                    key={tmpl.id}
                     initial={{ opacity: 0, x: -6 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.16, delay: i * 0.05 }}
                   >
                     <div className="flex items-start justify-between gap-4 rounded-lg border border-border bg-card px-5 py-4">
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-foreground">{t.name}</p>
+                        <p className="text-sm font-medium text-foreground">{tmpl.name}</p>
                         <p className="mt-0.5 text-xs text-muted-foreground">
-                          {LANG_LABEL[t.language] ?? t.language}
+                          {LANG_LABEL[tmpl.language] ?? tmpl.language}
                         </p>
-                        {t.description && (
-                          <p className="mt-1 text-xs text-muted-foreground">{t.description}</p>
+                        {tmpl.description && (
+                          <p className="mt-1 text-xs text-muted-foreground">{tmpl.description}</p>
                         )}
                         {(() => {
-                          const sections = extractSections(t.system_prompt)
+                          const sections = extractSections(tmpl.system_prompt)
                           if (sections.length === 0) return null
                           return (
                             <div className="mt-2">
                               <button
-                                onClick={() => setExpandedPreview(id => id === t.id ? null : t.id)}
+                                onClick={() => setExpandedPreview(id => id === tmpl.id ? null : tmpl.id)}
                                 className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-primary motion-reduce:transition-none"
                               >
-                                <ChevronDown className={`h-3 w-3 transition-transform duration-200 motion-reduce:transition-none ${expandedPreview === t.id ? 'rotate-180' : ''}`} />
-                                {expandedPreview === t.id ? 'Nascondi struttura' : 'Mostra struttura'}
+                                <ChevronDown className={`h-3 w-3 transition-transform duration-200 motion-reduce:transition-none ${expandedPreview === tmpl.id ? 'rotate-180' : ''}`} />
+                                {expandedPreview === tmpl.id ? t('templates.hide_structure') : t('templates.show_structure')}
                               </button>
                               <AnimatePresence>
-                                {expandedPreview === t.id && (
+                                {expandedPreview === tmpl.id && (
                                   <motion.div
                                     initial={{ height: 0, opacity: 0 }}
                                     animate={{ height: 'auto', opacity: 1 }}
@@ -297,32 +292,32 @@ export default function TemplatesPage() {
                       </div>
                       <div className="flex shrink-0 gap-2">
                         <button
-                          onClick={() => startEdit(t)}
+                          onClick={() => startEdit(tmpl)}
                           className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none"
                         >
-                          Modifica
+                          {t('templates.edit')}
                         </button>
-                        {deleteConfirm === t.id ? (
+                        {deleteConfirm === tmpl.id ? (
                           <div className="flex gap-1">
                             <button
-                              onClick={() => deleteTemplate(t.id)}
+                              onClick={() => deleteTemplate(tmpl.id)}
                               className="rounded-md border border-destructive/30 px-2 py-1.5 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10 motion-reduce:transition-none"
                             >
-                              Conferma
+                              {t('templates.confirm')}
                             </button>
                             <button
                               onClick={() => setDeleteConfirm(null)}
                               className="rounded-md border border-border px-2 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none"
                             >
-                              Annulla
+                              {t('templates.cancel')}
                             </button>
                           </div>
                         ) : (
                           <button
-                            onClick={() => setDeleteConfirm(t.id)}
+                            onClick={() => setDeleteConfirm(tmpl.id)}
                             className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive motion-reduce:transition-none"
                           >
-                            Elimina
+                            {t('templates.delete')}
                           </button>
                         )}
                       </div>
@@ -345,31 +340,31 @@ export default function TemplatesPage() {
               className="rounded-lg border border-primary/30 bg-card p-5"
             >
               <h2 className="mb-4 text-sm font-semibold text-foreground">
-                {editing.id ? 'Modifica template' : 'Nuovo template'}
+                {editing.id ? t('templates.edit_title') : t('templates.new_title')}
               </h2>
 
               <div className="flex flex-col gap-4">
                 <div className="flex gap-3">
                   <div className="flex flex-1 flex-col gap-1">
                     <label htmlFor="template-name" className="text-xs font-medium text-muted-foreground">
-                      Nome
+                      {t('templates.editor_name_label')}
                     </label>
                     <input
                       id="template-name"
                       type="text"
                       value={editing.name ?? ''}
-                      placeholder="Es. Consulenza legale"
+                      placeholder={t('templates.editor_name_placeholder')}
                       onChange={e => setEditing(prev => ({ ...prev!, name: e.target.value }))}
                       className={inputClass}
                     />
                   </div>
                   <div className="flex w-36 flex-col gap-1">
                     <label htmlFor="template-language" className="text-xs font-medium text-muted-foreground">
-                      Lingua
+                      {t('templates.language_label')}
                     </label>
                     <select
                       id="template-language"
-                      value={editing.language ?? 'it'}
+                      value={editing.language ?? i18n.language}
                       onChange={e => setEditing(prev => ({ ...prev!, language: e.target.value }))}
                       className={inputClass}
                     >
@@ -382,28 +377,28 @@ export default function TemplatesPage() {
 
                 <div className="flex flex-col gap-1">
                   <label htmlFor="template-description" className="text-xs font-medium text-muted-foreground">
-                    Descrizione (opzionale)
+                    {t('templates.editor_desc_label')}
                   </label>
                   <input
                     id="template-description"
                     type="text"
                     value={editing.description ?? ''}
                     onChange={e => setEditing(prev => ({ ...prev!, description: e.target.value }))}
-                    placeholder="Es. Per consulenze legali in italiano"
+                    placeholder={t('templates.editor_desc_placeholder')}
                     className={inputClass}
                   />
                 </div>
 
                 <div className="flex flex-col gap-1">
                   <label htmlFor="template-prompt" className="text-xs font-medium text-muted-foreground">
-                    Prompt di sintesi
+                    {t('templates.editor_prompt_label')}
                   </label>
                   <p className="text-xs text-muted-foreground">
-                    Scrivi le istruzioni che l'AI seguirà per strutturare la sintesi. Usa{' '}
+                    {t('templates.prompt_hint_before')}{' '}
                     <code className="rounded bg-muted px-1 font-mono text-foreground">
-                      **Titolo sezione**
+                      {t('templates.prompt_hint_code')}
                     </code>{' '}
-                    per definire le sezioni.
+                    {t('templates.prompt_hint_after')}
                   </p>
                   <textarea
                     id="template-prompt"
@@ -425,7 +420,7 @@ export default function TemplatesPage() {
                     onClick={() => { setEditing(null); setError(null) }}
                     className="rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-border hover:text-foreground motion-reduce:transition-none"
                   >
-                    Annulla
+                    {t('templates.cancel')}
                   </button>
                   <button
                     onClick={save}
@@ -433,7 +428,7 @@ export default function TemplatesPage() {
                     aria-busy={saving}
                     className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 motion-reduce:transition-none"
                   >
-                    {saving ? 'Salvataggio...' : 'Salva template'}
+                    {saving ? t('templates.saving') : t('templates.save_btn')}
                   </button>
                 </div>
               </div>
