@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { getProfessionLabel } from '../lib/professionSlugs'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
@@ -72,7 +73,7 @@ export default function ProfilePage() {
     { value: 'local', label: t('profile.mode_local_label'), description: t('profile.mode_local') },
   ]
 
-  const PROFESSIONS = t('onboarding.professions', { returnObjects: true }) as { category: string; items: string[] }[]
+  const PROFESSIONS = t('onboarding.professions', { returnObjects: true }) as { category: string; items: { slug: string; label: string }[] }[]
   const [email, setEmail] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [editingName, setEditingName] = useState(false)
@@ -184,7 +185,7 @@ export default function ProfilePage() {
       ? PROFESSIONS.map(cat => ({
           ...cat,
           items: cat.items.filter(item =>
-            item.toLowerCase().includes(professionSearch.toLowerCase())
+            item.label.toLowerCase().includes(professionSearch.toLowerCase())
           ),
         })).filter(cat => cat.items.length > 0)
       : PROFESSIONS
@@ -619,7 +620,7 @@ export default function ProfilePage() {
                   <input
                     id="profession-search"
                     type="text"
-                    value={professionOpen ? professionSearch : profession}
+                    value={professionOpen ? professionSearch : getProfessionLabel(profession, t)}
                     onFocus={() => { setProfessionOpen(true); setProfessionSearch('') }}
                     onBlur={() => setTimeout(() => setProfessionOpen(false), 150)}
                     onChange={e => setProfessionSearch(e.target.value)}
@@ -637,17 +638,17 @@ export default function ProfilePage() {
                         </p>
                         {cat.items.map(item => (
                           <button
-                            key={item}
+                            key={item.slug}
                             type="button"
-                            onClick={() => { setProfession(item); setProfessionSearch('') }}
-                            aria-pressed={profession === item}
+                            onClick={() => { setProfession(item.slug); setProfessionSearch('') }}
+                            aria-pressed={profession === item.slug}
                             className={`w-full text-left px-3 py-2 text-sm transition-colors motion-reduce:transition-none ${
-                              profession === item
+                              profession === item.slug
                                 ? 'bg-secondary text-primary'
                                 : 'text-foreground hover:bg-border'
                             }`}
                           >
-                            {item}
+                            {item.label}
                           </button>
                         ))}
                       </div>

@@ -254,68 +254,116 @@
     {
       "category": "Conseil & Finance",
       "items": [
-        "Conseiller financier / Wealth Manager",
-        "Expert-comptable / Commissaire aux comptes",
-        "Consultant en management",
-        "Analyste financier / Investment Analyst"
+        { "slug": "financial_advisor", "label": "Conseiller financier / Wealth Manager" },
+        { "slug": "accountant", "label": "Expert-comptable / Commissaire aux comptes" },
+        { "slug": "management_consultant", "label": "Consultant en management" },
+        { "slug": "financial_analyst", "label": "Analyste financier / Investment Analyst" }
       ]
     },
     {
       "category": "Juridique",
-      "items": ["Avocat", "Notaire", "Juriste d'entreprise"]
+      "items": [
+        { "slug": "lawyer", "label": "Avocat" },
+        { "slug": "notary", "label": "Notaire" },
+        { "slug": "inhouse_counsel", "label": "Juriste d'entreprise" }
+      ]
     },
     {
       "category": "Santé & Bien-être",
       "items": [
-        "Médecin / Spécialiste",
-        "Psychologue / Psychothérapeute",
-        "Travailleur social / Case Manager",
-        "Nutritionniste / Kinésithérapeute"
+        { "slug": "doctor", "label": "Médecin / Spécialiste" },
+        { "slug": "psychologist", "label": "Psychologue / Psychothérapeute" },
+        { "slug": "social_worker", "label": "Travailleur social / Case Manager" },
+        { "slug": "nutritionist", "label": "Nutritionniste / Kinésithérapeute" }
       ]
     },
     {
       "category": "Tech & Produit",
       "items": [
-        "Product Manager",
-        "Chef de projet",
-        "Engineering Manager / CTO",
-        "Consultant IT / Intégrateur de systèmes"
+        { "slug": "product_manager", "label": "Product Manager" },
+        { "slug": "project_manager", "label": "Chef de projet" },
+        { "slug": "engineering_manager", "label": "Engineering Manager / CTO" },
+        { "slug": "it_consultant", "label": "Consultant IT / Intégrateur de systèmes" }
       ]
     },
     {
       "category": "Marketing & Communication",
       "items": [
-        "Account / Client Manager",
-        "Consultant marketing / RP",
-        "Responsable de la communication"
+        { "slug": "account_manager", "label": "Account / Client Manager" },
+        { "slug": "marketing_consultant", "label": "Consultant marketing / RP" },
+        { "slug": "communications_manager", "label": "Responsable de la communication" }
       ]
     },
     {
       "category": "Ventes & Business Development",
-      "items": ["Sales Manager / Account Executive", "Business Developer", "Recruteur / Responsable RH"]
+      "items": [
+        { "slug": "sales_manager", "label": "Sales Manager / Account Executive" },
+        { "slug": "business_developer", "label": "Business Developer" },
+        { "slug": "recruiter", "label": "Recruteur / Responsable RH" }
+      ]
     },
     {
       "category": "Recherche & Formation",
       "items": [
-        "Chercheur / Universitaire",
-        "Journaliste d'investigation",
-        "Formateur / Coach",
-        "Doctorant / Étudiant en master"
+        { "slug": "researcher", "label": "Chercheur / Universitaire" },
+        { "slug": "journalist", "label": "Journaliste d'investigation" },
+        { "slug": "trainer", "label": "Formateur / Coach" },
+        { "slug": "student", "label": "Doctorant / Étudiant en master" }
       ]
     },
     {
       "category": "Associatif & Secteur public",
-      "items": ["Responsable d'association / ONG", "Fonctionnaire / Administration"]
+      "items": [
+        { "slug": "nonprofit_manager", "label": "Responsable d'association / ONG" },
+        { "slug": "public_official", "label": "Fonctionnaire / Administration" }
+      ]
     },
     {
       "category": "Founder & Direction",
-      "items": ["Founder / CEO", "Dirigeant / C-Suite"]
+      "items": [
+        { "slug": "founder", "label": "Founder / CEO" },
+        { "slug": "executive", "label": "Dirigeant / C-Suite" }
+      ]
     },
     {
       "category": "Autre",
-      "items": ["Indépendant (autre secteur)", "Salarié (autre fonction)"]
+      "items": [
+        { "slug": "freelancer_other", "label": "Indépendant (autre secteur)" },
+        { "slug": "employee_other", "label": "Salarié (autre fonction)" }
+      ]
     }
   ],
+  "onboarding.profession_labels.financial_advisor": "Conseiller financier / Wealth Manager",
+  "onboarding.profession_labels.accountant": "Expert-comptable / Commissaire aux comptes",
+  "onboarding.profession_labels.management_consultant": "Consultant en management",
+  "onboarding.profession_labels.financial_analyst": "Analyste financier / Investment Analyst",
+  "onboarding.profession_labels.lawyer": "Avocat",
+  "onboarding.profession_labels.notary": "Notaire",
+  "onboarding.profession_labels.inhouse_counsel": "Juriste d'entreprise",
+  "onboarding.profession_labels.doctor": "Médecin / Spécialiste",
+  "onboarding.profession_labels.psychologist": "Psychologue / Psychothérapeute",
+  "onboarding.profession_labels.social_worker": "Travailleur social / Case Manager",
+  "onboarding.profession_labels.nutritionist": "Nutritionniste / Kinésithérapeute",
+  "onboarding.profession_labels.product_manager": "Product Manager",
+  "onboarding.profession_labels.project_manager": "Chef de projet",
+  "onboarding.profession_labels.engineering_manager": "Engineering Manager / CTO",
+  "onboarding.profession_labels.it_consultant": "Consultant IT / Intégrateur de systèmes",
+  "onboarding.profession_labels.account_manager": "Account / Client Manager",
+  "onboarding.profession_labels.marketing_consultant": "Consultant marketing / RP",
+  "onboarding.profession_labels.communications_manager": "Responsable de la communication",
+  "onboarding.profession_labels.sales_manager": "Sales Manager / Account Executive",
+  "onboarding.profession_labels.business_developer": "Business Developer",
+  "onboarding.profession_labels.recruiter": "Recruteur / Responsable RH",
+  "onboarding.profession_labels.researcher": "Chercheur / Universitaire",
+  "onboarding.profession_labels.journalist": "Journaliste d'investigation",
+  "onboarding.profession_labels.trainer": "Formateur / Coach",
+  "onboarding.profession_labels.student": "Doctorant / Étudiant en master",
+  "onboarding.profession_labels.nonprofit_manager": "Responsable d'association / ONG",
+  "onboarding.profession_labels.public_official": "Fonctionnaire / Administration",
+  "onboarding.profession_labels.founder": "Founder / CEO",
+  "onboarding.profession_labels.executive": "Dirigeant / C-Suite",
+  "onboarding.profession_labels.freelancer_other": "Indépendant (autre secteur)",
+  "onboarding.profession_labels.employee_other": "Salarié (autre fonction)",
   "onboarding.about_title": "Parlez-nous de vous.",
   "onboarding.about_hint": "Deux informations facultatives pour rendre Sonabrief plus précis et personnel.",
   "onboarding.name_label": "Comment vous appelez-vous ?",

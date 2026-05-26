@@ -70,7 +70,7 @@ const optionCardWide = (active: boolean) =>
   }`
 
 export default function OnboardingPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const [step, setStep] = useState(1)
@@ -135,13 +135,13 @@ export default function OnboardingPage() {
     setCheckInputs(['', '', ''])
   }, [step])
 
-  const PROFESSIONS = t('onboarding.professions', { returnObjects: true }) as { category: string; items: string[] }[]
+  const PROFESSIONS = t('onboarding.professions', { returnObjects: true }) as { category: string; items: { slug: string; label: string }[] }[]
 
   const filteredProfessions = professionSearch.trim()
     ? PROFESSIONS.map(cat => ({
         ...cat,
         items: cat.items.filter(item =>
-          item.toLowerCase().includes(professionSearch.toLowerCase())
+          item.label.toLowerCase().includes(professionSearch.toLowerCase())
         ),
       })).filter(cat => cat.items.length > 0)
     : PROFESSIONS
@@ -304,7 +304,10 @@ export default function OnboardingPage() {
                 <button
                   key={lang.code}
                   type="button"
-                  onClick={() => setLanguage(lang.code)}
+                  onClick={() => {
+                    setLanguage(lang.code)
+                    i18n.changeLanguage(lang.code)
+                  }}
                   aria-pressed={language === lang.code}
                   className={optionCard(language === lang.code)}
                 >
@@ -341,17 +344,17 @@ export default function OnboardingPage() {
                   <div className="flex flex-col gap-1">
                     {cat.items.map(item => (
                       <button
-                        key={item}
+                        key={item.slug}
                         type="button"
                         onClick={() => {
-                          setProfession(item)
+                          setProfession(item.slug)
                           setProfessionCategory(cat.category)
                         }}
-                        aria-pressed={profession === item}
-                        className={optionCard(profession === item)}
+                        aria-pressed={profession === item.slug}
+                        className={optionCard(profession === item.slug)}
                       >
-                        <span className={`text-sm ${profession === item ? 'text-primary' : 'text-foreground'}`}>
-                          {item}
+                        <span className={`text-sm ${profession === item.slug ? 'text-primary' : 'text-foreground'}`}>
+                          {item.label}
                         </span>
                       </button>
                     ))}
