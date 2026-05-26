@@ -8,7 +8,7 @@ import { SynthesisEditor } from '../components/SynthesisEditor'
 import { exportMarkdown, exportPDF, exportWord, exportEmail, copyFormatted } from '../lib/export'
 import { getBillingStatus } from '../lib/api'
 import { TagInput, TagPill } from '../components/TagInput'
-import { TranscriptViewer, type WhisperSegment } from '../components/TranscriptViewer'
+import { TranscriptViewer, segmentsToText, type WhisperSegment } from '../components/TranscriptViewer'
 import { ChevronDown, Lock, Trash2 } from 'lucide-react'
 
 const LANG_LABEL: Record<string, string> = {
@@ -135,14 +135,20 @@ export default function ArchivePage() {
   }
 
   function buildTranscriptExportData() {
+    const segments = (() => { try { return JSON.parse(selectedTranscript!.segments ?? '[]') as WhisperSegment[] } catch { return [] } })()
+    const compactText = segments.length > 0
+      ? segments.map(s => s.text.trim()).filter(Boolean).join(' ')
+      : selectedTranscript!.text.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim()
     return {
       title: selectedMeeting!.title,
       date: formatDate(selectedMeeting!.startedAt),
       duration: formatMinutes(selectedMeeting!.durationSeconds),
       lang: LANG_LABEL[selectedMeeting!.lang ?? 'it'] ?? selectedMeeting!.lang ?? 'IT',
-      content: selectedTranscript!.text,
+      content: showTimestamps
+        ? segmentsToText(segments, true)
+        : compactText,
       isTranscript: true,
-      segments: (() => { try { return JSON.parse(selectedTranscript!.segments ?? '[]') as WhisperSegment[] } catch { return [] } })(),
+      segments,
       showTimestamps,
     }
   }
@@ -490,9 +496,17 @@ export default function ArchivePage() {
                   {selectedMeeting.hasSynthesis === false ? (
                     selectedTranscript ? (
                     <div>
-                      <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-                        Trascrizione
-                      </p>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                          Trascrizione
+                        </p>
+                        <button
+                          onClick={() => setShowTimestamps(t => !t)}
+                          className="rounded-full border px-2.5 py-0.5 text-xs font-medium border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                        >
+                          {showTimestamps ? 'Nascondi timestamp' : 'Mostra timestamp'}
+                        </button>
+                      </div>
                       <div className="max-h-125 overflow-y-auto rounded-md border border-border bg-muted/30 p-4">
                         <TranscriptViewer
                           segments={(() => {
@@ -501,7 +515,6 @@ export default function ArchivePage() {
                           })()}
                           rawText={selectedTranscript.text}
                           showTimestamps={showTimestamps}
-                          onToggleTimestamps={setShowTimestamps}
                         />
                       </div>
                       <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
@@ -552,6 +565,17 @@ export default function ArchivePage() {
                       {activeTab === 'transcript' && (
                         selectedTranscript ? (
                           <>
+                            <div className="flex items-center justify-between mb-2">
+                              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                                Trascrizione
+                              </p>
+                              <button
+                                onClick={() => setShowTimestamps(t => !t)}
+                                className="rounded-full border px-2.5 py-0.5 text-xs font-medium border-border text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+                              >
+                                {showTimestamps ? 'Nascondi timestamp' : 'Mostra timestamp'}
+                              </button>
+                            </div>
                             <div className="max-h-125 overflow-y-auto rounded-md border border-border bg-muted/30 p-4">
                               <TranscriptViewer
                                 segments={(() => {
@@ -560,7 +584,6 @@ export default function ArchivePage() {
                                 })()}
                                 rawText={selectedTranscript.text}
                                 showTimestamps={showTimestamps}
-                                onToggleTimestamps={setShowTimestamps}
                               />
                             </div>
                             <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">

@@ -65,8 +65,8 @@ function stripInlineMarkdown(text: string): string {
 }
 
 function resolveContent(data: ExportData): string {
-  if (data.segments && data.segments.length > 0) {
-    return segmentsToText(data.segments, data.showTimestamps ?? false)
+  if (data.showTimestamps && data.segments && data.segments.length > 0) {
+    return segmentsToText(data.segments, true)
   }
   return data.content
 }
@@ -102,10 +102,13 @@ export function exportPDF(data: ExportData): void {
   if (data.isTranscript) {
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(10)
-    for (const line of resolveContent(data).split('\n')) {
+    doc.setLineHeightFactor(1.5)
+    const content = resolveContent(data)
+    const wrappedLines = doc.splitTextToSize(content, pageWidth)
+    for (const line of wrappedLines) {
       if (y > 270) { doc.addPage(); y = margin }
       doc.text(line, margin, y)
-      y += 5
+      y += 7
     }
   } else {
     for (const section of extractSections(data.content)) {

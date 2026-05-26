@@ -10,6 +10,7 @@ export async function synthesizeWithOllama(
   onError: (msg: string) => void,
 ): Promise<void> {
   const model = localStorage.getItem('sonabrief_ollama_model') ?? 'llama3.2:3b'
+  const cleanTranscript = transcript.replace(/\n+/g, ' ').trim()
   try {
     const response = await fetch('http://localhost:11434/api/chat', {
       method: 'POST',
@@ -21,7 +22,7 @@ export async function synthesizeWithOllama(
           { role: 'system', content: systemPrompt },
           {
             role: 'user',
-            content: 'Trascrizione:\n' + transcript + (notes ? '\n\nNote:\n' + notes : ''),
+            content: 'Trascrizione:\n' + cleanTranscript + (notes ? '\n\nNote:\n' + notes : ''),
           },
         ],
       }),

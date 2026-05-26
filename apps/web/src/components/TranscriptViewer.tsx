@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 
 export interface WhisperSegment {
   timestamp: [number, number | null]
@@ -23,20 +23,9 @@ interface Props {
   segments: WhisperSegment[]
   rawText?: string
   showTimestamps?: boolean
-  onToggleTimestamps?: (val: boolean) => void
 }
 
-export function TranscriptViewer({ segments, rawText, showTimestamps, onToggleTimestamps }: Props) {
-  const [localShow, setLocalShow] = useState(false)
-  const controlled = showTimestamps !== undefined
-  const show = controlled ? showTimestamps : localShow
-
-  function toggle() {
-    const next = !show
-    if (controlled) onToggleTimestamps?.(next)
-    else setLocalShow(next)
-  }
-
+export function TranscriptViewer({ segments, rawText, showTimestamps = false }: Props) {
   const lines = useMemo(() =>
     segments.map(s => ({ time: s.timestamp[0], text: s.text.trim() })).filter(s => s.text),
     [segments]
@@ -46,26 +35,11 @@ export function TranscriptViewer({ segments, rawText, showTimestamps, onToggleTi
 
   return (
     <div className="flex flex-col gap-3 w-full">
-      {hasSegments && !controlled && (
-        <div className="flex justify-end">
-          <button
-            onClick={toggle}
-            className={`rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
-              show
-                ? 'border-primary bg-primary/10 text-primary'
-                : 'border-border bg-card text-muted-foreground hover:border-primary hover:text-primary'
-            }`}
-          >
-            {show ? 'Nascondi timestamp' : 'Mostra timestamp'}
-          </button>
-        </div>
-      )}
-
       {!hasSegments ? (
         <div className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
           {rawText ?? ''}
         </div>
-      ) : show ? (
+      ) : showTimestamps ? (
         <div className="flex flex-col gap-2">
           {lines.map((line, i) => (
             <div key={i} className="flex gap-3">
@@ -77,11 +51,9 @@ export function TranscriptViewer({ segments, rawText, showTimestamps, onToggleTi
           ))}
         </div>
       ) : (
-        <div className="flex flex-col gap-1">
-          {lines.map((line, i) => (
-            <p key={i} className="text-sm text-foreground leading-relaxed">{line.text}</p>
-          ))}
-        </div>
+        <p className="text-sm text-foreground leading-relaxed">
+          {lines.map(l => l.text).join(' ')}
+        </p>
       )}
     </div>
   )

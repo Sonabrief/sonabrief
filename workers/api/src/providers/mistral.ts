@@ -34,9 +34,12 @@ export function createMistralProvider(apiKey: string): LLMProvider {
             { role: "system", content: req.systemPrompt },
             {
               role: "user",
-              content: req.notes
-                ? `${req.transcript}\n\nNote manuali del partecipante:\n${req.notes}`
-                : req.transcript,
+              content: (() => {
+                const cleanTranscript = req.transcript.replace(/\n+/g, ' ').trim()
+                return req.notes
+                  ? `${cleanTranscript}\n\nNote manuali del partecipante:\n${req.notes}`
+                  : cleanTranscript
+              })(),
             },
           ],
         }),
