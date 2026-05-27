@@ -27,6 +27,7 @@ export interface UseAudioRecorderReturn {
   pause: () => void
   resume: () => void
   audioData: Float32Array | null
+  audioBlob: Blob | null
   reset: () => void
   stream: MediaStream | null
   sessionId: string | null
@@ -40,6 +41,7 @@ export function useAudioRecorder(onStreamReady?: () => void): UseAudioRecorderRe
   const [error, setError] = useState<string | null>(null)
   const [paused, setPaused] = useState(false)
   const [audioData, setAudioData] = useState<Float32Array | null>(null)
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [chunkCount, setChunkCount] = useState(0)
@@ -141,6 +143,7 @@ export function useAudioRecorder(onStreamReady?: () => void): UseAudioRecorderRe
         cleanup()
         try {
           const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' })
+          setAudioBlob(blob)
           const float32 = await blobToFloat32Array(blob)
           setAudioData(float32)
           setState('done')
@@ -196,8 +199,9 @@ export function useAudioRecorder(onStreamReady?: () => void): UseAudioRecorderRe
     setDuration(0)
     setError(null)
     setAudioData(null)
+    setAudioBlob(null)
     setPaused(false)
   }, [cleanup])
 
-  return { state, duration, error, paused, start, stop, pause, resume, audioData, reset, stream, sessionId, chunkCount, chunkSession }
+  return { state, duration, error, paused, start, stop, pause, resume, audioData, audioBlob, reset, stream, sessionId, chunkCount, chunkSession }
 }

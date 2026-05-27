@@ -1,9 +1,15 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Mic, Monitor, Video, Lock } from 'lucide-react'
+import { Mic, Monitor, Video, Lock, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAudioRecorder } from '../hooks/useAudioRecorder'
+import { useCloudTranscription } from '../hooks/useCloudTranscription'
+import { CloudQuotaWidget } from '../components/CloudQuotaWidget'
+import { fetchCloudQuota } from '../lib/transcribeCloud'
+import { estimateTranscriptionMinutes } from '../lib/transcribeUtils'
+import { requestNotificationPermission, notifyTranscriptionDone } from '../lib/notifications'
+import { toast } from 'sonner'
 import { whisper } from '../lib/whisper'
 import { Button } from '../components/ui/button'
 import { API_URL } from '../config'
@@ -162,10 +168,13 @@ interface SourceOption {
   icon: LucideIcon
 }
 
+type RecordingMode = 'standard' | 'local' | 'cloud'
+
 interface ModeOption {
-  id: 'standard' | 'local'
+  id: RecordingMode
   label: string
   desc: string
+  icon?: LucideIcon
 }
 
 // ─── Source selector button ────────────────────────────────────────────────────
@@ -219,9 +228,10 @@ export default function RecordingPage() {
   const MODE_OPTIONS: ModeOption[] = [
     { id: 'standard', label: t('recording.mode_standard'), desc: t('recording.mode_standard_desc') },
     { id: 'local', label: t('recording.mode_local'), desc: t('recording.mode_local_desc') },
+    { id: 'cloud', label: t('recording.mode_cloud'), desc: t('recording.mode_cloud_desc'), icon: Zap },
   ]
   const location = useLocation()
-  const { state, duration, error, paused, start, stop, pause, resume, audioData, reset, stream, chunkSession } = useAudioRecorder(() => {
+  const { state, duration, error, paused, start, stop, pause, resume, audioData, audioBlob, reset, stream, chunkSession } = useAudioRecorder(() => {
     setTriggerPiP(true)
   })
   const [_partialTranscript, setPartialTranscript] = useState('')
@@ -239,7 +249,22 @@ export default function RecordingPage() {
     const l = (location.state as { language?: string } | null)?.language
     return (l && ['it', 'en', 'fr', 'es', 'de'].includes(l) ? l : 'it') as 'it' | 'en' | 'fr' | 'es' | 'de'
   })
-  const [mode, setMode] = useState<'standard' | 'local'>('standard')
+  const [mode, setMode] = useState<RecordingMode>('standard')
+  const [cloudInlineQuota, setCloudInlineQuota] = useState<number | null>(null)
+  const cloudTx = useCloudTranscription()
+  const notificationPermissionRequestedRef = useRef(false)
+  const backgroundWarningShownRef = useRef(false)
+  const sessionTitleRef = useRef('')
+  const hasTriggeredCloudRef = useRef(false)
+
+  const handleStop = useCallback(() => {
+    if (!notificationPermissionRequestedRef.current) {
+      notificationPermissionRequestedRef.current = true
+      requestNotificationPermission().catch(() => {})
+    }
+    backgroundWarningShownRef.current = false
+    stop()
+  }, [stop])
   const [source, setSource] = useState<AudioSource>(() => {
     const s = (location.state as { source?: AudioSource; prefillTitle?: string } | null)?.source
     return s && ['microphone', 'both', 'tab'].includes(s) ? s : 'microphone'
@@ -444,9 +469,34 @@ export default function RecordingPage() {
   }, [selectedTemplate, templates])
 
   useEffect(() => {
-    if (!audioData || whisperState !== 'ready') return
+    if (isFree) return
+    fetchCloudQuota().then(q => {
+      if (q) setCloudInlineQuota(q.minutesRemaining)
+    })
+  }, [isFree])
+
+  useEffect(() => {
+    if (!audioData) return
+    if (mode === 'cloud') {
+      if (!audioBlob || hasTriggeredCloudRef.current) return
+      hasTriggeredCloudRef.current = true
+      setWhisperState('transcribing')
+      cloudTx.transcribe(audioBlob, language)
+      return
+    }
+    if (whisperState !== 'ready') return
     whisper.transcribe(audioData, language)
-  }, [audioData, whisperState])
+  }, [audioData, whisperState, mode])
+
+  useEffect(() => {
+    if (cloudTx.status === 'done') {
+      setTranscript(cloudTx.transcript)
+      setSegments((cloudTx.segments as WhisperSegment[]) ?? [])
+      setWhisperState('done')
+    } else if (cloudTx.status === 'error') {
+      setWhisperState('error')
+    }
+  }, [cloudTx.status])
 
   // ── DB save
   useEffect(() => {
@@ -564,6 +614,12 @@ export default function RecordingPage() {
     setShowTranscribeComplete(true)
     const t = setTimeout(() => setShowTranscribeComplete(false), 1500)
 
+    notifyTranscriptionDone(
+      i18n.t('recording.notification_title'),
+      i18n.t('recording.notification_body'),
+      sessionTitleRef.current.trim() || undefined,
+    )
+
     // Usa l'ultimo sessionId noto (chunkSession potrebbe essere già null)
     const sessionIdToDelete = lastSessionIdRef.current
     if (sessionIdToDelete) {
@@ -573,6 +629,21 @@ export default function RecordingPage() {
 
     return () => clearTimeout(t)
   }, [whisperState])
+
+  useEffect(() => { sessionTitleRef.current = sessionTitle }, [sessionTitle])
+
+  useEffect(() => {
+    function onVisibilityChange() {
+      if (document.visibilityState !== 'hidden') return
+      if (mode === 'cloud') return
+      if (whisperState !== 'transcribing') return
+      if (backgroundWarningShownRef.current) return
+      backgroundWarningShownRef.current = true
+      toast.warning(i18n.t('recording.background_warning'))
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [whisperState, mode])
 
   // ── Client suggestion from most-frequent past meetings
   useEffect(() => {
@@ -791,7 +862,7 @@ export default function RecordingPage() {
             initialNotes: notes,
             onPause: () => { pause(); render(duration, true) },
             onResume: () => { resume(); render(duration, false) },
-            onStop: () => { stop(); pipWin.close() },
+            onStop: () => { handleStop(); pipWin.close() },
             onNotesChange: (val: string) => {
               handleNotesChange(val)
             },
@@ -827,6 +898,8 @@ export default function RecordingPage() {
     setPartialTranscript('')
     setTranscript('')
     setSegments([])
+    cloudTx.reset()
+    hasTriggeredCloudRef.current = false
     setSynthesis('')
     setSynthesisState('idle')
     setQuickNotes([])
@@ -1000,26 +1073,42 @@ export default function RecordingPage() {
                     {t('recording.synthesis_mode')}
                   </legend>
                   <div className="flex gap-2">
-                    {MODE_OPTIONS.map(m => (
-                      <button
-                        key={m.id}
-                        onClick={() => setMode(m.id)}
-                        disabled={!canStart}
-                        className={`flex flex-1 flex-col gap-0.5 rounded-lg border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-40 ${
-                          mode === m.id
-                            ? 'border-primary bg-primary/10'
-                            : 'border-border bg-card hover:bg-muted'
-                        }`}
-                      >
-                        <span className={`text-xs font-semibold ${mode === m.id ? 'text-primary' : 'text-foreground'}`}>
-                          {m.label}
-                        </span>
-                        <span className={`text-[10px] leading-snug ${mode === m.id ? 'text-primary/70' : 'text-muted-foreground'}`}>
-                          {m.desc}
-                        </span>
-                      </button>
-                    ))}
+                    {MODE_OPTIONS.map(m => {
+                      const isCloud = m.id === 'cloud'
+                      const isLocked = isCloud && isFree
+                      const Icon = m.icon
+                      return (
+                        <button
+                          key={m.id}
+                          onClick={() => { if (!isLocked) setMode(m.id) }}
+                          disabled={!canStart}
+                          title={isLocked ? t('recording.mode_cloud_locked_tooltip') : undefined}
+                          aria-disabled={isLocked || undefined}
+                          className={`flex flex-1 flex-col gap-0.5 rounded-lg border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary motion-reduce:transition-none disabled:cursor-not-allowed disabled:opacity-40 ${
+                            mode === m.id
+                              ? 'border-primary bg-primary/10'
+                              : isLocked
+                              ? 'border-border bg-card opacity-60 cursor-not-allowed'
+                              : 'border-border bg-card hover:bg-muted'
+                          }`}
+                        >
+                          <div className={`flex items-center gap-1.5 ${mode === m.id ? 'text-primary' : 'text-foreground'}`}>
+                            {Icon && <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
+                            <span className="text-xs font-semibold">{m.label}</span>
+                            {isLocked && <Lock className="h-3 w-3 shrink-0 text-muted-foreground" aria-hidden="true" />}
+                          </div>
+                          <span className={`text-[10px] leading-snug ${mode === m.id ? 'text-primary/70' : 'text-muted-foreground'}`}>
+                            {m.desc}
+                          </span>
+                        </button>
+                      )
+                    })}
                   </div>
+                  {mode === 'cloud' && !isFree && cloudInlineQuota !== null && (
+                    <p className="mt-2 text-[11px] text-muted-foreground">
+                      {t('recording.cloud_quota_inline', { hours: (cloudInlineQuota / 60).toFixed(1) })}
+                    </p>
+                  )}
                 </fieldset>
               </motion.div>
               )}
@@ -1119,7 +1208,7 @@ export default function RecordingPage() {
                 <div className="flex gap-3">
                   <Button
                     variant="destructive"
-                    onClick={stop}
+                    onClick={handleStop}
                     className="rounded-md"
                   >
                     {t('recording.stop_btn')}
@@ -1170,12 +1259,62 @@ export default function RecordingPage() {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">{t('recording.transcribing_hint')}</p>
-                <p className="text-xs text-muted-foreground/70">
-                  {t('recording.transcribing_local')}
+                <p className="text-xs text-muted-foreground">
+                  {t('recording.estimated_time', { minutes: Math.max(1, Math.round(estimateTranscriptionMinutes(duration, mode))) })}
                 </p>
+                {mode !== 'cloud' && (
+                  <p className="text-xs text-muted-foreground/70">
+                    {t('recording.transcribing_local')}
+                  </p>
+                )}
               </motion.div>
               )}
             </AnimatePresence>
+
+            {/* Cloud Veloce transcription error */}
+            {state === 'done' && cloudTx.status === 'error' && cloudTx.error && (
+              <div className="space-y-3 rounded-lg border border-destructive/40 bg-destructive/5 p-4">
+                <p className="text-sm font-medium text-destructive">
+                  {cloudTx.error.kind === 'quota'
+                    ? t('recording.cloud_quota_error')
+                    : cloudTx.error.kind === 'not_available'
+                    ? t('recording.cloud_not_available')
+                    : cloudTx.error.kind === 'rate_limited'
+                    ? t('recording.cloud_rate_limited')
+                    : t('recording.error_prefix', { error: cloudTx.error.message })}
+                </p>
+                {cloudTx.error.kind === 'rate_limited' ? (
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        hasTriggeredCloudRef.current = true
+                        setWhisperState('transcribing')
+                        cloudTx.retry()
+                      }}
+                      className="rounded-md"
+                    >
+                      {t('recording.cloud_retry_cloud')}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        cloudTx.reset()
+                        setMode('standard')
+                        setWhisperState('ready')
+                      }}
+                      className="rounded-md"
+                    >
+                      {t('recording.cloud_retry_local')}
+                    </Button>
+                  </div>
+                ) : (
+                  <Button variant="outline" onClick={handleNewRecording} className="rounded-md">
+                    {t('recording.retry')}
+                  </Button>
+                )}
+              </div>
+            )}
 
             {/* Transcription complete flash */}
             {isDone && showTranscribeComplete && (
@@ -1472,6 +1611,7 @@ export default function RecordingPage() {
               <MeetingBriefing />
             )}
 
+            {!isFree && mode === 'cloud' && <CloudQuotaWidget />}
 
             {/* Quick notes — during recording */}
             {isRecording && (

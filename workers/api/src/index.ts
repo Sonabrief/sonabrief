@@ -23,6 +23,7 @@ import {
 import { handleGetPreferences, handleSavePreferences, handlePatchPreferences } from "./routes/preferences";
 import { handleDeleteAccount } from "./routes/account";
 import { handleSendWeeklyReminder } from "./routes/email-reminder";
+import { handleTranscribeCloud, handleTranscribeCloudQuota } from "./routes/transcribe-cloud";
 import { handleRetentionCleanup } from "./routes/cron-retention";
 import { handleGoogleStart, handleGoogleCallback, handleCalendarEvents, handleCalendarDisconnect, handleMicrosoftStart, handleMicrosoftCallback, handleMicrosoftCalendarEvents, handleMicrosoftDisconnect } from "./routes/calendar";
 import {
@@ -127,6 +128,10 @@ export default {
       response = await handleSendWeeklyReminder(request, env)
     } else if (url.pathname === '/v1/account' && request.method === 'DELETE') {
       response = await handleDeleteAccount(request, env)
+    } else if (url.pathname === '/v1/transcribe-cloud' && request.method === 'POST') {
+      response = await handleTranscribeCloud(request, env)
+    } else if (url.pathname === '/v1/transcribe-cloud/quota' && request.method === 'GET') {
+      response = await handleTranscribeCloudQuota(request, env)
     } else {
       response = new Response("Not found", { status: 404 });
     }
