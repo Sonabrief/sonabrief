@@ -50,16 +50,19 @@ async function loadModel(model: string) {
   const hasWebGPU = 'gpu' in navigator
   const useWasm = IS_INTEL || !hasWebGPU
   const device = useWasm ? 'wasm' : 'webgpu'
+  // q8 su WASM è più veloce di q4: dequantizzazione SIMD-friendly (i8 mul).
+  // Il bug MatMulNBits q8 era specifico di ORT 1.26-dev; ORT 1.22 non è affetto.
   const dtype = useWasm
-    ? 'q4'
+    ? 'q8'
     : { encoder_model: 'q4', decoder_model_merged: 'q4' } as const
 
+  const threads = navigator.hardwareConcurrency ?? 2
   if (useWasm) {
     // @ts-ignore
-    env.backends.onnx.wasm.numThreads = Math.min(navigator.hardwareConcurrency ?? 2, 4)
+    env.backends.onnx.wasm.numThreads = threads
   }
 
-  console.log(`[Whisper] device=${device} intel=${IS_INTEL} threads=${useWasm ? Math.min(navigator.hardwareConcurrency ?? 2, 4) : 'n/a'} crossOriginIsolated=${self.crossOriginIsolated}`)
+  console.log(`[Whisper] device=${device} intel=${IS_INTEL} threads=${useWasm ? threads : 'n/a'} crossOriginIsolated=${self.crossOriginIsolated}`)
 
   transcriber = await pipeline('automatic-speech-recognition', model, {
     device,
