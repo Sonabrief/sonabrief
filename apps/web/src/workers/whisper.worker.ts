@@ -3,49 +3,27 @@ import { pipeline, env } from '@huggingface/transformers'
 env.allowLocalModels = false
 env.useBrowserCache = true
 
-// ─── ORT multi-thread setup ────────────────────────────────────────────
-// Transformers v4.2.0 importa onnxruntime-web/webgpu che di default carica
-// "ort-wasm-simd-threaded.asyncify.{mjs,wasm}" — variante SINGLE-THREAD
-// (asyncify non usa pthreads, vedi cacheWasm.js commento esplicito).
-// Risultato: env.backends.onnx.wasm.numThreads viene ignorato.
-//
-// IMPORTANTE: NON usare un check `if (canThread)` su `self.crossOriginIsolated`
-// e `typeof SharedArrayBuffer`: oxc-minify (Rolldown) li valuta `false` a
-// build-time (Node non ha COI) e dead-coda l'intero blocco.
-// Soluzione: override INCONDIZIONATO; se il browser non ha COI/SAB,
-// `pipeline()` fallisce e il fallback in loadModel() rimuove l'override
-// e ricarica con i default asyncify.
+// ─── ORT setup ───────────────────────────────────────────────────────
+// NOTA: in passato si era tentato di forzare la variante threaded di ORT
+// (ort-wasm-simd-threaded.{mjs,wasm}) per abilitare il multi-thread reale.
+// Sul bundle dev di ORT 1.26.0-dev.20260416-b7804b056c questo causa hang
+// nella creazione della SECONDA session (mel matmul lazy in
+// _extract_fbank_features), bloccando del tutto la trascrizione.
+// Quindi torniamo al default asyncify di transformers (single-thread ma
+// stabile). Il guadagno di velocità per Whisper Small su Intel UHD va
+// affrontato a livello di model size (Tiny/Base) non di threading.
 
-// @ts-ignore – versions.web esiste a runtime ma non è tipato
-const ORT_VERSION: string = (env.backends.onnx as any).versions?.web ?? '1.26.0'
-const ORT_CDN = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`
-
-// Diagnostica runtime: bracket-access su globalThis impedisce constant folding
+// Diagnostica runtime (bracket-access su globalThis per resistere al minifier)
 const _g = globalThis as Record<string, unknown>
-const RT_COI = _g['crossOriginIsolated']
-const RT_SAB = _g['SharedArrayBuffer']
 console.log('[Whisper][diag]', {
-  ortVersion: ORT_VERSION,
-  crossOriginIsolated: RT_COI,
-  hasSharedArrayBuffer: typeof RT_SAB === 'function',
+  crossOriginIsolated: _g['crossOriginIsolated'],
+  hasSharedArrayBuffer: typeof _g['SharedArrayBuffer'] === 'function',
   hardwareConcurrency: navigator.hardwareConcurrency,
 })
 
-// Override INCONDIZIONATO — qualunque branch eliminerebbe l'effetto
-// @ts-ignore
-env.backends.onnx.wasm.wasmPaths = {
-  mjs: `${ORT_CDN}ort-wasm-simd-threaded.mjs`,
-  wasm: `${ORT_CDN}ort-wasm-simd-threaded.wasm`,
-}
+// numThreads resta settato: con asyncify viene ignorato ma è innocuo
 // @ts-ignore
 env.backends.onnx.wasm.numThreads = Math.min(navigator.hardwareConcurrency ?? 1, 4)
-
-console.log('[Whisper][diag] wasmPaths set to threaded:',
-  // @ts-ignore
-  env.backends.onnx.wasm.wasmPaths,
-  // @ts-ignore
-  'numThreads:', env.backends.onnx.wasm.numThreads,
-)
 
 type WhisperStatus =
   | { type: 'loading'; progress: number; file: string }
