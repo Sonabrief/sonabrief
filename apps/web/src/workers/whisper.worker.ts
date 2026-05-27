@@ -3,44 +3,48 @@ import { pipeline, env } from '@huggingface/transformers'
 env.allowLocalModels = false
 env.useBrowserCache = true
 
-// Diagnostica COI/SAB dentro il worker (può differire dal main thread)
-const SAB_OK = typeof SharedArrayBuffer !== 'undefined'
-const COI_OK = (self as unknown as { crossOriginIsolated?: boolean }).crossOriginIsolated === true
-console.log('[Whisper][diag] worker context:', {
-  crossOriginIsolated: COI_OK,
-  hasSharedArrayBuffer: SAB_OK,
+// ─── ORT multi-thread setup ────────────────────────────────────────────
+// Transformers v4.2.0 importa onnxruntime-web/webgpu che di default carica
+// "ort-wasm-simd-threaded.asyncify.{mjs,wasm}" — variante SINGLE-THREAD
+// (asyncify non usa pthreads, vedi cacheWasm.js commento esplicito).
+// Risultato: env.backends.onnx.wasm.numThreads viene ignorato.
+//
+// IMPORTANTE: NON usare un check `if (canThread)` su `self.crossOriginIsolated`
+// e `typeof SharedArrayBuffer`: oxc-minify (Rolldown) li valuta `false` a
+// build-time (Node non ha COI) e dead-coda l'intero blocco.
+// Soluzione: override INCONDIZIONATO; se il browser non ha COI/SAB,
+// `pipeline()` fallisce e il fallback in loadModel() rimuove l'override
+// e ricarica con i default asyncify.
+
+// @ts-ignore – versions.web esiste a runtime ma non è tipato
+const ORT_VERSION: string = (env.backends.onnx as any).versions?.web ?? '1.26.0'
+const ORT_CDN = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`
+
+// Diagnostica runtime: bracket-access su globalThis impedisce constant folding
+const _g = globalThis as Record<string, unknown>
+const RT_COI = _g['crossOriginIsolated']
+const RT_SAB = _g['SharedArrayBuffer']
+console.log('[Whisper][diag]', {
+  ortVersion: ORT_VERSION,
+  crossOriginIsolated: RT_COI,
+  hasSharedArrayBuffer: typeof RT_SAB === 'function',
   hardwareConcurrency: navigator.hardwareConcurrency,
 })
 
-// Transformers v4.2.0 importa onnxruntime-web/webgpu che hardcoda
-// "ort-wasm-simd-threaded.asyncify.mjs" — single-thread (asyncify non usa pthreads).
-// Override esplicito su variante threaded reale (richiede COI + SAB).
-{
-  // @ts-ignore
-  const ortVersion = (env.backends.onnx as any).versions?.web ?? '1.26.0'
-  const wasmPathPrefix = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ortVersion}/dist/`
-  console.log('[Whisper][diag] ORT version detected:', ortVersion)
-
-  if (COI_OK && SAB_OK) {
-    // @ts-ignore
-    env.backends.onnx.wasm.wasmPaths = {
-      mjs: `${wasmPathPrefix}ort-wasm-simd-threaded.mjs`,
-      wasm: `${wasmPathPrefix}ort-wasm-simd-threaded.wasm`,
-    }
-    console.log('[Whisper][diag] wasmPaths OVERRIDDEN to threaded:',
-      // @ts-ignore
-      (env.backends.onnx as any).wasm.wasmPaths,
-    )
-  } else {
-    console.warn('[Whisper][diag] COI o SAB mancanti: resto su asyncify single-thread')
-  }
+// Override INCONDIZIONATO — qualunque branch eliminerebbe l'effetto
+// @ts-ignore
+env.backends.onnx.wasm.wasmPaths = {
+  mjs: `${ORT_CDN}ort-wasm-simd-threaded.mjs`,
+  wasm: `${ORT_CDN}ort-wasm-simd-threaded.wasm`,
 }
-
 // @ts-ignore
 env.backends.onnx.wasm.numThreads = Math.min(navigator.hardwareConcurrency ?? 1, 4)
-console.log('[Whisper][diag] numThreads set to:',
+
+console.log('[Whisper][diag] wasmPaths set to threaded:',
   // @ts-ignore
-  (env.backends.onnx as any).wasm.numThreads,
+  env.backends.onnx.wasm.wasmPaths,
+  // @ts-ignore
+  'numThreads:', env.backends.onnx.wasm.numThreads,
 )
 
 type WhisperStatus =
@@ -95,15 +99,28 @@ async function loadModel(model: string) {
   const dtype = device === 'webgpu'
     ? { encoder_model: 'q4', decoder_model_merged: 'q4' } as const
     : 'q8'
-  transcriber = await pipeline('automatic-speech-recognition', model, {
-    device,
-    dtype,
-    progress_callback: (p: { status: string; progress?: number; file?: string }) => {
-      if (p.status === 'downloading' || p.status === 'loading') {
-        post({ type: 'loading', progress: Math.round(p.progress ?? 0), file: p.file ?? '' })
-      }
-    },
-  })
+
+  const progressCb = (p: { status: string; progress?: number; file?: string }) => {
+    if (p.status === 'downloading' || p.status === 'loading') {
+      post({ type: 'loading', progress: Math.round(p.progress ?? 0), file: p.file ?? '' })
+    }
+  }
+
+  try {
+    transcriber = await pipeline('automatic-speech-recognition', model, {
+      device, dtype, progress_callback: progressCb,
+    })
+  } catch (err) {
+    // Threaded variant ha fallito (probabile no COI/SAB nel browser).
+    // Rimuovi l'override e riprova con i default asyncify single-thread.
+    console.warn('[Whisper] threaded variant fallita, fallback ad asyncify:', err)
+    // @ts-ignore
+    delete env.backends.onnx.wasm.wasmPaths
+    transcriber = await pipeline('automatic-speech-recognition', model, {
+      device, dtype, progress_callback: progressCb,
+    })
+  }
+
   post({ type: 'ready' })
 }
 
