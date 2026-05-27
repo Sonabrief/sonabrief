@@ -44,25 +44,22 @@ async function loadModel(model: string) {
     transcriber = null
   }
 
-  // Intel iGPU: WebGPU è lento (molti op cadono su CPU); usiamo WASM con
-  // multi-thread se crossOriginIsolated è disponibile (COOP/COEP attivi).
-  // Su NVIDIA/AMD WebGPU è genuinamente più veloce → lo teniamo.
+  // WebGPU ovunque disponibile: con COI=true il backend JSEP threaded usa thread
+  // anche per le operazioni CPU-side (mel spectrogram, ecc.).
+  // WASM puro solo dove WebGPU non è disponibile, con q8 + tutti i thread.
   const hasWebGPU = 'gpu' in navigator
-  const useWasm = IS_INTEL || !hasWebGPU
-  const device = useWasm ? 'wasm' : 'webgpu'
-  // q8 su WASM è più veloce di q4: dequantizzazione SIMD-friendly (i8 mul).
-  // Il bug MatMulNBits q8 era specifico di ORT 1.26-dev; ORT 1.22 non è affetto.
-  const dtype = useWasm
-    ? 'q8'
-    : { encoder_model: 'q4', decoder_model_merged: 'q4' } as const
+  const device = hasWebGPU ? 'webgpu' : 'wasm'
+  const dtype = hasWebGPU
+    ? { encoder_model: 'q4', decoder_model_merged: 'q4' } as const
+    : 'q8'
 
   const threads = navigator.hardwareConcurrency ?? 2
-  if (useWasm) {
+  if (!hasWebGPU) {
     // @ts-ignore
     env.backends.onnx.wasm.numThreads = threads
   }
 
-  console.log(`[Whisper] device=${device} intel=${IS_INTEL} threads=${useWasm ? threads : 'n/a'} crossOriginIsolated=${self.crossOriginIsolated}`)
+  console.log(`[Whisper] device=${device} intel=${IS_INTEL} threads=${hasWebGPU ? 'n/a(webgpu)' : threads} crossOriginIsolated=${self.crossOriginIsolated}`)
 
   transcriber = await pipeline('automatic-speech-recognition', model, {
     device,
