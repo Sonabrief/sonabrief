@@ -3,32 +3,45 @@ import { pipeline, env } from '@huggingface/transformers'
 env.allowLocalModels = false
 env.useBrowserCache = true
 
-// Transformers v4.2.0 importa onnxruntime-web/webgpu e di default punta wasmPaths
-// alla variante "ort-wasm-simd-threaded.asyncify.{mjs,wasm}" — che NONOSTANTE
-// il nome è single-thread (asyncify non usa pthreads, vedi cacheWasm.js commento).
-// Risultato: env.backends.onnx.wasm.numThreads viene ignorato e Whisper gira su 1 core.
-// Override esplicito alla variante threaded reale quando crossOriginIsolated + SAB sono disponibili.
+// Diagnostica COI/SAB dentro il worker (può differire dal main thread)
+const SAB_OK = typeof SharedArrayBuffer !== 'undefined'
+const COI_OK = (self as unknown as { crossOriginIsolated?: boolean }).crossOriginIsolated === true
+console.log('[Whisper][diag] worker context:', {
+  crossOriginIsolated: COI_OK,
+  hasSharedArrayBuffer: SAB_OK,
+  hardwareConcurrency: navigator.hardwareConcurrency,
+})
+
+// Transformers v4.2.0 importa onnxruntime-web/webgpu che hardcoda
+// "ort-wasm-simd-threaded.asyncify.mjs" — single-thread (asyncify non usa pthreads).
+// Override esplicito su variante threaded reale (richiede COI + SAB).
 {
   // @ts-ignore
   const ortVersion = (env.backends.onnx as any).versions?.web ?? '1.26.0'
   const wasmPathPrefix = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ortVersion}/dist/`
-  const canThread =
-    typeof SharedArrayBuffer !== 'undefined' &&
-    (self as unknown as { crossOriginIsolated?: boolean }).crossOriginIsolated === true
-  if (canThread) {
+  console.log('[Whisper][diag] ORT version detected:', ortVersion)
+
+  if (COI_OK && SAB_OK) {
     // @ts-ignore
     env.backends.onnx.wasm.wasmPaths = {
       mjs: `${wasmPathPrefix}ort-wasm-simd-threaded.mjs`,
       wasm: `${wasmPathPrefix}ort-wasm-simd-threaded.wasm`,
     }
-    console.log('[Whisper] WASM threaded reale abilitato (crossOriginIsolated + SAB)')
+    console.log('[Whisper][diag] wasmPaths OVERRIDDEN to threaded:',
+      // @ts-ignore
+      (env.backends.onnx as any).wasm.wasmPaths,
+    )
   } else {
-    console.warn('[Whisper] crossOriginIsolated o SAB non disponibili: fallback asyncify single-thread')
+    console.warn('[Whisper][diag] COI o SAB mancanti: resto su asyncify single-thread')
   }
 }
 
 // @ts-ignore
 env.backends.onnx.wasm.numThreads = Math.min(navigator.hardwareConcurrency ?? 1, 4)
+console.log('[Whisper][diag] numThreads set to:',
+  // @ts-ignore
+  (env.backends.onnx as any).wasm.numThreads,
+)
 
 type WhisperStatus =
   | { type: 'loading'; progress: number; file: string }

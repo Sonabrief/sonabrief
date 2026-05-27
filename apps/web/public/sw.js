@@ -3,7 +3,8 @@
 // - API sempre network
 // - Inietta COOP/COEP per abilitare crossOriginIsolated (multi-threading WASM)
 
-const CACHE_NAME = 'sonabrief-v3';
+const CACHE_PREFIX = 'sonabrief-';
+const CACHE_NAME = 'sonabrief-v4';
 const SHELL_ASSETS = [
   '/',
   '/index.html',
@@ -22,7 +23,13 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+      Promise.all(
+        // Cancella SOLO le vecchie versioni dell'app cache; NON toccare
+        // cache di terze parti tipo `transformers-cache` (modello Whisper 244MB+).
+        keys
+          .filter((k) => k.startsWith(CACHE_PREFIX) && k !== CACHE_NAME)
+          .map((k) => caches.delete(k))
+      )
     ).then(() => clients.claim())
   );
 });
@@ -39,6 +46,14 @@ function withIsolationHeaders(response) {
   });
 }
 
+// HTML navigation → network-first (per non servire bundle vecchi dopo un deploy)
+// Asset hashed → cache-first (immutabili per definizione)
+function isHTMLRequest(request, url) {
+  return request.mode === 'navigate' ||
+    url.pathname === '/' ||
+    url.pathname.endsWith('.html');
+}
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -53,6 +68,26 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  if (isHTMLRequest(request, url)) {
+    // Network-first per evitare stale index.html dopo nuovi deploy
+    event.respondWith(
+      fetch(request).then((response) => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+        }
+        return withIsolationHeaders(response);
+      }).catch(() =>
+        caches.match(request).then((cached) =>
+          cached ? withIsolationHeaders(cached) :
+            caches.match('/index.html').then((r) => r ? withIsolationHeaders(r) : Response.error())
+        )
+      )
+    );
+    return;
+  }
+
+  // Asset (JS/CSS/font/img con hash): cache-first
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) return withIsolationHeaders(cached);
@@ -62,10 +97,6 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
         }
         return withIsolationHeaders(response);
-      }).catch(() => {
-        if (request.mode === 'navigate') {
-          return caches.match('/index.html').then(r => r ? withIsolationHeaders(r) : Response.error());
-        }
       });
     })
   );
