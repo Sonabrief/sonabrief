@@ -1,15 +1,15 @@
 // Service Worker — Sonabrief PWA
 // - Cache shell app per offline
 // - API sempre network
-// - NON inietta più COOP/COEP: l'attivazione di crossOriginIsolated triggerava
-//   un path interno di ORT/transformers v4.2.0 (con onnxruntime-web 1.26.0-dev)
-//   che rallentava Whisper drasticamente su Intel iGPU senza dare in cambio
-//   un multi-thread funzionante (la 2a session ORT in threaded hangava).
-//   Quando transformers/ORT stable supporteranno multi-thread su questo
-//   workload, si potranno riattivare le iniezioni di header (bump CACHE_NAME).
+// - Inietta COOP/COEP per abilitare crossOriginIsolated → SharedArrayBuffer →
+//   WASM multi-thread in ORT 1.22 (transformers 3.5.2).
+//   COEP usa "credentialless" (non "require-corp") per compatibilità con
+//   risorse cross-origin (Polar billing, Cloudflare auth, ecc.).
+//   Il multi-thread viene attivato SOLO su Intel iGPU (dove WebGPU è lento);
+//   su NVIDIA/AMD si usa comunque WebGPU che è più veloce.
 
 const CACHE_PREFIX = 'sonabrief-';
-const CACHE_NAME = 'sonabrief-v5';
+const CACHE_NAME = 'sonabrief-v6';
 const SHELL_ASSETS = [
   '/',
   '/index.html',
@@ -39,10 +39,15 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// NO-OP per ora: prima iniettavamo COOP/COEP, ora pass-through.
-// Manteniamo la firma per non dover toccare il resto del fetch handler.
 function withIsolationHeaders(response) {
-  return response;
+  const headers = new Headers(response.headers);
+  headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+  headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
 }
 
 // HTML navigation → network-first (per non servire bundle vecchi dopo un deploy)

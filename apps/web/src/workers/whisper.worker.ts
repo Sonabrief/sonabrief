@@ -3,6 +3,22 @@ import { pipeline, env } from '@huggingface/transformers'
 env.allowLocalModels = false
 env.useBrowserCache = true
 
+function isIntelGPU(): boolean {
+  try {
+    const canvas = new OffscreenCanvas(1, 1)
+    const gl = canvas.getContext('webgl') as WebGLRenderingContext | null
+    if (!gl) return false
+    const ext = gl.getExtension('WEBGL_debug_renderer_info')
+    if (!ext) return false
+    const renderer = (gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) as string).toLowerCase()
+    return renderer.includes('intel')
+  } catch {
+    return false
+  }
+}
+
+const IS_INTEL = isIntelGPU()
+
 type WhisperStatus =
   | { type: 'loading'; progress: number; file: string }
   | { type: 'ready' }
@@ -28,11 +44,22 @@ async function loadModel(model: string) {
     transcriber = null
   }
 
+  // Intel iGPU: WebGPU è lento (molti op cadono su CPU); usiamo WASM con
+  // multi-thread se crossOriginIsolated è disponibile (COOP/COEP attivi).
+  // Su NVIDIA/AMD WebGPU è genuinamente più veloce → lo teniamo.
   const hasWebGPU = 'gpu' in navigator
-  const device = hasWebGPU ? 'webgpu' : 'wasm'
-  const dtype = hasWebGPU
-    ? { encoder_model: 'q4', decoder_model_merged: 'q4' } as const
-    : 'q4'
+  const useWasm = IS_INTEL || !hasWebGPU
+  const device = useWasm ? 'wasm' : 'webgpu'
+  const dtype = useWasm
+    ? 'q4'
+    : { encoder_model: 'q4', decoder_model_merged: 'q4' } as const
+
+  if (useWasm) {
+    // @ts-ignore
+    env.backends.onnx.wasm.numThreads = Math.min(navigator.hardwareConcurrency ?? 2, 4)
+  }
+
+  console.log(`[Whisper] device=${device} intel=${IS_INTEL} threads=${useWasm ? Math.min(navigator.hardwareConcurrency ?? 2, 4) : 'n/a'} crossOriginIsolated=${self.crossOriginIsolated}`)
 
   transcriber = await pipeline('automatic-speech-recognition', model, {
     device,
