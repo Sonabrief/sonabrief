@@ -2,6 +2,31 @@ import { pipeline, env } from '@huggingface/transformers'
 
 env.allowLocalModels = false
 env.useBrowserCache = true
+
+// Transformers v4.2.0 importa onnxruntime-web/webgpu e di default punta wasmPaths
+// alla variante "ort-wasm-simd-threaded.asyncify.{mjs,wasm}" — che NONOSTANTE
+// il nome è single-thread (asyncify non usa pthreads, vedi cacheWasm.js commento).
+// Risultato: env.backends.onnx.wasm.numThreads viene ignorato e Whisper gira su 1 core.
+// Override esplicito alla variante threaded reale quando crossOriginIsolated + SAB sono disponibili.
+{
+  // @ts-ignore
+  const ortVersion = (env.backends.onnx as any).versions?.web ?? '1.26.0'
+  const wasmPathPrefix = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ortVersion}/dist/`
+  const canThread =
+    typeof SharedArrayBuffer !== 'undefined' &&
+    (self as unknown as { crossOriginIsolated?: boolean }).crossOriginIsolated === true
+  if (canThread) {
+    // @ts-ignore
+    env.backends.onnx.wasm.wasmPaths = {
+      mjs: `${wasmPathPrefix}ort-wasm-simd-threaded.mjs`,
+      wasm: `${wasmPathPrefix}ort-wasm-simd-threaded.wasm`,
+    }
+    console.log('[Whisper] WASM threaded reale abilitato (crossOriginIsolated + SAB)')
+  } else {
+    console.warn('[Whisper] crossOriginIsolated o SAB non disponibili: fallback asyncify single-thread')
+  }
+}
+
 // @ts-ignore
 env.backends.onnx.wasm.numThreads = Math.min(navigator.hardwareConcurrency ?? 1, 4)
 
@@ -25,11 +50,38 @@ self.addEventListener('unhandledrejection', (e) => {
 })
 
 async function loadModel(model: string) {
-  const hasWebGPU = 'gpu' in navigator
-  const device = hasWebGPU ? 'webgpu' : 'wasm'
-  const dtype = hasWebGPU
+  // Rilascia la sessione ORT precedente per evitare doppia allocazione su fallback Large→Small
+  if (transcriber) {
+    try { await (transcriber as { dispose?: () => Promise<void> }).dispose?.() } catch { /* ignora */ }
+    transcriber = null
+  }
+
+  // Intel GPU integrata è più lenta di WASM multi-thread per Whisper
+  // WebGPU conviene solo con GPU discrete (NVIDIA/AMD)
+  let device: 'webgpu' | 'wasm' = 'wasm'
+  try {
+    if ('gpu' in navigator) {
+      const adapter = await navigator.gpu.requestAdapter()
+      if (adapter) {
+        const info = (adapter as any).info ?? {}
+        const vendor = (info.vendor ?? '').toLowerCase()
+        const isIntegrated = vendor.includes('intel') || vendor.includes('microsoft')
+        if (!isIntegrated) {
+          device = 'webgpu'
+          console.log('[Whisper] GPU dedicata rilevata, uso WebGPU')
+        } else {
+          console.log('[Whisper] GPU integrata Intel/Microsoft, uso WASM multi-thread (più veloce)')
+        }
+      }
+    }
+  } catch {
+    console.log('[Whisper] WebGPU non disponibile, uso WASM')
+  }
+  // q4 su WebGPU vince per memory bandwidth; su WASM CPU q8 è ~25-35% più veloce
+  // (no unpacking 4-bit per token, nessun kernel q4 ottimizzato lato CPU)
+  const dtype = device === 'webgpu'
     ? { encoder_model: 'q4', decoder_model_merged: 'q4' } as const
-    : 'q4'
+    : 'q8'
   transcriber = await pipeline('automatic-speech-recognition', model, {
     device,
     dtype,
@@ -45,6 +97,7 @@ async function loadModel(model: string) {
 async function transcribe(audio: Float32Array, language?: string) {
   if (!transcriber) throw new Error('Model not loaded')
   post({ type: 'transcribing' })
+  console.log('[Whisper] inizio trascrizione, audio samples:', audio.length, 'durata stimata:', Math.round(audio.length / 16000), 's')
   const options: Record<string, unknown> = {
     return_timestamps: true,
     chunk_length_s: 30,
@@ -53,6 +106,7 @@ async function transcribe(audio: Float32Array, language?: string) {
   if (language) options.language = language
   // @ts-ignore
   const result = await transcriber(audio, options)
+  console.log('[Whisper] trascrizione completata')
   const output = Array.isArray(result) ? result[0] : result
   post({
     type: 'result',

@@ -528,11 +528,13 @@ export default function RecordingPage() {
     let rafId: number
     function tick() {
       const elapsed = Date.now() - startTime
-      const pct = Math.min(90, Math.round((elapsed / estimated) * 90))
+      // Fino al 85% segue stima temporale, poi rallenta verso 99% per non bloccarsi
+      const fastPct = Math.round((elapsed / estimated) * 85)
+      const pct = fastPct < 85
+        ? fastPct
+        : Math.min(99, 85 + Math.round((elapsed - estimated * 0.85 / estimated) / 1000 * 0.5))
       setTranscribeProgress(pct)
-      if (pct < 90) {
-        rafId = requestIdleCallback(() => tick(), { timeout: 2000 })
-      }
+      rafId = requestIdleCallback(() => tick(), { timeout: 2000 })
     }
     rafId = requestIdleCallback(() => tick(), { timeout: 2000 })
     return () => cancelIdleCallback(rafId)
