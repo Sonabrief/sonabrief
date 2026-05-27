@@ -94,11 +94,13 @@ async function loadModel(model: string) {
   } catch {
     console.log('[Whisper] WebGPU non disponibile, uso WASM')
   }
-  // q4 su WebGPU vince per memory bandwidth; su WASM CPU q8 è ~25-35% più veloce
-  // (no unpacking 4-bit per token, nessun kernel q4 ottimizzato lato CPU)
+  // q4 funziona ovunque (file del modello stabile); q8 su WASM dava
+  // qdq_actions.cc:137 TransposeDQWeightsForMatMulNBits "Missing required scale"
+  // con la variante threaded di ORT 1.26.0-dev. Il guadagno vero qui è il
+  // multi-thread reale (4 core invece di 1 asyncify), non il dtype.
   const dtype = device === 'webgpu'
     ? { encoder_model: 'q4', decoder_model_merged: 'q4' } as const
-    : 'q8'
+    : 'q4'
 
   const progressCb = (p: { status: string; progress?: number; file?: string }) => {
     if (p.status === 'downloading' || p.status === 'loading') {
@@ -106,20 +108,9 @@ async function loadModel(model: string) {
     }
   }
 
-  try {
-    transcriber = await pipeline('automatic-speech-recognition', model, {
-      device, dtype, progress_callback: progressCb,
-    })
-  } catch (err) {
-    // Threaded variant ha fallito (probabile no COI/SAB nel browser).
-    // Rimuovi l'override e riprova con i default asyncify single-thread.
-    console.warn('[Whisper] threaded variant fallita, fallback ad asyncify:', err)
-    // @ts-ignore
-    delete env.backends.onnx.wasm.wasmPaths
-    transcriber = await pipeline('automatic-speech-recognition', model, {
-      device, dtype, progress_callback: progressCb,
-    })
-  }
+  transcriber = await pipeline('automatic-speech-recognition', model, {
+    device, dtype, progress_callback: progressCb,
+  })
 
   post({ type: 'ready' })
 }
