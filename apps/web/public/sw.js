@@ -1,10 +1,15 @@
 // Service Worker — Sonabrief PWA
 // - Cache shell app per offline
 // - API sempre network
-// - Inietta COOP/COEP per abilitare crossOriginIsolated (multi-threading WASM)
+// - NON inietta più COOP/COEP: l'attivazione di crossOriginIsolated triggerava
+//   un path interno di ORT/transformers v4.2.0 (con onnxruntime-web 1.26.0-dev)
+//   che rallentava Whisper drasticamente su Intel iGPU senza dare in cambio
+//   un multi-thread funzionante (la 2a session ORT in threaded hangava).
+//   Quando transformers/ORT stable supporteranno multi-thread su questo
+//   workload, si potranno riattivare le iniezioni di header (bump CACHE_NAME).
 
 const CACHE_PREFIX = 'sonabrief-';
-const CACHE_NAME = 'sonabrief-v4';
+const CACHE_NAME = 'sonabrief-v5';
 const SHELL_ASSETS = [
   '/',
   '/index.html',
@@ -34,16 +39,10 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Aggiunge header COOP/COEP a una risposta same-origin
+// NO-OP per ora: prima iniettavamo COOP/COEP, ora pass-through.
+// Manteniamo la firma per non dover toccare il resto del fetch handler.
 function withIsolationHeaders(response) {
-  const headers = new Headers(response.headers);
-  headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
-  headers.set('Cross-Origin-Opener-Policy', 'same-origin');
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers,
-  });
+  return response;
 }
 
 // HTML navigation → network-first (per non servire bundle vecchi dopo un deploy)
