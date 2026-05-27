@@ -38,6 +38,13 @@ export type { Env };
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+    if (env.MAINTENANCE_MODE === "true") {
+      return new Response(
+        `<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>Manutenzione</title></head><body><h1>Sonabrief è in manutenzione — lancio pubblico imminente. Per accesso anticipato: sonabrief.app@gmail.com</h1></body></html>`,
+        { status: 503, headers: { "Content-Type": "text/html; charset=UTF-8" } }
+      );
+    }
+
     const url = new URL(request.url);
 
     if (request.method === "OPTIONS") {

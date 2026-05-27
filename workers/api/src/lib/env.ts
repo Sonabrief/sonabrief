@@ -32,6 +32,9 @@ export interface Env {
   POLAR_PRODUCT_UNLIMITED_MONTHLY: string;
   POLAR_PRODUCT_UNLIMITED_ANNUAL: string;
 
+  // Feature flags
+  MAINTENANCE_MODE?: string;
+
   // Lemon Squeezy (backup, non rimuovere)
   LEMONSQUEEZY_API_KEY?: string;
   LEMONSQUEEZY_WEBHOOK_SECRET?: string;
