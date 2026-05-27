@@ -108,9 +108,12 @@ async function loadModel(model: string) {
     }
   }
 
+  console.log('[Whisper][timing] pipeline() start, device:', device, 'dtype:', dtype)
+  const tPipe = performance.now()
   transcriber = await pipeline('automatic-speech-recognition', model, {
     device, dtype, progress_callback: progressCb,
   })
+  console.log(`[Whisper][timing] pipeline() ready in ${Math.round(performance.now() - tPipe)}ms`)
 
   post({ type: 'ready' })
 }
@@ -118,16 +121,19 @@ async function loadModel(model: string) {
 async function transcribe(audio: Float32Array, language?: string) {
   if (!transcriber) throw new Error('Model not loaded')
   post({ type: 'transcribing' })
-  console.log('[Whisper] inizio trascrizione, audio samples:', audio.length, 'durata stimata:', Math.round(audio.length / 16000), 's')
+  const durationS = Math.round(audio.length / 16000)
+  console.log('[Whisper] inizio trascrizione, audio samples:', audio.length, 'durata stimata:', durationS, 's')
   const options: Record<string, unknown> = {
     return_timestamps: true,
     chunk_length_s: 30,
     stride_length_s: 5,
   }
   if (language) options.language = language
+  const tStart = performance.now()
   // @ts-ignore
   const result = await transcriber(audio, options)
-  console.log('[Whisper] trascrizione completata')
+  const elapsedS = (performance.now() - tStart) / 1000
+  console.log(`[Whisper][timing] trascrizione completata in ${elapsedS.toFixed(1)}s (audio: ${durationS}s, ratio: ${(elapsedS / Math.max(durationS, 1)).toFixed(2)}x real-time)`)
   const output = Array.isArray(result) ? result[0] : result
   post({
     type: 'result',
