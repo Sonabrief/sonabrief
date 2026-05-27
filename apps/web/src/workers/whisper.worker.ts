@@ -115,6 +115,16 @@ async function loadModel(model: string) {
   })
   console.log(`[Whisper][timing] pipeline() ready in ${Math.round(performance.now() - tPipe)}ms`)
 
+  // Verifica che ORT non abbia fatto silent-fallback a numThreads=1
+  console.log('[Whisper][diag] post-pipeline ORT state:', {
+    // @ts-ignore
+    numThreads: env.backends.onnx.wasm.numThreads,
+    // @ts-ignore
+    wasmPaths: env.backends.onnx.wasm.wasmPaths,
+    // @ts-ignore
+    proxy: env.backends.onnx.wasm.proxy,
+  })
+
   post({ type: 'ready' })
 }
 
@@ -123,17 +133,38 @@ async function transcribe(audio: Float32Array, language?: string) {
   post({ type: 'transcribing' })
   const durationS = Math.round(audio.length / 16000)
   console.log('[Whisper] inizio trascrizione, audio samples:', audio.length, 'durata stimata:', durationS, 's')
+
+  // Streamer minimale per contare token e tempi — identifica hang vs lentezza
+  let tokensCount = 0
+  let lastTokenLog = performance.now()
+  const tStart = performance.now()
+  const streamer = {
+    put(value: bigint[][]) {
+      tokensCount += value[0]?.length ?? 0
+      const now = performance.now()
+      if (now - lastTokenLog > 1000) {
+        lastTokenLog = now
+        const elapsedS = (now - tStart) / 1000
+        console.log(`[Whisper][stream] +${elapsedS.toFixed(1)}s — tokens generati: ${tokensCount} (${(tokensCount / elapsedS).toFixed(1)} tok/s)`)
+      }
+    },
+    end() {
+      const elapsedS = (performance.now() - tStart) / 1000
+      console.log(`[Whisper][stream] end — totale tokens: ${tokensCount} in ${elapsedS.toFixed(1)}s (${(tokensCount / elapsedS).toFixed(1)} tok/s)`)
+    },
+  }
+
   const options: Record<string, unknown> = {
     return_timestamps: true,
     chunk_length_s: 30,
     stride_length_s: 5,
+    streamer,
   }
   if (language) options.language = language
-  const tStart = performance.now()
   // @ts-ignore
   const result = await transcriber(audio, options)
   const elapsedS = (performance.now() - tStart) / 1000
-  console.log(`[Whisper][timing] trascrizione completata in ${elapsedS.toFixed(1)}s (audio: ${durationS}s, ratio: ${(elapsedS / Math.max(durationS, 1)).toFixed(2)}x real-time)`)
+  console.log(`[Whisper][timing] trascrizione completata in ${elapsedS.toFixed(1)}s (audio: ${durationS}s, ratio: ${(elapsedS / Math.max(durationS, 1)).toFixed(2)}x real-time, ${tokensCount} tokens)`)
   const output = Array.isArray(result) ? result[0] : result
   post({
     type: 'result',
