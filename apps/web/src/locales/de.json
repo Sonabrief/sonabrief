@@ -847,5 +847,21 @@
 
   "tag_input.remove_aria": "Tag {{tag}} entfernen",
   "tag_input.add_placeholder": "Tag hinzufügen...",
-  "tag_input.create_tag": "Tag \"{{tag}}\" erstellen"
+  "tag_input.create_tag": "Tag \"{{tag}}\" erstellen",
+
+  "hardware": {
+    "estimateLabel": "Geschätzte Zeit: etwa {{minutes}} Minute{{minutes, plural, one{} other{n}}}",
+    "estimateFast": "Transkription läuft — normalerweise unter einer Minute.",
+    "notifyBtn": "Benachrichtigen, wenn fertig",
+    "keepTabOpen": "Lassen Sie diese Seite offen — ein Tab-Wechsel verlangsamt die Transkription.",
+    "longWaitBanner": "Transkription läuft noch — gleich geschafft. Vermeiden Sie den Ruhezustand des Computers.",
+    "longWaitCloudHint": "Nächstes Mal: Cloud Schnell transkribiert diese Aufnahme in unter 30 Sekunden.",
+    "doneSlowFree": "Sie haben {{minutes}} Minuten gewartet. Mit dem Pro-Plan transkribiert Cloud Schnell dieselbe Aufnahme in etwa 20 Sekunden.",
+    "doneSlowPro": "Sie haben {{minutes}} Minuten gewartet. Wählen Sie nächstes Mal Cloud Schnell — fertig in Sekunden.",
+    "doneSlowFreeCta": "Pro-Plan entdecken",
+    "modalTitle": "Ihr Gerät kann die lokale Transkription verlangsamen",
+    "modalBody": "Auf dieser Hardware kann die lokale Transkription mehrere Minuten dauern. Cloud Schnell erledigt dasselbe in Sekunden – mit demselben datenschutzfreundlichen EU-Stack.",
+    "modalCta": "Cloud Schnell ausprobieren",
+    "modalSkip": "Lokal fortfahren"
+  }
 }

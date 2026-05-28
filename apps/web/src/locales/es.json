@@ -847,5 +847,21 @@
 
   "tag_input.remove_aria": "Quitar tag {{tag}}",
   "tag_input.add_placeholder": "Añadir tag...",
-  "tag_input.create_tag": "Crear tag \"{{tag}}\""
+  "tag_input.create_tag": "Crear tag \"{{tag}}\"",
+
+  "hardware": {
+    "estimateLabel": "Tiempo estimado: unos {{minutes}} minuto{{minutes, plural, one{} other{s}}}",
+    "estimateFast": "Transcripción en curso — normalmente menos de un minuto.",
+    "notifyBtn": "Avisarme cuando esté lista",
+    "keepTabOpen": "Mantén esta página abierta — cambiar de pestaña ralentiza la transcripción.",
+    "longWaitBanner": "La transcripción sigue en curso, ya casi termina. Evita poner el ordenador en suspensión.",
+    "longWaitCloudHint": "La próxima vez: Cloud Rápido transcribe este audio en menos de 30 segundos.",
+    "doneSlowFree": "Has esperado {{minutes}} minutos. Con el plan Pro, Cloud Rápido transcribe el mismo audio en unos 20 segundos.",
+    "doneSlowPro": "Has esperado {{minutes}} minutos. La próxima vez elige Cloud Rápido — termina en segundos.",
+    "doneSlowFreeCta": "Ver el plan Pro",
+    "modalTitle": "Tu dispositivo puede ralentizar la transcripción local",
+    "modalBody": "En este hardware, la transcripción local puede tardar varios minutos. Cloud Rápido hace el mismo trabajo en segundos, con el mismo stack EU que protege tu privacidad.",
+    "modalCta": "Probar Cloud Rápido",
+    "modalSkip": "Continuar en local"
+  }
 }

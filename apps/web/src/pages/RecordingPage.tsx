@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Mic, Monitor, Video, Lock, Zap } from 'lucide-react'
@@ -8,6 +8,7 @@ import { useCloudTranscription } from '../hooks/useCloudTranscription'
 import { CloudQuotaWidget } from '../components/CloudQuotaWidget'
 import { fetchCloudQuota } from '../lib/transcribeCloud'
 import { estimateTranscriptionMinutes } from '../lib/transcribeUtils'
+import { getHardwareTier } from '../lib/whisperModel'
 import { requestNotificationPermission, notifyTranscriptionDone } from '../lib/notifications'
 import { toast } from 'sonner'
 import { whisper } from '../lib/whisper'
@@ -19,6 +20,7 @@ import type { WhisperSegment } from '../components/TranscriptViewer'
 import { db } from '../lib/db'
 import { synthesizeWithOllama } from '../lib/ollama'
 import { OllamaSetupFlow } from '../components/local-mode'
+import { HardwareSuggestionModal } from '../components/HardwareSuggestionModal'
 import { syncMeetingNow } from '../lib/sync'
 import { saveActionItemsFromNote } from '../lib/actionItems'
 import { saveEmbeddingForMeeting } from '../lib/semanticSearch'
@@ -215,7 +217,7 @@ function SourceButton({
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function RecordingPage() {
-  const { isFree } = useTier()
+  const { isFree, tier } = useTier()
   const { t } = useTranslation()
   const navigate = useNavigate()
 
@@ -225,11 +227,21 @@ export default function RecordingPage() {
     { id: 'tab', label: t('recording.source_tab'), subtitle: t('recording.source_tab_desc'), icon: Monitor },
   ]
 
+  const hwTier = useMemo(() => getHardwareTier(), [])
+  const isProPlus = tier === 'pro' || tier === 'unlimited'
+
   const MODE_OPTIONS: ModeOption[] = [
     { id: 'standard', label: t('recording.mode_standard'), desc: t('recording.mode_standard_desc') },
     { id: 'local', label: t('recording.mode_local'), desc: t('recording.mode_local_desc') },
     { id: 'cloud', label: t('recording.mode_cloud'), desc: t('recording.mode_cloud_desc'), icon: Zap },
   ]
+
+  const orderedModeOptions = useMemo(() => {
+    if ((hwTier === 'slow' || hwTier === 'medium') && isProPlus) {
+      return (['cloud', 'standard', 'local'] as RecordingMode[]).map(id => MODE_OPTIONS.find(m => m.id === id)!)
+    }
+    return MODE_OPTIONS
+  }, [hwTier, isProPlus])
   const location = useLocation()
   const { state, duration, error, paused, start, stop, pause, resume, audioData, audioBlob, reset, stream, chunkSession } = useAudioRecorder(() => {
     setTriggerPiP(true)
@@ -265,6 +277,11 @@ export default function RecordingPage() {
     backgroundWarningShownRef.current = false
     stop()
   }, [stop])
+
+  async function handleRequestNotify() {
+    const result = await requestNotificationPermission()
+    if (result === 'granted') setNotifyGranted(true)
+  }
   const [source, setSource] = useState<AudioSource>(() => {
     const s = (location.state as { source?: AudioSource; prefillTitle?: string } | null)?.source
     return s && ['microphone', 'both', 'tab'].includes(s) ? s : 'microphone'
@@ -305,6 +322,14 @@ export default function RecordingPage() {
   const pipPausedRef = useRef(paused)
   const [triggerPiP, setTriggerPiP] = useState(false)
   const [pipActive, setPipActive] = useState(false)
+  const [showTabHint, setShowTabHint] = useState(false)
+  const [showLongWaitBanner, setShowLongWaitBanner] = useState(false)
+  const [showDoneSlowMsg, setShowDoneSlowMsg] = useState(false)
+  const [notifyGranted, setNotifyGranted] = useState(() =>
+    typeof Notification !== 'undefined' && Notification.permission === 'granted'
+  )
+  const transcribeStartRef = useRef<number | null>(null)
+  const elapsedTxMinRef = useRef(0)
 
   // ── Derived state
   const canStart = state === 'idle' && whisperState === 'ready'
@@ -614,6 +639,15 @@ export default function RecordingPage() {
     setShowTranscribeComplete(true)
     const t = setTimeout(() => setShowTranscribeComplete(false), 1500)
 
+    // B4: inform user if they waited more than 5 minutes (once per user)
+    const elapsedMin = transcribeStartRef.current
+      ? (Date.now() - transcribeStartRef.current) / 60_000
+      : 0
+    if (elapsedMin > 5 && !localStorage.getItem('sb_slow_tx_educated')) {
+      elapsedTxMinRef.current = elapsedMin
+      setShowDoneSlowMsg(true)
+    }
+
     notifyTranscriptionDone(
       i18n.t('recording.notification_title'),
       i18n.t('recording.notification_body'),
@@ -644,6 +678,26 @@ export default function RecordingPage() {
     document.addEventListener('visibilitychange', onVisibilityChange)
     return () => document.removeEventListener('visibilitychange', onVisibilityChange)
   }, [whisperState, mode])
+
+  // ── Track transcription start time (for B4)
+  useEffect(() => {
+    if (isTranscribing) transcribeStartRef.current = Date.now()
+  }, [isTranscribing])
+
+  // ── B2: tab-open hint after 60s (skip for fast tier and cloud)
+  useEffect(() => {
+    if (!isTranscribing) { setShowTabHint(false); return }
+    if (hwTier === 'fast' || mode === 'cloud') return
+    const timer = setTimeout(() => setShowTabHint(true), 60_000)
+    return () => clearTimeout(timer)
+  }, [isTranscribing, hwTier, mode])
+
+  // ── B3: long-wait banner after 3 minutes
+  useEffect(() => {
+    if (!isTranscribing) { setShowLongWaitBanner(false); return }
+    const timer = setTimeout(() => setShowLongWaitBanner(true), 180_000)
+    return () => clearTimeout(timer)
+  }, [isTranscribing])
 
   // ── Client suggestion from most-frequent past meetings
   useEffect(() => {
@@ -1073,7 +1127,7 @@ export default function RecordingPage() {
                     {t('recording.synthesis_mode')}
                   </legend>
                   <div className="flex gap-2">
-                    {MODE_OPTIONS.map(m => {
+                    {orderedModeOptions.map(m => {
                       const isCloud = m.id === 'cloud'
                       const isLocked = isCloud && isFree
                       const Icon = m.icon
@@ -1245,6 +1299,38 @@ export default function RecordingPage() {
                 <p className="text-sm font-medium text-foreground">
                   {t('recording.transcribing', { progress: transcribeProgress })}
                 </p>
+
+                {/* B1 — Estimate block above progress bar */}
+                {(() => {
+                  const estimatedMin = estimateTranscriptionMinutes(duration / 60)
+                  return (
+                    <div className="rounded-lg border border-border bg-card px-3 py-2.5 space-y-2">
+                      {hwTier === 'fast' || mode === 'cloud' ? (
+                        <p className="text-xs text-muted-foreground">{t('hardware.estimateFast')}</p>
+                      ) : (
+                        <>
+                          <p className="text-xs text-muted-foreground">
+                            {t('hardware.estimateLabel', { minutes: estimatedMin })}
+                          </p>
+                          {estimatedMin > 2 && !notifyGranted && (
+                            <button
+                              onClick={handleRequestNotify}
+                              className="text-xs font-medium text-primary hover:underline"
+                            >
+                              {t('hardware.notifyBtn')}
+                            </button>
+                          )}
+                          {estimatedMin > 2 && isProPlus && (
+                            <p className="text-xs text-muted-foreground/70">
+                              {t('hardware.longWaitCloudHint')}
+                            </p>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )
+                })()}
+
                 <div
                   role="progressbar"
                   aria-valuenow={transcribeProgress}
@@ -1258,10 +1344,14 @@ export default function RecordingPage() {
                     style={{ width: `${transcribeProgress}%` }}
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">{t('recording.transcribing_hint')}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t('recording.estimated_time', { minutes: Math.max(1, Math.round(estimateTranscriptionMinutes(duration, mode))) })}
-                </p>
+
+                {/* B2 — Tab-open hint after 60s */}
+                {showTabHint && (
+                  <p className="text-xs text-muted-foreground">
+                    {t('hardware.keepTabOpen')}
+                  </p>
+                )}
+
                 {mode !== 'cloud' && (
                   <p className="text-xs text-muted-foreground/70">
                     {t('recording.transcribing_local')}
@@ -1270,6 +1360,20 @@ export default function RecordingPage() {
               </motion.div>
               )}
             </AnimatePresence>
+
+            {/* B3 — Long-wait banner after 3 minutes */}
+            {showLongWaitBanner && isTranscribing && (
+              <div className="rounded-lg border border-amber-300/60 bg-amber-50/80 dark:bg-amber-900/20 dark:border-amber-700/50 px-4 py-3 space-y-1">
+                <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
+                  {t('hardware.longWaitBanner')}
+                </p>
+                {isProPlus && (
+                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                    {t('hardware.longWaitCloudHint')}
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Cloud Veloce transcription error */}
             {state === 'done' && cloudTx.status === 'error' && cloudTx.error && (
@@ -1319,6 +1423,34 @@ export default function RecordingPage() {
             {/* Transcription complete flash */}
             {isDone && showTranscribeComplete && (
               <p className="text-sm font-medium text-primary">{t('recording.transcript_done')}</p>
+            )}
+
+            {/* B4 — Done-slow message (shown once if waited >5 min) */}
+            {isDone && showDoneSlowMsg && (
+              <div className="rounded-lg border border-border bg-card px-4 py-3 space-y-2">
+                <p className="text-sm text-foreground">
+                  {isFree
+                    ? t('hardware.doneSlowFree', { minutes: Math.round(elapsedTxMinRef.current) })
+                    : t('hardware.doneSlowPro', { minutes: Math.round(elapsedTxMinRef.current) })
+                  }
+                </p>
+                {isFree && (
+                  <a
+                    href="/pricing"
+                    className="inline-block text-xs font-medium text-primary hover:underline"
+                    onClick={() => { localStorage.setItem('sb_slow_tx_educated', '1'); setShowDoneSlowMsg(false) }}
+                  >
+                    {t('hardware.doneSlowFreeCta')}
+                  </a>
+                )}
+                <button
+                  onClick={() => { localStorage.setItem('sb_slow_tx_educated', '1'); setShowDoneSlowMsg(false) }}
+                  className="block text-xs text-muted-foreground hover:text-foreground"
+                  aria-label="Chiudi"
+                >
+                  ✕
+                </button>
+              </div>
             )}
 
             {/* Done: transcript + synthesis flow */}
@@ -1724,6 +1856,14 @@ export default function RecordingPage() {
             />
           </div>
         </div>
+      )}
+
+      {/* B5 — Hardware suggestion modal (once, Pro/PU only, slow/medium hardware) */}
+      {isProPlus && (
+        <HardwareSuggestionModal
+          onTryCloud={() => setMode('cloud')}
+          onContinueLocal={() => {}}
+        />
       )}
     </div>
   )

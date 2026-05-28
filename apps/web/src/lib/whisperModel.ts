@@ -26,3 +26,13 @@ export function setModelOverride(model: WhisperModelId | null) {
 export function resolveWhisperModel(): WhisperModelId {
   return getModelOverride() ?? detectWhisperModel()
 }
+
+export function getHardwareTier(): 'fast' | 'medium' | 'slow' {
+  const nav = navigator as Navigator & { gpu?: unknown; deviceMemory?: number }
+  if (nav.gpu !== undefined) return 'fast'
+  const mem = nav.deviceMemory ?? 8
+  const cores = navigator.hardwareConcurrency ?? 4
+  if (mem < 4 || cores <= 2) return 'slow'
+  if (mem < 8 && cores <= 4) return 'medium'
+  return 'fast'
+}

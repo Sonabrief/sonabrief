@@ -847,5 +847,21 @@
 
   "tag_input.remove_aria": "Rimuovi tag {{tag}}",
   "tag_input.add_placeholder": "Aggiungi tag...",
-  "tag_input.create_tag": "Crea tag \"{{tag}}\""
+  "tag_input.create_tag": "Crea tag \"{{tag}}\"",
+
+  "hardware": {
+    "estimateLabel": "Tempo stimato: circa {{minutes}} minut{{minutes, plural, one{o} other{i}}}",
+    "estimateFast": "Trascrizione in corso — di solito meno di un minuto.",
+    "notifyBtn": "Avvisami quando è pronta",
+    "keepTabOpen": "Tieni questa pagina aperta — cambiare tab rallenta la trascrizione.",
+    "longWaitBanner": "La trascrizione è in corso, ci siamo quasi. Evita di mettere in standby il computer.",
+    "longWaitCloudHint": "La prossima volta: Cloud Veloce trascrive questo audio in meno di 30 secondi.",
+    "doneSlowFree": "Hai aspettato {{minutes}} minuti. Con il piano Pro, Cloud Veloce trascrive lo stesso audio in circa 20 secondi.",
+    "doneSlowPro": "Hai aspettato {{minutes}} minuti. La prossima volta seleziona Cloud Veloce — finisce in pochi secondi.",
+    "doneSlowFreeCta": "Scopri il piano Pro",
+    "modalTitle": "Il tuo dispositivo è lento per la trascrizione locale",
+    "modalBody": "Su questo hardware la trascrizione richiede diversi minuti. Cloud Veloce completa lo stesso lavoro in pochi secondi, con lo stesso stack EU privacy-first.",
+    "modalCta": "Prova Cloud Veloce",
+    "modalSkip": "Continua in locale"
+  }
 }

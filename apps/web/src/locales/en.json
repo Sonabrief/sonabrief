@@ -847,5 +847,21 @@
 
   "tag_input.remove_aria": "Remove tag {{tag}}",
   "tag_input.add_placeholder": "Add tag...",
-  "tag_input.create_tag": "Create tag \"{{tag}}\""
+  "tag_input.create_tag": "Create tag \"{{tag}}\"",
+
+  "hardware": {
+    "estimateLabel": "Estimated time: about {{minutes}} minute{{minutes, plural, one{} other{s}}}",
+    "estimateFast": "Transcription in progress — usually under a minute.",
+    "notifyBtn": "Notify me when ready",
+    "keepTabOpen": "Keep this page open — switching tabs slows down transcription.",
+    "longWaitBanner": "Transcription is still running — almost there. Avoid putting your computer to sleep.",
+    "longWaitCloudHint": "Next time: Cloud Fast transcribes this audio in under 30 seconds.",
+    "doneSlowFree": "You waited {{minutes}} minutes. With the Pro plan, Cloud Fast transcribes the same audio in about 20 seconds.",
+    "doneSlowPro": "You waited {{minutes}} minutes. Next time, select Cloud Fast — it finishes in seconds.",
+    "doneSlowFreeCta": "See Pro plan",
+    "modalTitle": "Your device may slow down local transcription",
+    "modalBody": "On this hardware, local transcription can take several minutes. Cloud Fast does the same job in seconds, with the same EU privacy-first stack.",
+    "modalCta": "Try Cloud Fast",
+    "modalSkip": "Continue locally"
+  }
 }
