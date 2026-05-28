@@ -1,318 +1,347 @@
-# Sonabrief — Whitepaper Architettura Privacy
+# Sonabrief — Privacy Architecture Whitepaper
 
-**Documento tecnico per professionisti con obblighi di riservatezza**
+**Technical document for professionals with confidentiality obligations**
 
-Versione 2.0 · Maggio 2026
+Version 2.0 · May 2026
 
-Classificazione: Pubblico · Verificabile nel codice open source
-
----
-
-## Premessa
-
-Questo documento descrive l'architettura tecnica di privacy di Sonabrief. È scritto per professionisti — avvocati, commercialisti, medici, psicologi, consulenti regolamentati — che devono valutare se uno strumento è compatibile con i propri obblighi di riservatezza prima di adottarlo.
-
-Non chiediamo di fidarti delle nostre dichiarazioni. Ogni affermazione in questo documento è verificabile: nel codice open source, nei DevTools del browser, nei contratti con i subprocessor. Le istruzioni di verifica sono incluse.
+Classification: Public · Verifiable in the open source code
 
 ---
 
-## 1. L'audio non viene mai salvato come file
+## Preamble
 
-### 1.1 Il flusso di registrazione
+This document describes the technical privacy architecture of Sonabrief. It is written for professionals — lawyers, accountants, physicians, psychologists, regulated consultants — who need to assess whether a tool is compatible with their confidentiality obligations before adopting it.
 
-Quando avvii una registrazione in Sonabrief, l'audio viene catturato tramite le API Web Audio del browser (`getUserMedia` per il microfono, `getDisplayMedia` con tracce video scartate per l'audio di sistema). Il flusso audio non raggiunge mai un server. Non viene mai scritto su disco come file.
-
-Il flusso di elaborazione è il seguente:
-
-1. `MediaRecorder` cattura chunk audio ogni 30 secondi
-2. Ogni chunk viene cifrato immediatamente con XChaCha20-Poly1305 (chiave session-scoped, vedi §1.2) e scritto nell'IndexedDB del browser
-3. Quando si accumulano circa 2 minuti di chunk, Whisper (in esecuzione in un Web Worker separato via WebAssembly) trascrive il batch con un overlap di 30 secondi sul batch precedente per preservare la qualità ai confini
-4. Immediatamente dopo la trascrizione del batch, i chunk audio corrispondenti vengono eliminati dall'IndexedDB
-5. A fine meeting: l'IndexedDB non contiene alcun record audio. Resta solo la trascrizione testuale
-
-Vita media di ogni chunk audio: circa 2-3 minuti (durata batch + tempo di trascrizione Whisper).
-
-### 1.2 Cifratura dei chunk temporanei
-
-I chunk audio temporanei in IndexedDB sono cifrati con XChaCha20-Poly1305, lo stesso algoritmo usato per la crittografia zero-knowledge dell'archivio Synced.
-
-La chiave di cifratura è **session-scoped**: viene generata al boot della sessione di registrazione usando `crypto.getRandomValues()`, usata solo per quella sessione, e mai persistita oltre la fine della registrazione. Se il browser venisse chiuso forzatamente durante una registrazione attiva, i chunk orfani sarebbero tecnicamente presenti in IndexedDB ma computazionalmente inutilizzabili: la chiave che li ha cifrati non esiste più in memoria.
-
-### 1.3 Persistenza temporanea cifrata: perché questa architettura
-
-La scelta di usare chunk cifrati in IndexedDB invece di processare l'audio in streaming puro non è un compromesso sulla privacy — è una scelta tecnica necessaria per la qualità e la resilienza.
-
-**Qualità della trascrizione.** Whisper Large — Alta qualità ha una context window interna di 30 secondi indipendentemente dalla dimensione dell'input. Trascrivere batch da 2 minuti con overlap di 30 secondi produce una qualità misurata inferiore di meno dello 0.5% WER rispetto alla trascrizione monolitica dell'intero meeting. Lo streaming frame-by-frame degraderebbe la qualità in modo significativo.
-
-**Resilienza ai crash.** Un meeting professionale di 60-90 minuti in un browser con decine di tab aperte è un contesto realistico. Senza persistenza temporanea, un crash del browser a 50 minuti farebbe perdere tutto. Con il chunking, al riavvio l'app rileva i chunk orfani e propone il recupero: "Registrazione del 21/05 14:30 (47 minuti). Premi per completare la trascrizione." I chunk vengono trascritti e poi eliminati.
-
-**Confronto con la soluzione alternativa.** L'alternativa sarebbe salvare un file audio completo sul disco e trascriverlo a fine meeting. Questa soluzione è più semplice da implementare ma crea esattamente il file audio che la nostra architettura promette di non creare mai — con tutti i rischi legali e di sicurezza che ne derivano.
-
-### 1.4 Verifica autonoma: DevTools
-
-Per verificare che nessun audio persista a fine meeting:
-
-1. Apri Sonabrief nel browser
-2. Apri DevTools (F12 o Cmd+Opt+I)
-3. Vai su **Application → IndexedDB → sonabrief-local**
-4. Avvia una registrazione
-5. Durante la registrazione, osserva l'object store dei chunk audio: vedrai i record apparire ogni 30 secondi e sparire progressivamente dopo la trascrizione di ogni batch
-6. Termina la registrazione
-7. Verifica che l'object store dei chunk audio sia vuoto
-
-Puoi anche verificare nel codice sorgente: il file che gestisce il chunking e la cancellazione progressiva è nel repository pubblico `github.com/sonabrief/sonabrief`.
+We do not ask you to trust our statements. Every claim in this document is verifiable: in the open source code, in the browser's DevTools, in the contracts with our subprocessors. Verification instructions are included.
 
 ---
 
-## 2. Trascrizione locale (Whisper)
+## 1. Audio is never saved as a file
 
-### 2.1 Il modello gira sul tuo computer
+### 1.1 The recording flow
 
-La trascrizione avviene interamente sul tuo dispositivo. Il modello attivo in produzione è **Whisper Large — Alta qualità** (`onnx-community/whisper-large-v3-turbo (via @huggingface/transformers v4.2.0)`, ~800 MB in formato ONNX), eseguito nel browser via WebAssembly in un Web Worker dedicato.
+When you start a recording in Sonabrief, audio is captured via the browser's Web Audio APIs (`getUserMedia` for the microphone, `getDisplayMedia` with discarded video tracks for system audio). The audio stream never reaches a server. It is never written to disk as a file.
 
-Il modello viene scaricato una sola volta al primo utilizzo e cachato tramite Cache API / IndexedDB del browser. Le sessioni successive usano il modello già presente localmente — nessun download aggiuntivo.
+The processing flow is as follows:
 
-Su hardware con risorse limitate (RAM < 8 GB o core < 4), l'app passa automaticamente a Whisper Small (~470 MB). La detection avviene tramite `navigator.deviceMemory` e `navigator.hardwareConcurrency`. L'utente può sovrascrivere manualmente la scelta in /profilo.
+1. `MediaRecorder` captures audio chunks every 30 seconds
+2. Each chunk is immediately encrypted with XChaCha20-Poly1305 (session-scoped key, see §1.2) and written to the browser's IndexedDB
+3. When approximately 2 minutes of chunks accumulate, Whisper (running in a dedicated Web Worker via WebAssembly) transcribes the batch with a 30-second overlap on the previous batch to preserve quality at boundaries
+4. Immediately after transcription of the batch, the corresponding audio chunks are deleted from IndexedDB
+5. At the end of the meeting: IndexedDB contains zero audio records. Only the text transcription remains
 
-### 2.2 Qualità della trascrizione
+Average lifespan of each audio chunk: approximately 2–3 minutes (batch duration + Whisper transcription time).
 
-Whisper Large — Alta qualità è il modello di qualità più alta disponibile in esecuzione locale per uso professionale. WER (Word Error Rate) stimato sull'italiano professionale: 5-8%, contro il 10-12% di Whisper Small. Il modello gestisce bene nomi propri, gergo professionale, punteggiatura, e ha un tasso di allucinazioni sui silenzi significativamente inferiore ai modelli più piccoli.
+### 1.2 Encryption of temporary chunks
 
-Lo stesso modello è attivo su tutti i tier (Free, Pro, Pro Unlimited). Non differenziamo la qualità della trascrizione per tier perché degradare la qualità sul Free danneggerebbe la percezione del prodotto per esattamente i professionisti che vogliamo convincere.
+Temporary audio chunks in IndexedDB are encrypted with XChaCha20-Poly1305, the same algorithm used for the zero-knowledge encryption of the Synced archive.
 
-### 2.3 Configurazione ONNX Runtime WASM
+The encryption key is **session-scoped**: it is generated at the boot of the recording session using `crypto.getRandomValues()`, used only for that session, and never persisted beyond the end of the recording. If the browser were forcibly closed during an active recording, the orphaned chunks would technically be present in IndexedDB but computationally unusable: the key that encrypted them no longer exists in memory.
 
-Per ragioni di compatibilità con Chrome su Mac e altri ambienti browser, il runtime è configurato con `numThreads = 1` e `dtype: 'fp32'`. Il multithreading causa un `ERROR_CODE: 1` in determinati scenari ONNX Runtime + WASM. Questa configurazione è documentata nel codice sorgente.
+### 1.3 Temporary encrypted persistence: why this architecture
 
----
+The choice to use encrypted chunks in IndexedDB instead of pure streaming is not a privacy compromise — it is a technical choice necessary for quality and resilience.
 
-## 3. Sintesi: Standard vs Local Only
+**Transcription quality.** Whisper Large-v3-turbo has an internal context window of 30 seconds regardless of input size. Transcribing 2-minute batches with 30-second overlap produces measured quality less than 0.5% WER worse than monolithic transcription of the entire meeting. Frame-by-frame streaming would degrade quality significantly.
 
-### 3.1 Modalità Standard
+**Crash resilience.** A 60–90 minute professional meeting in a browser with dozens of tabs open is a realistic scenario. Without temporary persistence, a browser crash at 50 minutes would lose everything. With chunking, on restart the app detects orphaned chunks and offers recovery: "Recording from 21/05 14:30 (47 minutes). Press to complete transcription." Chunks are transcribed and then deleted.
 
-In modalità Standard, la trascrizione testuale viene inviata al nostro backend cloud (Cloudflare Worker) per la generazione della sintesi strutturata tramite Mistral Large 3, modello ospitato in Francia (UE).
+**Comparison with the alternative.** The alternative would be to save a complete audio file to disk and transcribe it at the end of the meeting. This approach is simpler to implement but creates exactly the audio file our architecture promises never to create — with all the legal and security risks that entails.
 
-**Cosa inviamo**: solo il testo trascritto. Zero audio. L'utente vede un'anteprima del testo che sta per essere inviato prima di confermare.
+### 1.4 Independent verification: DevTools
 
-**Cosa non inviamo**: audio, note personali non esplicitate, dati del cliente, identificativi del meeting.
+To verify that no audio persists at the end of a meeting:
 
-**Routing per tier**: Free utilizza Mistral Small 3.1, Pro e Pro Unlimited utilizzano Mistral Large 3. Entrambi i modelli sono ospitati nei server Mistral di Parigi.
+1. Open Sonabrief in the browser
+2. Open DevTools (F12 or Cmd+Opt+I)
+3. Go to **Application → IndexedDB → sonabrief-local**
+4. Start a recording
+5. During the recording, observe the audio chunk object store: you will see records appear every 30 seconds and disappear progressively after each batch is transcribed
+6. End the recording
+7. Verify that the audio chunk object store is empty
 
-**Zero Data Retention attiva**: sul nostro account Mistral è attiva la Zero Data Retention (ZDR). Le trascrizioni inviate non vengono conservate da Mistral, non vengono usate per addestrare modelli, non vengono log-gate oltre il tempo di elaborazione. Verificabile nel pannello admin Mistral.
-
-**Nessun fallback su provider USA**: in caso di indisponibilità di Mistral, il backend restituisce un errore esplicito e l'app suggerisce Local Only come alternativa immediata. Non esiste un fallback automatico su provider non-EU.
-
-### 3.2 Modalità Local Only
-
-In modalità Local Only, sia trascrizione che sintesi avvengono interamente sul dispositivo dell'utente. Il modello di sintesi locale è gestito tramite Ollama, installato silenziosamente dall'app al primo utilizzo della modalità.
-
-Il modello locale è differenziato per tier in base alle capacità hardware richieste:
-
-- **Free**: Llama 3.2 3B (~2 GB) — funziona su qualsiasi hardware recente
-- **Pro**: Llama 3.1 8B (~5 GB) — richiede ~8 GB RAM
-- **Pro Unlimited**: scelta utente tra Llama 3.1 8B, Qwen 2.5 14B (~9 GB), Qwen 32B (~20 GB)
-
-Nulla lascia il dispositivo. Il nome esposto all'utente nell'interfaccia è "Sonabrief Privacy Engine".
-
-### 3.3 Verifica autonoma: nessuna rete durante Local Only
-
-Per verificare che in modalità Local Only nessun dato raggiunga la rete:
-
-1. Apri DevTools → **Network**
-2. Avvia una registrazione in modalità Local Only
-3. Trascrivi e genera la sintesi
-4. Verifica che nessuna richiesta raggiunga domini esterni durante il processo (l'unico traffico di rete lecito è il caricamento del modello Whisper al primo utilizzo)
+You can also verify in the source code: the file that manages chunking and progressive deletion is in the public repository `github.com/sonabrief/sonabrief`.
 
 ---
 
-## 4. Archiviazione: Local Only vs Synced
+## 2. Local transcription (Whisper)
+
+### 2.1 The model runs on your computer
+
+Transcription happens entirely on your device. The model active in production is **Whisper Large-v3-turbo** (`onnx-community/whisper-large-v3-turbo` via `@huggingface/transformers`, ~800 MB in ONNX format), running in the browser via WebAssembly in a dedicated Web Worker.
+
+The model is downloaded once at first use and cached via Cache API / IndexedDB of the browser. Subsequent sessions use the model already present locally — no additional download.
+
+On hardware with limited resources (RAM < 8 GB or fewer than 4 cores), the app automatically switches to Whisper Small (~470 MB). Detection happens via `navigator.deviceMemory` and `navigator.hardwareConcurrency`. The user can manually override the choice in /profile.
+
+### 2.2 Transcription quality
+
+Whisper Large-v3-turbo is the highest quality model available for local execution for professional use. Estimated WER (Word Error Rate) on professional English and Italian: 5–8%, compared to 10–12% for Whisper Small. The model handles proper nouns, professional terminology, punctuation well, and has a significantly lower hallucination rate on silences than smaller models.
+
+The same model is active on all tiers (Free, Pro, Pro Unlimited). We do not differentiate transcription quality by tier because degrading quality on Free would damage brand perception for exactly the professionals we want to convince.
+
+### 2.3 ONNX Runtime WASM configuration
+
+For compatibility reasons with Chrome on Mac and other browser environments, the runtime is configured with `numThreads = 1` and `dtype: 'fp32'`. Multithreading causes `ERROR_CODE: 1` in certain ONNX Runtime + WASM scenarios. This configuration is documented in the source code.
+
+---
+
+## 3. Synthesis and transcription: three modes
+
+Sonabrief offers three modes. You choose explicitly at the start of each recording. The choice determines what, if anything, leaves your device.
+
+### 3.1 Standard mode (default — all tiers)
+
+The text transcription produced locally by Whisper is sent to our cloud backend (Cloudflare Worker) for structured synthesis generation via Mistral Large 3, hosted in France (EU).
+
+**What we send**: only the transcribed text. Zero audio. The user sees a preview of the text about to be sent before confirming.
+
+**What we do not send**: audio, personal notes, client data, meeting identifiers.
+
+**Tier routing**: Free uses Mistral Small 3.1, Pro and Pro Unlimited use Mistral Large 3. Both models are hosted on Mistral's Paris servers.
+
+**Zero Data Retention active**: on our Mistral account, Zero Data Retention (ZDR) is enabled. Transcriptions sent for synthesis are not retained by Mistral, are not used to train models, and are not logged beyond processing time. Verifiable in the Mistral admin panel.
+
+**No fallback to US providers**: if Mistral is unavailable, the backend returns an explicit error and the app suggests Local Only as an immediate alternative. There is no automatic fallback to non-EU providers.
+
+### 3.2 Local Only mode (all tiers)
+
+Both transcription and synthesis happen entirely on the user's device. The local synthesis model is managed via Ollama, installed silently by the app on first use of the mode.
+
+The local model is differentiated by tier based on required hardware capabilities:
+
+- **Free**: Llama 3.2 3B (~2 GB) — runs on any recent hardware
+- **Pro**: Llama 3.1 8B (~5 GB) — requires ~8 GB RAM
+- **Pro Unlimited**: user's choice among Llama 3.1 8B, Qwen 2.5 14B (~9 GB), Qwen 32B (~20 GB)
+
+Nothing leaves the device. The name shown to the user in the interface is "Sonabrief Privacy Engine".
+
+To verify that in Local Only mode no data reaches the network:
+
+1. Open DevTools → **Network**
+2. Start a recording in Local Only mode
+3. Transcribe and generate the synthesis
+4. Verify that no request reaches external domains during the process (the only legitimate network traffic is the Whisper model download on first use)
+
+### 3.3 Cloud Fast mode (Pro and Pro Unlimited only)
+
+Cloud Fast mode exists for hardware where local Whisper transcription is too slow to be practical — typically Windows machines with integrated Intel GPU, where 30 minutes of audio can take 50–60 minutes to transcribe locally.
+
+**What happens**: audio is encrypted end-to-end on your device (XChaCha20-Poly1305 with a per-request ephemeral key) before being transmitted to Mistral Voxtral (Paris, EU) for transcription. After transcription, the text follows the Standard synthesis flow via Mistral Large 3.
+
+**Privacy guarantees**:
+- Audio is encrypted before it leaves your device
+- Audio is never written to disk — neither on Sonabrief servers nor by Mistral
+- Zero Data Retention is active on our Mistral account and covers Voxtral (documented in the DPA, extension confirmed)
+- The Sonabrief Worker that handles the relay logs only metadata (user ID, duration in minutes, timestamp) — never audio content
+- Diarization (speaker labels) is native to Voxtral; you can disable it in settings if preferred
+
+**For professionals with the strictest confidentiality obligations**: Cloud Fast involves audio transiting to Mistral's EU servers, even if encrypted in transit and never persisted. If your obligations preclude any audio leaving your device under any circumstances, use Standard or Local Only mode. Local Only provides the maximum privacy guarantee: nothing leaves the machine.
+
+**Availability**: Pro includes 5 hours/month. Pro Unlimited includes 20 hours/month. Additional hours can be purchased.
+
+---
+
+## 4. Storage: Local Only vs Synced
 
 ### 4.1 Local Only
 
-I dati derivati (trascrizioni, sintesi, note, action items, embedding semantici, tag) vengono conservati in IndexedDB tramite Dexie.js. Nessun server coinvolto. I dati vivono sul dispositivo e restano lì.
+Derived data (transcriptions, syntheses, notes, action items, semantic embeddings, tags) is stored in IndexedDB via Dexie.js. No server involved. Data lives on the device and stays there.
 
-Il backup è esportabile come file cifrato. La gestione del backup è responsabilità dell'utente.
+The backup is exportable as an encrypted file. Backup management is the user's responsibility.
 
 ### 4.2 Synced (zero-knowledge)
 
-In modalità Synced, i dati vengono cifrati lato client prima di essere caricati sui server. Il modello crittografico è il seguente:
+In Synced mode, data is encrypted client-side before being uploaded to our servers. The cryptographic model is as follows:
 
-**Stack crittografico**:
-- Libreria: `libsodium-wrappers-sumo`
-- Cifratura payload: XChaCha20-Poly1305
-- Derivazione chiave: Argon2id con parametri MODERATE dalla passphrase utente
-- Formato blob `.sbb`: magic `SBB1` (4 byte) + version (1 byte) + salt (16 byte) + nonce (24 byte) + ciphertext
+**Cryptographic stack**:
+- Library: `libsodium-wrappers-sumo`
+- Payload encryption: XChaCha20-Poly1305
+- Key derivation: Argon2id with MODERATE parameters from the user's passphrase
+- Blob format `.sbb`: magic `SBB1` (4 bytes) + version (1 byte) + salt (16 bytes) + nonce (24 bytes) + ciphertext
 
-**Gestione della chiave**: la chiave di cifratura è derivata dalla passphrase dell'utente tramite Argon2id. Non viene mai trasmessa ai nostri server. La passphrase è conservata nel keychain di sistema del dispositivo (macOS Keychain / Windows Credential Manager / browser Credential Management API) per non doverla reinserire a ogni accesso.
+**Key management**: the encryption key is derived from the user's passphrase via Argon2id. It is never transmitted to our servers. The passphrase is stored in the device's system keychain (macOS Keychain / Windows Credential Manager / browser Credential Management API) to avoid re-entry on every access.
 
-**Recovery**: in onboarding vengono generate 12 parole di recovery BIP39. L'utente deve confermarne alcune prima di procedere. Se passphrase e recovery words vengono perse, i dati non sono recuperabili — nemmeno da noi.
+**Recovery**: during onboarding, 12 BIP39 recovery words are generated. The user must confirm some of them before proceeding. If both passphrase and recovery words are lost, data is not recoverable — not even by us.
 
-**Storage server-side**: i blob cifrati sono conservati su Cloudflare R2 EU-West. Il naming dei blob è `{user_id}/{meeting_id}.sbb`. Noi vediamo solo blob cifrati senza capacità di decifratura.
+**Server-side storage**: encrypted blobs are stored on Cloudflare R2 EU-West. Blob naming is `{user_id}/{meeting_id}.sbb`. We see only encrypted blobs with no decryption capability.
 
-**Conflict resolution**: in caso di conflitti tra versioni (raro, dato l'uso tipicamente monoutente), la risoluzione avviene tramite timestamp con eventuale intervento manuale dell'utente.
+**Conflict resolution**: in case of version conflicts (rare, given typical single-user usage), resolution happens via timestamp with possible manual user intervention.
 
-### 4.3 Backup E2E automatico (Pro Unlimited)
+### 4.3 Automatic E2E backup (Pro Unlimited)
 
-I titolari di Pro Unlimited possono attivare un backup automatico programmato. Il cron gira nell'app (non su un server) ed esegue una sincronizzazione incrementale verso R2. La frequenza è configurabile in /profilo (giornaliero per default, ogni 6 ore, ogni ora).
+Pro Unlimited holders can enable a scheduled automatic backup. The cron runs in the app (not on a server) and performs an incremental sync toward R2. Frequency is configurable in /profile (daily by default, every 6 hours, every hour).
 
-I dati restano zero-knowledge: il cron sincronizza blob già cifrati. Noi non vediamo mai il contenuto.
+Data remains zero-knowledge: the cron syncs already-encrypted blobs. We never see the content.
 
-### 4.4 Retention dell'archivio
+### 4.4 Archive retention
 
-La retention si applica ai dati derivati (trascrizioni, sintesi, note). L'audio non è mai conservato in nessun tier.
+Retention applies to derived data (transcriptions, syntheses, notes). Audio is never stored in any tier.
 
-- **Free**: 7 giorni. Cleanup automatico al boot dell'app (locale) + cron server-side per blob R2.
-- **Pro**: 12 mesi.
-- **Pro Unlimited**: per sempre.
+- **Free**: 7 days. Automatic cleanup at app boot (local) + server-side cron for R2 blobs.
+- **Pro**: 12 months.
+- **Pro Unlimited**: forever.
 
-In caso di downgrade, i record oltre il nuovo limite vengono mantenuti 30 giorni aggiuntivi con segnalazione visibile, poi eliminati.
+In case of downgrade, records beyond the new limit are kept for an additional 30 days with a visible notice, then deleted.
 
 ---
 
-## 5. Autenticazione
+## 5. Authentication
 
 ### 5.1 Magic link
 
-Il metodo predefinito. Un link a uso singolo con validità 15 minuti viene inviato all'indirizzo email dell'utente tramite Resend. Il link è monouso (viene invalidato dopo il primo utilizzo) e non lascia credenziali persistenti esposte.
+The default method. A single-use link valid for 15 minutes is sent to the user's email address via Resend. The link is single-use (invalidated after first use) and leaves no persistent credentials exposed.
 
-Le sessioni usano cookie HttpOnly + SameSite=Strict, con sliding window di 30 giorni e un solo refresh al giorno. L'IP è conservato solo come hash SHA-256.
+Sessions use HttpOnly + SameSite=Strict cookies, with a 30-day sliding window and one refresh per day. IP is stored only as a SHA-256 hash.
 
 ### 5.2 Passkey (WebAuthn)
 
-Disponibile su tutti i tier come alternativa al magic link. L'implementazione usa `@simplewebauthn/server` (backend) e `@simplewebauthn/browser` (client).
+Available on all tiers as an alternative to magic link. The implementation uses `@simplewebauthn/server` (backend) and `@simplewebauthn/browser` (client).
 
-**Architettura**: al momento della registrazione di una passkey, il browser genera una coppia di chiavi asimmetrica. La **chiave privata** resta nel Secure Enclave del dispositivo — non transita mai in rete. Solo la **chiave pubblica** e un identificatore (`credential_id`) vengono inviati ai nostri server e conservati nella tabella `webauthn_credentials` del database.
+**Architecture**: when registering a passkey, the browser generates an asymmetric key pair. The **private key** stays in the device's Secure Enclave — it never transits the network. Only the **public key** and an identifier (`credential_id`) are sent to our servers and stored in the `webauthn_credentials` table of the database.
 
-**All'autenticazione**: il server invia una challenge casuale, il dispositivo firma la challenge con la chiave privata locale, il server verifica la firma con la chiave pubblica registrata. Nessun segreto transita in rete in nessuna fase.
+**At authentication**: the server sends a random challenge, the device signs the challenge with the local private key, the server verifies the signature with the registered public key. No secret transits the network at any stage.
 
-Il magic link resta disponibile come fallback per il recupero account.
-
----
-
-## 6. Reminder email settimanale (Pro+): architettura zero-knowledge
-
-I titolari di Pro e Pro Unlimited possono attivare un reminder settimanale degli action items aperti. L'architettura è stata progettata per mantenere il modello zero-knowledge.
-
-**Flusso**:
-1. L'app (lato client) legge gli action items dall'IndexedDB locale — già decifrati sulla macchina dell'utente
-2. Compone l'email HTML strutturata interamente in memoria nel browser
-3. Invia il payload (email già composta) al nostro Worker tramite una richiesta HTTPS
-4. Il Worker fa da relay: passa l'email a Resend per la consegna. Non conserva il contenuto, non lo logga, non lo processa
-
-Il Worker non ha mai accesso ai dati cifrati dei meeting. Riceve solo un'email già pronta — che potrebbe essere qualsiasi contenuto HTML — e la consegna. Il contenuto dei meeting non transita mai in chiaro sui nostri server.
+Magic link remains available as a recovery fallback.
 
 ---
 
-## 7. Subprocessor: dettaglio tecnico
+## 6. Weekly email reminder (Pro+): zero-knowledge architecture
 
-| Subprocessor | Funzione specifica | Dati trasmessi | Garanzie |
+Pro and Pro Unlimited holders can enable a weekly summary of open action items. The architecture was designed to maintain the zero-knowledge model.
+
+**Flow**:
+1. The app (client-side) reads action items from local IndexedDB — already decrypted on the user's machine
+2. It composes the structured HTML email entirely in memory in the browser
+3. It sends the payload (already composed email) to our Worker via HTTPS
+4. The Worker acts as a relay: it passes the email to Resend for delivery. It does not store the content, does not log it, does not process it
+
+The Worker never has access to the encrypted meeting data. It receives only a ready-made email — which could be any HTML content — and delivers it. Meeting content never transits in clear text on our servers.
+
+---
+
+## 7. Subprocessors: technical detail
+
+| Subprocessor | Specific function | Data transmitted | Guarantees |
 |---|---|---|---|
-| Cloudflare Workers | Backend API, autenticazione, anti-abuse, routing LLM | Metadati richiesta, token sessione (non contenuto meeting) | DPA, SCCs, SOC 2 Type II |
-| Cloudflare D1 | Database: utenti, sessioni, licenze, metadati meeting (ID, timestamp, tier) | Metadati strutturali, nessun contenuto | Come sopra |
-| Cloudflare R2 | Storage blob cifrati zero-knowledge | Blob `.sbb` cifrati — contenuto inaccessibile a Cloudflare | Come sopra |
-| Mistral AI (Parigi) | Sintesi LLM cloud (solo modalità Standard) | Testo trascritto (no audio, no metadati cliente) | DPA GDPR Art. 28, ZDR attiva, server UE |
-| Resend | Delivery email transazionali e reminder action items | Indirizzo email destinatario + corpo email già composto client-side | DPA, SCCs |
-| Polar | Pagamenti, gestione abbonamenti, webhook eventi | Dati fatturazione, stato abbonamento | PCI DSS, DPA |
+| Cloudflare Workers | Backend API, authentication, anti-abuse, LLM routing, Cloud Fast relay | Request metadata, session token (no meeting content) | DPA, SCCs, SOC 2 Type II |
+| Cloudflare D1 | Database: users, sessions, licenses, meeting metadata (ID, timestamp, tier) | Structural metadata, no content | Same as above |
+| Cloudflare R2 | Zero-knowledge encrypted blob storage | `.sbb` encrypted blobs — content inaccessible to Cloudflare | Same as above |
+| Mistral AI (Paris) | Cloud LLM synthesis (Standard mode, transcribed text only) + Cloud Fast transcription (audio encrypted E2E in transit, ZDR active, never persisted) | Standard: transcribed text (no audio, no client metadata). Cloud Fast: encrypted audio in transit, never stored | DPA GDPR Art. 28, ZDR active, EU servers |
+| Resend | Transactional email delivery and action items reminder | Recipient email address + email body composed client-side | DPA, SCCs |
+| MailerLite | Product update and broadcast email (opt-in only) | Email address and subscription status only. Never receives meeting content | DPA, SCCs, GDPR compliant, EU-based |
+| Polar | Payments, subscription management, webhook events | Billing data, subscription status | PCI DSS, DPA |
 
-### Nota sul Cloud Act USA
+### Note on the US CLOUD Act
 
-Cloudflare e Resend sono società USA soggette all'USA CLOUD Act. Questo significa che le autorità USA potrebbero richiedere dati conservati su questi servizi tramite ordine giudiziario.
+Cloudflare, Resend, and Polar are US companies subject to the USA CLOUD Act. This means US authorities could request data stored on these services via court order.
 
-**Per i dati Synced su R2**: le autorità USA riceverebbero blob cifrati `.sbb` che nemmeno noi siamo in grado di decifrare. Senza la passphrase dell'utente, quei dati sono computazionalmente inutilizzabili.
+**For Synced data on R2**: US authorities receiving the blobs would receive encrypted `.sbb` data that not even we can decrypt. Without the user's passphrase, that data is computationally unusable.
 
-**Per i metadati in D1**: potrebbero essere accessibili (email, tier, timestamp degli accessi, lista di ID meeting). Non contengono il contenuto dei meeting.
+**For metadata in D1**: could be accessible (email, tier, access timestamps, list of meeting IDs). Does not contain meeting content.
 
-**Per Mistral**: sede in Francia, soggetta al GDPR e non al CLOUD Act. I dati inviati a Mistral (testo trascritto) non sono conservati grazie alla Zero Data Retention.
+**For Mistral**: headquartered in France, subject to GDPR and not the CLOUD Act. Data sent to Mistral (transcribed text in Standard; audio in Cloud Fast) is not retained thanks to Zero Data Retention.
 
-Per professionisti con obblighi di riservatezza particolarmente stringenti, la **modalità Local Only completa** (trascrizione + sintesi sul dispositivo, archivio non Synced) è l'unica modalità che non coinvolge alcun subprocessor per i dati di meeting.
-
----
-
-## 8. Checklist di verifica autonoma
-
-Per ogni affermazione critica, un metodo di verifica indipendente.
-
-**Verifica 1 — L'audio non raggiunge nessun server**
-
-DevTools → Network → avvia registrazione in modalità Standard → filtra per richieste verso domini esterni → verifica che nessuna richiesta porti payload audio (i soli upload legittimi sono il testo trascritto verso l'endpoint di sintesi, verificabile nel body della richiesta).
-
-**Verifica 2 — I chunk audio temporanei vengono eliminati**
-
-DevTools → Application → IndexedDB → avvia registrazione → osserva i chunk apparire e sparire progressivamente → a fine meeting, verifica che nessun record audio persista nell'object store.
-
-**Verifica 3 — In Local Only nessun dato lascia la macchina**
-
-DevTools → Network → attiva modalità Local Only → registra e genera sintesi → verifica che nessuna richiesta raggiunga Mistral o endpoint cloud durante elaborazione. L'unico traffico lecito è il download iniziale del modello Whisper.
-
-**Verifica 4 — I blob Synced sono illeggibili senza passphrase**
-
-DevTools → Application → IndexedDB (o ispeziona i blob su R2 se hai accesso) → verifica che i dati non siano in formato leggibile. I blob `.sbb` iniziano con il magic `SBB1` seguito da dati binari cifrati.
-
-**Verifica 5 — Whisper non invia dati in rete**
-
-Nel codice sorgente, cerca il file del Web Worker che esegue la trascrizione. Verifica che non contenga chiamate a endpoint di rete durante l'elaborazione audio. L'unica connessione di rete legittima del Worker è il download iniziale del modello da Hugging Face (solo alla prima installazione).
-
-**Verifica 6 — Architettura zero-knowledge del reminder email**
-
-Nel codice sorgente, cerca il modulo che compone e invia il reminder settimanale. Verifica che la composizione dell'email avvenga lato client (nel browser) e che il Worker riceva solo il corpo dell'email già pronto, senza accesso ai dati cifrati dell'archivio.
-
-Il repository pubblico è `github.com/sonabrief/sonabrief`.
+For professionals with particularly strict confidentiality obligations, **complete Local Only mode** (local transcription + local synthesis + non-Synced archive) is the only mode that involves no subprocessor for meeting data whatsoever.
 
 ---
 
-## 9. Limitazioni dichiarate
+## 8. Independent verification checklist
 
-Ogni architettura di privacy ha limitazioni. Le dichiariamo esplicitamente.
+For every critical claim, an independent verification method.
 
-**Metadati in modalità Synced.** Anche con crittografia zero-knowledge sul contenuto, i metadati strutturali (email utente, timestamp degli accessi, numero e dimensione dei blob) sono visibili a Cloudflare e potenzialmente accessibili tramite ordini giudiziari USA. I metadati non rivelano il contenuto dei meeting, ma rivelano che i meeting esistono e quando sono avvenuti.
+**Verification 1 — Audio does not reach any server**
 
-**Trascrizione in modalità Standard.** Il testo trascritto viene inviato a Mistral AI (Francia, UE) per la sintesi. Mistral ha Zero Data Retention attiva, ma il testo transita comunque fuori dalla macchina dell'utente. Per chi non può permettersi nemmeno questo, la modalità Local Only è l'unica alternativa.
+DevTools → Network → start recording in Standard mode → filter for requests to external domains → verify that no request carries audio payload (the only legitimate upload is the transcribed text toward the synthesis endpoint, verifiable in the request body).
 
-**Mistral sub-processing.** Mistral AI usa Google Cloud Platform come infrastruttura, con data center in Francia (UE). Google Cloud è soggetta al CLOUD Act USA anche per i server EU. Mistral ha attivato la Zero Data Retention che limita la retention dei dati, ma l'infrastruttura sottostante è di una società USA. Questa è una limitazione strutturale del mercato cloud europeo che monitoriamo attivamente.
+**Verification 2 — Temporary audio chunks are deleted**
 
-**Apple ITP (Safari macOS e iOS).** Safari implementa Intelligent Tracking Prevention che può eliminare i dati IndexedDB di siti web dopo 7 giorni di inattività. Questo significa che un utente che non apre Sonabrief per 7+ giorni su Safari rischia di perdere i dati locali (in modalità Local Only) o di dover ri-sincronizzare l'archivio da R2 (in modalità Synced con auto-restore). Mitigazioni attive: `navigator.storage.persist()` al boot dell'app, warning soft agli utenti Safari per installare Sonabrief come PWA (le PWA installate sono esenti dall'ITP eviction), auto-restore da R2 al primo avvio se l'IndexedDB risulta vuota.
+DevTools → Application → IndexedDB → start recording → observe chunks appearing and disappearing progressively → at the end of the meeting, verify that no audio record persists in the object store.
 
-**Modalità privata del browser.** Alcuni browser in modalità di navigazione privata limitano o bloccano l'accesso a IndexedDB. Sonabrief rileva questa condizione al caricamento e mostra una spiegazione didattica: la modalità privata è incompatibile con l'architettura dell'app, e un profilo browser dedicato a Sonabrief è una soluzione privacy equivalente ma tecnicamente compatibile.
+**Verification 3 — In Local Only mode no data leaves the machine**
 
-**Aggiramento della retention dal codice open source.** Sonabrief è open source e il codice del cleanup della retention è ispezionabile. Un utente tecnicamente competente potrebbe in teoria modificare il codice per aggirare il limite di retention del tier Free. Questa è una limitazione consapevole e accettata della filosofia open core: il cleanup lato client è una regola di prodotto, non un DRM. La retention lato server (blob R2) non è aggirabile dall'utente. Per il Free in modalità Local Only, l'aggiro è tecnicamente possibile ma non costituisce abuso dei nostri servizi.
+DevTools → Network → enable Local Only mode → record and generate synthesis → verify that no request reaches Mistral or cloud endpoints during processing. The only legitimate traffic is the initial Whisper model download.
 
----
+**Verification 4 — Synced blobs are unreadable without passphrase**
 
-## 10. Domande frequenti per professionisti con obblighi di riservatezza
+DevTools → Application → IndexedDB (or inspect blobs on R2 if you have access) → verify that data is not in readable format. `.sbb` blobs begin with the magic `SBB1` followed by encrypted binary data.
 
-**Posso usare Sonabrief per sessioni con clienti coperti da segreto professionale?**
+**Verification 5 — Whisper does not send data over the network**
 
-In modalità Local Only completa (trascrizione locale + sintesi locale + archivio non Synced): nessun dato del meeting raggiunge mai un server esterno. È compatibile con obblighi di segreto professionale forti. Consigliamo di verificare con il proprio ordine professionale per casi specifici.
+In the source code, find the Web Worker file that runs transcription. Verify it contains no calls to network endpoints during audio processing. The only legitimate network connection of the Worker is the initial model download from Hugging Face (only on first installation).
 
-In modalità Standard: il testo trascritto raggiunge Mistral AI (Francia, UE) per la sintesi. Per alcune categorie professionali questo potrebbe non essere compatibile con gli obblighi di riservatezza.
+**Verification 6 — Zero-knowledge architecture of the email reminder**
 
-**Il mio cliente può richiedere che i suoi dati vengano cancellati?**
+In the source code, find the module that composes and sends the weekly reminder. Verify that email composition happens client-side (in the browser) and that the Worker receives only the ready email body, without access to the encrypted archive data.
 
-Sì. In modalità Local Only, i dati sono sul tuo dispositivo — puoi cancellarli manualmente in qualsiasi momento. In modalità Synced, puoi cancellare singoli meeting dall'app oppure cancellare l'intero account. La cancellazione dell'account elimina tutti i blob da R2 e tutti i metadati dal database.
+**Verification 7 — Cloud Fast audio is not persisted**
 
-**Cosa succede se Sonabrief cessa di operare?**
+DevTools → Network → enable Cloud Fast mode → start a recording → inspect the POST request to `/v1/transcribe-cloud`. Verify the request body contains encrypted binary data. Inspect the response: it contains only the encrypted transcript, not a confirmation of audio storage. The Sonabrief Worker source code confirms the relay-and-discard architecture.
 
-I dati in modalità Local Only restano sul tuo dispositivo — non dipendono dall'operatività di Sonabrief. I dati in modalità Synced sono cifrati con la tua passphrase: puoi esportarli in qualsiasi momento in Markdown, PDF, o Word dall'app. Il codice è open source e può continuare a essere eseguito indipendentemente da noi.
-
-**Le autorità possono ottenere l'accesso ai miei dati?**
-
-Per i dati Synced: le autorità che ottenessero i blob da R2 riceverebbero dati cifrati che nemmeno noi possiamo decifrare. Senza la tua passphrase, sono computazionalmente inutilizzabili.
-
-Per i metadati dell'account (email, timestamp): potrebbero essere soggetti a ordini giudiziari. Non contengono il contenuto dei meeting.
-
-Per i dati in modalità Local Only: risiedono sul tuo dispositivo e non sono in nostro possesso. Non possiamo consegnare ciò che non abbiamo.
+The public repository is `github.com/sonabrief/sonabrief`.
 
 ---
 
-## Contatti
+## 9. Declared limitations
 
-Per domande tecniche su questo documento o per richiedere informazioni aggiuntive per valutazioni di compliance aziendale:
+Every privacy architecture has limitations. We declare them explicitly.
 
-**Email**: hello@sonabrief.com  
-**Repository**: github.com/sonabrief/sonabrief  
-**Privacy Policy completa**: sonabrief.com/privacy
+**Metadata in Synced mode.** Even with zero-knowledge encryption on content, structural metadata (user email, access timestamps, blob count and size) is visible to Cloudflare and potentially accessible via US court orders. Metadata does not reveal meeting content, but reveals that meetings exist and when they occurred.
+
+**Transcription in Standard mode.** The transcribed text is sent to Mistral AI (France, EU) for synthesis. Mistral has Zero Data Retention active, but the text still transits outside the user's machine. For those who cannot permit even this, Local Only mode is the only alternative.
+
+**Audio in Cloud Fast mode.** In Cloud Fast mode, audio encrypted end-to-end transits toward Mistral Voxtral EU servers before being discarded. For professionals whose obligations preclude any audio leaving their device under any circumstances — even encrypted, even to EU servers with ZDR — this mode is not suitable. Standard or Local Only should be used instead.
+
+**Mistral sub-processing.** Mistral AI uses Google Cloud Platform as infrastructure, with data centers in France (EU). Google Cloud is subject to the CLOUD Act even for EU servers. Mistral has activated Zero Data Retention which limits data retention, but the underlying infrastructure is a US company's. This is a structural limitation of the European cloud market that we actively monitor.
+
+**Apple ITP (Safari macOS and iOS).** Safari's Intelligent Tracking Prevention can delete IndexedDB data from websites after 7 days of inactivity. This means a user who does not open Sonabrief for 7+ days on Safari risks losing local data (in Local Only mode) or having to re-sync the archive from R2 (in Synced mode with auto-restore). Active mitigations: `navigator.storage.persist()` at app boot, soft warning to Safari users to install Sonabrief as a PWA (installed PWAs are exempt from ITP eviction), auto-restore from R2 on first launch if IndexedDB is empty.
+
+**Private browsing mode.** Some browsers in private browsing mode limit or block access to IndexedDB. Sonabrief detects this condition on load and shows a plain-language explanation: private mode is incompatible with the app's architecture, and a dedicated browser profile for Sonabrief is a privacy-equivalent but technically compatible solution.
+
+**Retention bypass from open source code.** Sonabrief is open source and the retention cleanup code is inspectable. A technically proficient user could in theory modify the code to bypass the Free tier retention limit. This is a deliberate and accepted limitation of the open core philosophy: client-side cleanup is a product rule, not DRM. Server-side retention on R2 blobs is not bypassable by the user.
 
 ---
 
-*Versione 1.2 · Maggio 2026*  
-*Versione precedente: 1.0 · Maggio 2026*
+## 10. Frequently asked questions for professionals with confidentiality obligations
+
+**Can I use Sonabrief for sessions with clients covered by professional secrecy?**
+
+In complete Local Only mode (local transcription + local synthesis + non-Synced archive): no meeting data ever reaches an external server. It is compatible with strong professional secrecy obligations. We recommend verifying with your professional body for specific cases.
+
+In Standard mode: the transcribed text reaches Mistral AI (France, EU) for synthesis. For some professional categories this may not be compatible with confidentiality obligations.
+
+In Cloud Fast mode: encrypted audio transits toward Mistral's EU servers for transcription, then is discarded. This mode is not suitable if your obligations preclude any audio leaving your device under any circumstances.
+
+**Can my client request that their data be deleted?**
+
+Yes. In Local Only mode, data is on your device — you can delete it manually at any time. In Synced mode, you can delete individual meetings from the app or delete the entire account. Account deletion removes all blobs from R2 and all metadata from the database.
+
+**What happens if Sonabrief ceases to operate?**
+
+Data in Local Only mode stays on your device — it does not depend on Sonabrief's operational status. Data in Synced mode is encrypted with your passphrase: you can export it at any time to Markdown, PDF, or Word from the app. The code is open source and can continue to be run independently of us.
+
+**Can authorities obtain access to my data?**
+
+For Synced data: authorities obtaining blobs from R2 would receive encrypted data that not even we can decrypt. Without your passphrase, it is computationally unusable.
+
+For account metadata (email, timestamps): could be subject to court orders. Does not contain meeting content.
+
+For data in Local Only mode: it resides on your device and is not in our possession. We cannot hand over what we do not have.
+
+**Is Cloud Fast mode GDPR-compliant for professional use?**
+
+Cloud Fast sends encrypted audio to Mistral AI (Paris, France — EU jurisdiction). Mistral operates under GDPR, has a signed DPA, and Zero Data Retention is active (audio is not stored or used for training). For most professional use cases within the EU, this is compliant. For professions with the strictest rules on client data (e.g. psychologists, lawyers in certain jurisdictions), verify with your professional body or use Local Only mode.
+
+---
+
+## Contacts
+
+For technical questions about this document or to request additional information for corporate compliance assessments:
+
+**Email**: hello@sonabrief.com
+**Repository**: github.com/sonabrief/sonabrief
+**Full Privacy Policy**: sonabrief.com/privacy
+
+---
+
+*Version 2.0 · May 2026*

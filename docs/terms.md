@@ -1,156 +1,175 @@
 # Terms of Service
 
-**Sonabrief · Maggio 2026 · Versione 1.1**
+**Sonabrief · May 2026 · Version 2.0**
 
 ---
 
-Questi Termini di Servizio regolano l'accesso e l'uso di Sonabrief, il meeting assistant open source privacy-first sviluppato e gestito sotto il brand Sonabrief. Usando il servizio accetti questi termini. Se non li accetti, non usare il servizio.
+These Terms of Service govern access to and use of Sonabrief, the open source privacy-first meeting assistant developed and operated under the Sonabrief brand. By using the service you agree to these terms. If you do not agree, do not use the service.
 
 ---
 
-## 1. Cos'è Sonabrief
+## 1. What Sonabrief is
 
-Sonabrief è un assistente AI per meeting professionali. Cattura l'audio dei tuoi meeting elaborandolo in tempo reale sul tuo computer, senza salvarlo come file. Genera trascrizioni locali, sintesi strutturate, e un archivio ricercabile delle tue conversazioni professionali.
+Sonabrief is an AI assistant for professional meetings. It captures the audio of your meetings by processing it in real time on your computer, without saving it as a file. It generates local transcriptions, structured syntheses, and a searchable archive of your professional conversations.
 
-Il codice che gira sul tuo dispositivo è open source e verificabile su github.com/sonabrief/sonabrief. Alcune parti del servizio (backend cloud, template curati, storage sincronizzato) sono erogate come servizio commerciale.
+The code running on your device is open source and verifiable at github.com/sonabrief/sonabrief. Some parts of the service (cloud backend, curated templates, synchronized storage) are delivered as a commercial service.
 
 ---
 
 ## 2. Account
 
-Per usare Sonabrief devi creare un account con un indirizzo email valido. L'autenticazione avviene tramite magic link (link monouso inviato via email) o passkey WebAuthn se ne hai configurata una.
+To use Sonabrief you must create an account with a valid email address. Authentication happens via magic link (a single-use link sent by email) or WebAuthn passkey if you have configured one.
 
-Sei responsabile della sicurezza del tuo account. In particolare:
+You are responsible for the security of your account. In particular:
 
-- Le tue 12 parole di recovery BIP39 (generate in onboarding per la modalità Synced) sono l'unica strada per recuperare l'accesso ai tuoi dati cifrati se perdi la passphrase. Conservale in modo sicuro. Noi non possiamo recuperarle.
-- Non condividere l'accesso al tuo account con altri. Ogni account è per uso individuale, salvo piani Enterprise che includono licenze multi-utente esplicite.
+- Your 12 BIP39 recovery words (generated during onboarding for Synced mode) are the only way to regain access to your encrypted data if you lose your passphrase. Store them securely. We cannot recover them.
+- Do not share access to your account with others. Each account is for individual use, except Enterprise plans which include explicit multi-user licenses.
 
 ---
 
-## 3. Piani e prezzi
+## 3. Plans and pricing
 
 ### Free
 
-- 3 ore di audio cloud al mese (rolling window basata sulla data di signup)
-- Superato il limite mensile, la registrazione in modalità Standard si blocca con un messaggio chiaro fino al rinnovo. La modalità Local Only resta disponibile e illimitata
-- **Retention archivio: 7 giorni.** Trascrizioni e sintesi più vecchie di 7 giorni vengono eliminate automaticamente
-- Accesso a 3 template di sistema
-- Export in Markdown e copia testo
+- 3 hours of Standard cloud audio per month (rolling window based on your signup date)
+- Once the monthly limit is reached, recording in Standard mode is paused with a clear message until renewal. Local mode remains available and unlimited
+- **Archive retention: 7 days.** Transcriptions and syntheses older than 7 days are automatically deleted
+- Access to 3 system templates
+- Export in Markdown and copy to clipboard
+- Cloud Fast mode: not available
 
-### Pro — €9/mese o €89/anno
+### Pro — €9/month or €89/year
 
-- 30 ore di audio cloud al mese
-- **Retention archivio: 12 mesi**
-- Tutti i 7 template di sistema in 5 lingue native (IT, EN, FR, ES, DE)
-- Template verticali professionali (legale, medico, fiscale, terapia, coaching, ecc.) disponibili progressivamente nei mesi successivi al lancio, dopo review da professionisti madrelingua per ciascun mercato
-- Fino a 5 template personalizzati
-- Export completi: Markdown, PDF, Word, Email formattata
-- Dashboard action items, briefing pre-meeting, ricerca semantica, vista cliente, calendario OAuth
-- Tag e etichette personalizzate
-- Reminder action items email settimanale (opt-in)
-- Supporto via email (risposta entro 48 ore)
+- 30 hours of Standard cloud audio per month
+- **Cloud Fast mode: 5 hours/month included**, then €0.50/hour extra (max 25h/month hard cap)
+- **Archive retention: 12 months**
+- All 7 system templates in 5 native languages (IT, EN, FR, ES, DE)
+- Professional vertical templates (legal, medical, tax, therapy, coaching, etc.) released progressively after the launch, following review by native-speaking professionals for each market
+- Up to 5 custom templates
+- Full export: Markdown, PDF, Word, formatted email
+- Action items dashboard, pre-meeting briefing, semantic search, client view, calendar OAuth
+- Custom tags and labels
+- Weekly action items email reminder (opt-in)
+- Email support (response within 48 hours)
 
-### Pro Unlimited — €19/mese o €189/anno
+### Pro Unlimited — €19/month or €189/year
 
-- Sintesi illimitata — nessun limite mensile
-- **Retention archivio: per sempre**
-- Backup E2E automatico cifrato verso i nostri server (frequenza configurabile)
-- Licenza multi-device
-- Template personalizzati illimitati
-- Tutte le feature Pro
-- Supporto prioritario (risposta entro 24 ore)
+- Unlimited synthesis — no monthly cap on Standard mode
+- **Cloud Fast mode: 20 hours/month included**, then €0.30/hour extra (max 80h/month hard cap)
+- **Archive retention: forever**
+- Automatic E2E encrypted backup to our servers (configurable frequency)
+- Multi-device license
+- Unlimited custom templates
+- All Pro features
+- Priority support (response within 24 hours)
 
-### Enterprise — Pricing su misura
+### Enterprise — Custom pricing
 
-Per studi, società e team con esigenze specifiche. Include licenza commerciale alternativa all'AGPL v3, opzione self-hosting, SSO, admin dashboard, template custom, supporto dedicato. Contatto: hello@sonabrief.com.
+For firms, companies and teams with specific needs. Includes a commercial license as an alternative to AGPL v3, self-hosting option, SSO, admin dashboard, custom templates, dedicated support. Contact: hello@sonabrief.com.
 
-### Retention dell'archivio
+### Archive retention
 
-Sonabrief conserva trascrizioni e sintesi per una durata che dipende dal piano: 7 giorni nel Free, 12 mesi nel Pro, per sempre nel Pro Unlimited. L'audio non viene mai salvato come file, indipendentemente dal piano.
+Sonabrief retains transcriptions and syntheses for a duration that depends on your plan: 7 days on Free, 12 months on Pro, forever on Pro Unlimited. Audio is never saved as a file, regardless of plan or mode.
 
-In caso di downgrade di piano, i record oltre il nuovo limite vengono mantenuti per 30 giorni aggiuntivi con segnalazione visibile nell'archivio, poi eliminati permanentemente. Puoi esportare qualsiasi record in Markdown, PDF o Word prima della scadenza.
+In case of a plan downgrade, records beyond the new limit are kept for an additional 30 days with a visible notice in the archive, then permanently deleted. You can export any record to Markdown, PDF, or Word before expiry.
 
-### Sconti e programmi speciali
+### Discounts and special programs
 
-- **Annuale**: circa 17% di sconto rispetto al mensile
-- **Friends & Family**: 12 mesi di Pro gratis per persone selezionate dal team
-- **Open source maintainer**: 12 mesi di Pro gratis per maintainer attivi di progetti open source (verifica via GitHub). Scrivi a hello@sonabrief.com con link al repository
-
----
-
-## 4. Uso accettabile
-
-Puoi usare Sonabrief per qualsiasi scopo professionale legittimo. Non puoi:
-
-- Usare il servizio per attività illegali o per registrare conversazioni senza il consenso dei partecipanti (dove richiesto dalla legge applicabile)
-- Tentare di aggirare i meccanismi di autenticazione, quota o sicurezza del servizio
-- Usare il servizio in modo da compromettere la disponibilità o la sicurezza per altri utenti
-- Rivendere o sublicenziare l'accesso al servizio senza accordo scritto
-
-**Responsabilità delle registrazioni.** Le leggi sul consenso alla registrazione variano per giurisdizione. Sei responsabile di ottenere i consensi necessari prima di registrare conversazioni con terzi. Sonabrief non è responsabile per l'uso del servizio in violazione di leggi locali sul consenso.
-
-**Anti-abuse.** Il sistema anti-abuse può in rari casi generare falsi positivi su utenti legittimi (es. più dispositivi sulla stessa rete, VPN aziendali, conversioni da Free a Pro). Gli utenti paganti vengono rimossi automaticamente da qualsiasi lista di controllo al momento del primo pagamento verificato. Se riscontri blocchi o rallentamenti anomali, scrivi a hello@sonabrief.com — rispondiamo entro 48 ore.
+- **Annual**: approximately 17% discount compared to monthly
+- **Friends & Family**: 12 months of Pro free for people personally selected by the team
+- **Open source maintainer**: 12 months of Pro free for active maintainers of open source projects (verified via GitHub). Write to hello@sonabrief.com with a link to the repository
 
 ---
 
-## 5. Rinnovo e cancellazione
+## 4. Transcription modes
 
-Gli abbonamenti si rinnovano automaticamente alla scadenza (mensile o annuale) fino a cancellazione esplicita. Puoi cancellare in qualsiasi momento da /profilo → Piano e abbonamento. La cancellazione è efficace a fine periodo già pagato — non effettuiamo rimborsi pro-rata per periodi non usati, salvo quanto previsto dalla politica di rimborso al §6.
+Sonabrief offers three transcription and synthesis modes. You choose explicitly at the start of each recording.
 
-Puoi cancellare l'intero account da /profilo → Privacy e dati → Elimina account. La cancellazione dell'account è permanente: tutti i dati vengono eliminati e non sono recuperabili.
+### Standard (default — all tiers)
+Transcription runs locally on your computer via Whisper Large-v3-turbo. Synthesis is sent to Mistral Large 3 (Paris, EU) as transcribed text only. Audio never leaves your computer.
 
----
+### Local (all tiers)
+Both transcription and synthesis run entirely on your computer via Whisper and a local Ollama model. Nothing leaves your device. Maximum privacy.
 
-## 6. Politica di rimborso
+### Cloud Fast (Pro and Pro Unlimited only)
+Audio is encrypted end-to-end on your device and sent to Mistral Voxtral (Paris, EU) for transcription. Synthesis follows via Mistral Large 3 as in Standard mode. Audio is never written to disk — neither by Sonabrief servers nor by Mistral (Zero Data Retention active). This mode is designed for hardware where local transcription is too slow (e.g. Windows with integrated Intel GPU).
 
-Se riscontri un problema tecnico che impedisce l'uso del servizio e non riusciamo a risolverlo entro 7 giorni dalla segnalazione, puoi richiedere un rimborso proporzionale al periodo non usufruito. Scrivi a hello@sonabrief.com.
-
-Per acquisti recenti (entro 14 giorni dalla prima sottoscrizione), puoi richiedere il rimborso completo se il servizio non soddisfa le aspettative ragionevoli descritte in questi termini.
-
----
-
-## 7. Proprietà dei tuoi dati
-
-I tuoi dati — trascrizioni, sintesi, note, action items — sono tuoi. Non li usiamo per addestrare modelli AI, non li vendiamo, non li cediamo a terzi salvo quanto strettamente necessario all'erogazione del servizio (vedi subprocessor nella Privacy Policy).
-
-In modalità Synced, i tuoi dati sono cifrati con una chiave che solo tu possiedi. Tecnicamente non siamo in grado di leggerli. Puoi esportarli in qualsiasi momento in formato standard (Markdown, PDF, Word) direttamente dall'app. L'export avviene lato client — l'app decifra i dati localmente e genera il file sul tuo dispositivo.
+**Cloud Fast quota.** Pro includes 5 hours per month. Pro Unlimited includes 20 hours per month. Hours beyond the included quota are billed at €0.50/h (Pro) or €0.30/h (Pro Unlimited). A hard monthly cap of 25h (Pro) and 80h (Pro Unlimited) applies. Before exceeding included hours, the app shows a confirmation prompt with the overage cost.
 
 ---
 
-## 8. Proprietà intellettuale
+## 5. Acceptable use
 
-Il codice client di Sonabrief è rilasciato sotto licenza AGPL v3. I template di sistema generici sono open source. I template verticali professionali curati, il brand Sonabrief (nome, logo, identità visiva), e il backend commerciale sono proprietà di Sonabrief e non sono coperti dalla licenza AGPL v3.
+You may use Sonabrief for any legitimate professional purpose. You may not:
 
-Se contribuisci codice al repository pubblico, la tua contribuzione è soggetta al Contributor License Agreement (CLA Harmony) disponibile in CLA.md nel repository.
+- Use the service for illegal activities or to record conversations without the consent of participants (where required by applicable law)
+- Attempt to circumvent authentication, quota, or security mechanisms of the service
+- Use the service in a way that compromises availability or security for other users
+- Resell or sublicense access to the service without a written agreement
 
----
+**Recording responsibility.** Consent laws for recording vary by jurisdiction. You are responsible for obtaining any necessary consents before recording conversations with third parties. Sonabrief is not responsible for use of the service in violation of local consent laws.
 
-## 9. Limitazione di responsabilità
-
-Sonabrief è fornito "così com'è". Non garantiamo disponibilità continua del servizio cloud, accuratezza assoluta delle trascrizioni, o idoneità del servizio per usi specifici regolamentati (es. documentazione medico-legale). La qualità della trascrizione dipende dalla qualità dell'audio, dall'hardware del dispositivo, e dal modello Whisper in uso.
-
-In nessun caso la nostra responsabilità per danni derivanti dall'uso del servizio supera l'importo pagato nei 12 mesi precedenti all'evento che ha causato il danno.
-
----
-
-## 10. Modifiche ai termini
-
-Quando aggiorniamo questi termini, la nuova versione viene pubblicata su questa pagina con data di aggiornamento. Per modifiche significative che riducono i diritti attualmente garantiti, avvisiamo via email almeno 30 giorni prima dell'entrata in vigore. L'uso continuato del servizio dopo l'entrata in vigore costituisce accettazione dei nuovi termini.
+**Anti-abuse.** The anti-abuse system may in rare cases generate false positives on legitimate users (e.g. multiple devices on the same network, corporate VPNs, upgrades from Free to Pro). Paying users are automatically removed from any watchlist upon the first verified payment. If you experience abnormal blocks or slowdowns, write to hello@sonabrief.com — we respond within 48 hours.
 
 ---
 
-## 11. Legge applicabile
+## 6. Renewals and cancellation
 
-Questi termini sono regolati dalla legge italiana. Per qualsiasi controversia, il foro competente è quello del luogo in cui ha sede Sonabrief, salvo diversa disposizione imperativa applicabile al consumatore.
+Subscriptions renew automatically at expiry (monthly or annual) until explicitly cancelled. You can cancel at any time from /profile → Plan and subscription. Cancellation takes effect at the end of the current paid period — we do not issue pro-rata refunds for unused periods, except as provided in the refund policy in §7.
 
----
-
-## 12. Contatti
-
-**Email**: hello@sonabrief.com  
-**Sito**: sonabrief.com
+You can delete your entire account from /profile → Privacy and data → Delete account. Account deletion is permanent: all data is deleted and cannot be recovered.
 
 ---
 
-*Versione 1.2 · Maggio 2026*  
-*Versione precedente: 1.0 · Maggio 2026*
+## 7. Refund policy
+
+If you encounter a technical problem that prevents use of the service and we are unable to resolve it within 7 days of your report, you may request a refund proportional to the unused period. Write to hello@sonabrief.com.
+
+For recent purchases (within 14 days of first subscription), you may request a full refund if the service does not meet the reasonable expectations described in these terms.
+
+---
+
+## 8. Ownership of your data
+
+Your data — transcriptions, syntheses, notes, action items — belongs to you. We do not use it to train AI models, we do not sell it, we do not transfer it to third parties except as strictly necessary to deliver the service (see subprocessors in the Privacy Policy).
+
+In Synced mode, your data is encrypted with a key only you hold. We are technically unable to read it. You can export it at any time in standard formats (Markdown, PDF, Word) directly from the app. The export is client-side — the app decrypts your data locally and generates the file on your device.
+
+---
+
+## 9. Intellectual property
+
+The Sonabrief client code is released under the AGPL v3 license. Generic system templates are open source. Curated professional vertical templates, the Sonabrief brand (name, logo, visual identity), and the commercial backend are the property of Sonabrief and are not covered by the AGPL v3 license.
+
+If you contribute code to the public repository, your contribution is subject to the Contributor License Agreement (CLA Harmony) available in CLA.md in the repository.
+
+---
+
+## 10. Limitation of liability
+
+Sonabrief is provided "as is". We do not guarantee continuous availability of the cloud service, absolute accuracy of transcriptions, or fitness of the service for specific regulated uses (e.g. medico-legal documentation). Transcription quality depends on audio quality, device hardware, and the Whisper model in use.
+
+In no event shall our liability for damages arising from use of the service exceed the amount paid in the 12 months preceding the event that caused the damage.
+
+---
+
+## 11. Changes to these terms
+
+When we update these terms, the new version is published on this page with an update date. For significant changes that reduce the rights currently guaranteed, we notify by email at least 30 days before they take effect. Continued use of the service after the effective date constitutes acceptance of the new terms.
+
+---
+
+## 12. Governing law
+
+These terms are governed by Italian law. For any dispute, the competent court is that of the location of Sonabrief's registered office, unless a mandatory provision applicable to the consumer provides otherwise.
+
+---
+
+## 13. Contacts
+
+**Email**: hello@sonabrief.com
+**Website**: sonabrief.com
+
+---
+
+*Version 2.0 · May 2026*
