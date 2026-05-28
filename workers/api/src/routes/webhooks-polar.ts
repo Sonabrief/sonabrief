@@ -1,6 +1,22 @@
 import type { Env } from "../lib/env";
 import { addUserToWhitelist } from "../lib/antiabuse";
 
+const EXTRA_MINUTES_MAP: Record<string, number> = {
+  'fb6c1a92-1d5c-4ea6-b683-f5b324bc437b': 300,
+  'da7239fb-c3a7-4cff-a71d-77a0e1b257da': 900,
+  '5d1207b4-2369-417e-9cd4-eb3dd3300569': 2400,
+  'e79cd9b0-9250-4b98-ab14-ab07ebaefe4d': 480,
+  '8d896b13-374f-488e-a1f2-c62be8379872': 1200,
+  'eb9825af-0dd4-4278-bca9-9b0f1cf6fd04': 3300,
+}
+
+function currentMonth(): string {
+  const now = new Date()
+  const yyyy = now.getUTCFullYear()
+  const mm = String(now.getUTCMonth() + 1).padStart(2, '0')
+  return `${yyyy}-${mm}`
+}
+
 async function verifyPolarSignature(
   rawBody: string,
   signature: string | null,
@@ -120,6 +136,22 @@ async function processPolarEvent(eventType: string, data: Record<string, any>, e
         UPDATE licenses SET status = 'cancelled', cancelled_at = ?, ends_at = ?, updated_at = ?
         WHERE polar_subscription_id = ?
       `).bind(Date.now(), endsAt, Date.now(), subscriptionId).run();
+      break;
+    }
+    case "order.created": {
+      if (!userId) { console.warn("[webhook-polar] order.created: missing user_id in metadata"); return; }
+      const minutes = EXTRA_MINUTES_MAP[productId];
+      if (!minutes) { console.warn("[webhook-polar] order.created: unknown product_id:", productId); return; }
+      const month = currentMonth();
+      const now = Date.now();
+      await env.DB.prepare(`
+        INSERT INTO cloud_transcription_usage (id, user_id, month, minutes_used, extra_minutes_purchased, last_updated)
+        VALUES (?, ?, ?, 0, ?, ?)
+        ON CONFLICT(user_id, month) DO UPDATE SET
+          extra_minutes_purchased = extra_minutes_purchased + ?,
+          last_updated = excluded.last_updated
+      `).bind(crypto.randomUUID(), userId, month, minutes, now, minutes).run();
+      console.log(`[webhook-polar] order.created: +${minutes} min for user ${userId} in ${month}`);
       break;
     }
     default:

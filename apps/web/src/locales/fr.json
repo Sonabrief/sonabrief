@@ -585,6 +585,7 @@
   "recording.cloud_quota_widget_title": "Cloud Veloce ce mois-ci",
   "recording.cloud_quota_format": "{{used}} h / {{total}} h ce mois-ci",
   "recording.cloud_quota_error": "Quota Cloud Veloce épuisé pour ce mois",
+  "recording.cloud_buy_extra_title": "Acheter des heures supplémentaires",
   "recording.cloud_not_available": "Cloud Veloce est disponible avec Pro",
   "recording.cloud_rate_limited": "Service temporairement occupé — réessayez dans quelques secondes.",
   "recording.cloud_retry_cloud": "Réessayer en Cloud",

@@ -13,6 +13,7 @@ export interface QuotaInfo {
   minutesRemaining: number
   hardCap: number
   extraMinutesPurchased: number
+  tier: 'pro' | 'unlimited'
 }
 
 export class CloudVeloceNotAvailableError extends Error {
@@ -77,6 +78,15 @@ export async function transcribeCloud(
     throw new Error(`Cloud transcription failed (${res.status})`)
   }
   return res.json() as Promise<CloudTranscribeResult>
+}
+
+export async function fetchCloudCheckout(pkg: string): Promise<string> {
+  const res = await fetch(`${API_URL}/v1/transcribe-cloud/checkout?package=${encodeURIComponent(pkg)}`, {
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error(`Checkout failed (${res.status})`)
+  const data = await res.json() as { checkoutUrl: string }
+  return data.checkoutUrl
 }
 
 export async function fetchCloudQuota(): Promise<QuotaInfo | null> {

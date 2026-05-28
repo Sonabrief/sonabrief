@@ -2,6 +2,15 @@ import type { Env } from '../lib/env'
 import { getUserFromSession } from '../lib/sessions'
 import { getUserTier } from '../lib/tier'
 
+const PACKAGE_PRODUCTS: Record<string, { productId: string; allowedTier: 'pro' | 'unlimited' }> = {
+  pro_5h:  { productId: 'fb6c1a92-1d5c-4ea6-b683-f5b324bc437b', allowedTier: 'pro' },
+  pro_15h: { productId: 'da7239fb-c3a7-4cff-a71d-77a0e1b257da', allowedTier: 'pro' },
+  pro_40h: { productId: '5d1207b4-2369-417e-9cd4-eb3dd3300569', allowedTier: 'pro' },
+  pu_8h:   { productId: 'e79cd9b0-9250-4b98-ab14-ab07ebaefe4d', allowedTier: 'unlimited' },
+  pu_20h:  { productId: '8d896b13-374f-488e-a1f2-c62be8379872', allowedTier: 'unlimited' },
+  pu_55h:  { productId: 'eb9825af-0dd4-4278-bca9-9b0f1cf6fd04', allowedTier: 'unlimited' },
+}
+
 const MINUTES_INCLUDED: Record<string, number> = {
   pro: 300,
   unlimited: 1200,
@@ -254,5 +263,54 @@ export async function handleTranscribeCloudQuota(req: Request, env: Env): Promis
     minutesRemaining,
     hardCap,
     extraMinutesPurchased: usage.extra_minutes_purchased,
+    tier,
   })
+}
+
+export async function handleTranscribeCloudCheckout(req: Request, env: Env): Promise<Response> {
+  const session = await getUserFromSession(req, env)
+  if (!session) return jsonResponse({ error: 'unauthorized' }, 401)
+
+  const tier = await getUserTier(session.userId, env)
+  if (tier !== 'pro' && tier !== 'unlimited') {
+    return jsonResponse({ error: 'pro_required' }, 403)
+  }
+
+  const url = new URL(req.url)
+  const pkg = url.searchParams.get('package')
+  const pkgInfo = pkg ? PACKAGE_PRODUCTS[pkg] : null
+  if (!pkgInfo) return jsonResponse({ error: 'invalid_package' }, 400)
+
+  if (pkgInfo.allowedTier !== tier) {
+    return jsonResponse({ error: 'package_not_available_for_tier' }, 403)
+  }
+
+  const userRow = await env.DB
+    .prepare('SELECT email FROM users WHERE id = ?')
+    .bind(session.userId)
+    .first<{ email: string }>()
+  if (!userRow) return jsonResponse({ error: 'user_not_found' }, 404)
+
+  const polarRes = await fetch('https://api.polar.sh/v1/checkouts/', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${env.POLAR_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      product_id: pkgInfo.productId,
+      customer_email: userRow.email,
+      metadata: { user_id: session.userId },
+      success_url: 'https://sonabrief.com/app',
+    }),
+  })
+
+  if (!polarRes.ok) {
+    const errText = await polarRes.text()
+    console.error('[transcribe-cloud] checkout error:', polarRes.status, errText)
+    return jsonResponse({ error: 'checkout_failed' }, 502)
+  }
+
+  const data = await polarRes.json() as { url: string }
+  return jsonResponse({ checkoutUrl: data.url })
 }
