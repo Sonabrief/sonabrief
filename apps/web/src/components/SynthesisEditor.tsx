@@ -30,7 +30,7 @@ export function SynthesisEditor({ content, readonly = false, isStreaming = false
     if (!editor || isStreaming) return
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (content !== (editor.storage as any).markdown?.getMarkdown()) {
-      const normalized = content.replace(/(\*\*[^*]+\*\*)\n([^\n])/g, '$1\n\n$2')
+      const normalized = content.replace(/([^\n])\n(?=[^\n])/g, '$1\n\n')
       editor.commands.setContent(normalized)
     }
   }, [content, editor, isStreaming])
