@@ -35,6 +35,9 @@ export interface Env {
   // Feature flags
   MAINTENANCE_MODE?: string;
 
+  // Budget caps
+  CLOUD_BUDGET_CAP_EUR?: string;
+
   // Lemon Squeezy (backup, non rimuovere)
   LEMONSQUEEZY_API_KEY?: string;
   LEMONSQUEEZY_WEBHOOK_SECRET?: string;

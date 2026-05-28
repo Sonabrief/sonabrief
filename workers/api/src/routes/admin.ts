@@ -51,19 +51,25 @@ export async function handleAdminStats(req: Request, env: Env): Promise<Response
   const cors = corsHeaders(req, env)
 
   const month = currentMonth()
+  const now = new Date()
   const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+  const startOfMonthMs = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
+  const startOfNextMonthMs = Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)
 
   // 1. Utenti totali
   const totalUsers = await env.DB
     .prepare('SELECT COUNT(*) as cnt FROM users')
     .first<{ cnt: number }>()
 
-  // 2. Utenti per tier
+  // 2. Utenti per tier (inclusi free senza licenza)
   const tierCounts = await env.DB
     .prepare(`
-      SELECT tier, COUNT(*) as cnt FROM licenses
-      WHERE status = 'active'
-      GROUP BY tier
+      SELECT COALESCE(l.tier, 'free') as tier, COUNT(*) as cnt
+      FROM users u
+      LEFT JOIN licenses l ON l.user_id = u.id AND l.status = 'active'
+      GROUP BY COALESCE(l.tier, 'free')
+      ORDER BY cnt DESC
     `)
     .all<{ tier: string; cnt: number }>()
 
@@ -150,7 +156,7 @@ export async function handleAdminStats(req: Request, env: Env): Promise<Response
     .bind(month)
     .all<{ email: string; threshold_hours: number; triggered_at: number }>()
 
-  // 10. Ultimi 20 webhook
+  // 10. Ultimi 20 webhook (tutti i provider)
   const webhooks = await env.DB
     .prepare(`
       SELECT event_id, event_name, processed_at
@@ -169,11 +175,154 @@ export async function handleAdminStats(req: Request, env: Env): Promise<Response
     `)
     .all<{ status: string; cnt: number }>()
 
+  // 12. Cloud Veloce — aggregati mese corrente
+  const cloudVeloceAgg = await env.DB
+    .prepare(`
+      SELECT
+        COALESCE(SUM(minutes_used), 0) as total_minutes,
+        COALESCE(SUM(extra_minutes_purchased), 0) as total_extra_minutes,
+        COUNT(DISTINCT CASE WHEN minutes_used > 0 THEN user_id END) as unique_users,
+        MAX(budget_alert_sent_80) as alert_sent
+      FROM cloud_transcription_usage
+      WHERE month = ?
+    `)
+    .bind(month)
+    .first<{ total_minutes: number; total_extra_minutes: number; unique_users: number; alert_sent: number }>()
+
+  // 13. Cloud Veloce — top 5 utenti
+  const cloudVeloceTopUsers = await env.DB
+    .prepare(`
+      SELECT u.email, c.minutes_used
+      FROM cloud_transcription_usage c
+      JOIN users u ON u.id = c.user_id
+      WHERE c.month = ?
+      ORDER BY c.minutes_used DESC
+      LIMIT 5
+    `)
+    .bind(month)
+    .all<{ email: string; minutes_used: number }>()
+
+  // 14. Cloud Veloce — distribuzione utenti per fascia
+  const cloudVeloceDist = await env.DB
+    .prepare(`
+      SELECT
+        COALESCE(SUM(CASE WHEN minutes_used < 60 THEN 1 ELSE 0 END), 0) as d_0_1h,
+        COALESCE(SUM(CASE WHEN minutes_used >= 60 AND minutes_used < 180 THEN 1 ELSE 0 END), 0) as d_1_3h,
+        COALESCE(SUM(CASE WHEN minutes_used >= 180 AND minutes_used < 300 THEN 1 ELSE 0 END), 0) as d_3_5h,
+        COALESCE(SUM(CASE WHEN minutes_used >= 300 THEN 1 ELSE 0 END), 0) as d_5h_plus
+      FROM cloud_transcription_usage
+      WHERE month = ?
+    `)
+    .bind(month)
+    .first<{ d_0_1h: number; d_1_3h: number; d_3_5h: number; d_5h_plus: number }>()
+
+  // 15. Extra credits — ordini Polar via webhook_events mese corrente
+  const extraCreditsOrders = await env.DB
+    .prepare(`
+      SELECT COUNT(*) as cnt
+      FROM webhook_events
+      WHERE event_name = 'order.created'
+      AND processed_at >= ?
+      AND processed_at < ?
+    `)
+    .bind(startOfMonthMs, startOfNextMonthMs)
+    .first<{ cnt: number }>()
+
+  // 15b. Extra credits — minuti acquistati per tier (per stima ricavo)
+  const extraMinsByTier = await env.DB
+    .prepare(`
+      SELECT
+        COALESCE(l.tier, 'free') as tier,
+        COALESCE(SUM(c.extra_minutes_purchased), 0) as extra_minutes,
+        COUNT(DISTINCT c.user_id) as user_count
+      FROM cloud_transcription_usage c
+      LEFT JOIN licenses l ON l.user_id = c.user_id
+      WHERE c.month = ? AND c.extra_minutes_purchased > 0
+      GROUP BY COALESCE(l.tier, 'free')
+    `)
+    .bind(month)
+    .all<{ tier: string; extra_minutes: number; user_count: number }>()
+
+  // 16. Storage — row count + blob size + active magic tokens
+  const [usersRowCount, syncBlobsStats, cloudUsageRowCount, activeMagicTokens] = await Promise.all([
+    env.DB.prepare('SELECT COUNT(*) as cnt FROM users').first<{ cnt: number }>(),
+    env.DB.prepare('SELECT COUNT(*) as cnt, COALESCE(SUM(blob_size), 0) as total_bytes FROM sync_blobs').first<{ cnt: number; total_bytes: number }>(),
+    env.DB.prepare('SELECT COUNT(*) as cnt FROM cloud_transcription_usage').first<{ cnt: number }>(),
+    env.DB.prepare('SELECT COUNT(*) as cnt FROM magic_tokens WHERE used = 0 AND expires_at > ?').bind(Date.now()).first<{ cnt: number }>(),
+  ])
+
+  // 19. Errori synthesis ultimi 7 giorni
+  const synthErrors = await env.DB
+    .prepare(`
+      SELECT error_code, COUNT(*) as cnt
+      FROM synthesis_log
+      WHERE error_code IS NOT NULL AND created_at > ?
+      GROUP BY error_code
+      ORDER BY cnt DESC
+      LIMIT 20
+    `)
+    .bind(sevenDaysAgo)
+    .all<{ error_code: string; cnt: number }>()
+
+  // 17. Retention — cancellazioni mese corrente
+  const canceledThisMonth = await env.DB
+    .prepare(`
+      SELECT COUNT(*) as cnt FROM licenses
+      WHERE cancelled_at >= ? AND cancelled_at < ?
+    `)
+    .bind(startOfMonthMs, startOfNextMonthMs)
+    .first<{ cnt: number }>()
+
+  // 18. Retention — signup ultimi 30 giorni (per grafico)
+  const signupsLast30d = await env.DB
+    .prepare(`
+      SELECT
+        strftime('%Y-%m-%d', datetime(created_at / 1000, 'unixepoch')) as date,
+        COUNT(*) as count
+      FROM users
+      WHERE created_at > ?
+      GROUP BY date
+      ORDER BY date
+    `)
+    .bind(thirtyDaysAgo)
+    .all<{ date: string; count: number }>()
+
+  // Valori derivati Cloud Veloce
+  const cvTotalMinutes = cloudVeloceAgg?.total_minutes ?? 0
+  const cvEstimatedCostUSD = cvTotalMinutes * 0.003
+  const cvBudgetCapEUR = parseFloat(env.CLOUD_BUDGET_CAP_EUR ?? '50')
+  const cvBudgetUsedPercent = cvBudgetCapEUR > 0
+    ? (cvEstimatedCostUSD / 1.08 / cvBudgetCapEUR) * 100
+    : 0
+  const synthesisCostUSD = budget?.cost_usd ?? 0
+  const ordersCount = extraCreditsOrders?.cnt ?? 0
+
+  // Stima ricavo ore extra
+  // Rate basato sul pacchetto medio (900min@€9 Pro, 1200min@€9 Unlimited)
+  const EXTRA_EUR_PER_MIN: Record<string, number> = {
+    pro: 9 / 900,
+    unlimited: 9 / 1200,
+  }
+  const POLAR_FEE_RATE = 0.055   // 4% base + 1.5% international
+  const POLAR_FEE_FIXED_EUR = 0.40
+
+  let extraGrossEUR = 0
+  let totalExtraMinSold = 0
+  for (const row of extraMinsByTier.results) {
+    const rate = EXTRA_EUR_PER_MIN[row.tier] ?? EXTRA_EUR_PER_MIN['pro']
+    extraGrossEUR += row.extra_minutes * rate
+    totalExtraMinSold += row.extra_minutes
+  }
+
+  const extraPolarFeesEUR = extraGrossEUR * POLAR_FEE_RATE + ordersCount * POLAR_FEE_FIXED_EUR
+  const extraVoxtralCostEUR = totalExtraMinSold * 0.003 / 1.08
+  const extraNetEUR = extraGrossEUR - extraPolarFeesEUR - extraVoxtralCostEUR
+
   return new Response(JSON.stringify({
     overview: {
       total_users: totalUsers?.cnt ?? 0,
       mrr_eur: Math.round(mrr * 100) / 100,
-      budget_used_usd: budget?.cost_usd ?? 0,
+      budget_used_usd: synthesisCostUSD,
       budget_cap_usd: budget?.cap_usd ?? 50,
     },
     tiers: tierCounts.results,
@@ -184,6 +333,57 @@ export async function handleAdminStats(req: Request, env: Env): Promise<Response
     thresholds_triggered: thresholds.results,
     recent_webhooks: webhooks.results,
     subscription_status: subStatus.results,
+    cloud_veloce: {
+      total_minutes: cvTotalMinutes,
+      total_extra_minutes: cloudVeloceAgg?.total_extra_minutes ?? 0,
+      estimated_cost_usd: Math.round(cvEstimatedCostUSD * 10000) / 10000,
+      budget_cap_eur: cvBudgetCapEUR,
+      budget_used_percent: Math.round(cvBudgetUsedPercent * 10) / 10,
+      unique_users: cloudVeloceAgg?.unique_users ?? 0,
+      top_users: cloudVeloceTopUsers.results,
+      distribution: {
+        '0_1h': cloudVeloceDist?.d_0_1h ?? 0,
+        '1_3h': cloudVeloceDist?.d_1_3h ?? 0,
+        '3_5h': cloudVeloceDist?.d_3_5h ?? 0,
+        '5h_plus': cloudVeloceDist?.d_5h_plus ?? 0,
+      },
+      alert_sent: (cloudVeloceAgg?.alert_sent ?? 0) === 1,
+    },
+    extra_credits: {
+      orders_count: ordersCount,
+      revenue_gross_eur: Math.round(extraGrossEUR * 100) / 100,
+      revenue_net_eur: Math.round(extraNetEUR * 100) / 100,
+      polar_fees_eur: Math.round(extraPolarFeesEUR * 100) / 100,
+      voxtral_cost_eur: Math.round(extraVoxtralCostEUR * 100) / 100,
+      total_extra_minutes: totalExtraMinSold,
+      by_tier: extraMinsByTier.results,
+      is_estimate: true,
+    },
+    tech: {
+      errors_5xx_last_7d: null as null,
+      synthesis_errors_7d: synthErrors.results,
+      note: 'Errori 5xx e Mistral 429: logging non implementato',
+    },
+    storage: {
+      blob_total_bytes: syncBlobsStats?.total_bytes ?? 0,
+      meetings_count: syncBlobsStats?.cnt ?? 0,
+      active_magic_tokens: activeMagicTokens?.cnt ?? 0,
+      d1_row_counts: [
+        { table: 'users', count: usersRowCount?.cnt ?? 0 },
+        { table: 'sync_blobs', count: syncBlobsStats?.cnt ?? 0 },
+        { table: 'cloud_transcription_usage', count: cloudUsageRowCount?.cnt ?? 0 },
+        { table: 'magic_tokens (attivi)', count: activeMagicTokens?.cnt ?? 0 },
+      ],
+    },
+    retention: {
+      canceled_this_month: canceledThisMonth?.cnt ?? 0,
+      signups_last_30d: signupsLast30d.results,
+    },
+    synthesis_cost_breakdown: {
+      synthesis_cost_usd: synthesisCostUSD,
+      transcription_cost_usd: Math.round(cvEstimatedCostUSD * 10000) / 10000,
+      total_cost_usd: Math.round((synthesisCostUSD + cvEstimatedCostUSD) * 10000) / 10000,
+    },
   }), {
     status: 200,
     headers: { ...cors, 'Content-Type': 'application/json' },
