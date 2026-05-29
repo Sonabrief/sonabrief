@@ -13,7 +13,9 @@ export function HardwareSuggestionModal({ onTryCloud, onContinueLocal }: Hardwar
   const [visible] = useState(() => {
     if (typeof localStorage === 'undefined') return false
     if (localStorage.getItem('sb_hw_modal_shown')) return false
-    return getHardwareTier() !== 'fast'
+    const tier = getHardwareTier()
+    const isSlowHardware = tier === 'slow' || tier === 'medium'
+    return isSlowHardware
   })
   const [open, setOpen] = useState(visible)
 

@@ -27,12 +27,15 @@ export function resolveWhisperModel(): WhisperModelId {
   return getModelOverride() ?? detectWhisperModel()
 }
 
-export function getHardwareTier(): 'fast' | 'medium' | 'slow' {
-  const nav = navigator as Navigator & { gpu?: unknown; deviceMemory?: number }
-  if (nav.gpu !== undefined) return 'fast'
-  const mem = nav.deviceMemory ?? 8
+export function getHardwareTier(): 'ultrafast' | 'fast' | 'medium' | 'slow' {
+  const mem = (navigator as any).deviceMemory ?? 8
   const cores = navigator.hardwareConcurrency ?? 4
-  if (mem < 4 || cores <= 2) return 'slow'
-  if (mem < 8 && cores <= 4) return 'medium'
-  return 'fast'
+  // macOS with high specs → likely Apple Silicon (unified memory, fast inference).
+  // Same specs on Windows/Linux still use slower x86 WASM, so they cap at 'medium'.
+  const isMac = /Mac/i.test(navigator.platform) || /Mac OS X/i.test(navigator.userAgent)
+
+  if (isMac && mem >= 16 && cores >= 10) return 'ultrafast' // M-series Pro/Max
+  if (isMac && mem >= 8  && cores >= 8)  return 'fast'      // M1/M2 base
+  if (mem < 4 || cores <= 2)             return 'slow'
+  return 'medium'
 }

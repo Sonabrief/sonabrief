@@ -3,9 +3,10 @@ import { getHardwareTier } from './whisperModel'
 export function estimateTranscriptionMinutes(audioMinutes: number): number {
   const tier = getHardwareTier()
   const multipliers = {
-    fast: 0.3,
-    medium: 0.8,
-    slow: 2.2,
+    ultrafast: 0.3,
+    fast: 0.6,
+    medium: 2.0,
+    slow: 3.0,
   }
-  return Math.ceil(audioMinutes * multipliers[tier])
+  return Math.ceil(audioMinutes * multipliers[tier] * 1.2)
 }

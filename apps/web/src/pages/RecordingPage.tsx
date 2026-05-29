@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Mic, Monitor, Video, Lock, Zap } from 'lucide-react'
+import { Mic, Monitor, Video, Lock, Zap, Clock, CheckCircle2 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useAudioRecorder } from '../hooks/useAudioRecorder'
 import { useCloudTranscription } from '../hooks/useCloudTranscription'
@@ -228,6 +228,7 @@ export default function RecordingPage() {
   ]
 
   const hwTier = useMemo(() => getHardwareTier(), [])
+  const isSlowHardware = hwTier === 'slow' || hwTier === 'medium'
   const isProPlus = tier === 'pro' || tier === 'unlimited'
 
   const MODE_OPTIONS: ModeOption[] = [
@@ -237,11 +238,11 @@ export default function RecordingPage() {
   ]
 
   const orderedModeOptions = useMemo(() => {
-    if ((hwTier === 'slow' || hwTier === 'medium') && isProPlus) {
+    if (isSlowHardware && isProPlus) {
       return (['cloud', 'standard', 'local'] as RecordingMode[]).map(id => MODE_OPTIONS.find(m => m.id === id)!)
     }
     return MODE_OPTIONS
-  }, [hwTier, isProPlus])
+  }, [isSlowHardware, isProPlus])
   const location = useLocation()
   const { state, duration, error, paused, start, stop, pause, resume, audioData, audioBlob, reset, stream, chunkSession } = useAudioRecorder(() => {
     setTriggerPiP(true)
@@ -684,13 +685,13 @@ export default function RecordingPage() {
     if (isTranscribing) transcribeStartRef.current = Date.now()
   }, [isTranscribing])
 
-  // ── B2: tab-open hint after 60s (skip for fast tier and cloud)
+  // ── B2: tab-open hint after 60s (skip for fast/ultrafast tier and cloud)
   useEffect(() => {
     if (!isTranscribing) { setShowTabHint(false); return }
-    if (hwTier === 'fast' || mode === 'cloud') return
+    if (!isSlowHardware || mode === 'cloud') return
     const timer = setTimeout(() => setShowTabHint(true), 60_000)
     return () => clearTimeout(timer)
-  }, [isTranscribing, hwTier, mode])
+  }, [isTranscribing, isSlowHardware, mode])
 
   // ── B3: long-wait banner after 3 minutes
   useEffect(() => {
@@ -1305,12 +1306,14 @@ export default function RecordingPage() {
                   const estimatedMin = estimateTranscriptionMinutes(duration / 60)
                   return (
                     <div className="rounded-lg border border-border bg-card px-3 py-2.5 space-y-2">
-                      {hwTier === 'fast' || mode === 'cloud' ? (
+                      {mode === 'cloud' ? (
                         <p className="text-xs text-muted-foreground">{t('hardware.estimateFast')}</p>
                       ) : (
                         <>
                           <p className="text-xs text-muted-foreground">
-                            {t('hardware.estimateLabel', { minutes: estimatedMin })}
+                            {estimatedMin <= 1
+                              ? t('hardware.estimateFast')
+                              : t('hardware.estimateLabel', { minutes: estimatedMin })}
                           </p>
                           {estimatedMin > 2 && !notifyGranted && (
                             <button
@@ -1363,15 +1366,18 @@ export default function RecordingPage() {
 
             {/* B3 — Long-wait banner after 3 minutes */}
             {showLongWaitBanner && isTranscribing && (
-              <div className="rounded-lg border border-amber-300/60 bg-amber-50/80 dark:bg-amber-900/20 dark:border-amber-700/50 px-4 py-3 space-y-1">
-                <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
-                  {t('hardware.longWaitBanner')}
-                </p>
-                {isProPlus && (
-                  <p className="text-xs text-amber-700 dark:text-amber-300">
-                    {t('hardware.longWaitCloudHint')}
+              <div className="rounded-xl border border-border bg-card px-4 py-3.5 flex items-start gap-3">
+                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-primary/60" aria-hidden="true" />
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium text-foreground">
+                    {t('hardware.longWaitBanner')}
                   </p>
-                )}
+                  {isProPlus && (
+                    <p className="text-xs text-muted-foreground">
+                      {t('hardware.longWaitCloudHint')}
+                    </p>
+                  )}
+                </div>
               </div>
             )}
 
@@ -1427,28 +1433,31 @@ export default function RecordingPage() {
 
             {/* B4 — Done-slow message (shown once if waited >5 min) */}
             {isDone && showDoneSlowMsg && (
-              <div className="rounded-lg border border-border bg-card px-4 py-3 space-y-2">
-                <p className="text-sm text-foreground">
-                  {isFree
-                    ? t('hardware.doneSlowFree', { minutes: Math.round(elapsedTxMinRef.current) })
-                    : t('hardware.doneSlowPro', { minutes: Math.round(elapsedTxMinRef.current) })
-                  }
-                </p>
-                {isFree && (
-                  <a
-                    href="/pricing"
-                    className="inline-block text-xs font-medium text-primary hover:underline"
-                    onClick={() => { localStorage.setItem('sb_slow_tx_educated', '1'); setShowDoneSlowMsg(false) }}
-                  >
-                    {t('hardware.doneSlowFreeCta')}
-                  </a>
-                )}
+              <div className="rounded-xl border border-border bg-card px-4 py-3.5 flex items-start gap-3">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary/60" aria-hidden="true" />
+                <div className="flex-1 space-y-1.5">
+                  <p className="text-sm text-foreground">
+                    {isFree
+                      ? t('hardware.doneSlowFree', { minutes: Math.round(elapsedTxMinRef.current) })
+                      : t('hardware.doneSlowPro', { minutes: Math.round(elapsedTxMinRef.current) })
+                    }
+                  </p>
+                  {isFree && (
+                    <a
+                      href="/pricing"
+                      className="inline-block text-xs font-medium text-primary hover:underline"
+                      onClick={() => { localStorage.setItem('sb_slow_tx_educated', '1'); setShowDoneSlowMsg(false) }}
+                    >
+                      {t('hardware.doneSlowFreeCta')}
+                    </a>
+                  )}
+                </div>
                 <button
                   onClick={() => { localStorage.setItem('sb_slow_tx_educated', '1'); setShowDoneSlowMsg(false) }}
-                  className="block text-xs text-muted-foreground hover:text-foreground"
+                  className="shrink-0 text-muted-foreground/60 hover:text-foreground transition-colors"
                   aria-label="Chiudi"
                 >
-                  ✕
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
                 </button>
               </div>
             )}
