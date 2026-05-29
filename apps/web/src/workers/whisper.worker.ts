@@ -19,6 +19,18 @@ function isIntelGPU(): boolean {
 
 const IS_INTEL = isIntelGPU()
 
+function getBatchSize(): number {
+  const hasWebGPU = 'gpu' in navigator
+  const mem = (navigator as any).deviceMemory ?? 8
+  const cores = navigator.hardwareConcurrency ?? 4
+
+  // WASM: batch parallelo non aiuta e rischia OOM. Resta seriale.
+  if (!hasWebGPU) return 1
+  if (mem >= 16 && cores >= 10) return 8
+  if (mem >= 8 && cores > 8) return 4
+  return 2
+}
+
 type WhisperStatus =
   | { type: 'loading'; progress: number; file: string }
   | { type: 'ready' }
@@ -61,7 +73,7 @@ async function loadModel(model: string) {
     env.backends.onnx.wasm.numThreads = threads
   }
 
-  console.log(`[Whisper] device=${device} dtype=${JSON.stringify(dtype)} intel=${IS_INTEL} threads=${hasWebGPU ? 'n/a(webgpu)' : threads} crossOriginIsolated=${self.crossOriginIsolated}`)
+  console.log(`[Whisper] device=${device} dtype=${JSON.stringify(dtype)} batch_size=${getBatchSize()} intel=${IS_INTEL} threads=${hasWebGPU ? 'n/a(webgpu)' : threads} crossOriginIsolated=${self.crossOriginIsolated}`)
 
   transcriber = await pipeline('automatic-speech-recognition', model, {
     device,
@@ -82,6 +94,7 @@ async function transcribe(audio: Float32Array, language?: string) {
     return_timestamps: true,
     chunk_length_s: 30,
     stride_length_s: 5,
+    batch_size: getBatchSize(),
   }
   if (language) options.language = language
   // @ts-ignore
