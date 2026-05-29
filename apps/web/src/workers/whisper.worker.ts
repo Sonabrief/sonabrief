@@ -49,10 +49,10 @@ async function loadModel(model: string) {
   // WASM puro solo dove WebGPU non è disponibile, con q8 + tutti i thread.
   const hasWebGPU = 'gpu' in navigator
   const device = hasWebGPU ? 'webgpu' : 'wasm'
-  // fp16 encoder on WebGPU: faster inference without meaningful quality loss.
-  // WASM keeps q4 for both to minimise memory and stay within browser limits.
+  // q4f16 encoder on WebGPU: quantised weights with fp16 compute, faster than
+  // pure fp16 with similar quality. WASM keeps q4 for both.
   const dtype = hasWebGPU
-    ? { encoder_model: 'fp16', decoder_model_merged: 'q4' } as const
+    ? { encoder_model: 'q4f16', decoder_model_merged: 'q4' } as const
     : { encoder_model: 'q4', decoder_model_merged: 'q4' } as const
 
   const threads = navigator.hardwareConcurrency ?? 2
