@@ -49,9 +49,11 @@ async function loadModel(model: string) {
   // WASM puro solo dove WebGPU non è disponibile, con q8 + tutti i thread.
   const hasWebGPU = 'gpu' in navigator
   const device = hasWebGPU ? 'webgpu' : 'wasm'
+  // fp16 encoder on WebGPU: faster inference without meaningful quality loss.
+  // WASM keeps q4 for both to minimise memory and stay within browser limits.
   const dtype = hasWebGPU
-    ? { encoder_model: 'q4', decoder_model_merged: 'q4' } as const
-    : 'q8'
+    ? { encoder_model: 'fp16', decoder_model_merged: 'q4' } as const
+    : { encoder_model: 'q4', decoder_model_merged: 'q4' } as const
 
   const threads = navigator.hardwareConcurrency ?? 2
   if (!hasWebGPU) {
@@ -59,7 +61,7 @@ async function loadModel(model: string) {
     env.backends.onnx.wasm.numThreads = threads
   }
 
-  console.log(`[Whisper] device=${device} intel=${IS_INTEL} threads=${hasWebGPU ? 'n/a(webgpu)' : threads} crossOriginIsolated=${self.crossOriginIsolated}`)
+  console.log(`[Whisper] device=${device} dtype=${JSON.stringify(dtype)} intel=${IS_INTEL} threads=${hasWebGPU ? 'n/a(webgpu)' : threads} crossOriginIsolated=${self.crossOriginIsolated}`)
 
   transcriber = await pipeline('automatic-speech-recognition', model, {
     device,
