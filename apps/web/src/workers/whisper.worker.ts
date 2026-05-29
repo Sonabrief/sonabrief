@@ -21,13 +21,16 @@ const IS_INTEL = isIntelGPU()
 
 function getBatchSize(): number {
   const hasWebGPU = 'gpu' in navigator
-  const mem = (navigator as any).deviceMemory ?? 8
-  const cores = navigator.hardwareConcurrency ?? 4
-
-  // WASM: batch parallelo non aiuta e rischia OOM. Resta seriale.
   if (!hasWebGPU) return 1
-  if (mem >= 16 && cores >= 10) return 8
-  if (mem >= 8 && cores > 8) return 4
+
+  const cores = navigator.hardwareConcurrency ?? 4
+  const mem = (navigator as any).deviceMemory ?? 8
+
+  // ultrafast: 10+ core (M-series Pro/Max, workstation) — deviceMemory non affidabile, usiamo cores
+  if (cores >= 10) return 8
+  // fast: 8+ core con 8GB+ dichiarati
+  if (cores > 8 && mem >= 8) return 4
+  // WebGPU su hardware modesto
   return 2
 }
 
