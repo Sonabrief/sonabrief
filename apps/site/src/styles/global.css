@@ -1,0 +1,32 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600&display=swap");
+@import "tailwindcss";
+
+:root {
+  --color-deep-teal: #1A4D52;
+  --color-amber: #C89868;
+  --color-cream: #FAF7F0;
+  --color-charcoal: #1A1A1F;
+  --color-stone: #8B8B92;
+  --color-mist: #E8E5DD;
+  --color-signal-red: #B84545;
+  --color-signal-green: #5A7D5A;
+}
+
+html,
+body {
+  background-color: var(--color-cream);
+  font-family: "Plus Jakarta Sans", sans-serif;
+  color: var(--color-charcoal);
+}
+
+.grain-texture::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+}

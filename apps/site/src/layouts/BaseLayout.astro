@@ -1,0 +1,43 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  lang?: string;
+  description?: string;
+}
+
+const {
+  title = 'Sonabrief',
+  lang = 'en',
+  description = 'Sonabrief — Coming soon',
+} = Astro.props;
+
+const hreflangs = [
+  { lang: 'en', href: 'https://sonabrief.com/' },
+  { lang: 'it', href: 'https://sonabrief.com/it/' },
+  { lang: 'fr', href: 'https://sonabrief.com/fr/' },
+  { lang: 'es', href: 'https://sonabrief.com/es/' },
+  { lang: 'de', href: 'https://sonabrief.com/de/' },
+];
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+
+    {hreflangs.map(({ lang: l, href }) => (
+      <link rel="alternate" hreflang={l} href={href} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href="https://sonabrief.com/" />
+
+    <script defer data-domain="sonabrief.com" src="https://plausible.io/js/script.js"></script>
+  </head>
+  <body class="grain-texture">
+    <slot />
+  </body>
+</html>
