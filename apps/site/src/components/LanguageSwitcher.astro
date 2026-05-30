@@ -1,0 +1,75 @@
+---
+interface Props {
+  currentLang: string;
+  currentPath?: string;
+}
+
+const { currentLang, currentPath = '' } = Astro.props;
+
+// Strip leading lang prefix from path (e.g. "/it/pricing" → "pricing")
+const langPrefixes = ['it', 'fr', 'es', 'de'];
+let strippedPath = currentPath.replace(/^\//, '');
+for (const prefix of langPrefixes) {
+  if (strippedPath === prefix || strippedPath.startsWith(prefix + '/')) {
+    strippedPath = strippedPath.slice(prefix.length).replace(/^\//, '');
+    break;
+  }
+}
+
+const langs = [
+  { code: 'en', label: 'EN', href: strippedPath ? `/${strippedPath}` : '/' },
+  { code: 'it', label: 'IT', href: strippedPath ? `/it/${strippedPath}` : '/it/' },
+  { code: 'fr', label: 'FR', href: strippedPath ? `/fr/${strippedPath}` : '/fr/' },
+  { code: 'es', label: 'ES', href: strippedPath ? `/es/${strippedPath}` : '/es/' },
+  { code: 'de', label: 'DE', href: strippedPath ? `/de/${strippedPath}` : '/de/' },
+];
+---
+
+<nav class="lang-switcher" aria-label="Language switcher">
+  {langs.map(({ code, label, href }, i) => (
+    <>
+      <a
+        href={href}
+        class:list={['lang-switcher-link', { active: code === currentLang }]}
+        aria-current={code === currentLang ? 'page' : undefined}
+        lang={code}
+      >
+        {label}
+      </a>
+      {i < langs.length - 1 && (
+        <span class="lang-switcher-sep" aria-hidden="true">·</span>
+      )}
+    </>
+  ))}
+</nav>
+
+<style>
+  .lang-switcher {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .lang-switcher-link {
+    font-family: "Manrope", sans-serif;
+    font-size: 13px;
+    color: var(--color-stone);
+    text-decoration: none;
+    transition: color 150ms ease;
+  }
+
+  .lang-switcher-link:hover,
+  .lang-switcher-link.active {
+    color: var(--color-deep-teal);
+  }
+
+  .lang-switcher-link.active {
+    font-weight: 700;
+  }
+
+  .lang-switcher-sep {
+    font-size: 13px;
+    color: var(--color-mist);
+    user-select: none;
+  }
+</style>

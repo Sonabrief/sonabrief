@@ -1,7 +1,204 @@
 ---
-// Navbar placeholder
+interface Props {
+  lang?: string;
+}
+const { lang = 'en' } = Astro.props;
 ---
 
-<nav>
-  <!-- Navbar coming soon -->
-</nav>
+<header class="navbar">
+  <div class="navbar-inner">
+    <!-- Logo -->
+    <a href="/" class="navbar-logo" aria-label="Sonabrief home">SB</a>
+
+    <!-- Nav links (desktop) -->
+    <nav class="navbar-links" aria-label="Main navigation">
+      <a href="/security">Security</a>
+      <a href="/open-source">Open source</a>
+      <a href="/pricing">Pricing</a>
+      <a href="https://github.com/Sonabrief" target="_blank" rel="noopener noreferrer">
+        GitHub&nbsp;↗
+      </a>
+    </nav>
+
+    <!-- CTA (desktop) -->
+    <a href="https://app.sonabrief.com/signup" class="navbar-cta">Try free</a>
+
+    <!-- Hamburger (mobile) -->
+    <button class="navbar-hamburger" id="navbar-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="navbar-mobile-menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+
+  <!-- Mobile menu overlay -->
+  <div class="navbar-mobile-menu" id="navbar-mobile-menu" aria-hidden="true">
+    <nav aria-label="Mobile navigation">
+      <a href="/security">Security</a>
+      <a href="/open-source">Open source</a>
+      <a href="/pricing">Pricing</a>
+      <a href="https://github.com/Sonabrief" target="_blank" rel="noopener noreferrer">
+        GitHub&nbsp;↗
+      </a>
+      <a href="https://app.sonabrief.com/signup" class="navbar-mobile-cta">Try free</a>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background-color: var(--color-cream);
+    border-bottom: 1px solid var(--color-mist);
+  }
+
+  .navbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+    height: 64px;
+  }
+
+  .navbar-logo {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--color-deep-teal);
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+
+  .navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .navbar-links a {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    color: var(--color-charcoal);
+    text-decoration: none;
+    transition: color 150ms ease;
+  }
+
+  .navbar-links a:hover {
+    color: var(--color-deep-teal);
+  }
+
+  .navbar-cta {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-cream);
+    background-color: var(--color-deep-teal);
+    padding: 8px 20px;
+    border-radius: 9999px;
+    text-decoration: none;
+    flex-shrink: 0;
+    transition: opacity 150ms ease;
+  }
+
+  .navbar-cta:hover {
+    opacity: 0.88;
+  }
+
+  .navbar-hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .navbar-hamburger span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background-color: var(--color-charcoal);
+    border-radius: 2px;
+  }
+
+  .navbar-mobile-menu {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: var(--color-cream);
+    z-index: 49;
+    padding: 80px 32px 32px;
+  }
+
+  .navbar-mobile-menu.is-open {
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .navbar-mobile-menu nav {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    width: 100%;
+  }
+
+  .navbar-mobile-menu a {
+    font-family: "Manrope", sans-serif;
+    font-size: 20px;
+    color: var(--color-charcoal);
+    text-decoration: none;
+  }
+
+  .navbar-mobile-menu a:hover {
+    color: var(--color-deep-teal);
+  }
+
+  .navbar-mobile-cta {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 16px !important;
+    font-weight: 500;
+    color: var(--color-cream) !important;
+    background-color: var(--color-deep-teal);
+    padding: 12px 28px;
+    border-radius: 9999px;
+    text-align: center;
+  }
+
+  @media (max-width: 767px) {
+    .navbar-inner {
+      height: 56px;
+    }
+
+    .navbar-links,
+    .navbar-cta {
+      display: none;
+    }
+
+    .navbar-hamburger {
+      display: flex;
+    }
+  }
+</style>
+
+<script>
+  const toggle = document.getElementById('navbar-toggle');
+  const menu = document.getElementById('navbar-mobile-menu');
+
+  if (toggle && menu) {
+    toggle.addEventListener('click', () => {
+      const isOpen = menu.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', String(isOpen));
+      menu.setAttribute('aria-hidden', String(!isOpen));
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    });
+  }
+</script>

@@ -1,16 +1,18 @@
 ---
 import '../styles/global.css';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
 
 interface Props {
   title?: string;
-  lang?: string;
   description?: string;
+  lang?: string;
 }
 
 const {
   title = 'Sonabrief',
+  description = 'Open-source meeting assistant. Audio never leaves your computer.',
   lang = 'en',
-  description = 'Sonabrief — Coming soon',
 } = Astro.props;
 
 const hreflangs = [
@@ -28,6 +30,7 @@ const hreflangs = [
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <meta name="robots" content="noindex,nofollow" />
     <title>{title}</title>
 
     {hreflangs.map(({ lang: l, href }) => (
@@ -38,6 +41,8 @@ const hreflangs = [
     <script defer data-domain="sonabrief.com" src="https://plausible.io/js/script.js"></script>
   </head>
   <body class="grain-texture">
+    <Navbar lang={lang} />
     <slot />
+    <Footer currentLang={lang} />
   </body>
 </html>

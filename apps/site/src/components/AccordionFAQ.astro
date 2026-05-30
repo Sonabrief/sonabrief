@@ -1,0 +1,129 @@
+---
+interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+interface Props {
+  items: FAQItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<dl class="accordion">
+  {items.map((item, i) => {
+    const panelId = `accordion-panel-${i}`;
+    const btnId = `accordion-btn-${i}`;
+    return (
+      <div class="accordion-item">
+        <dt>
+          <button
+            id={btnId}
+            class="accordion-trigger"
+            aria-expanded="false"
+            aria-controls={panelId}
+          >
+            <span class="accordion-question">{item.question}</span>
+            <span class="accordion-icon" aria-hidden="true">+</span>
+          </button>
+        </dt>
+        <dd id={panelId} role="region" aria-labelledby={btnId} class="accordion-panel">
+          <div class="accordion-panel-inner">
+            {item.answer}
+          </div>
+        </dd>
+      </div>
+    );
+  })}
+</dl>
+
+<style>
+  .accordion {
+    margin: 0;
+    padding: 0;
+  }
+
+  .accordion-item {
+    border-bottom: 1px solid var(--color-mist);
+  }
+
+  .accordion-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 20px 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    gap: 16px;
+  }
+
+  .accordion-question {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-charcoal);
+    flex: 1;
+  }
+
+  .accordion-icon {
+    font-family: "Manrope", sans-serif;
+    font-size: 20px;
+    color: var(--color-stone);
+    line-height: 1;
+    transition: transform 300ms ease-out;
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+  }
+
+  .accordion-trigger[aria-expanded="true"] .accordion-icon {
+    transform: rotate(45deg);
+  }
+
+  .accordion-panel {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 300ms ease-out;
+    margin: 0;
+  }
+
+  .accordion-panel-inner {
+    font-family: "Manrope", sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--color-stone);
+    padding-bottom: 20px;
+  }
+</style>
+
+<script>
+  const triggers = document.querySelectorAll<HTMLButtonElement>('.accordion-trigger');
+
+  triggers.forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      const panelId = trigger.getAttribute('aria-controls');
+      const panel = panelId ? document.getElementById(panelId) : null;
+      const isOpen = trigger.getAttribute('aria-expanded') === 'true';
+
+      // Close all others
+      triggers.forEach((otherTrigger) => {
+        if (otherTrigger !== trigger) {
+          const otherId = otherTrigger.getAttribute('aria-controls');
+          const otherPanel = otherId ? document.getElementById(otherId) : null;
+          otherTrigger.setAttribute('aria-expanded', 'false');
+          if (otherPanel) otherPanel.style.maxHeight = '0';
+        }
+      });
+
+      // Toggle current
+      trigger.setAttribute('aria-expanded', String(!isOpen));
+      if (panel) {
+        panel.style.maxHeight = isOpen ? '0' : panel.scrollHeight + 'px';
+      }
+    });
+  });
+</script>

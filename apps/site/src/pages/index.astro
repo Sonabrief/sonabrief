@@ -2,13 +2,31 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout lang="en" title="Sonabrief — Coming soon">
-  <main style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:1.5rem;">
-    <p style="font-family:'Manrope',sans-serif;font-size:1.25rem;letter-spacing:0.15em;color:var(--color-deep-teal);font-weight:600;">
-      Sonabrief
-    </p>
-    <h1 style="font-size:2rem;font-weight:700;color:var(--color-charcoal);">
-      EN — Coming soon
-    </h1>
+<BaseLayout
+  lang="en"
+  title="Sonabrief — A private mind for your meetings"
+  description="Open-source meeting assistant. Audio never leaves your computer."
+>
+  <main class="hero">
+    <h1 class="hero-heading">EN — Coming soon</h1>
   </main>
 </BaseLayout>
+
+<style>
+  .hero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 64px);
+    padding: 120px 24px 80px;
+  }
+
+  .hero-heading {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    color: var(--color-deep-teal);
+    text-align: center;
+    margin: 0;
+  }
+</style>

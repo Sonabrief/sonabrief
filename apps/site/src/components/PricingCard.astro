@@ -1,0 +1,163 @@
+---
+interface Props {
+  name: string;
+  price: string;
+  period: string;
+  description: string;
+  features: string[];
+  cta: string;
+  ctaHref: string;
+  highlighted?: boolean;
+}
+
+const {
+  name,
+  price,
+  period,
+  description,
+  features,
+  cta,
+  ctaHref,
+  highlighted = false,
+} = Astro.props;
+---
+
+<div class:list={['pricing-card', { 'pricing-card--highlighted': highlighted }]}>
+  <p class="pricing-card-name">{name}</p>
+
+  <div class="pricing-card-price-row">
+    <span class="pricing-card-price">{price}</span>
+    <span class="pricing-card-period">{period}</span>
+  </div>
+
+  <p class="pricing-card-description">{description}</p>
+
+  <ul class="pricing-card-features">
+    {features.map((feature) => (
+      <li>
+        <span class="pricing-card-bullet" aria-hidden="true">·</span>
+        {feature}
+      </li>
+    ))}
+  </ul>
+
+  <a href={ctaHref} class:list={['pricing-card-cta', { 'pricing-card-cta--highlighted': highlighted }]}>
+    {cta}
+  </a>
+</div>
+
+<style>
+  .pricing-card {
+    border: 1px solid var(--color-mist);
+    border-radius: 16px;
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background-color: var(--color-cream);
+  }
+
+  .pricing-card--highlighted {
+    border: 2px solid var(--color-deep-teal);
+    background-color: #ffffff;
+  }
+
+  .pricing-card-name {
+    font-family: "Manrope", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-stone);
+    margin: 0 0 20px;
+  }
+
+  .pricing-card-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+
+  .pricing-card-price {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--color-deep-teal);
+    line-height: 1;
+  }
+
+  .pricing-card-period {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    color: var(--color-stone);
+  }
+
+  .pricing-card-description {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    color: var(--color-stone);
+    line-height: 1.6;
+    margin: 0 0 24px;
+  }
+
+  .pricing-card-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .pricing-card-features li {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    color: var(--color-charcoal);
+  }
+
+  .pricing-card-bullet {
+    color: var(--color-amber);
+    font-size: 16px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .pricing-card-cta {
+    display: block;
+    width: 100%;
+    text-align: center;
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 12px 20px;
+    border-radius: 9999px;
+    text-decoration: none;
+    border: 1.5px solid var(--color-deep-teal);
+    color: var(--color-deep-teal);
+    background: transparent;
+    transition: background-color 150ms ease, color 150ms ease;
+    box-sizing: border-box;
+  }
+
+  .pricing-card-cta:hover {
+    background-color: var(--color-deep-teal);
+    color: var(--color-cream);
+  }
+
+  .pricing-card-cta--highlighted {
+    background-color: var(--color-deep-teal);
+    color: var(--color-cream);
+    border-color: var(--color-deep-teal);
+  }
+
+  .pricing-card-cta--highlighted:hover {
+    opacity: 0.88;
+    background-color: var(--color-deep-teal);
+    color: var(--color-cream);
+  }
+</style>

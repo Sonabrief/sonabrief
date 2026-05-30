@@ -1,7 +1,300 @@
 ---
-// Footer placeholder
+interface Props {
+  currentLang?: string;
+}
+const { currentLang = 'en' } = Astro.props;
+
+const langLinks = [
+  { code: 'en', label: 'EN', href: '/' },
+  { code: 'it', label: 'IT', href: '/it/' },
+  { code: 'fr', label: 'FR', href: '/fr/' },
+  { code: 'es', label: 'ES', href: '/es/' },
+  { code: 'de', label: 'DE', href: '/de/' },
+];
 ---
 
-<footer>
-  <!-- Footer coming soon -->
+<footer class="footer">
+  <div class="footer-inner">
+    <!-- 3-column grid -->
+    <div class="footer-columns">
+      <!-- Column 1: Product -->
+      <div class="footer-col">
+        <h3 class="footer-col-heading">Product</h3>
+        <ul>
+          <li><a href="/features">Features</a></li>
+          <li><a href="/pricing">Pricing</a></li>
+          <li><a href="/privacy-modes">Privacy modes</a></li>
+          <li><a href="https://app.sonabrief.com/signup" class="footer-cta-link">Try free →</a></li>
+        </ul>
+      </div>
+
+      <!-- Column 2: Trust -->
+      <div class="footer-col">
+        <h3 class="footer-col-heading">Trust</h3>
+        <ul>
+          <li><a href="/security">Security</a></li>
+          <li><a href="/privacy-policy">Privacy policy</a></li>
+          <li><a href="/terms">Terms of service</a></li>
+          <li><a href="/cookies">Cookie policy</a></li>
+          <li><span class="footer-note">DPA on request</span></li>
+        </ul>
+      </div>
+
+      <!-- Column 3: Company -->
+      <div class="footer-col">
+        <h3 class="footer-col-heading">Company</h3>
+        <ul>
+          <li><a href="/about">About</a></li>
+          <li><a href="/open-source">Open source</a></li>
+          <li><a href="mailto:hello@sonabrief.com">hello@sonabrief.com</a></li>
+          <li><a href="https://github.com/Sonabrief" target="_blank" rel="noopener noreferrer">GitHub&nbsp;↗</a></li>
+          <li><a href="https://x.com/sonabrief" target="_blank" rel="noopener noreferrer">X&nbsp;↗</a></li>
+          <li><a href="https://bsky.app/profile/sonabrief.com" target="_blank" rel="noopener noreferrer">Bluesky&nbsp;↗</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Separator -->
+    <div class="footer-separator"></div>
+
+    <!-- Bottom row -->
+    <div class="footer-bottom">
+      <!-- Email form -->
+      <form class="footer-form" action="" method="post" onsubmit="return false;">
+        <label for="footer-email" class="footer-form-label">Get updates</label>
+        <div class="footer-form-row">
+          <input
+            id="footer-email"
+            type="email"
+            name="email"
+            placeholder="your@email.com"
+            class="footer-form-input"
+            required
+          />
+          <button type="submit" class="footer-form-btn" aria-label="Subscribe">→</button>
+        </div>
+      </form>
+
+      <!-- Language switcher -->
+      <nav class="footer-lang" aria-label="Language switcher">
+        {langLinks.map(({ code, label, href }, i) => (
+          <>
+            <a
+              href={href}
+              class:list={['footer-lang-link', { active: code === currentLang }]}
+              aria-current={code === currentLang ? 'page' : undefined}
+            >
+              {label}
+            </a>
+            {i < langLinks.length - 1 && <span class="footer-lang-sep" aria-hidden="true">·</span>}
+          </>
+        ))}
+      </nav>
+
+      <!-- Copyright -->
+      <p class="footer-copyright">
+        © 2026 Sonabrief · <a href="/open-source">Open source</a> · AGPL v3
+      </p>
+    </div>
+  </div>
 </footer>
+
+<style>
+  .footer {
+    background-color: var(--color-cream);
+    border-top: 1px solid var(--color-mist);
+    padding: 64px 0 48px;
+  }
+
+  .footer-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .footer-columns {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 48px;
+  }
+
+  .footer-col-heading {
+    font-family: "Manrope", sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-stone);
+    margin-bottom: 16px;
+  }
+
+  .footer-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .footer-col a {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    color: var(--color-charcoal);
+    text-decoration: none;
+    transition: color 150ms ease;
+  }
+
+  .footer-col a:hover {
+    color: var(--color-deep-teal);
+  }
+
+  .footer-cta-link {
+    color: var(--color-deep-teal) !important;
+    font-weight: 500;
+  }
+
+  .footer-note {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    color: var(--color-stone);
+  }
+
+  .footer-separator {
+    height: 1px;
+    background-color: var(--color-mist);
+    margin: 48px 0 32px;
+  }
+
+  .footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  /* Email form */
+  .footer-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .footer-form-label {
+    font-family: "Manrope", sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-stone);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .footer-form-row {
+    display: flex;
+    gap: 0;
+  }
+
+  .footer-form-input {
+    font-family: "Manrope", sans-serif;
+    font-size: 13px;
+    color: var(--color-charcoal);
+    background: transparent;
+    border: 1px solid var(--color-mist);
+    border-right: none;
+    border-radius: 6px 0 0 6px;
+    padding: 8px 12px;
+    outline: none;
+    width: 200px;
+    transition: border-color 150ms ease;
+  }
+
+  .footer-form-input::placeholder {
+    color: var(--color-stone);
+  }
+
+  .footer-form-input:focus {
+    border-color: var(--color-deep-teal);
+  }
+
+  .footer-form-btn {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    color: var(--color-cream);
+    background-color: var(--color-deep-teal);
+    border: none;
+    border-radius: 0 6px 6px 0;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: opacity 150ms ease;
+  }
+
+  .footer-form-btn:hover {
+    opacity: 0.88;
+  }
+
+  /* Language switcher */
+  .footer-lang {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .footer-lang-link {
+    font-family: "Manrope", sans-serif;
+    font-size: 12px;
+    color: var(--color-stone);
+    text-decoration: none;
+    transition: color 150ms ease;
+  }
+
+  .footer-lang-link:hover,
+  .footer-lang-link.active {
+    color: var(--color-deep-teal);
+  }
+
+  .footer-lang-link.active {
+    font-weight: 700;
+  }
+
+  .footer-lang-sep {
+    font-size: 12px;
+    color: var(--color-mist);
+    user-select: none;
+  }
+
+  /* Copyright */
+  .footer-copyright {
+    font-family: "Manrope", sans-serif;
+    font-size: 12px;
+    color: var(--color-stone);
+  }
+
+  .footer-copyright a {
+    color: var(--color-stone);
+    text-decoration: none;
+    transition: color 150ms ease;
+  }
+
+  .footer-copyright a:hover {
+    color: var(--color-deep-teal);
+  }
+
+  /* Mobile */
+  @media (max-width: 767px) {
+    .footer-columns {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+
+    .footer-bottom {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 28px;
+    }
+
+    .footer-form-input {
+      width: 180px;
+    }
+  }
+</style>
