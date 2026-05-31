@@ -26,18 +26,36 @@ export function generateSalt(): Uint8Array {
   return sodium.randombytes_buf(16)
 }
 
+// Additional Authenticated Data (AAD): costante versionata, non segreta.
+// Lega ogni ciphertext al contesto applicativo "sync archive v1" così un blob
+// non è riutilizzabile in un contesto diverso e abbiamo un punto di estensione
+// futuro. Deve essere identica in encrypt e decrypt o l'autenticazione fallisce.
+const SYNC_AAD = sodium.from_string('sonabrief-sync-v1')
+
 export function encrypt(
   plaintext: string,
   key: Uint8Array,
 ): { ciphertext: Uint8Array; nonce: Uint8Array } {
-  const nonce = sodium.randombytes_buf(sodium.crypto_secretbox_NONCEBYTES)
-  const ciphertext = sodium.crypto_secretbox_easy(plaintext, nonce, key)
+  const nonce = sodium.randombytes_buf(sodium.crypto_aead_xchacha20poly1305_ietf_NPUBBYTES)
+  const ciphertext = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
+    plaintext,
+    SYNC_AAD,
+    null,
+    nonce,
+    key,
+  )
   return { ciphertext, nonce }
 }
 
 export function decrypt(ciphertext: Uint8Array, nonce: Uint8Array, key: Uint8Array): string {
   try {
-    const plaintext = sodium.crypto_secretbox_open_easy(ciphertext, nonce, key)
+    const plaintext = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(
+      null,
+      ciphertext,
+      SYNC_AAD,
+      nonce,
+      key,
+    )
     return sodium.to_string(plaintext)
   } catch {
     throw new Error('Decryption failed: invalid key or corrupted data')
