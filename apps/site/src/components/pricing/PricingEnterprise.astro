@@ -1,0 +1,151 @@
+---
+interface Props {
+  t: any;
+  lang: string;
+}
+const { t } = Astro.props;
+
+const e = t.pricing.enterprise ?? {};
+const form = e.form ?? {};
+---
+
+<section class="pe">
+  <div class="pe-inner">
+    <div class="pe-card">
+      <h2 class="pe-h2">{e.heading}</h2>
+      <p class="pe-body">{e.body}</p>
+
+      <form
+        class="pe-form"
+        action="mailto:hello@sonabrief.com"
+        method="post"
+        enctype="text/plain"
+      >
+        <div class="pe-field">
+          <label for="pe-name" class="pe-label">{form.name}</label>
+          <input id="pe-name" name="name" type="text" class="pe-input" required />
+        </div>
+        <div class="pe-field">
+          <label for="pe-email" class="pe-label">{form.email}</label>
+          <input id="pe-email" name="email" type="email" class="pe-input" required />
+        </div>
+        <div class="pe-field">
+          <label for="pe-notes" class="pe-label">{form.notes}</label>
+          <textarea id="pe-notes" name="notes" class="pe-textarea" rows="4"></textarea>
+        </div>
+        <button type="submit" class="pe-submit">{form.submit ?? e.cta}</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<style>
+  .pe {
+    padding: 48px 24px 96px;
+  }
+
+  .pe-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .pe-card {
+    background-color: var(--color-mist);
+    border-radius: 24px;
+    padding: 48px;
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .pe-h2 {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(24px, 3vw, 32px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-deep-teal);
+    margin: 0;
+  }
+
+  .pe-body {
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--color-stone);
+    margin: 0 0 16px;
+  }
+
+  .pe-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .pe-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .pe-label {
+    font-family: "Manrope", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-stone);
+  }
+
+  .pe-input,
+  .pe-textarea {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    color: var(--color-charcoal);
+    background-color: var(--color-cream);
+    border: 1px solid var(--color-mist);
+    border-radius: 8px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 150ms ease;
+  }
+
+  .pe-textarea {
+    resize: vertical;
+    min-height: 96px;
+    font-family: "Manrope", sans-serif;
+  }
+
+  .pe-input:focus,
+  .pe-textarea:focus {
+    border-color: var(--color-deep-teal);
+  }
+
+  .pe-submit {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-cream);
+    background-color: var(--color-deep-teal);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 9999px;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: opacity 150ms ease;
+  }
+
+  .pe-submit:hover {
+    opacity: 0.88;
+  }
+
+  @media (max-width: 767px) {
+    .pe {
+      padding: 32px 16px 64px;
+    }
+    .pe-card {
+      padding: 32px 24px;
+    }
+  }
+</style>

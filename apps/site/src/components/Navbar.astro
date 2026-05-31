@@ -12,6 +12,13 @@ const homeHref = lang === 'en' ? '/' : `/${lang}/`;
 const securityHref = `${prefix}/security`;
 const openSourceHref = `${prefix}/open-source`;
 const pricingHref = `${prefix}/pricing`;
+
+const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+
+function isActive(href: string): boolean {
+  const normalized = href.replace(/\/$/, '') || '/';
+  return currentPath === normalized;
+}
 ---
 
 <header class="navbar">
@@ -23,9 +30,9 @@ const pricingHref = `${prefix}/pricing`;
 
     <!-- Nav links (desktop) -->
     <nav class="navbar-links" aria-label="Main navigation">
-      <a href={securityHref}>{t.nav.security}</a>
-      <a href={openSourceHref}>{t.nav.openSource}</a>
-      <a href={pricingHref}>{t.nav.pricing}</a>
+      <a href={securityHref} class:list={[{ active: isActive(securityHref) }]} aria-current={isActive(securityHref) ? 'page' : undefined}>{t.nav.security}</a>
+      <a href={openSourceHref} class:list={[{ active: isActive(openSourceHref) }]} aria-current={isActive(openSourceHref) ? 'page' : undefined}>{t.nav.openSource}</a>
+      <a href={pricingHref} class:list={[{ active: isActive(pricingHref) }]} aria-current={isActive(pricingHref) ? 'page' : undefined}>{t.nav.pricing}</a>
       <a href="https://github.com/Sonabrief" target="_blank" rel="noopener noreferrer">
         {t.nav.github}&nbsp;↗
       </a>
@@ -45,9 +52,9 @@ const pricingHref = `${prefix}/pricing`;
   <!-- Mobile menu overlay -->
   <div class="navbar-mobile-menu" id="navbar-mobile-menu" aria-hidden="true">
     <nav aria-label="Mobile navigation">
-      <a href={securityHref}>{t.nav.security}</a>
-      <a href={openSourceHref}>{t.nav.openSource}</a>
-      <a href={pricingHref}>{t.nav.pricing}</a>
+      <a href={securityHref} class:list={[{ active: isActive(securityHref) }]} aria-current={isActive(securityHref) ? 'page' : undefined}>{t.nav.security}</a>
+      <a href={openSourceHref} class:list={[{ active: isActive(openSourceHref) }]} aria-current={isActive(openSourceHref) ? 'page' : undefined}>{t.nav.openSource}</a>
+      <a href={pricingHref} class:list={[{ active: isActive(pricingHref) }]} aria-current={isActive(pricingHref) ? 'page' : undefined}>{t.nav.pricing}</a>
       <a href="https://github.com/Sonabrief" target="_blank" rel="noopener noreferrer">
         {t.nav.github}&nbsp;↗
       </a>
@@ -105,8 +112,14 @@ const pricingHref = `${prefix}/pricing`;
     transition: color 150ms ease;
   }
 
-  .navbar-links a:hover {
+  .navbar-links a:hover,
+  .navbar-links a.active {
     color: var(--color-deep-teal);
+    text-decoration: none;
+  }
+
+  .navbar-links a.active {
+    font-weight: 600;
   }
 
   .navbar-cta {
@@ -172,8 +185,13 @@ const pricingHref = `${prefix}/pricing`;
     text-decoration: none;
   }
 
-  .navbar-mobile-menu a:hover {
+  .navbar-mobile-menu a:hover,
+  .navbar-mobile-menu a.active {
     color: var(--color-deep-teal);
+  }
+
+  .navbar-mobile-menu a.active {
+    font-weight: 600;
   }
 
   .navbar-mobile-cta {

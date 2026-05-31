@@ -1,0 +1,54 @@
+---
+import AccordionFAQ from '../AccordionFAQ.astro';
+
+interface Props {
+  t: any;
+  lang: string;
+}
+const { t } = Astro.props;
+
+interface FAQEntry {
+  q: string;
+  a: string;
+}
+
+const rawItems: FAQEntry[] = t.pricing.faq?.items ?? [];
+const items = rawItems.map((it) => ({ question: it.q, answer: it.a }));
+const title: string = t.pricing.faq?.title ?? '';
+---
+
+<section class="pfaq">
+  <div class="pfaq-inner">
+    <h2 class="pfaq-title">{title}</h2>
+    <AccordionFAQ items={items} />
+  </div>
+</section>
+
+<style>
+  .pfaq {
+    padding: 96px 24px 120px;
+  }
+
+  .pfaq-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .pfaq-title {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(28px, 3.5vw, 40px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-deep-teal);
+    margin: 0;
+  }
+
+  @media (max-width: 767px) {
+    .pfaq {
+      padding: 64px 24px 80px;
+    }
+  }
+</style>

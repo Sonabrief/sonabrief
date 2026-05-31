@@ -1,0 +1,214 @@
+---
+interface Props {
+  t: any;
+  lang: string;
+}
+const { t } = Astro.props;
+
+interface Row {
+  feature: string;
+  values: string[];
+}
+interface Group {
+  label: string;
+  rows: Row[];
+}
+
+const columns: string[] = t.pricing.comparison?.columns ?? [];
+const groups: Group[] = t.pricing.comparison?.groups ?? [];
+const banners: string[] = t.pricing.banners ?? [];
+
+function classifyValue(v: string): 'check' | 'dash' | 'text' {
+  const trimmed = (v ?? '').trim();
+  if (trimmed === '✓' || /^✓\s/.test(trimmed)) return 'check';
+  if (trimmed === '—' || trimmed === '-') return 'dash';
+  return 'text';
+}
+---
+
+<section class="ptf">
+  <div class="ptf-inner">
+    <div class="ptf-scroll">
+      <table class="ptf-table">
+        <thead>
+          <tr>
+            <th class="ptf-th ptf-th--feature"></th>
+            {columns.map((c, i) => (
+              <th class:list={['ptf-th', { 'ptf-th--highlight': i === 2 }]}>{c}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {groups.map((group) => (
+            <>
+              <tr class="ptf-group-row">
+                <th
+                  scope="rowgroup"
+                  class="ptf-group-label"
+                  colspan={columns.length + 1}
+                >
+                  {group.label}
+                </th>
+              </tr>
+              {group.rows.map((row) => (
+                <tr class="ptf-row">
+                  <th scope="row" class="ptf-feature">{row.feature}</th>
+                  {row.values.map((v, i) => {
+                    const kind = classifyValue(v);
+                    return (
+                      <td class:list={[
+                        'ptf-cell',
+                        `ptf-cell--${kind}`,
+                        { 'ptf-cell--highlight': i === 2 },
+                      ]}>
+                        {kind === 'check' ? '✓' : kind === 'dash' ? '—' : v}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    {banners.length > 0 && (
+      <div class="ptf-banners">
+        {banners.map((b) => (
+          <p class="ptf-banner">{b}</p>
+        ))}
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .ptf {
+    padding: 48px 24px 96px;
+  }
+
+  .ptf-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .ptf-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ptf-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: "Manrope", sans-serif;
+    min-width: 720px;
+  }
+
+  .ptf-th {
+    position: sticky;
+    top: 64px;
+    background-color: var(--color-cream);
+    z-index: 2;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-deep-teal);
+    text-align: left;
+    padding: 16px 12px;
+    border-bottom: 1px solid var(--color-mist);
+  }
+
+  .ptf-th--feature {
+    min-width: 220px;
+  }
+
+  .ptf-th--highlight {
+    background-color: #ffffff;
+    border-left: 1px solid var(--color-mist);
+    border-right: 1px solid var(--color-mist);
+  }
+
+  .ptf-group-row {
+    background-color: transparent;
+  }
+
+  .ptf-group-label {
+    font-family: "Manrope", sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-stone);
+    text-align: left;
+    padding: 28px 12px 8px;
+    border-bottom: 1px solid var(--color-mist);
+  }
+
+  .ptf-row {
+    border-bottom: 1px solid var(--color-mist);
+  }
+
+  .ptf-feature {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-charcoal);
+    text-align: left;
+    padding: 14px 12px;
+    position: sticky;
+    left: 0;
+    background-color: var(--color-cream);
+    z-index: 1;
+    min-width: 220px;
+  }
+
+  .ptf-cell {
+    font-size: 14px;
+    color: var(--color-charcoal);
+    padding: 14px 12px;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  .ptf-cell--check {
+    color: var(--color-deep-teal);
+    font-weight: 600;
+  }
+
+  .ptf-cell--dash {
+    color: var(--color-stone);
+  }
+
+  .ptf-cell--highlight {
+    background-color: #ffffff;
+    border-left: 1px solid var(--color-mist);
+    border-right: 1px solid var(--color-mist);
+  }
+
+  .ptf-banners {
+    border-top: 1px solid var(--color-mist);
+    margin-top: 24px;
+    padding-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ptf-banner {
+    font-family: "Manrope", sans-serif;
+    font-size: 13px;
+    color: var(--color-stone);
+    margin: 0;
+    padding: 4px 0;
+  }
+
+  @media (max-width: 767px) {
+    .ptf {
+      padding: 32px 16px 64px;
+    }
+    .ptf-th {
+      top: 56px;
+    }
+  }
+</style>

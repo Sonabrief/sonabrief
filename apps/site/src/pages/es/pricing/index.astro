@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getTranslations } from '../../../i18n/utils';
+import PricingHero from '../../../components/pricing/PricingHero.astro';
+import PricingTableFull from '../../../components/pricing/PricingTableFull.astro';
+import PricingEnterprise from '../../../components/pricing/PricingEnterprise.astro';
+import PricingFAQ from '../../../components/pricing/PricingFAQ.astro';
+
+const lang = 'es';
+const t = await getTranslations(lang);
+---
+
+<BaseLayout lang={lang} title={t.pricing.title} description={t.hero.sub}>
+  <main>
+    <PricingHero t={t} lang={lang} />
+    <PricingTableFull t={t} lang={lang} />
+    <PricingEnterprise t={t} lang={lang} />
+    <PricingFAQ t={t} lang={lang} />
+  </main>
+</BaseLayout>

@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getTranslations } from '../../../i18n/utils';
+import AboutPage from '../../../components/AboutPage.astro';
+
+const lang = 'it';
+const t = await getTranslations(lang);
+const title: string = t.about?.sections?.[0]?.title ?? 'About';
+---
+
+<BaseLayout lang={lang} title={title} description={t.hero.sub}>
+  <main>
+    <AboutPage t={t} lang={lang} />
+  </main>
+</BaseLayout>

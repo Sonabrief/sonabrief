@@ -1,0 +1,134 @@
+---
+interface Props {
+  t: any;
+  lang: string;
+}
+const { t } = Astro.props;
+
+interface AboutSection {
+  title: string;
+  body?: string;
+  items?: string[];
+}
+
+const sections: AboutSection[] = t.about?.sections ?? [];
+const contact: string = t.about?.contact ?? '';
+---
+
+<section class="about">
+  <div class="about-inner">
+    {sections.map((s) => (
+      <div class="about-section fade-up" data-about-section>
+        <h2 class="about-h2">{s.title}</h2>
+        {s.body && <p class="about-body">{s.body}</p>}
+        {s.items && (
+          <ul class="about-list">
+            {s.items.map((item) => (
+              <li class="about-list-item">{item}</li>
+            ))}
+          </ul>
+        )}
+      </div>
+    ))}
+
+    {contact && (
+      <div class="about-section fade-up" data-about-section>
+        <a href={`mailto:${contact}`} class="about-contact">{contact}</a>
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .about {
+    padding: 120px 24px;
+  }
+
+  .about-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 64px;
+  }
+
+  .about-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .about-h2 {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(24px, 3vw, 32px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-deep-teal);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .about-body {
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--color-stone);
+    margin: 0;
+    max-width: 65ch;
+  }
+
+  .about-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .about-list-item {
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--color-stone);
+    border-left: 2px solid var(--color-mist);
+    padding-left: 16px;
+  }
+
+  .about-contact {
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    color: var(--color-deep-teal);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  @media (max-width: 767px) {
+    .about {
+      padding: 80px 24px;
+    }
+    .about-inner {
+      gap: 48px;
+    }
+  }
+</style>
+
+<script>
+  const items = document.querySelectorAll<HTMLElement>('[data-about-section]');
+  if ('IntersectionObserver' in window && items.length > 0) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+    items.forEach((item) => observer.observe(item));
+  } else {
+    items.forEach((item) => item.classList.add('visible'));
+  }
+</script>
