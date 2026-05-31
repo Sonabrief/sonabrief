@@ -1,0 +1,55 @@
+---
+interface Props {
+  t: any;
+  lang: string;
+}
+const { t } = Astro.props;
+const lines: string[] = t.problem.lines ?? [];
+---
+
+<section class="problem">
+  <div class="problem-inner">
+    {lines.map((line, i) => (
+      <p class:list={['problem-line', { 'problem-line--strong': i === lines.length - 1 }]}>
+        {line}
+      </p>
+    ))}
+  </div>
+</section>
+
+<style>
+  .problem {
+    padding: 120px 24px;
+  }
+
+  .problem-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .problem-line {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 24px;
+    line-height: 1.4;
+    color: var(--color-stone);
+    margin: 0;
+  }
+
+  .problem-line--strong {
+    color: var(--color-charcoal);
+    font-weight: 600;
+  }
+
+  @media (max-width: 767px) {
+    .problem {
+      padding: 80px 24px;
+    }
+    .problem-line {
+      font-size: 20px;
+    }
+  }
+</style>

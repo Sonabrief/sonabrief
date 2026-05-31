@@ -1,8 +1,14 @@
 ---
+import { getTranslations } from '../i18n/utils';
+
 interface Props {
   currentLang?: string;
 }
 const { currentLang = 'en' } = Astro.props;
+const t = await getTranslations(currentLang);
+
+const prefix = currentLang === 'en' ? '' : `/${currentLang}`;
+const homeHref = currentLang === 'en' ? '/' : `/${currentLang}/`;
 
 const langLinks = [
   { code: 'en', label: 'EN', href: '/' },
@@ -11,45 +17,112 @@ const langLinks = [
   { code: 'es', label: 'ES', href: '/es/' },
   { code: 'de', label: 'DE', href: '/de/' },
 ];
+
+const productLinks: string[] = t.footer.columns.product.links ?? [];
+const trustLinks: string[] = t.footer.columns.trust.links ?? [];
+const companyLinks: string[] = t.footer.columns.company.links ?? [];
+
+const productHrefs = [
+  `${prefix}/features`,
+  `${prefix}/pricing`,
+  `${prefix}/privacy-modes`,
+  'https://app.sonabrief.com/signup',
+];
+const trustHrefs = [
+  `${prefix}/security`,
+  `${prefix}/privacy-policy`,
+  `${prefix}/terms`,
+  `${prefix}/cookies`,
+  null,
+];
+const companyHrefs = [
+  `${prefix}/about`,
+  `${prefix}/open-source`,
+  'mailto:hello@sonabrief.com',
+  'https://github.com/Sonabrief',
+  'https://x.com/sonabrief',
+  'https://bsky.app/profile/sonabrief.com',
+];
+
+function isExternal(href: string | null): boolean {
+  return !!href && (href.startsWith('http') || href.startsWith('mailto'));
+}
 ---
 
 <footer class="footer">
   <div class="footer-inner">
+    <!-- Lockup -->
+    <a href={homeHref} class="footer-logo" aria-label="Sonabrief home">
+      <img src="/logo.svg" alt="Sonabrief" height="32" style="width:auto" />
+    </a>
+
     <!-- 3-column grid -->
     <div class="footer-columns">
       <!-- Column 1: Product -->
       <div class="footer-col">
-        <h3 class="footer-col-heading">Product</h3>
+        <h3 class="footer-col-heading">{t.footer.columns.product.title}</h3>
         <ul>
-          <li><a href="/features">Features</a></li>
-          <li><a href="/pricing">Pricing</a></li>
-          <li><a href="/privacy-modes">Privacy modes</a></li>
-          <li><a href="https://app.sonabrief.com/signup" class="footer-cta-link">Try free →</a></li>
+          {productLinks.map((label, i) => {
+            const href = productHrefs[i] ?? '#';
+            const isCta = i === productLinks.length - 1;
+            return (
+              <li>
+                <a
+                  href={href}
+                  class:list={[{ 'footer-cta-link': isCta }]}
+                  target={isExternal(href) ? '_blank' : undefined}
+                  rel={isExternal(href) ? 'noopener noreferrer' : undefined}
+                >
+                  {label}
+                </a>
+              </li>
+            );
+          })}
         </ul>
       </div>
 
       <!-- Column 2: Trust -->
       <div class="footer-col">
-        <h3 class="footer-col-heading">Trust</h3>
+        <h3 class="footer-col-heading">{t.footer.columns.trust.title}</h3>
         <ul>
-          <li><a href="/security">Security</a></li>
-          <li><a href="/privacy-policy">Privacy policy</a></li>
-          <li><a href="/terms">Terms of service</a></li>
-          <li><a href="/cookies">Cookie policy</a></li>
-          <li><span class="footer-note">DPA on request</span></li>
+          {trustLinks.map((label, i) => {
+            const href = trustHrefs[i];
+            if (!href) {
+              return <li><span class="footer-note">{label}</span></li>;
+            }
+            return (
+              <li>
+                <a
+                  href={href}
+                  target={isExternal(href) ? '_blank' : undefined}
+                  rel={isExternal(href) ? 'noopener noreferrer' : undefined}
+                >
+                  {label}
+                </a>
+              </li>
+            );
+          })}
         </ul>
       </div>
 
       <!-- Column 3: Company -->
       <div class="footer-col">
-        <h3 class="footer-col-heading">Company</h3>
+        <h3 class="footer-col-heading">{t.footer.columns.company.title}</h3>
         <ul>
-          <li><a href="/about">About</a></li>
-          <li><a href="/open-source">Open source</a></li>
-          <li><a href="mailto:hello@sonabrief.com">hello@sonabrief.com</a></li>
-          <li><a href="https://github.com/Sonabrief" target="_blank" rel="noopener noreferrer">GitHub&nbsp;↗</a></li>
-          <li><a href="https://x.com/sonabrief" target="_blank" rel="noopener noreferrer">X&nbsp;↗</a></li>
-          <li><a href="https://bsky.app/profile/sonabrief.com" target="_blank" rel="noopener noreferrer">Bluesky&nbsp;↗</a></li>
+          {companyLinks.map((label, i) => {
+            const href = companyHrefs[i] ?? '#';
+            return (
+              <li>
+                <a
+                  href={href}
+                  target={isExternal(href) ? '_blank' : undefined}
+                  rel={isExternal(href) ? 'noopener noreferrer' : undefined}
+                >
+                  {label}
+                </a>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </div>
@@ -61,17 +134,17 @@ const langLinks = [
     <div class="footer-bottom">
       <!-- Email form -->
       <form class="footer-form" action="" method="post" onsubmit="return false;">
-        <label for="footer-email" class="footer-form-label">Get updates</label>
+        <label for="footer-email" class="footer-form-label">{t.footer.newsletter.heading}</label>
         <div class="footer-form-row">
           <input
             id="footer-email"
             type="email"
             name="email"
-            placeholder="your@email.com"
+            placeholder={t.footer.newsletter.placeholder}
             class="footer-form-input"
             required
           />
-          <button type="submit" class="footer-form-btn" aria-label="Subscribe">→</button>
+          <button type="submit" class="footer-form-btn" aria-label={t.footer.newsletter.cta}>→</button>
         </div>
       </form>
 
@@ -92,9 +165,7 @@ const langLinks = [
       </nav>
 
       <!-- Copyright -->
-      <p class="footer-copyright">
-        © 2026 Sonabrief · <a href="/open-source">Open source</a> · AGPL v3
-      </p>
+      <p class="footer-copyright">{t.footer.legal}</p>
     </div>
   </div>
 </footer>
@@ -110,6 +181,18 @@ const langLinks = [
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 24px;
+  }
+
+  .footer-logo {
+    display: inline-block;
+    margin-bottom: 40px;
+    text-decoration: none;
+  }
+
+  .footer-logo img {
+    display: block;
+    height: 32px;
+    width: auto;
   }
 
   .footer-columns {

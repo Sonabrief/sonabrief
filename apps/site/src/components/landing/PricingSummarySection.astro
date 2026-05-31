@@ -1,0 +1,210 @@
+---
+import PricingCard from '../PricingCard.astro';
+
+interface Props {
+  t: any;
+  lang: string;
+}
+const { t, lang } = Astro.props;
+
+interface Tier {
+  name: string;
+  price: string;
+  priceAnnual?: string;
+  period?: string;
+  highlights: string[];
+  cta: string;
+}
+
+const tiers: Tier[] = t.pricing.tiers ?? [];
+const claims: string[] = t.pricing.claims ?? t.pricing.banners ?? [];
+
+function ctaHref(name: string): string {
+  if (/enterprise/i.test(name)) return 'mailto:hello@sonabrief.com';
+  return 'https://app.sonabrief.com/signup';
+}
+
+const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
+---
+
+<section class="pricing-summary">
+  <div class="pricing-summary-inner">
+    <h2 class="pricing-summary-title">{t.pricing.title}</h2>
+
+    <div class="pricing-toggle" role="tablist" aria-label="Billing period">
+      <button
+        type="button"
+        class="pricing-toggle-btn is-active"
+        data-period="monthly"
+        aria-pressed="true"
+      >
+        {t.pricing.toggle?.monthly ?? 'Monthly'}
+      </button>
+      <button
+        type="button"
+        class="pricing-toggle-btn"
+        data-period="annual"
+        aria-pressed="false"
+      >
+        {t.pricing.toggle?.annual ?? 'Annual'}
+      </button>
+    </div>
+
+    <div class="pricing-grid">
+      {tiers.map((tier, i) => (
+        <div
+          class="pricing-slot"
+          data-monthly-price={tier.price}
+          data-annual-price={tier.priceAnnual ?? tier.price}
+        >
+          <PricingCard
+            name={tier.name}
+            price={tier.price}
+            period={tier.period ?? ''}
+            description=""
+            features={tier.highlights}
+            cta={tier.cta}
+            ctaHref={ctaHref(tier.name)}
+            highlighted={i === 1}
+          />
+        </div>
+      ))}
+    </div>
+
+    {claims.length > 0 && (
+      <div class="pricing-claims">
+        {claims.map((claim) => (
+          <div class="pricing-claim">{claim}</div>
+        ))}
+      </div>
+    )}
+
+    <a href={pricingPath} class="pricing-full-link">{t.pricing.fullComparison}</a>
+  </div>
+</section>
+
+<style>
+  .pricing-summary {
+    padding: 120px 24px;
+  }
+
+  .pricing-summary-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .pricing-summary-title {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(28px, 3.5vw, 40px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-deep-teal);
+    text-align: center;
+    margin: 0;
+  }
+
+  .pricing-toggle {
+    display: inline-flex;
+    align-self: center;
+    border: 1px solid var(--color-mist);
+    border-radius: 9999px;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .pricing-toggle-btn {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 20px;
+    border: none;
+    background: transparent;
+    color: var(--color-stone);
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: background-color 250ms ease, color 250ms ease;
+  }
+
+  .pricing-toggle-btn.is-active {
+    background-color: var(--color-deep-teal);
+    color: var(--color-cream);
+  }
+
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+
+  .pricing-claims {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 720px;
+    margin: 16px auto 0;
+    width: 100%;
+  }
+
+  .pricing-claim {
+    font-family: "Manrope", sans-serif;
+    font-size: 13px;
+    color: var(--color-stone);
+    border: 1px solid var(--color-mist);
+    border-radius: 8px;
+    padding: 12px 16px;
+    text-align: center;
+  }
+
+  .pricing-full-link {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    color: var(--color-deep-teal);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  @media (max-width: 1023px) {
+    .pricing-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 639px) {
+    .pricing-summary {
+      padding: 80px 24px;
+    }
+    .pricing-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  const toggles = document.querySelectorAll<HTMLButtonElement>('.pricing-toggle-btn');
+  const slots = document.querySelectorAll<HTMLElement>('.pricing-slot');
+
+  toggles.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const period = btn.getAttribute('data-period');
+      toggles.forEach((b) => {
+        const active = b === btn;
+        b.classList.toggle('is-active', active);
+        b.setAttribute('aria-pressed', String(active));
+      });
+
+      slots.forEach((slot) => {
+        const monthly = slot.getAttribute('data-monthly-price') ?? '';
+        const annual = slot.getAttribute('data-annual-price') ?? monthly;
+        const priceEl = slot.querySelector<HTMLElement>('.pricing-card-price');
+        if (priceEl) {
+          priceEl.textContent = period === 'annual' ? annual : monthly;
+        }
+      });
+    });
+  });
+</script>

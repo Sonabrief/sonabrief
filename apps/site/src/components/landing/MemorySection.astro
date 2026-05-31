@@ -1,0 +1,147 @@
+---
+interface Props {
+  t: any;
+  lang: string;
+}
+const { t } = Astro.props;
+
+interface Tier {
+  label: string;
+  value: string;
+  note?: string;
+}
+
+const tiers: Tier[] = t.memory.tiers ?? [];
+---
+
+<section class="memory">
+  <div class="memory-inner">
+    <h2 class="memory-h2">{t.memory.h2}</h2>
+    <p class="memory-lead">{t.memory.lead}</p>
+
+    <div class="memory-tiers">
+      {tiers.map((tier) => {
+        const isForever = /forever|sempre|para siempre|toujours|für immer/i.test(tier.value);
+        return (
+          <div class="memory-tier">
+            <div class="memory-tier-label">{tier.label}</div>
+            <div class:list={['memory-tier-value', { 'memory-tier-value--big': isForever }]}>
+              {tier.value}
+            </div>
+            {tier.note && <div class="memory-tier-note">{tier.note}</div>}
+          </div>
+        );
+      })}
+    </div>
+
+    <p class="memory-body">{t.memory.body}</p>
+    <p class="memory-tradeoff">{t.memory.tradeoff}</p>
+  </div>
+</section>
+
+<style>
+  .memory {
+    padding: 120px 24px;
+  }
+
+  .memory-inner {
+    max-width: 880px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .memory-h2 {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(28px, 3.5vw, 40px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-deep-teal);
+    margin: 0;
+  }
+
+  .memory-lead {
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--color-stone);
+    max-width: 65ch;
+    margin: 0;
+  }
+
+  .memory-tiers {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    border-top: 1px solid var(--color-mist);
+    border-bottom: 1px solid var(--color-mist);
+    padding: 32px 0;
+    margin: 16px 0;
+  }
+
+  .memory-tier {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .memory-tier-label {
+    font-family: "Manrope", sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-stone);
+  }
+
+  .memory-tier-value {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--color-charcoal);
+  }
+
+  .memory-tier-value--big {
+    font-size: 32px;
+    color: var(--color-deep-teal);
+    letter-spacing: -0.02em;
+  }
+
+  .memory-tier-note {
+    font-family: "Manrope", sans-serif;
+    font-size: 13px;
+    color: var(--color-stone);
+    font-style: italic;
+  }
+
+  .memory-body {
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--color-charcoal);
+    margin: 0;
+  }
+
+  .memory-tradeoff {
+    font-family: "Manrope", sans-serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--color-stone);
+    border-left: 2px solid var(--color-amber);
+    padding-left: 16px;
+    margin: 0;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 767px) {
+    .memory {
+      padding: 80px 24px;
+    }
+    .memory-tiers {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+  }
+</style>

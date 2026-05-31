@@ -1,0 +1,145 @@
+---
+interface Props {
+  t: any;
+  lang: string;
+}
+const { t } = Astro.props;
+
+const h1Raw: string = t.hero.h1;
+const h1Html = h1Raw.replace(/brief/gi, (match) => `<em class="brief-italic">${match}</em>`);
+---
+
+<section class="hero fade-up" id="hero">
+  <div class="hero-inner">
+    <h1 class="hero-h1" set:html={h1Html}></h1>
+    <p class="hero-sub">{t.hero.sub}</p>
+
+    <div class="hero-cta-row">
+      <a href="https://app.sonabrief.com/signup" class="hero-cta-primary">{t.hero.cta1}</a>
+      <a href="#how-it-works" class="hero-cta-secondary">{t.hero.cta2}</a>
+    </div>
+
+    <p class="hero-micro">{t.hero.micro}</p>
+
+    <div class="hero-frame" aria-hidden="true">
+      <span>App screenshot coming soon</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding: 120px 24px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  .hero-h1 {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(40px, 5vw, 72px);
+    font-weight: 700;
+    color: var(--color-deep-teal);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin: 0;
+    max-width: 14ch;
+  }
+
+  .hero-sub {
+    font-family: "Manrope", sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--color-stone);
+    max-width: 560px;
+    margin: 0;
+  }
+
+  .hero-cta-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .hero-cta-primary {
+    font-family: "Manrope", sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-cream);
+    background-color: var(--color-deep-teal);
+    padding: 14px 28px;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: opacity 150ms ease;
+  }
+
+  .hero-cta-primary:hover {
+    opacity: 0.88;
+  }
+
+  .hero-cta-secondary {
+    font-family: "Manrope", sans-serif;
+    font-size: 15px;
+    color: var(--color-stone);
+    text-decoration: none;
+    transition: color 150ms ease;
+  }
+
+  .hero-cta-secondary:hover {
+    color: var(--color-deep-teal);
+  }
+
+  .hero-micro {
+    font-family: "Manrope", sans-serif;
+    font-size: 13px;
+    color: var(--color-stone);
+    margin: 8px 0 0;
+  }
+
+  .hero-frame {
+    margin-top: 56px;
+    width: 100%;
+    max-width: 800px;
+    height: 500px;
+    border: 1px solid var(--color-mist);
+    border-radius: 16px;
+    background-color: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+  }
+
+  .hero-frame span {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    color: var(--color-stone);
+  }
+
+  @media (max-width: 767px) {
+    .hero {
+      padding: 80px 24px 64px;
+    }
+    .hero-frame {
+      height: 280px;
+      margin-top: 40px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const el = document.getElementById('hero');
+    if (el) {
+      requestAnimationFrame(() => el.classList.add('visible'));
+    }
+  });
+</script>

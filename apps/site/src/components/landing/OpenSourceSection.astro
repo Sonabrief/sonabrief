@@ -1,0 +1,100 @@
+---
+interface Props {
+  t: any;
+  lang: string;
+}
+const { t } = Astro.props;
+---
+
+<section class="oss">
+  <div class="oss-inner">
+    <h2 class="oss-h2">{t.openSource.h2}</h2>
+    <p class="oss-body">{t.openSource.body}</p>
+
+    <div class="oss-cta-row">
+      <a href="https://github.com/Sonabrief" class="oss-cta" target="_blank" rel="noopener noreferrer">
+        {t.openSource.cta1}
+      </a>
+      <a href="/security" class="oss-cta">{t.openSource.cta2}</a>
+    </div>
+
+    <p class="oss-meta">{t.openSource.builtWith}</p>
+    <p class="oss-meta">{t.openSource.contribute}</p>
+  </div>
+</section>
+
+<style>
+  .oss {
+    background-color: var(--color-deep-teal);
+    color: var(--color-cream);
+    padding: 120px 24px;
+  }
+
+  .oss-inner {
+    max-width: 880px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .oss-h2 {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(28px, 3.5vw, 36px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-cream);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .oss-body {
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--color-cream);
+    opacity: 0.85;
+    margin: 0;
+    max-width: 65ch;
+  }
+
+  .oss-cta-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .oss-cta {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-cream);
+    background: transparent;
+    border: 1.5px solid var(--color-cream);
+    padding: 12px 24px;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+
+  .oss-cta:hover {
+    background-color: var(--color-cream);
+    color: var(--color-deep-teal);
+  }
+
+  .oss-meta {
+    font-family: "Manrope", sans-serif;
+    font-size: 13px;
+    color: var(--color-cream);
+    opacity: 0.6;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 767px) {
+    .oss {
+      padding: 80px 24px;
+    }
+  }
+</style>

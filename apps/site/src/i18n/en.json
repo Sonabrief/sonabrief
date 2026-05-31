@@ -460,7 +460,7 @@
       {
         "title": "What we won't build",
         "items": [
-          "Meeting tools that compromise privacy "just for free users"",
+          "Meeting tools that compromise privacy \"just for free users\"",
           "Enterprise bloat that makes the product worse for individuals",
           "Analytics that spy on you to sell ads",
           "Anything that would require us to be less honest tomorrow than we are today"

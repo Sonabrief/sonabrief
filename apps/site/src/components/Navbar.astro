@@ -1,27 +1,38 @@
 ---
+import { getTranslations } from '../i18n/utils';
+
 interface Props {
   lang?: string;
 }
 const { lang = 'en' } = Astro.props;
+const t = await getTranslations(lang);
+
+const prefix = lang === 'en' ? '' : `/${lang}`;
+const homeHref = lang === 'en' ? '/' : `/${lang}/`;
+const securityHref = `${prefix}/security`;
+const openSourceHref = `${prefix}/open-source`;
+const pricingHref = `${prefix}/pricing`;
 ---
 
 <header class="navbar">
   <div class="navbar-inner">
     <!-- Logo -->
-    <a href="/" class="navbar-logo" aria-label="Sonabrief home">SB</a>
+    <a href={homeHref} class="navbar-logo" aria-label="Sonabrief home">
+      <img src="/sonabrief-logo.svg" alt="Sonabrief" height="36" width="37" />
+    </a>
 
     <!-- Nav links (desktop) -->
     <nav class="navbar-links" aria-label="Main navigation">
-      <a href="/security">Security</a>
-      <a href="/open-source">Open source</a>
-      <a href="/pricing">Pricing</a>
+      <a href={securityHref}>{t.nav.security}</a>
+      <a href={openSourceHref}>{t.nav.openSource}</a>
+      <a href={pricingHref}>{t.nav.pricing}</a>
       <a href="https://github.com/Sonabrief" target="_blank" rel="noopener noreferrer">
-        GitHub&nbsp;↗
+        {t.nav.github}&nbsp;↗
       </a>
     </nav>
 
     <!-- CTA (desktop) -->
-    <a href="https://app.sonabrief.com/signup" class="navbar-cta">Try free</a>
+    <a href="https://app.sonabrief.com/signup" class="navbar-cta">{t.nav.cta}</a>
 
     <!-- Hamburger (mobile) -->
     <button class="navbar-hamburger" id="navbar-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="navbar-mobile-menu">
@@ -34,13 +45,13 @@ const { lang = 'en' } = Astro.props;
   <!-- Mobile menu overlay -->
   <div class="navbar-mobile-menu" id="navbar-mobile-menu" aria-hidden="true">
     <nav aria-label="Mobile navigation">
-      <a href="/security">Security</a>
-      <a href="/open-source">Open source</a>
-      <a href="/pricing">Pricing</a>
+      <a href={securityHref}>{t.nav.security}</a>
+      <a href={openSourceHref}>{t.nav.openSource}</a>
+      <a href={pricingHref}>{t.nav.pricing}</a>
       <a href="https://github.com/Sonabrief" target="_blank" rel="noopener noreferrer">
-        GitHub&nbsp;↗
+        {t.nav.github}&nbsp;↗
       </a>
-      <a href="https://app.sonabrief.com/signup" class="navbar-mobile-cta">Try free</a>
+      <a href="https://app.sonabrief.com/signup" class="navbar-mobile-cta">{t.nav.cta}</a>
     </nav>
   </div>
 </header>
@@ -65,12 +76,16 @@ const { lang = 'en' } = Astro.props;
   }
 
   .navbar-logo {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-weight: 700;
-    font-size: 24px;
-    color: var(--color-deep-teal);
+    display: inline-flex;
+    align-items: center;
     text-decoration: none;
     flex-shrink: 0;
+  }
+
+  .navbar-logo img {
+    display: block;
+    height: 36px;
+    width: auto;
   }
 
   .navbar-links {

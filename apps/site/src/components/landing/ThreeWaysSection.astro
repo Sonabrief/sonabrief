@@ -1,0 +1,148 @@
+---
+interface Props {
+  t: any;
+  lang: string;
+}
+const { t } = Astro.props;
+
+interface Mode {
+  name: string;
+  badge?: string;
+  points: string[];
+}
+
+const modes: Mode[] = t.threeWays.modes ?? [];
+const title: string = t.threeWays.title;
+const positioning: string | undefined = t.threeWays.positioning;
+---
+
+<section class="three-ways">
+  <div class="three-ways-inner">
+    <h2 class="three-ways-title">{title}</h2>
+
+    <div class="three-ways-grid">
+      {modes.map((mode) => (
+        <div class="three-ways-card">
+          {mode.badge && (
+            <span class="three-ways-badge">{mode.badge}</span>
+          )}
+          <h3 class="three-ways-card-name">{mode.name}</h3>
+          <ul class="three-ways-points">
+            {mode.points.map((p) => (
+              <li>
+                <span class="three-ways-bullet" aria-hidden="true">·</span>
+                <span>{p}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    {positioning && (
+      <p class="three-ways-positioning">{positioning}</p>
+    )}
+  </div>
+</section>
+
+<style>
+  .three-ways {
+    padding: 120px 24px;
+  }
+
+  .three-ways-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+
+  .three-ways-title {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(28px, 3.5vw, 40px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-deep-teal);
+    text-align: center;
+    margin: 0;
+  }
+
+  .three-ways-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .three-ways-card {
+    border: 1px solid var(--color-mist);
+    border-radius: 12px;
+    padding: 28px;
+    background-color: var(--color-cream);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .three-ways-badge {
+    font-family: "Manrope", sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-amber);
+    align-self: flex-start;
+  }
+
+  .three-ways-card-name {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--color-deep-teal);
+    margin: 0;
+  }
+
+  .three-ways-points {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .three-ways-points li {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-charcoal);
+  }
+
+  .three-ways-bullet {
+    color: var(--color-amber);
+    flex-shrink: 0;
+  }
+
+  .three-ways-positioning {
+    font-family: "Manrope", sans-serif;
+    font-style: italic;
+    font-size: 15px;
+    color: var(--color-stone);
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 767px) {
+    .three-ways {
+      padding: 80px 24px;
+    }
+    .three-ways-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
