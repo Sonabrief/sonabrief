@@ -392,7 +392,8 @@
         },
         { "term": "Lato client", "plain": "Tutto questo avviene sul tuo dispositivo, prima che qualcosa raggiunga i nostri server." }
       ],
-      "closer": "Ciò che conserviamo sono dati cifrati che non possiamo leggere. Non perché scegliamo di non farlo — perché matematicamente non possiamo."
+      "closer": "Ciò che conserviamo sono dati cifrati che non possiamo leggere. Non perché scegliamo di non farlo — perché matematicamente non possiamo.",
+      "verifyLink": "Verifica nel codice →"
     },
     "modes": {
       "title": "Tre modalità di trascrizione",

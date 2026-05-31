@@ -1,0 +1,56 @@
+---
+interface Props {
+  t: any;
+}
+const { t } = Astro.props;
+
+const title: string = t.security.early.title;
+const body: string = t.security.early.body;
+---
+
+<section class="early">
+  <div class="early-inner">
+    <h2 class="early-h2">{title}</h2>
+    <p class="early-body">{body}</p>
+  </div>
+</section>
+
+<style>
+  .early {
+    padding: 80px 24px 120px;
+  }
+
+  .early-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .early-h2 {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(24px, 3vw, 32px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-deep-teal);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .early-body {
+    font-family: "Manrope", sans-serif;
+    font-style: italic;
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--color-stone);
+    margin: 0;
+    max-width: 680px;
+  }
+
+  @media (max-width: 767px) {
+    .early {
+      padding: 56px 24px 80px;
+    }
+  }
+</style>

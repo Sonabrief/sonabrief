@@ -392,7 +392,8 @@
         },
         { "term": "Côté client", "plain": "Tout cela se passe sur votre appareil, avant que quoi que ce soit n'atteigne nos serveurs." }
       ],
-      "closer": "Ce que nous stockons, ce sont des données chiffrées que nous ne pouvons pas lire. Non par choix — parce que c'est mathématiquement impossible."
+      "closer": "Ce que nous stockons, ce sont des données chiffrées que nous ne pouvons pas lire. Non par choix — parce que c'est mathématiquement impossible.",
+      "verifyLink": "Vérifier dans le code →"
     },
     "modes": {
       "title": "Trois modes de transcription",

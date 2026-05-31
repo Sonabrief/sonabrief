@@ -1,0 +1,25 @@
+---
+import SecurityPromise from './SecurityPromise.astro';
+import AudioFlowSection from './AudioFlowSection.astro';
+import ZeroKnowledgeSection from './ZeroKnowledgeSection.astro';
+import ModesSection from './ModesSection.astro';
+import MistralSection from './MistralSection.astro';
+import SubprocessorsSection from './SubprocessorsSection.astro';
+import VerifySection from './VerifySection.astro';
+import EarlySection from './EarlySection.astro';
+
+interface Props {
+  t: any;
+  lang: string;
+}
+const { t } = Astro.props;
+---
+
+<SecurityPromise t={t} />
+<AudioFlowSection t={t} />
+<ZeroKnowledgeSection t={t} />
+<ModesSection t={t} />
+<MistralSection t={t} />
+<SubprocessorsSection t={t} />
+<VerifySection t={t} />
+<EarlySection t={t} />

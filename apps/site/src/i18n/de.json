@@ -392,7 +392,8 @@
         },
         { "term": "Clientseitig", "plain": "All das geschieht auf Ihrem Gerät, bevor irgendetwas unsere Server erreicht." }
       ],
-      "closer": "Was wir speichern, sind verschlüsselte Daten, die wir nicht lesen können. Nicht weil wir es nicht wollen — weil wir es mathematisch nicht können."
+      "closer": "Was wir speichern, sind verschlüsselte Daten, die wir nicht lesen können. Nicht weil wir es nicht wollen — weil wir es mathematisch nicht können.",
+      "verifyLink": "Im Code überprüfen →"
     },
     "modes": {
       "title": "Drei Transkriptionsmodi",

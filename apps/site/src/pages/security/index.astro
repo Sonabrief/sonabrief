@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getTranslations } from '../../i18n/utils';
+import SecurityPage from '../../components/security/SecurityPage.astro';
+
+const lang = 'en';
+const t = await getTranslations(lang);
+const title = `${t.nav.security} — Sonabrief`;
+const description: string = t.security.promise.lines?.[0] ?? t.hero.sub;
+---
+
+<BaseLayout lang={lang} title={title} description={description}>
+  <main>
+    <SecurityPage t={t} lang={lang} />
+  </main>
+</BaseLayout>

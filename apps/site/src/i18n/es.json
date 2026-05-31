@@ -392,7 +392,8 @@
         },
         { "term": "En el cliente", "plain": "Todo esto ocurre en tu dispositivo, antes de que nada llegue a nuestros servidores." }
       ],
-      "closer": "Lo que almacenamos son datos cifrados que no podemos leer. No porque elijamos no hacerlo — porque matemáticamente no podemos."
+      "closer": "Lo que almacenamos son datos cifrados que no podemos leer. No porque elijamos no hacerlo — porque matemáticamente no podemos.",
+      "verifyLink": "Verifícalo en el código →"
     },
     "modes": {
       "title": "Tres modos de transcripción",

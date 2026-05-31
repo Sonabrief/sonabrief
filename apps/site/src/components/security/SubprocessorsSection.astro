@@ -1,0 +1,126 @@
+---
+interface Props {
+  t: any;
+}
+const { t } = Astro.props;
+
+const title: string = t.security.subprocessors.title;
+const intro: string = t.security.subprocessors.intro;
+const headers: string[] = t.security.subprocessors.headers ?? [];
+const rows: string[][] = t.security.subprocessors.rows ?? [];
+const note: string = t.security.subprocessors.note;
+---
+
+<section class="subp">
+  <div class="subp-inner">
+    <h2 class="subp-h2">{title}</h2>
+    <p class="subp-intro">{intro}</p>
+
+    <div class="subp-table-wrap">
+      <table class="subp-table">
+        <thead>
+          <tr>
+            {headers.map((h) => (
+              <th class="subp-th" scope="col">{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr>
+              {row.map((cell) => (
+                <td class="subp-td">{cell}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <p class="subp-note">{note}</p>
+  </div>
+</section>
+
+<style>
+  .subp {
+    padding: 80px 24px;
+  }
+
+  .subp-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .subp-h2 {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(24px, 3vw, 32px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-deep-teal);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .subp-intro {
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--color-stone);
+    margin: 0;
+  }
+
+  .subp-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--color-mist);
+    border-radius: 10px;
+  }
+
+  .subp-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 560px;
+  }
+
+  .subp-th {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    color: var(--color-charcoal);
+    padding: 12px 16px;
+    background-color: color-mix(in srgb, var(--color-mist) 40%, transparent);
+    border-bottom: 1px solid var(--color-mist);
+  }
+
+  .subp-td {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-charcoal);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--color-mist);
+  }
+
+  .subp-table tbody tr:last-child .subp-td {
+    border-bottom: none;
+  }
+
+  .subp-note {
+    font-family: "Manrope", sans-serif;
+    font-style: italic;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--color-stone);
+    margin: 0;
+  }
+
+  @media (max-width: 767px) {
+    .subp {
+      padding: 56px 24px;
+    }
+  }
+</style>

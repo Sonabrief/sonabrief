@@ -395,7 +395,8 @@
           "plain": "All of this happens on your device, before anything reaches our servers."
         }
       ],
-      "closer": "What we store is encrypted data we cannot read. Not because we choose not to — because we mathematically can't."
+      "closer": "What we store is encrypted data we cannot read. Not because we choose not to — because we mathematically can't.",
+      "verifyLink": "Verify in code →"
     },
     "modes": {
       "title": "Three transcription modes",

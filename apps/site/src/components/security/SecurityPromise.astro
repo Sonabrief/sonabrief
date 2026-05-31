@@ -1,0 +1,88 @@
+---
+interface Props {
+  t: any;
+}
+const { t } = Astro.props;
+
+const title: string = t.security.promise.title;
+const lines: string[] = t.security.promise.lines ?? [];
+const link: string = t.security.promise.link;
+---
+
+<section class="promise">
+  <div class="promise-inner">
+    <p class="promise-title">{title}</p>
+    <div class="promise-lines">
+      <p class="promise-line promise-line-a">{lines[0]}</p>
+      <p class="promise-line promise-line-a">{lines[1]}</p>
+      <p class="promise-line promise-line-c">{lines[2]}</p>
+    </div>
+    <a class="promise-link" href="#audio-section">{link}</a>
+  </div>
+</section>
+
+<style>
+  .promise {
+    padding: 120px 24px 80px;
+  }
+
+  .promise-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .promise-title {
+    font-family: "Manrope", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-stone);
+    margin: 0;
+  }
+
+  .promise-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .promise-line {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    margin: 0;
+    line-height: 1.55;
+  }
+
+  .promise-line-a {
+    font-size: 18px;
+    color: var(--color-stone);
+  }
+
+  .promise-line-c {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-deep-teal);
+  }
+
+  .promise-link {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    color: var(--color-deep-teal);
+    text-decoration: none;
+    width: fit-content;
+  }
+
+  .promise-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  @media (max-width: 767px) {
+    .promise {
+      padding: 80px 24px 56px;
+    }
+  }
+</style>

@@ -1,0 +1,135 @@
+---
+interface Props {
+  t: any;
+}
+const { t } = Astro.props;
+
+const title: string = t.security.zeroKnowledge.title;
+const intro: string = t.security.zeroKnowledge.intro;
+const points: { term: string; plain: string }[] = t.security.zeroKnowledge.points ?? [];
+const closer: string = t.security.zeroKnowledge.closer;
+const verifyLink: string = t.security.zeroKnowledge.verifyLink;
+
+// Backs the XChaCha20-Poly1305 claim: real encrypt() in the open source repo.
+const verifyHref =
+  'https://github.com/Sonabrief/sonabrief/blob/main/apps/web/src/lib/crypto.ts#L29-L48';
+---
+
+<section class="zk">
+  <div class="zk-inner">
+    <h2 class="zk-h2">{title}</h2>
+    <p class="zk-intro">{intro}</p>
+
+    <div class="zk-points">
+      {
+        points.map((p) => (
+          <div class="zk-point">
+            <p class="zk-term">{p.term}</p>
+            <p class="zk-plain">{p.plain}</p>
+            {p.term === 'XChaCha20-Poly1305' && (
+              <a class="zk-verify-link" href={verifyHref} target="_blank" rel="noopener noreferrer">
+                {verifyLink}
+              </a>
+            )}
+          </div>
+        ))
+      }
+    </div>
+
+    <p class="zk-closer">{closer}</p>
+  </div>
+</section>
+
+<style>
+  .zk {
+    padding: 80px 24px;
+  }
+
+  .zk-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .zk-h2 {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(24px, 3vw, 32px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-deep-teal);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .zk-intro {
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--color-stone);
+    margin: 0;
+  }
+
+  .zk-points {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .zk-point {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .zk-term {
+    font-family: "Manrope", sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-deep-teal);
+    border-left: 3px solid var(--color-amber);
+    padding-left: 12px;
+    margin: 0;
+  }
+
+  .zk-plain {
+    font-family: "Manrope", sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--color-stone);
+    margin: 0;
+    margin-left: 16px;
+  }
+
+  .zk-verify-link {
+    font-family: "Manrope", sans-serif;
+    font-size: 15px;
+    color: var(--color-deep-teal);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    width: fit-content;
+    margin-left: 16px;
+  }
+
+  .zk-closer {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--color-deep-teal);
+    border: 1px solid var(--color-mist);
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 0.75rem;
+    padding: 24px;
+    max-width: 600px;
+    margin: 0;
+  }
+
+  @media (max-width: 767px) {
+    .zk {
+      padding: 56px 24px;
+    }
+  }
+</style>

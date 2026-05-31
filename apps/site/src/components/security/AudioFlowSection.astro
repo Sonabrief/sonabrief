@@ -1,0 +1,191 @@
+---
+interface Props {
+  t: any;
+}
+const { t } = Astro.props;
+
+const title: string = t.security.audio.title;
+const flow: string[] = t.security.audio.flow ?? [];
+const body: string = t.security.audio.body;
+const codeNote: string = t.security.audio.codeNote;
+const codeLink: string = t.security.audio.codeLink;
+
+const codeHref =
+  'https://github.com/Sonabrief/sonabrief/blob/main/apps/web/src/lib/chunkStore.ts#L86-L90';
+---
+
+<section class="audio" id="audio-section">
+  <div class="audio-inner">
+    <h2 class="audio-h2">{title}</h2>
+
+    <div class="audio-diagram" role="img" aria-label={flow.join(' → ')}>
+      {
+        flow.map((step, i) => (
+          <>
+            <div
+              class:list={['audio-box fade-up', { 'audio-box-final': i === flow.length - 1 }]}
+              data-audio-box
+              style={`transition-delay:${i * 150}ms`}
+            >
+              <span class="audio-box-text">{step}</span>
+            </div>
+            {i < flow.length - 1 && (
+              <span class="audio-arrow fade-up" data-audio-box style={`transition-delay:${i * 150 + 75}ms`} aria-hidden="true">
+                <span class="audio-arrow-h">→</span>
+                <span class="audio-arrow-v">↓</span>
+              </span>
+            )}
+          </>
+        ))
+      }
+    </div>
+
+    <p class="audio-body">{body}</p>
+
+    <p class="audio-codenote">{codeNote}</p>
+
+    <a class="audio-codelink" href={codeHref} target="_blank" rel="noopener noreferrer">{codeLink}</a>
+  </div>
+</section>
+
+<style>
+  .audio {
+    padding: 80px 24px;
+  }
+
+  .audio-inner {
+    max-width: 680px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .audio-h2 {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(24px, 3vw, 32px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-deep-teal);
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .audio-diagram {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .audio-box {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid var(--color-mist);
+    background-color: var(--color-cream);
+    border-radius: 10px;
+    padding: 16px 12px;
+  }
+
+  .audio-box-final {
+    border-color: var(--color-deep-teal);
+    background-color: var(--color-deep-teal);
+  }
+
+  .audio-box-text {
+    font-family: "Manrope", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--color-charcoal);
+  }
+
+  .audio-box-final .audio-box-text {
+    color: var(--color-cream);
+    font-weight: 600;
+  }
+
+  .audio-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-stone);
+    font-size: 18px;
+    flex: 0 0 auto;
+  }
+
+  .audio-arrow-v {
+    display: none;
+  }
+
+  .audio-body {
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--color-stone);
+    margin: 0;
+    max-width: 680px;
+  }
+
+  .audio-codenote {
+    font-family: "Manrope", sans-serif;
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--color-stone);
+    margin: 0;
+  }
+
+  .audio-codelink {
+    font-family: "Manrope", sans-serif;
+    font-size: 15px;
+    color: var(--color-deep-teal);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    width: fit-content;
+  }
+
+  @media (max-width: 767px) {
+    .audio {
+      padding: 56px 24px;
+    }
+    .audio-diagram {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .audio-box {
+      flex: 1 1 auto;
+    }
+    .audio-arrow-h {
+      display: none;
+    }
+    .audio-arrow-v {
+      display: block;
+    }
+  }
+</style>
+
+<script>
+  const boxes = document.querySelectorAll<HTMLElement>('#audio-section [data-audio-box]');
+  if ('IntersectionObserver' in window && boxes.length > 0) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.25 }
+    );
+    boxes.forEach((box) => observer.observe(box));
+  } else {
+    boxes.forEach((box) => box.classList.add('visible'));
+  }
+</script>
