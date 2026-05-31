@@ -1,1 +1,486 @@
-{}
+{
+  "nav": {
+    "security": "Sicherheit",
+    "openSource": "Open Source",
+    "pricing": "Preise",
+    "github": "GitHub",
+    "cta": "Kostenlos testen"
+  },
+  "hero": {
+    "h1": "Ein privater Kopf für Ihre Meetings.",
+    "sub": "Sonabrief nimmt Ihre beruflichen Gespräche auf, transkribiert und fasst sie zusammen — ohne ein einziges Byte Audio in die Cloud zu senden. Niemals.",
+    "cta1": "Sonabrief kostenlos testen →",
+    "cta2": "So funktioniert's →",
+    "micro": "Kostenloser Plan verfügbar · Keine Kreditkarte · Open Source"
+  },
+  "problem": {
+    "lines": [
+      "Jedes Meeting-Tool sendet Ihr Audio an Server, die Sie nie gesehen haben.",
+      "Für die meisten Menschen ist das in Ordnung.",
+      "Für Sie nicht."
+    ]
+  },
+  "manifesto": {
+    "items": [
+      {
+        "num": "01",
+        "title": "Ihr Audio bleibt auf Ihrem Computer.",
+        "body": "Im Arbeitsspeicher verarbeitet, transkribiert, verworfen. Nie gespeichert. Nie hochgeladen.",
+        "linkLabel": "Im Code überprüfen →"
+      },
+      {
+        "num": "02",
+        "title": "Ihre Notizen werden vor der Synchronisierung verschlüsselt.",
+        "body": "Wir können sie nicht lesen. Unser Cloud-LLM auch nicht. Zwölf Wörter schützen Ihr Archiv.",
+        "linkLabel": "Mehr über Zero-Knowledge →"
+      },
+      {
+        "num": "03",
+        "title": "Open Source.",
+        "body": "Erklärte Versprechen, Code, der sie beweist. AGPL v3. Alles auf GitHub.",
+        "linkLabel": "Auf GitHub prüfen →"
+      }
+    ]
+  },
+  "howItWorks": {
+    "steps": [
+      {
+        "title": "Aufnehmen (lokal)",
+        "desc": "Ihr Mikrofon und Ihr Audio bleiben auf Ihrem Mac oder PC."
+      },
+      {
+        "title": "Transkribieren",
+        "desc": "Auf Ihrem Gerät mit Whisper — oder über Cloud Schnell, unsere schnelle EU-Cloud (Pro und Pro Unlimited). So oder so wird nie eine Audiodatei aufbewahrt."
+      },
+      {
+        "title": "Zusammenfassen",
+        "desc": "Mistral EU mit Zero Data Retention oder Ollama vollständig lokal. Nur der transkribierte Text — nie das Audio."
+      }
+    ],
+    "qualityNote": "Erstklassige Transkription in jedem Plan — auch im Free. Wir verwenden Whisper Large-v3-turbo, dasselbe Modell, das Forschende nutzen, vollständig auf Ihrem Gerät ausgeführt.",
+    "cloudNote": "Bei Pro und Pro Unlimited transkribiert Cloud Schnell in der EU-Cloud: 30 Minuten Audio in 1–2 Minuten, unabhängig von Ihrer Hardware."
+  },
+  "threeWays": {
+    "title": "Drei Wege, es zu nutzen.",
+    "modes": [
+      {
+        "name": "Standard",
+        "points": [
+          "Mistral, in der EU gehostet, ZDR aktiv, DPA unterzeichnet",
+          "Nur der transkribierte Text erreicht den Server — nie das Audio",
+          "Ausgezeichnete Zusammenfassungsqualität, hohe Geschwindigkeit",
+          "Free: Mistral Small 3.1 · Pro und Pro Unlimited: Mistral Large 3"
+        ]
+      },
+      {
+        "name": "Nur lokal",
+        "points": [
+          "Ollama, vollständig auf Ihrem Gerät",
+          "Kein einziges Byte verlässt es — nie, in keinem Modus",
+          "Langsamer, erfordert geeignete Hardware",
+          "In allen Plänen verfügbar, auch im Free"
+        ]
+      },
+      {
+        "name": "Cloud Schnell",
+        "badge": "Pro und Pro Unlimited",
+        "points": [
+          "Volle Geschwindigkeit auf jedem Gerät — selbst auf einem älteren Windows-Laptop",
+          "30 Minuten Audio, transkribiert in 1–2 Minuten",
+          "Mit Mistral, in Europa in Paris gehostet — Audio bei der Übertragung verschlüsselt, nie gespeichert",
+          "5 Std./Monat inklusive bei Pro · 20 Std./Monat bei Pro Unlimited"
+        ]
+      }
+    ],
+    "positioning": "Das einzige Meeting-Tool mit dreistufiger Datenschutz-Wahl, einem 100 % europäischen Stack und unbegrenzter lokaler Transkription in jedem Plan — auch im Free."
+  },
+  "memory": {
+    "h2": "Ein Gedächtnis, das bleibt.",
+    "lead": "Die meisten Meeting-Tools löschen Ihren Verlauf nach 14 Tagen in den kostenlosen Plänen. Wir finden, Ihr berufliches Gedächtnis sollte Ihnen gehören — nicht deren Aufbewahrungsrichtlinie.",
+    "tiers": [
+      { "label": "Free", "value": "Archiv 7 Tage" },
+      { "label": "Pro", "value": "Archiv 12 Monate" },
+      { "label": "Pro Unlimited", "value": "Für immer", "note": "(ja, wirklich)" }
+    ],
+    "body": "Mit Ihrer Passphrase verschlüsselt. Über alle Ihre Geräte synchronisiert. Durchsuchbar. Ihres — wirklich Ihres.",
+    "tradeoff": "Wenn Sie Ihre Passphrase vergessen, können wir sie nicht wiederherstellen. Kompromisse sind real. Wir verbergen sie nicht."
+  },
+  "professionals": {
+    "lead": "Wir haben es für Menschen gebaut, deren Gespräche wirklich Gewicht haben.",
+    "roles": [
+      "Anwälte, die Mandantengespräche vorbereiten.",
+      "Therapeuten, die Patientensitzungen schützen.",
+      "Investigativjournalisten mit anonymen Quellen.",
+      "Steuerberater mit sensiblen Finanzgesprächen.",
+      "Ärzte in eigener Praxis.",
+      "Forschende, die qualitative Interviews führen."
+    ],
+    "close": "Wenn Ihre Meetings Dinge enthalten, die die Cloud nicht sehen sollte, wissen Sie genau, warum wir es gebaut haben.",
+    "aside": "(Und wenn nicht — Sonabrief funktioniert auch für Sie.)"
+  },
+  "openSource": {
+    "h2": "Open Source. Überprüfbar, nicht nur behauptet.",
+    "body": "Alles, was Ihre Daten verarbeitet, ist auf GitHub. Von allen prüfbar. Forkbar. Inspizierbar. Lizenziert unter AGPL v3.",
+    "cta1": "Auf GitHub ansehen →",
+    "cta2": "Unsere Sicherheitsarchitektur lesen →",
+    "builtWith": "Gebaut mit Whisper · Ollama · Mistral · libsodium · Cloudflare Workers — offene Standards, offener Code.",
+    "contribute": "Mitwirken? Unterschreiben Sie unsere Harmony CLA. Für Enterprise bieten wir Dual-Licensing."
+  },
+  "pricing": {
+    "title": "Was es kostet, und warum.",
+    "toggle": { "monthly": "Monatlich", "annual": "Jährlich", "annualNote": "2 Monate gratis" },
+    "tiers": [
+      {
+        "name": "Free",
+        "price": "€0",
+        "period": "für immer",
+        "highlights": [
+          "Unbegrenzte lokale Transkription",
+          "Cloud Standard: 3 Std./Monat",
+          "Whisper Large-v3-turbo",
+          "Archiv 7 Tage"
+        ],
+        "cta": "Kostenlos testen"
+      },
+      {
+        "name": "Pro",
+        "price": "€9",
+        "priceAnnual": "€90",
+        "period": "/Monat",
+        "highlights": [
+          "Alles aus Free",
+          "Cloud Standard: 30 Std./Monat",
+          "Cloud Schnell: 5 Std./Monat",
+          "Archiv 12 Monate · Kalender"
+        ],
+        "cta": "Pro wählen"
+      },
+      {
+        "name": "Pro Unlimited",
+        "price": "€19",
+        "priceAnnual": "€190",
+        "period": "/Monat",
+        "highlights": [
+          "Alles aus Pro",
+          "Cloud Schnell: 20 Std./Monat",
+          "Archiv für immer",
+          "Zusammenfassungen mit Mistral Large 3"
+        ],
+        "cta": "Pro Unlimited wählen"
+      },
+      {
+        "name": "Enterprise",
+        "price": "Individuell",
+        "highlights": [
+          "Self-Hosting-Option",
+          "Cloud Schnell: unbegrenzt (faire Nutzung)",
+          "DPA- und Compliance-Support"
+        ],
+        "cta": "Kontakt aufnehmen"
+      }
+    ],
+    "claims": [
+      "Alle Pläne nutzen Whisper Large-v3-turbo. Keine reduzierte Qualität im Free.",
+      "Die gesamte Cloud-Verarbeitung läuft auf Mistral, in der EU gehostet, mit Zero Data Retention."
+    ],
+    "fullComparison": "Vollständigen Vergleich ansehen →",
+    "comparison": {
+      "columns": ["Free", "Pro €9", "Pro Unlimited €19", "Enterprise"],
+      "groups": [
+        {
+          "label": "Gedächtnis & Archiv",
+          "rows": [
+            { "feature": "Archiv (Zusammenfassungen + Transkripte)", "values": ["7 Tage", "12 Monate", "Für immer", "Individuell"] },
+            { "feature": "Audio", "values": ["Nie gespeichert", "Nie gespeichert", "Nie gespeichert", "Nie gespeichert"] }
+          ]
+        },
+        {
+          "label": "Transkription",
+          "rows": [
+            { "feature": "Whisper-Modell", "values": ["Large-v3-turbo", "Large-v3-turbo", "Large-v3-turbo", "Large-v3-turbo"] },
+            { "feature": "Lokale Transkription", "values": ["Unbegrenzt", "Unbegrenzt", "Unbegrenzt", "Unbegrenzt"] },
+            { "feature": "Cloud Standard (Std./Monat)", "values": ["3 Std.", "30 Std.", "Faire Nutzung", "Individuell"] },
+            { "feature": "Cloud Schnell (schnelle EU-Transkription)", "values": ["—", "5 Std./Monat", "20 Std./Monat", "Unbegrenzt (faire Nutzung)"] }
+          ]
+        },
+        {
+          "label": "Zusammenfassung",
+          "rows": [
+            { "feature": "Cloud-LLM-Modell", "values": ["Mistral Small 3.1", "Mistral Large 3", "Mistral Large 3", "Mistral Large 3"] },
+            { "feature": "Modell Nur lokal", "values": ["Llama 3B", "Llama 8B", "Frei wählbar", "Frei wählbar"] }
+          ]
+        },
+        {
+          "label": "Vorlagen",
+          "rows": [
+            { "feature": "Systemvorlagen (5 Sprachen)", "values": ["3", "7", "7", "7"] },
+            { "feature": "Vertikale Profi-Vorlagen", "values": ["—", "10 (schrittweise)", "10 (schrittweise)", "10 + individuell"] },
+            { "feature": "Eigene Vorlagen", "values": ["—", "5", "Unbegrenzt", "Unbegrenzt"] }
+          ]
+        },
+        {
+          "label": "Arbeitsablauf",
+          "rows": [
+            { "feature": "Exporte (PDF · Word · E-Mail)", "values": ["Nur Markdown", "✓", "✓", "✓"] },
+            { "feature": "Tags & Labels", "values": ["—", "✓", "✓", "✓"] },
+            { "feature": "Action-Items-Übersicht", "values": ["—", "✓", "✓", "✓"] },
+            { "feature": "Vorbesprechungs-Briefing", "values": ["—", "✓", "✓", "✓"] },
+            { "feature": "Semantische Suche", "values": ["—", "✓", "✓", "✓"] },
+            { "feature": "Sprecherkennung", "values": ["—", "✓", "✓", "✓"] },
+            { "feature": "Kunden-/Projektansicht", "values": ["—", "✓", "✓", "✓"] },
+            { "feature": "Kalender (Google · Microsoft)", "values": ["—", "✓", "✓", "✓"] },
+            { "feature": "Wöchentliche Action-Items-E-Mail", "values": ["—", "✓ Opt-in", "✓ Opt-in", "✓ Opt-in"] },
+            { "feature": "Analytics-Dashboard", "values": ["—", "✓", "✓", "✓"] }
+          ]
+        },
+        {
+          "label": "Synchronisierung & Geräte",
+          "rows": [
+            { "feature": "Synced-Speicher (Zero-Knowledge)", "values": ["100 MB", "5 GB", "25 GB", "Individuell"] },
+            { "feature": "Mehrere Geräte", "values": ["✓", "✓", "✓", "✓"] },
+            { "feature": "Automatisches E2E-Backup", "values": ["✓", "✓", "✓", "✓"] }
+          ]
+        },
+        {
+          "label": "Sicherheit & Konto",
+          "rows": [
+            { "feature": "Passkey (WebAuthn)", "values": ["✓", "✓", "✓", "✓"] },
+            { "feature": "Anmeldung per Magic Link", "values": ["✓", "✓", "✓", "✓"] }
+          ]
+        },
+        {
+          "label": "Enterprise",
+          "rows": [
+            { "feature": "Persönliche API", "values": ["—", "—", "—", "✓"] },
+            { "feature": "SSO", "values": ["—", "—", "—", "✓"] },
+            { "feature": "Admin-Dashboard", "values": ["—", "—", "—", "✓"] },
+            { "feature": "Self-Hosting-Option", "values": ["—", "—", "—", "✓"] },
+            { "feature": "Kommerzielle Lizenz (nicht AGPL)", "values": ["—", "—", "—", "✓"] }
+          ]
+        },
+        {
+          "label": "Support",
+          "rows": [
+            { "feature": "Support", "values": ["Community", "E-Mail, 48 Std.", "Vorrangig, 24 Std.", "Dediziert"] }
+          ]
+        }
+      ]
+    },
+    "banners": [
+      "Whisper Large-v3-turbo in jedem Plan. Keine reduzierte Transkription im Free.",
+      "Das gesamte Cloud-LLM auf Mistral, in der EU gehostet · ZDR aktiv · DPA unterzeichnet"
+    ],
+    "enterprise": {
+      "heading": "Enterprise",
+      "body": "Individuelle Preise für Teams. Self-Hosting-Option verfügbar, mit einer kommerziellen Lizenz (Alternative zur AGPL v3) für modifizierte Self-Hosting-Deployments. SSO, Admin-Dashboard, dedizierter Support.",
+      "cta": "Kontakt aufnehmen",
+      "form": { "name": "Name", "email": "Geschäftliche E-Mail", "notes": "Was brauchen Sie?", "submit": "Senden" }
+    },
+    "faq": {
+      "title": "Harte Fragen. Ehrliche Antworten.",
+      "items": [
+        {
+          "q": "Bieten Sie Rückerstattungen an?",
+          "a": "Wenn Sonabrief nichts für Sie ist, schreiben Sie innerhalb von 14 Tagen nach Ihrer Zahlung an hello@sonabrief.com, und wir erstatten sie — Jahrespläne inklusive. Keine Formulare, kein Aufwand."
+        },
+        {
+          "q": "Was passiert, wenn ich herabstufe?",
+          "a": "Alles, was über das Aufbewahrungslimit Ihres neuen Plans hinausgeht, bleibt weitere 30 Tage verfügbar, als ablaufend markiert — Zeit, es zu exportieren oder es sich anders zu überlegen. Danach wird es entfernt. Ihr Audio war ohnehin nicht gespeichert, es gibt also nichts weiter zu bereinigen."
+        },
+        {
+          "q": "Wie wird die EU-Mehrwertsteuer gehandhabt?",
+          "a": "Die Preise werden ohne MwSt. angezeigt. An der Kasse handelt unser Zahlungsanbieter Polar als Merchant of Record und wendet die korrekte MwSt. für Ihr Land an; sie erscheint auf Ihrer Rechnung. Sie haben eine USt-IdNr.? Geben Sie sie an der Kasse ein."
+        },
+        {
+          "q": "Wann werde ich abgerechnet?",
+          "a": "Monatspläne verlängern sich jeden Monat zu Ihrem Anmeldedatum. Jahrespläne verlängern sich einmal im Jahr und enthalten zwei Gratismonate. Kündigen Sie jederzeit in Ihrem Konto — die nächste Abbuchung entfällt und Sie behalten den Zugang bis zum Ende des Zeitraums."
+        },
+        {
+          "q": "Kann ich ein Konto mit meinem Team teilen?",
+          "a": "Konten sind persönlich. Pro Unlimited ergänzt die Nutzung auf mehreren Geräten, sodass Sie Ihr Konto auf allen Ihren Rechnern verwenden können. Für mehrere Personen bietet Enterprise eine echte Mehrplatz-Einrichtung — sprechen Sie uns an."
+        },
+        {
+          "q": "Gibt es einen Studentenrabatt?",
+          "a": "Nein. Der Free-Plan ist echt, mit unbegrenzter lokaler Transkription — das deckt schon viel ab. Wir halten die Preise lieber einfach, statt Sonderfälle zu verwalten."
+        }
+      ]
+    }
+  },
+  "faq": {
+    "title": "Harte Fragen. Ehrliche Antworten.",
+    "items": [
+      {
+        "q": "Laden Sie mein Audio irgendwo hoch?",
+        "a": "Nein. Audio wird im Arbeitsspeicher auf Ihrem Gerät verarbeitet, transkribiert und dann verworfen. Es erreicht nie unsere Server, nicht einmal als temporäre Datei. Sie können das in unserem Code überprüfen — die betreffende Funktion ist auf unserer Seite /security verlinkt."
+      },
+      {
+        "q": "Was sind die drei Transkriptionsmodi?",
+        "a": "Standard transkribiert lokal und fasst in der EU-Cloud zusammen. Nur lokal behält alles auf Ihrem Gerät. Cloud Schnell (Pro und Pro Unlimited) transkribiert auf Mistrals europäischen Servern in Paris — schnell auf jeder Hardware, mit bei der Übertragung verschlüsseltem und nie gespeichertem Audio. Sie wählen pro Meeting."
+      },
+      {
+        "q": "Was, wenn ich meine Passphrase vergesse?",
+        "a": "Wir können sie nicht wiederherstellen — das ist der Sinn der Zero-Knowledge-Verschlüsselung. Beim Einrichten erhalten Sie 12 Wiederherstellungswörter (BIP39-Standard). Notieren Sie sie und bewahren Sie sie sicher auf. Wenn Sie sowohl die Passphrase als auch die Wiederherstellungswörter verlieren, wird Ihr verschlüsseltes Archiv unlesbar. Kompromisse sind real."
+      },
+      {
+        "q": "Ist Ihr Cloud-LLM wirklich in der EU gehostet?",
+        "a": "Ja. Wir nutzen Mistral, ein europäisches Unternehmen, auf in der EU gehosteter Infrastruktur, mit aktivem Zero Data Retention und einem unterzeichneten Data Processing Agreement. Details und DPA-Referenz auf /security."
+      },
+      {
+        "q": "Warum Open Source?",
+        "a": "Weil Datenschutzversprechen, die sich nicht überprüfen lassen, Marketing sind. Alles, was Ihre Daten verarbeitet, ist auf GitHub unter AGPL v3. Lesen Sie es, prüfen Sie es, forken Sie es."
+      },
+      {
+        "q": "Warum 9 €/Monat und nicht weniger?",
+        "a": "Der Free-Plan existiert und ist echt — nicht beschnitten. Pro ist für alle, die einen längeren Verlauf, bessere LLM-Qualität und den vollen Funktionsumfang brauchen. Wir benötigen Einnahmen, um unabhängig zu bleiben und die Infrastruktur zu betreiben. Ganz einfach."
+      },
+      {
+        "q": "Funktioniert es auf dem Smartphone?",
+        "a": "Sonabrief ist eine Progressive Web App — installieren Sie sie aus Ihrem Browser auf jedem Gerät. Die Aufnahme vom Smartphone kommt in einem künftigen Update. Synchronisierung und das Lesen des Archivs funktionieren heute schon mobil."
+      },
+      {
+        "q": "Welche Sprachen werden unterstützt?",
+        "a": "Oberfläche auf Englisch, Italienisch, Französisch, Spanisch, Deutsch. Transkription: 99 Sprachen über Whisper. Zusammenfassungsvorlagen: EN, IT, FR, ES, DE zum Start."
+      },
+      {
+        "q": "Wann ist der öffentliche Launch?",
+        "a": "Jetzt. Erstellen Sie oben Ihr kostenloses Konto."
+      }
+    ]
+  },
+  "footer": {
+    "columns": {
+      "product": { "title": "Produkt", "links": ["Funktionen", "Preise", "Datenschutzmodi", "Kostenlos testen →"] },
+      "trust": { "title": "Vertrauen", "links": ["Sicherheit", "Datenschutzerklärung", "Nutzungsbedingungen", "Cookie-Richtlinie", "DPA auf Anfrage"] },
+      "company": { "title": "Unternehmen", "links": ["Über uns", "Open Source", "Kontakt", "GitHub →", "X →", "Bluesky →"] }
+    },
+    "newsletter": { "heading": "Updates erhalten", "placeholder": "Ihre E-Mail", "cta": "Abonnieren" },
+    "legal": "© 2026 Sonabrief · Open Source · AGPL v3"
+  },
+  "security": {
+    "promise": {
+      "title": "Das Versprechen",
+      "lines": [
+        "Ihr Meeting-Audio wird nie als Datei gespeichert.",
+        "Alles, was daraus entsteht — Transkripte, Zusammenfassungen, Notizen — lebt dort, wo Sie es entscheiden: verschlüsselt auf unseren Servern mit Zero-Knowledge, nur auf Ihrem Gerät oder beides.",
+        "Ihre Wahl."
+      ],
+      "link": "Details lesen →"
+    },
+    "audio": {
+      "title": "Was mit Ihrem Audio geschieht",
+      "flow": [
+        "Im Arbeitsspeicher erfasst",
+        "Von Whisper in kurzen Blöcken transkribiert",
+        "Jeder Block nach der Transkription gelöscht",
+        "Kein Audio bleibt übrig"
+      ],
+      "body": "Keine Audiodatei — weder .wav noch .mp3 noch .webm — wird je auf die Festplatte geschrieben. Niemals. Während der Aufnahme bleibt das Audio im Arbeitsspeicher; um einen Browser-Absturz in einem langen Meeting zu überstehen, leben kurze Blöcke ein paar Minuten in der verschlüsselten lokalen Datenbank des Browsers und löschen sich selbst, sobald sie transkribiert sind. Am Ende des Meetings bleibt nirgendwo Audio übrig.",
+      "codeNote": "Das ist kein Marketingversprechen. Die genaue Funktion, die Ihr Audio verwirft, steht in unserem Open-Source-Code.",
+      "codeLink": "Die Funktion auf GitHub ansehen →"
+    },
+    "zeroKnowledge": {
+      "title": "Zero-Knowledge-Synchronisierung",
+      "intro": "Beim Synchronisieren werden Ihre Notizen und Zusammenfassungen verschlüsselt, bevor sie Ihr Gerät verlassen.",
+      "points": [
+        {
+          "term": "Argon2id",
+          "plain": "Ihre 12 Wiederherstellungswörter werden über Argon2id, eine bewusst langsame Schlüsselableitungsfunktion, zu Ihrem Verschlüsselungsschlüssel. Genau deshalb kann niemand — auch wir nicht — Ihre Passphrase wiederherstellen, wenn Sie sie vergessen."
+        },
+        {
+          "term": "XChaCha20-Poly1305",
+          "plain": "Ihre Daten werden mit XChaCha20-Poly1305 versiegelt, derselben Primitive für authentifizierte Verschlüsselung, die WhatsApp und Signal verwenden."
+        },
+        { "term": "Clientseitig", "plain": "All das geschieht auf Ihrem Gerät, bevor irgendetwas unsere Server erreicht." }
+      ],
+      "closer": "Was wir speichern, sind verschlüsselte Daten, die wir nicht lesen können. Nicht weil wir es nicht wollen — weil wir es mathematisch nicht können."
+    },
+    "modes": {
+      "title": "Drei Transkriptionsmodi",
+      "intro": "Sie wählen pro Meeting.",
+      "items": [
+        { "name": "Standard", "desc": "Auf Ihrem Gerät transkribiert, in der EU-Cloud zusammengefasst. Audio verlässt nie Ihren Computer." },
+        { "name": "Nur lokal", "desc": "Transkription und Zusammenfassung beide auf Ihrem Gerät. Nichts verlässt es, in keinem Modus." },
+        { "name": "Cloud Schnell", "desc": "Auf Mistrals europäischen Servern in Paris transkribiert. Audio bei der Übertragung verschlüsselt, nie gespeichert. Schnell auf jeder Hardware. Pro und Pro Unlimited." }
+      ],
+      "performance": {
+        "title": "Geschwindigkeit nach Hardware",
+        "headers": ["Ihre Hardware", "Standard (lokal)", "Cloud Schnell"],
+        "rows": [
+          ["MacBook (M-Serie)", "30 Min → 3–6 Min", "30 Min → 1–2 Min"],
+          ["Windows / Linux, dedizierte GPU", "30 Min → 5–10 Min", "30 Min → 1–2 Min"],
+          ["Windows / Linux, integrierte Intel-GPU", "30 Min → 50–60 Min", "30 Min → 1–2 Min"]
+        ]
+      }
+    },
+    "mistral": {
+      "title": "Cloud-LLM: Mistral, EU, Zero Data Retention",
+      "body": "Unser Cloud-LLM verarbeitet nur den transkribierten Text — nie das Audio. Es läuft auf in der EU gehosteter Mistral-Infrastruktur, mit aktivem Zero Data Retention für unsere Organisation und einem unterzeichneten Data Processing Agreement.",
+      "cta": "DPA-Referenz anfordern (PDF) →"
+    },
+    "subprocessors": {
+      "title": "Unsere Unterauftragsverarbeiter",
+      "intro": "Die vollständige Liste, in klarer Sprache.",
+      "headers": ["Anbieter", "Rolle", "Standort", "Daten"],
+      "rows": [
+        ["Cloudflare", "CDN, DNS & Workers", "USA", "Keine Nutzerdaten verarbeitet"],
+        ["Mistral AI", "Cloud-LLM & Cloud-Schnell-Transkription", "In der EU gehostet", "ZDR aktiv, DPA unterzeichnet"],
+        ["Resend", "Transaktions-E-Mail", "USA", "Nur E-Mail-Adresse"],
+        ["Polar", "Zahlungsabwicklung", "USA (Delaware)", "Nur Abrechnungsdaten"],
+        ["MailerLite", "Newsletter", "USA", "Nur E-Mail-Adresse (Opt-in)"]
+      ],
+      "note": "Wenn ein Unterauftragsverarbeiter in den USA sitzt, verarbeitet er nie lesbare Meeting-Inhalte — nur die aufgeführten begrenzten Daten. Ihre Meetings bleiben auf Ihrem Gerät oder sind so verschlüsselt, dass weder wir noch sie sie lesen können."
+    },
+    "verify": {
+      "title": "Überprüfen Sie es selbst",
+      "intro": "Glauben Sie uns nicht aufs Wort.",
+      "steps": [
+        "Starten Sie eine Aufnahme im Modus Standard oder Nur lokal.",
+        "Öffnen Sie die DevTools Ihres Browsers — Tab Netzwerk.",
+        "Nehmen Sie 30 Sekunden auf und beobachten Sie die ausgehenden Anfragen. Bei Nur lokal verlässt nichts Ihr Gerät; bei Standard verlässt es nur Text — das Transkriptionsergebnis — nie das Audio. (Cloud Schnell ist bewusst anders: Dort wird verschlüsseltes Audio absichtlich an unsere europäischen Server gesendet, um es dort zu transkribieren — bei der Übertragung verschlüsselt und nie gespeichert. Das ist der einzige Modus, in dem ausgehendes Audio zu erwarten ist.)"
+      ],
+      "codeLinks": ["Die Funktion, die Audio verwirft →", "Die Verschlüsselungsfunktion →"]
+    },
+    "early": {
+      "title": "Wir stehen am Anfang",
+      "body": "Wir sind ein kleines, unabhängiges Produkt. Wir veröffentlichen noch keine aggregierten Transparenzkennzahlen — unsere Nutzerbasis ist noch zu klein, als dass die Zahlen aussagekräftig wären. Wir tun es, sobald sie es sind. Bis dahin ist unser Code der Beweis."
+    }
+  },
+  "about": {
+    "sections": [
+      {
+        "title": "Warum wir es gebaut haben",
+        "body": "Jahre in den professionellen Dienstleistungen haben uns gezeigt, wie viele sensible Informationen durch Besprechungsräume fließen — und wie wenig Kontrolle Menschen darüber haben, wo sie landen. Bestehende Tools machten einen Handel, den wir nicht akzeptieren konnten: Bequemlichkeit im Tausch gegen die Kontrolle über Ihre eigenen Gespräche. Wir wollten beides. Also haben wir Sonabrief gebaut."
+      },
+      { "title": "Warum Open Source", "body": "Open Source ist der Beweis, dass das, was wir sagen, dem entspricht, was wir tun. Lesen Sie es, prüfen Sie es, forken Sie es. AGPL v3." },
+      { "title": "Warum Bootstrap", "body": "Kein VC, kein Wachstum um jeden Preis. Wir zahlen unsere Rechnungen mit Abonnements. Das ist das Modell." },
+      { "title": "Warum wir unser Gesicht nicht zeigen", "body": "Die Marke spricht für sich. Wenn Sonabrief ein öffentliches Gesicht braucht, wird es eines haben. Bis dahin: hello@sonabrief.com." },
+      {
+        "title": "Was wir nicht bauen werden",
+        "items": [
+          "Meeting-Tools, die den Datenschutz «nur für Gratisnutzer» untergraben",
+          "Enterprise-Ballast, der das Produkt für Einzelne verschlechtert",
+          "Analytics, die Sie ausspähen, um Werbung zu verkaufen",
+          "Alles, was uns zwingen würde, morgen weniger ehrlich zu sein als heute"
+        ]
+      }
+    ],
+    "contact": "hello@sonabrief.com"
+  },
+  "openSourcePage": {
+    "intro": "Alles, was Ihre Daten verarbeitet, ist Open Source. Keine Geste — die Art, wie wir unsere Datenschutzversprechen beweisen.",
+    "sections": [
+      { "title": "Was offen ist", "body": "Der gesamte Code, der Ihre Daten berührt — Aufnahme, Transkription, Verschlüsselung, Synchronisierung — ist öffentlich auf GitHub." },
+      { "title": "AGPL v3, in der Praxis", "body": "Sie dürfen Sonabrief frei lesen, ausführen und forken. Verteilen Sie eine modifizierte Version, verlangt die AGPL v3, dass Sie Ihre Änderungen unter derselben Lizenz teilen. Kommerzieller Vertrieb ohne diese Pflichten erfordert eine separate Lizenz." },
+      { "title": "Die Harmony-CLA", "body": "Mitwirkende unterzeichnen ein Contributor License Agreement (Harmony-CLA). Es erlaubt uns, neben der Open-Source-Lizenz weiterhin eine kommerzielle Lizenz für Enterprise-Kunden anzubieten, während Ihr Beitrag offen bleibt." },
+      { "title": "Dual Licensing", "body": "Enterprise-Kunden können eine kommerzielle Lizenz wählen — eine Alternative zur AGPL v3 — für modifizierte Self-Hosting-Deployments." },
+      { "title": "Wie man beiträgt", "body": "Lesen Sie CONTRIBUTING.md, öffnen Sie ein Issue oder senden Sie einen Pull Request. Alles geschieht offen." }
+    ],
+    "repo": "github.com/sonabrief/sonabrief",
+    "cta": "Zum Repository →"
+  },
+  "notFound": {
+    "title": "Diese Seite gibt es nicht.",
+    "subtitle": "Vielleicht hat es sie nie gegeben.",
+    "cta": "← Zurück zu Sonabrief"
+  }
+}
