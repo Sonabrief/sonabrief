@@ -1,14 +1,11 @@
-import _sodium from 'libsodium-wrappers-sumo'
-await _sodium.ready
-const sodium = _sodium
-
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'motion/react'
 import { savePreferences } from '../lib/api'
-import { unlockWithPassphrase, persistKeyToSession, saveVerificationBlob, getCurrentKey } from '../lib/keystore'
-import { initCrypto, generateSalt, generateRecoveryPhrase } from '../lib/crypto'
+import { unlockWithDEK, persistKeyToSession } from '../lib/keystore'
+import { initCrypto, generateRecoveryPhrase } from '../lib/crypto'
+import { createKeyring, putKeyring } from '../lib/keyring'
 import { OllamaSetupFlow } from '../components/local-mode'
 
 const LANGUAGES = [
@@ -162,10 +159,12 @@ export default function OnboardingPage() {
     setPassphraseSubmitting(true)
     try {
       await initCrypto()
-      const salt = generateSalt()
-      await unlockWithPassphrase(passphrase, salt)
-      await saveVerificationBlob(getCurrentKey()!)
-      localStorage.setItem('sonabrief_sync_salt', sodium.to_base64(salt))
+      // Envelope encryption: genera UNA DEK e avvolgila con passphrase + recovery
+      // phrase (già generata a mount in `phrase`). Le due strade scartano la stessa DEK.
+      const { keyring, dek } = await createKeyring(passphrase, phrase)
+      unlockWithDEK(dek)
+      const saved = await putKeyring(keyring)
+      if (!saved) throw new Error('keyring_save_failed')
       setStep(7)
     } finally {
       setPassphraseSubmitting(false)

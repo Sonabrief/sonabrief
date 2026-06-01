@@ -1,11 +1,8 @@
-import _sodium from 'libsodium-wrappers-sumo'
-await _sodium.ready
-const sodium = _sodium
-
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { unlockWithPassphrase, unlockWithRecoveryPhrase, persistKeyToSession, verifyKey, getCurrentKey } from '../lib/keystore'
+import { unlockWithPassphrase, unlockWithRecoveryPhrase, persistKeyToSession, InvalidUnlockSecretError } from '../lib/keystore'
+import { fetchKeyring } from '../lib/keyring'
 import { Button } from '../components/ui/button'
 
 export default function SyncUnlockPage() {
@@ -26,16 +23,18 @@ export default function SyncUnlockPage() {
     setSubmitting(true)
     setPassphraseError('')
     try {
-      const saltB64 = localStorage.getItem('sonabrief_sync_salt')
-      if (!saltB64) throw new Error('Salt non trovato')
-      const salt = sodium.from_base64(saltB64)
-      await unlockWithPassphrase(passphrase, salt)
-      const valid = await verifyKey(getCurrentKey()!)
-      if (!valid) throw new Error('wrong passphrase')
+      const keyring = await fetchKeyring()
+      if (!keyring) throw new Error('keyring_not_found')
+      // unlockWithPassphrase lancia InvalidUnlockSecretError se la passphrase è errata
+      await unlockWithPassphrase(passphrase, keyring)
       await persistKeyToSession()
       navigate('/dashboard')
-    } catch {
-      setPassphraseError(t('sync_unlock.error_wrong'))
+    } catch (err) {
+      setPassphraseError(
+        err instanceof InvalidUnlockSecretError
+          ? t('sync_unlock.error_wrong')
+          : t('sync_unlock.error_generic'),
+      )
     } finally {
       setSubmitting(false)
     }
@@ -45,11 +44,17 @@ export default function SyncUnlockPage() {
     setRecoverySubmitting(true)
     setRecoveryError('')
     try {
-      unlockWithRecoveryPhrase(recoveryWords)
+      const keyring = await fetchKeyring()
+      if (!keyring) throw new Error('keyring_not_found')
+      await unlockWithRecoveryPhrase(recoveryWords, keyring)
       await persistKeyToSession()
       navigate('/dashboard')
-    } catch {
-      setRecoveryError(t('sync_unlock.error_invalid_recovery'))
+    } catch (err) {
+      setRecoveryError(
+        err instanceof InvalidUnlockSecretError
+          ? t('sync_unlock.error_invalid_recovery')
+          : t('sync_unlock.error_generic'),
+      )
     } finally {
       setRecoverySubmitting(false)
     }

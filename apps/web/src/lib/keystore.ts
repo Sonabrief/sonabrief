@@ -2,44 +2,73 @@ import _sodium from 'libsodium-wrappers-sumo'
 await _sodium.ready
 const sodium = _sodium
 
-import { deriveKey, recoveryPhraseToKey, encrypt, decrypt } from './crypto'
+import { unwrapWithPassphrase, unwrapWithRecovery, type SerializedKeyring } from './keyring'
 
 const SESSION_KEY = 'sb_session_key_'
 
-let currentKey: Uint8Array | null = null
+// La chiave tenuta in memoria è la DEK (Data Encryption Key): cifra l'archivio.
+// passphrase e recovery phrase non producono più una chiave direttamente —
+// scartano la DEK dal keyring (vedi keyring.ts).
+let currentDEK: Uint8Array | null = null
 
-export async function unlockWithPassphrase(passphrase: string, salt: Uint8Array): Promise<void> {
+/** Errore lanciato quando passphrase o recovery phrase non aprono il keyring. */
+export class InvalidUnlockSecretError extends Error {
+  constructor() {
+    super('invalid_unlock_secret')
+    this.name = 'InvalidUnlockSecretError'
+  }
+}
+
+function setDEK(dek: Uint8Array): void {
+  if (currentDEK) sodium.memzero(currentDEK)
+  currentDEK = dek
+}
+
+/** Sblocca la sessione con la passphrase, scartando la DEK dal keyring. */
+export async function unlockWithPassphrase(passphrase: string, keyring: SerializedKeyring): Promise<void> {
   await sodium.ready
-  const newKey = await deriveKey(passphrase, salt)
-  if (currentKey) sodium.memzero(currentKey)
-  currentKey = newKey
+  try {
+    setDEK(await unwrapWithPassphrase(keyring, passphrase))
+  } catch {
+    throw new InvalidUnlockSecretError()
+  }
 }
 
-export function unlockWithRecoveryPhrase(phrase: string[]): void {
-  const newKey = recoveryPhraseToKey(phrase)
-  if (currentKey) sodium.memzero(currentKey)
-  currentKey = newKey
+/** Sblocca la sessione con la recovery phrase, scartando la DEK dal keyring. */
+export async function unlockWithRecoveryPhrase(phrase: string[], keyring: SerializedKeyring): Promise<void> {
+  await sodium.ready
+  try {
+    setDEK(await unwrapWithRecovery(keyring, phrase))
+  } catch {
+    throw new InvalidUnlockSecretError()
+  }
 }
 
+/** Sblocca direttamente con una DEK già nota (es. subito dopo createKeyring in onboarding). */
+export function unlockWithDEK(dek: Uint8Array): void {
+  setDEK(dek.slice())
+}
+
+/** Ritorna la DEK corrente (chiave di cifratura archivio) o null se la sessione è bloccata. */
 export function getCurrentKey(): Uint8Array | null {
-  return currentKey
+  return currentDEK
 }
 
 export function isUnlocked(): boolean {
-  return currentKey !== null
+  return currentDEK !== null
 }
 
 export function lock(): void {
-  if (currentKey) {
-    sodium.memzero(currentKey)
-    currentKey = null
+  if (currentDEK) {
+    sodium.memzero(currentDEK)
+    currentDEK = null
   }
 }
 
 export async function persistKeyToSession(): Promise<void> {
-  if (!currentKey) throw new Error('No key to persist: vault is locked')
+  if (!currentDEK) throw new Error('No key to persist: vault is locked')
   await sodium.ready
-  const encoded = sodium.to_base64(currentKey, sodium.base64_variants.ORIGINAL)
+  const encoded = sodium.to_base64(currentDEK, sodium.base64_variants.ORIGINAL)
   sessionStorage.setItem(SESSION_KEY, encoded)
 }
 
@@ -47,39 +76,10 @@ export async function restoreKeyFromSession(): Promise<boolean> {
   const encoded = sessionStorage.getItem(SESSION_KEY)
   if (!encoded) return false
   await sodium.ready
-  const newKey = sodium.from_base64(encoded, sodium.base64_variants.ORIGINAL)
-  if (currentKey) sodium.memzero(currentKey)
-  currentKey = newKey
+  setDEK(sodium.from_base64(encoded, sodium.base64_variants.ORIGINAL))
   return true
 }
 
 export function clearSessionKey(): void {
   sessionStorage.removeItem(SESSION_KEY)
-}
-
-export async function saveVerificationBlob(key: Uint8Array): Promise<void> {
-  await sodium.ready
-  const { ciphertext, nonce } = encrypt('sonabrief-verify-v1', key)
-  const blob = {
-    ciphertext: sodium.to_base64(ciphertext, sodium.base64_variants.ORIGINAL),
-    nonce: sodium.to_base64(nonce, sodium.base64_variants.ORIGINAL),
-  }
-  localStorage.setItem('sonabrief_verify_blob', JSON.stringify(blob))
-}
-
-export async function verifyKey(key: Uint8Array): Promise<boolean> {
-  await sodium.ready
-  const raw = localStorage.getItem('sonabrief_verify_blob')
-  if (!raw) return true // primo accesso, niente da verificare
-  try {
-    const { ciphertext, nonce } = JSON.parse(raw)
-    decrypt(
-      sodium.from_base64(ciphertext, sodium.base64_variants.ORIGINAL),
-      sodium.from_base64(nonce, sodium.base64_variants.ORIGINAL),
-      key,
-    )
-    return true
-  } catch {
-    return false
-  }
 }

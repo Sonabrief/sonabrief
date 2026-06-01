@@ -4,6 +4,7 @@ import { getUserFromSession } from '../lib/sessions'
 const TABLES_WITH_USER_ID = [
   'action_items_meta',
   'sync_blobs',
+  'sync_keyring',
   'oauth_tokens',
   'user_preferences',
   'synthesis_log',

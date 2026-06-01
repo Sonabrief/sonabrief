@@ -725,6 +725,7 @@
   "sync_unlock.hint": "Saisissez votre phrase secrète pour accéder à vos meetings synchronisés",
   "sync_unlock.passphrase_label": "Phrase secrète",
   "sync_unlock.error_wrong": "Phrase secrète incorrecte",
+  "sync_unlock.error_generic": "Une erreur s'est produite. Réessayez.",
   "sync_unlock.unlocking": "Déverrouillage…",
   "sync_unlock.unlock_btn": "Déverrouiller",
   "sync_unlock.recovery_link": "Phrase secrète oubliée → utiliser la recovery phrase",

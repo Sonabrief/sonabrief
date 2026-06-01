@@ -72,6 +72,56 @@ export async function handleSyncUpload(request: Request, env: Env): Promise<Resp
   return json({ ok: true, path, size: blobField.size });
 }
 
+const MAX_KEYRING_SIZE = 8 * 1024; // 8 KB — il keyring è piccolo (2 wrapped key + salt)
+
+/**
+ * GET /v1/sync/keyring — restituisce il keyring cifrato dell'utente.
+ * Il server conserva solo il blob: non può decifrare nulla (zero-knowledge).
+ */
+export async function handleKeyringGet(request: Request, env: Env): Promise<Response> {
+  const session = await getUserFromSession(request, env);
+  if (!session) return new Response("Unauthorized", { status: 401 });
+
+  const row = await env.DB
+    .prepare("SELECT keyring_json, updated_at FROM sync_keyring WHERE user_id = ?")
+    .bind(session.userId)
+    .first<{ keyring_json: string; updated_at: number }>();
+
+  if (!row) return json({ keyring: null }, 200);
+
+  return json({ keyring: JSON.parse(row.keyring_json), updated_at: row.updated_at }, 200);
+}
+
+/**
+ * PUT /v1/sync/keyring — salva/aggiorna il keyring cifrato dell'utente.
+ * Body: { keyring: <oggetto JSON> }. Il server non interpreta il contenuto.
+ */
+export async function handleKeyringPut(request: Request, env: Env): Promise<Response> {
+  const session = await getUserFromSession(request, env);
+  if (!session) return new Response("Unauthorized", { status: 401 });
+
+  const body = await request.json().catch(() => null) as { keyring?: unknown } | null;
+  if (!body || typeof body.keyring !== "object" || body.keyring === null) {
+    return json({ error: "invalid_keyring" }, 400);
+  }
+
+  const keyringJson = JSON.stringify(body.keyring);
+  if (keyringJson.length > MAX_KEYRING_SIZE) {
+    return json({ error: "keyring_too_large" }, 400);
+  }
+
+  const now = Date.now();
+  await env.DB.prepare(
+    `INSERT INTO sync_keyring (user_id, keyring_json, updated_at)
+     VALUES (?, ?, ?)
+     ON CONFLICT(user_id) DO UPDATE SET keyring_json = excluded.keyring_json, updated_at = excluded.updated_at`
+  )
+    .bind(session.userId, keyringJson, now)
+    .run();
+
+  return json({ ok: true }, 200);
+}
+
 export async function handleSyncDownload(request: Request, env: Env): Promise<Response> {
   const session = await getUserFromSession(request, env);
   if (!session) return new Response("Unauthorized", { status: 401 });

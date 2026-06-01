@@ -8,7 +8,7 @@ import {
 } from "./routes/auth";
 import { handleSynthesize } from "./routes/synthesize";
 import { handleTemplates } from "./routes/templates";
-import { handleSyncUpload, handleSyncDownload } from "./routes/sync";
+import { handleSyncUpload, handleSyncDownload, handleKeyringGet, handleKeyringPut } from "./routes/sync";
 import { handleCheckout } from "./routes/checkout";
 import { handleLemonsqueezyWebhook } from "./routes/webhooks";
 import { handlePolarCheckout } from "./routes/checkout-polar";
@@ -82,6 +82,10 @@ export default {
       response = await handleSyncUpload(request, env);
     } else if (url.pathname === "/v1/sync/download" && request.method === "POST") {
       response = await handleSyncDownload(request, env);
+    } else if (url.pathname === "/v1/sync/keyring" && request.method === "GET") {
+      response = await handleKeyringGet(request, env);
+    } else if (url.pathname === "/v1/sync/keyring" && request.method === "PUT") {
+      response = await handleKeyringPut(request, env);
     } else if (url.pathname === "/v1/checkout" && request.method === "POST") {
       response = await handleCheckout(request, env);
     } else if (url.pathname === "/v1/billing/status" && request.method === "GET") {

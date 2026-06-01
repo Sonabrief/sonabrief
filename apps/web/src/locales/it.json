@@ -725,6 +725,7 @@
   "sync_unlock.hint": "Inserisci la tua passphrase per accedere ai meeting sincronizzati",
   "sync_unlock.passphrase_label": "Passphrase",
   "sync_unlock.error_wrong": "Passphrase errata",
+  "sync_unlock.error_generic": "Si è verificato un problema. Riprova.",
   "sync_unlock.unlocking": "Sblocco in corso…",
   "sync_unlock.unlock_btn": "Sblocca",
   "sync_unlock.recovery_link": "Ho perso la passphrase → usa recovery phrase",
