@@ -20,10 +20,6 @@ const h1Html = h1Raw.replace(/brief/gi, (match) => `<em class="brief-italic">${m
     </div>
 
     <p class="hero-micro">{t.hero.micro}</p>
-
-    <div class="hero-frame" aria-hidden="true">
-      <span>App screenshot coming soon</span>
-    </div>
   </div>
 </section>
 
@@ -104,33 +100,9 @@ const h1Html = h1Raw.replace(/brief/gi, (match) => `<em class="brief-italic">${m
     margin: 8px 0 0;
   }
 
-  .hero-frame {
-    margin-top: 56px;
-    width: 100%;
-    max-width: 800px;
-    height: 500px;
-    border: 1px solid var(--color-mist);
-    border-radius: 16px;
-    background-color: rgba(255, 255, 255, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    align-self: center;
-  }
-
-  .hero-frame span {
-    font-family: "Manrope", sans-serif;
-    font-size: 14px;
-    color: var(--color-stone);
-  }
-
   @media (max-width: 767px) {
     .hero {
       padding: 80px 24px 64px;
-    }
-    .hero-frame {
-      height: 280px;
-      margin-top: 40px;
     }
   }
 </style>
