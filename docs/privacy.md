@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Sonabrief · May 2026 · Version 2.0**
+**Sonabrief · June 2026 · Version 2.1**
 
 ---
 
@@ -102,16 +102,23 @@ You can verify this yourself: open your browser's DevTools, go to Application �
 
 Transcription happens entirely on your computer via Whisper, OpenAI's open source model, run in the browser via WebAssembly. Audio never reaches a server for transcription.
 
-The active model is Whisper Large-v3-turbo — High quality (~800 MB, downloaded once on the first session and cached in the browser). On hardware with limited resources, the app automatically switches to Whisper Small — Optimized for limited hardware (~470 MB). You can manage the preference in /profile.
+Model selection is **automatic by default**. The app inspects your hardware and chooses between two models:
+
+- **Whisper Large-v3-turbo** — High quality (~800 MB, downloaded once on the first session and cached in the browser). Selected automatically only when your device reports **at least 8 GB of RAM and at least 4 CPU cores**.
+- **Whisper Small** — Optimized for limited hardware (~470 MB). Selected automatically on devices below that threshold, so transcription stays responsive on slower machines.
+
+If a device claims enough resources but then runs out of memory while loading Large, the app falls back to Small at runtime so the recording is never blocked.
+
+Large is always available: you can **override the automatic choice in /profile** and force Large (or force Small). A manual choice takes precedence over the hardware detection. Either way, transcription always runs locally — audio never reaches a server in Standard or Local Only mode.
 
 ### 3.3 Synthesis and transcription: three modes
 
 
-**Standard mode**: the text transcription produced locally by Whisper is sent to our cloud service (Mistral Large 3, Paris EU) to generate the structured synthesis. Audio never reaches the cloud — only the transcribed text.
+**Standard mode**: the text transcription produced locally by Whisper is sent to our cloud service (Mistral, Paris EU) to generate the structured synthesis. The model depends on your plan: **Free uses Mistral Small; Pro and Pro Unlimited use Mistral Large**. Audio never reaches the cloud — only the transcribed text.
 
 **Local Only mode**: both transcription and synthesis happen entirely on your computer. Nothing leaves the machine. Maximum privacy, quality slightly lower than cloud mode.
 
-**Cloud Fast mode (Pro and Pro Unlimited only)**: audio is encrypted end-to-end on your device before being transmitted to Mistral Voxtral (Paris, EU) for transcription. Audio is never written to disk — neither on Sonabrief servers nor on Mistral (Zero Data Retention active, documented in the DPA). After transcription, the text follows the Standard synthesis flow via Mistral Large 3. This mode exists for hardware where local Whisper is too slow (e.g. Windows with integrated Intel GPU).
+**Cloud Fast mode (Pro and Pro Unlimited only)**: audio is encrypted end-to-end on your device before being transmitted to Mistral Voxtral (Paris, EU) for transcription. Audio is never written to disk — neither on Sonabrief servers nor on Mistral (Zero Data Retention active, documented in the DPA). After transcription, the text follows the Standard synthesis flow (Mistral Small on Free, Mistral Large on Pro and Pro Unlimited). This mode exists for hardware where local Whisper is too slow (e.g. Windows with integrated Intel GPU).
 
 The choice is per-meeting: you can change mode before each recording.
 
@@ -121,7 +128,7 @@ The derived data (transcriptions, syntheses, notes) lives where you decide.
 
 **Local Only mode**: all data stays on a single device in IndexedDB. No server involved. The backup is exportable as an encrypted file that you manage.
 
-**Synced mode**: data is encrypted client-side with zero-knowledge encryption (XChaCha20-Poly1305, key derived via Argon2id from your passphrase) before being synced to our servers (Cloudflare R2). We store encrypted blobs that we are unable to read. The same model used by 1Password, ProtonMail, Signal.
+**Synced mode**: data is encrypted client-side with zero-knowledge encryption (XChaCha20-Poly1305, key derived via Argon2id — MODERATE parameters — from your passphrase) before being synced to our servers (Cloudflare R2). We store encrypted blobs that we are unable to read. The same model used by 1Password, ProtonMail, Signal.
 
 **Automatic E2E backup (Pro Unlimited)**: Pro Unlimited holders can enable a scheduled automatic backup to R2. The cron runs in the app, the data stays zero-knowledge — we sync encrypted blobs without ever seeing the content.
 
@@ -257,7 +264,12 @@ The current version is always available at sonabrief.com/privacy and in the publ
 
 ## 11. Contacts and data controller
 
-**Data controller**: Sonabrief
+**Data controller**: Sonabrief is an independent project operated as a sole proprietorship under the "Sonabrief" brand. The project is pre-incorporation: a formal company and VAT registration are in progress. We have chosen to keep the founder's identity off the public-facing documents for now — this is a deliberate, stated choice, not an attempt to obscure responsibility. A single, accountable natural person stands behind the project and acts as data controller.
+
+**Controller contact point**: hello@sonabrief.com — this is a monitored channel and the reference point for any request directed to the data controller.
+
+**Full controller identity on request**: the complete identifying details of the data controller (legal name and registered address) are available on request by writing to hello@sonabrief.com, and will be published in this policy when the VAT registration is completed.
+
 **Email**: hello@sonabrief.com
 **Website**: sonabrief.com
 
@@ -265,4 +277,4 @@ For any questions about this policy, to exercise your GDPR rights, or to report 
 
 ---
 
-*Version 2.0 · May 2026*
+*Version 2.1 · June 2026*

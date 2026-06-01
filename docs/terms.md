@@ -1,6 +1,6 @@
 # Terms of Service
 
-**Sonabrief · May 2026 · Version 2.0**
+**Sonabrief · June 2026 · Version 2.1**
 
 ---
 
@@ -76,7 +76,6 @@ In case of a plan downgrade, records beyond the new limit are kept for an additi
 ### Discounts and special programs
 
 - **Annual**: approximately 17% discount compared to monthly
-- **Friends & Family**: 12 months of Pro free for people personally selected by the team
 - **Open source maintainer**: 12 months of Pro free for active maintainers of open source projects (verified via GitHub). Write to hello@sonabrief.com with a link to the repository
 
 ---
@@ -86,13 +85,13 @@ In case of a plan downgrade, records beyond the new limit are kept for an additi
 Sonabrief offers three transcription and synthesis modes. You choose explicitly at the start of each recording.
 
 ### Standard (default — all tiers)
-Transcription runs locally on your computer via Whisper Large-v3-turbo. Synthesis is sent to Mistral Large 3 (Paris, EU) as transcribed text only. Audio never leaves your computer.
+Transcription runs locally on your computer via Whisper. The model is selected automatically based on your hardware (Whisper Large-v3-turbo on capable devices, Whisper Small on lighter ones); you can override the choice in /profile. Synthesis is sent to Mistral (Paris, EU) as transcribed text only, never audio. The synthesis model depends on your plan: **Free uses Mistral Small; Pro and Pro Unlimited use Mistral Large.** Audio never leaves your computer.
 
 ### Local (all tiers)
 Both transcription and synthesis run entirely on your computer via Whisper and a local Ollama model. Nothing leaves your device. Maximum privacy.
 
 ### Cloud Fast (Pro and Pro Unlimited only)
-Audio is encrypted end-to-end on your device and sent to Mistral Voxtral (Paris, EU) for transcription. Synthesis follows via Mistral Large 3 as in Standard mode. Audio is never written to disk — neither by Sonabrief servers nor by Mistral (Zero Data Retention active). This mode is designed for hardware where local transcription is too slow (e.g. Windows with integrated Intel GPU).
+Audio is encrypted end-to-end on your device and sent to Mistral Voxtral (Paris, EU) for transcription. Synthesis follows as in Standard mode (Mistral Large on Pro and Pro Unlimited, the only plans where Cloud Fast is available). Audio is never written to disk — neither by Sonabrief servers nor by Mistral (Zero Data Retention active). This mode is designed for hardware where local transcription is too slow (e.g. Windows with integrated Intel GPU).
 
 **Cloud Fast quota.** Pro includes 5 hours per month. Pro Unlimited includes 20 hours per month. Hours beyond the included quota are billed at €0.50/h (Pro) or €0.30/h (Pro Unlimited). A hard monthly cap of 25h (Pro) and 80h (Pro Unlimited) applies. Before exceeding included hours, the app shows a confirmation prompt with the overage cost.
 
@@ -161,15 +160,19 @@ When we update these terms, the new version is published on this page with an up
 
 ## 12. Governing law
 
-These terms are governed by Italian law. For any dispute, the competent court is that of the location of Sonabrief's registered office, unless a mandatory provision applicable to the consumer provides otherwise.
+These terms are governed by Italian law, without prejudice to any mandatory consumer-protection provisions of the country in which you habitually reside.
+
+Sonabrief is an independent project operated as a sole proprietorship under the "Sonabrief" brand and is currently pre-incorporation, with VAT registration in progress, so it does not yet have a registered office. Until a registered office is established and published, jurisdiction is determined by the rules of law applicable to each case: if you are a consumer, the courts of your place of residence have jurisdiction where mandatory consumer law so provides; in any other case, the competent court is the one designated by the applicable rules of Italian civil procedure. When the registered office is established, it will be published in these terms and will serve as the reference forum, subject to the consumer protections above.
 
 ---
 
-## 13. Contacts
+## 13. Contacts and operator
+
+Sonabrief is an independent project operated as a sole proprietorship under the "Sonabrief" brand, currently pre-incorporation with VAT registration in progress. The founder's identity is kept off the public-facing documents for now — a deliberate, stated choice, not an attempt to avoid responsibility. A single, accountable natural person stands behind the project and operates the service. The full identifying details of the operator (legal name and registered address) are available on request at hello@sonabrief.com and will be published in these terms once VAT registration is completed.
 
 **Email**: hello@sonabrief.com
 **Website**: sonabrief.com
 
 ---
 
-*Version 2.0 · May 2026*
+*Version 2.1 · June 2026*
