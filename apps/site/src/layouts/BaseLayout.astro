@@ -37,6 +37,8 @@ const hreflangs = [
     <meta name="robots" content="noindex,nofollow" />
     <title>{title}</title>
 
+    <link rel="canonical" href={`${base}/${path}`} />
+
     {hreflangs.map(({ lang: l, href }) => (
       <link rel="alternate" hreflang={l} href={href} />
     ))}

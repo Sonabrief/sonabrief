@@ -349,8 +349,8 @@
   },
   "footer": {
     "columns": {
-      "product": { "title": "Produkt", "links": ["Funktionen", "Preise", "Datenschutzmodi", "Kostenlos testen →"] },
-      "trust": { "title": "Vertrauen", "links": ["Sicherheit", "Datenschutzerklärung", "Nutzungsbedingungen", "Cookie-Richtlinie", "DPA auf Anfrage"] },
+      "product": { "title": "Produkt", "links": ["Preise", "Kostenlos testen →"] },
+      "trust": { "title": "Vertrauen", "links": ["Sicherheit", "Datenschutzerklärung", "Nutzungsbedingungen", "DPA auf Anfrage"] },
       "company": { "title": "Unternehmen", "links": ["Über uns", "Open Source", "Kontakt", "GitHub →", "X →", "Bluesky →"] }
     },
     "newsletter": { "heading": "Updates erhalten", "placeholder": "Ihre E-Mail", "cta": "Abonnieren" },
