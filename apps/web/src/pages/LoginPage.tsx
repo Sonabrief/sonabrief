@@ -93,7 +93,7 @@ export default function LoginPage() {
 
       {/* Colonna sinistra — pannello brand */}
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-[#1a5c5c] px-16 py-14">
-        <img src="/sonabrief-logo.png" alt="Sonabrief" className="h-12 w-12 object-contain brightness-0 invert" />
+        <img src="/logo.svg" alt="Sonabrief" className="h-8 w-auto brightness-0 invert" />
 
         <div>
           <h2 className="font-heading text-[clamp(2rem,3.5vw,2.75rem)] font-extrabold leading-[1.15] tracking-[-0.02em] text-white">
