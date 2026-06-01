@@ -9,7 +9,7 @@ const title = `${t.nav.security} — Sonabrief`;
 const description: string = t.security.promise.lines?.[0] ?? t.hero.sub;
 ---
 
-<BaseLayout lang={lang} title={title} description={description}>
+<BaseLayout lang={lang} title={title} description={description} currentPath="security">
   <main>
     <SecurityPage t={t} lang={lang} />
   </main>

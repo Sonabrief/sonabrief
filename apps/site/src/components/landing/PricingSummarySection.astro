@@ -79,7 +79,7 @@ const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
       </div>
     )}
 
-    <a href={pricingPath} class="pricing-full-link">{t.pricing.fullComparison}</a>
+    <a href={pricingPath} class="pricing-full-link" plausible-event-name="CTA: Full comparison">{t.pricing.fullComparison}</a>
   </div>
 </section>
 

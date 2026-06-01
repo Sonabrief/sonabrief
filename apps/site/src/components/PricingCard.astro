@@ -41,7 +41,11 @@ const {
     ))}
   </ul>
 
-  <a href={ctaHref} class:list={['pricing-card-cta', { 'pricing-card-cta--highlighted': highlighted }]}>
+  <a
+    href={ctaHref}
+    class:list={['pricing-card-cta', { 'pricing-card-cta--highlighted': highlighted }]}
+    plausible-event-name={ctaHref.includes('signup') ? 'CTA: Try free' : undefined}
+  >
     {cta}
   </a>
 </div>

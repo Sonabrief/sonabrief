@@ -17,9 +17,7 @@ const form = e.form ?? {};
 
       <form
         class="pe-form"
-        action="mailto:hello@sonabrief.com"
-        method="post"
-        enctype="text/plain"
+        id="enterprise-form"
       >
         <div class="pe-field">
           <label for="pe-name" class="pe-label">{form.name}</label>
@@ -33,7 +31,7 @@ const form = e.form ?? {};
           <label for="pe-notes" class="pe-label">{form.notes}</label>
           <textarea id="pe-notes" name="notes" class="pe-textarea" rows="4"></textarea>
         </div>
-        <button type="submit" class="pe-submit">{form.submit ?? e.cta}</button>
+        <button type="submit" class="pe-submit" data-label={form.submit ?? e.cta}>{form.submit ?? e.cta}</button>
       </form>
     </div>
   </div>
@@ -149,3 +147,35 @@ const form = e.form ?? {};
     }
   }
 </style>
+
+<script>
+  const form = document.getElementById('enterprise-form') as HTMLFormElement | null;
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const target = e.target as HTMLFormElement;
+      const btn = target.querySelector<HTMLButtonElement>('[type=submit]');
+      if (!btn) return;
+      btn.disabled = true;
+      btn.textContent = '...';
+      try {
+        const res = await fetch('/api/enterprise-contact', {
+          method: 'POST',
+          body: new FormData(target),
+        });
+        const json = await res.json();
+        if (json.ok) {
+          target.innerHTML = '<p style="color:var(--color-deep-teal);font-family:Manrope">✓ Message sent. We will be in touch within 48 hours.</p>';
+        } else {
+          btn.disabled = false;
+          btn.textContent = btn.dataset.label ?? 'Send';
+          alert('Something went wrong. Please email hello@sonabrief.com directly.');
+        }
+      } catch {
+        btn.disabled = false;
+        btn.textContent = btn.dataset.label ?? 'Send';
+        alert('Something went wrong. Please email hello@sonabrief.com directly.');
+      }
+    });
+  }
+</script>

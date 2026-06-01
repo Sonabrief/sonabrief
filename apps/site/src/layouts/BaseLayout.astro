@@ -7,20 +7,24 @@ interface Props {
   title?: string;
   description?: string;
   lang?: string;
+  currentPath?: string;
 }
 
 const {
   title = 'Sonabrief',
   description = 'Open-source meeting assistant. Audio never leaves your computer.',
   lang = 'en',
+  currentPath = '',
 } = Astro.props;
 
+const base = 'https://sonabrief.com';
+const path = currentPath ? `${currentPath}/`.replace(/\/\/$/, '/') : '';
 const hreflangs = [
-  { lang: 'en', href: 'https://sonabrief.com/' },
-  { lang: 'it', href: 'https://sonabrief.com/it/' },
-  { lang: 'fr', href: 'https://sonabrief.com/fr/' },
-  { lang: 'es', href: 'https://sonabrief.com/es/' },
-  { lang: 'de', href: 'https://sonabrief.com/de/' },
+  { lang: 'en', href: `${base}/${path}` },
+  { lang: 'it', href: `${base}/it/${path}` },
+  { lang: 'fr', href: `${base}/fr/${path}` },
+  { lang: 'es', href: `${base}/es/${path}` },
+  { lang: 'de', href: `${base}/de/${path}` },
 ];
 ---
 
@@ -36,9 +40,10 @@ const hreflangs = [
     {hreflangs.map(({ lang: l, href }) => (
       <link rel="alternate" hreflang={l} href={href} />
     ))}
-    <link rel="alternate" hreflang="x-default" href="https://sonabrief.com/" />
+    <link rel="alternate" hreflang="x-default" href={`${base}/${path}`} />
 
-    <script defer data-domain="sonabrief.com" src="https://plausible.io/js/script.js"></script>
+    <script defer data-domain="sonabrief.com,app.sonabrief.com" src="https://plausible.io/js/script.hash.js"></script>
+    <!-- data-api="/api/event" --><!-- uncomment to proxy events and bypass ad-blockers -->
   </head>
   <body class="grain-texture">
     <Navbar lang={lang} />

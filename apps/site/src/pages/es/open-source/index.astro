@@ -8,7 +8,7 @@ const t = await getTranslations(lang);
 const title: string = t.nav?.openSource ?? 'Open source';
 ---
 
-<BaseLayout lang={lang} title={title} description={t.openSourcePage?.intro ?? ''}>
+<BaseLayout lang={lang} title={title} description={t.openSourcePage?.intro ?? ''} currentPath="open-source">
   <main>
     <OpenSourcePage t={t} lang={lang} />
   </main>

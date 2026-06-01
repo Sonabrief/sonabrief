@@ -8,7 +8,7 @@ const t = await getTranslations(lang);
 const title: string = t.about?.sections?.[0]?.title ?? 'About';
 ---
 
-<BaseLayout lang={lang} title={title} description={t.hero.sub}>
+<BaseLayout lang={lang} title={title} description={t.hero.sub} currentPath="about">
   <main>
     <AboutPage t={t} lang={lang} />
   </main>

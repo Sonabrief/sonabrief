@@ -1,0 +1,116 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getTranslations } from '../../i18n/utils';
+
+const lang = 'es';
+const t = await getTranslations(lang);
+const homeHref = '/es/';
+---
+
+<BaseLayout title="404 — Sonabrief" lang={lang}>
+  <div class="not-found grain-texture">
+    <div class="nf-inner">
+      <img
+        src="/sonabrief-logo.svg"
+        alt="Sonabrief"
+        width="64"
+        height="64"
+        class="nf-logo"
+      />
+      <h1 class="nf-title">{t.notFound.title}</h1>
+      <p class="nf-subtitle">{t.notFound.subtitle}</p>
+      <a href={homeHref} class="nf-cta">{t.notFound.cta}</a>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .not-found {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-cream);
+    padding: 24px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .not-found {
+      background-color: var(--color-charcoal);
+    }
+  }
+
+  .nf-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0;
+  }
+
+  .nf-logo {
+    width: 64px;
+    height: 64px;
+    animation: nf-logo-in 600ms ease-out both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nf-logo {
+      animation: none;
+    }
+  }
+
+  @keyframes nf-logo-in {
+    from {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .nf-title {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-deep-teal);
+    letter-spacing: -0.01em;
+    margin: 32px 0 0;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .nf-title {
+      color: var(--color-cream);
+    }
+  }
+
+  .nf-subtitle {
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    font-style: italic;
+    color: var(--color-stone);
+    margin: 8px 0 0;
+  }
+
+  .nf-cta {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    color: var(--color-deep-teal);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    margin-top: 32px;
+    transition: opacity 150ms ease;
+  }
+
+  .nf-cta:hover {
+    opacity: 0.7;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .nf-cta {
+      color: color-mix(in srgb, var(--color-deep-teal) 85%, var(--color-cream));
+    }
+  }
+</style>

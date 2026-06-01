@@ -10,7 +10,7 @@ const lang = 'es';
 const t = await getTranslations(lang);
 ---
 
-<BaseLayout lang={lang} title={t.pricing.title} description={t.hero.sub}>
+<BaseLayout lang={lang} title={t.pricing.title} description={t.hero.sub} currentPath="pricing">
   <main>
     <PricingHero t={t} lang={lang} />
     <PricingTableFull t={t} lang={lang} />

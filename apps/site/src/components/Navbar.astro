@@ -33,13 +33,13 @@ function isActive(href: string): boolean {
       <a href={securityHref} class:list={[{ active: isActive(securityHref) }]} aria-current={isActive(securityHref) ? 'page' : undefined}>{t.nav.security}</a>
       <a href={openSourceHref} class:list={[{ active: isActive(openSourceHref) }]} aria-current={isActive(openSourceHref) ? 'page' : undefined}>{t.nav.openSource}</a>
       <a href={pricingHref} class:list={[{ active: isActive(pricingHref) }]} aria-current={isActive(pricingHref) ? 'page' : undefined}>{t.nav.pricing}</a>
-      <a href="https://github.com/Sonabrief" target="_blank" rel="noopener noreferrer">
+      <a href="https://github.com/Sonabrief" target="_blank" rel="noopener noreferrer" plausible-event-name="CTA: GitHub">
         {t.nav.github}&nbsp;↗
       </a>
     </nav>
 
     <!-- CTA (desktop) -->
-    <a href="https://app.sonabrief.com/signup" class="navbar-cta">{t.nav.cta}</a>
+    <a href="https://app.sonabrief.com/signup" class="navbar-cta" plausible-event-name="CTA: Try free">{t.nav.cta}</a>
 
     <!-- Hamburger (mobile) -->
     <button class="navbar-hamburger" id="navbar-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="navbar-mobile-menu">
@@ -55,10 +55,10 @@ function isActive(href: string): boolean {
       <a href={securityHref} class:list={[{ active: isActive(securityHref) }]} aria-current={isActive(securityHref) ? 'page' : undefined}>{t.nav.security}</a>
       <a href={openSourceHref} class:list={[{ active: isActive(openSourceHref) }]} aria-current={isActive(openSourceHref) ? 'page' : undefined}>{t.nav.openSource}</a>
       <a href={pricingHref} class:list={[{ active: isActive(pricingHref) }]} aria-current={isActive(pricingHref) ? 'page' : undefined}>{t.nav.pricing}</a>
-      <a href="https://github.com/Sonabrief" target="_blank" rel="noopener noreferrer">
+      <a href="https://github.com/Sonabrief" target="_blank" rel="noopener noreferrer" plausible-event-name="CTA: GitHub">
         {t.nav.github}&nbsp;↗
       </a>
-      <a href="https://app.sonabrief.com/signup" class="navbar-mobile-cta">{t.nav.cta}</a>
+      <a href="https://app.sonabrief.com/signup" class="navbar-mobile-cta" plausible-event-name="CTA: Try free">{t.nav.cta}</a>
     </nav>
   </div>
 </header>

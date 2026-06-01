@@ -12,7 +12,7 @@ const { t } = Astro.props;
     <p class="oss-body">{t.openSource.body}</p>
 
     <div class="oss-cta-row">
-      <a href="https://github.com/Sonabrief" class="oss-cta" target="_blank" rel="noopener noreferrer">
+      <a href="https://github.com/Sonabrief" class="oss-cta" target="_blank" rel="noopener noreferrer" plausible-event-name="CTA: GitHub">
         {t.openSource.cta1}
       </a>
       <a href="/security" class="oss-cta">{t.openSource.cta2}</a>
