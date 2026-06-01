@@ -57,7 +57,7 @@
         "desc": "Mistral EU avec Zero Data Retention, ou Ollama entièrement en local. Uniquement le texte transcrit — jamais l'audio."
       }
     ],
-    "qualityNote": "Une transcription de haut niveau sur chaque plan — y compris le Free. Nous utilisons Whisper Large-v3-turbo, le modèle qu'utilisent les chercheurs, exécuté entièrement sur votre machine.",
+    "qualityNote": "La qualité de transcription ne dépend pas de ce que vous payez. Whisper Large-v3-turbo — le modèle qu'utilisent les chercheurs — est disponible sur chaque plan, Free compris, et s'exécute entièrement sur votre machine. Par défaut, l'application choisit le modèle adapté à votre matériel ; vous pouvez forcer Large-v3-turbo dans les réglages quand vous le souhaitez.",
     "cloudNote": "Sur Pro et Pro Unlimited, Cloud Rapide transcrit dans le cloud européen : 30 minutes d'audio en 1 à 2 minutes, quel que soit votre matériel."
   },
   "threeWays": {
@@ -69,7 +69,7 @@
           "Mistral, hébergé en EU, ZDR actif, DPA signé",
           "Seul le texte transcrit atteint le serveur — jamais l'audio",
           "Qualité de résumé excellente, grande rapidité",
-          "Free : Mistral Small 3.1 · Pro et Pro Unlimited : Mistral Large 3"
+          "Free : Mistral Small · Pro et Pro Unlimited : Mistral Large"
         ]
       },
       {
@@ -164,7 +164,7 @@
           "Tout le Pro",
           "Cloud Rapide : 20 h/mois",
           "Archives pour toujours",
-          "Résumés avec Mistral Large 3"
+          "Résumés avec Mistral Large"
         ],
         "cta": "Choisir Pro Unlimited"
       },
@@ -180,7 +180,7 @@
       }
     ],
     "claims": [
-      "Tous les plans utilisent Whisper Large-v3-turbo. Aucune qualité réduite sur le Free.",
+      "Whisper Large-v3-turbo est disponible sur chaque plan, Free compris — le modèle exécuté dépend de votre matériel, jamais de votre prix, et vous pouvez forcer Large dans les réglages.",
       "Tout le traitement cloud s'exécute sur Mistral, hébergé en EU, avec Zero Data Retention."
     ],
     "fullComparison": "Voir le comparatif complet →",
@@ -197,7 +197,7 @@
         {
           "label": "Transcription",
           "rows": [
-            { "feature": "Modèle Whisper", "values": ["Large-v3-turbo", "Large-v3-turbo", "Large-v3-turbo", "Large-v3-turbo"] },
+            { "feature": "Modèle Whisper (auto selon le matériel, forçable)", "values": ["Large-v3-turbo", "Large-v3-turbo", "Large-v3-turbo", "Large-v3-turbo"] },
             { "feature": "Transcription locale", "values": ["Illimitée", "Illimitée", "Illimitée", "Illimitée"] },
             { "feature": "Cloud Standard (heures/mois)", "values": ["3 h", "30 h", "Usage raisonnable", "Sur mesure"] },
             { "feature": "Cloud Rapide (transcription rapide EU)", "values": ["—", "5 h/mois", "20 h/mois", "Illimité (usage raisonnable)"] }
@@ -206,7 +206,7 @@
         {
           "label": "Résumé",
           "rows": [
-            { "feature": "Modèle cloud LLM", "values": ["Mistral Small 3.1", "Mistral Large 3", "Mistral Large 3", "Mistral Large 3"] },
+            { "feature": "Modèle cloud LLM", "values": ["Mistral Small", "Mistral Large", "Mistral Large", "Mistral Large"] },
             { "feature": "Modèle Local uniquement", "values": ["Llama 3B", "Llama 8B", "Au choix", "Au choix"] }
           ]
         },
@@ -267,7 +267,7 @@
       ]
     },
     "banners": [
-      "Whisper Large-v3-turbo sur chaque plan. Aucune transcription dégradée sur le Free.",
+      "Whisper Large-v3-turbo sur chaque plan, Free compris. Le modèle s'adapte à votre matériel, pas à votre prix — et Large reste toujours forçable.",
       "Tout le LLM cloud sur Mistral, hébergé en EU · ZDR actif · DPA signé"
     ],
     "enterprise": {

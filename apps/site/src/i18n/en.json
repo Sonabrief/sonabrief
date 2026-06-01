@@ -57,7 +57,7 @@
         "desc": "Mistral EU with Zero Data Retention, or Ollama fully local. Only transcribed text — never audio."
       }
     ],
-    "qualityNote": "Top-tier transcription on every plan — including Free. We use Whisper Large-v3-turbo, the same model researchers use, running entirely on your machine.",
+    "qualityNote": "Transcription quality doesn't depend on what you pay. Whisper Large-v3-turbo — the same model researchers use — is available on every plan, including Free, and runs entirely on your machine. By default the app picks the right model for your hardware; you can force Large-v3-turbo in settings whenever you want.",
     "cloudNote": "On Pro and Pro Unlimited, Cloud Fast transcribes in the EU cloud: 30 minutes of audio in 1–2 minutes, whatever your hardware."
   },
   "threeWays": {
@@ -69,7 +69,7 @@
           "Mistral, EU-hosted, ZDR active, DPA signed",
           "Only transcribed text reaches the server — never audio",
           "Excellent summary quality, great speed",
-          "Free: Mistral Small 3.1 · Pro & Pro Unlimited: Mistral Large 3"
+          "Free: Mistral Small · Pro & Pro Unlimited: Mistral Large"
         ]
       },
       {
@@ -164,7 +164,7 @@
           "Everything in Pro",
           "Cloud Fast: 20h/mo",
           "Forever archive",
-          "Mistral Large 3 summaries"
+          "Mistral Large summaries"
         ],
         "cta": "Choose Pro Unlimited"
       },
@@ -180,7 +180,7 @@
       }
     ],
     "claims": [
-      "All plans use Whisper Large-v3-turbo. No quality downgrade on Free.",
+      "Whisper Large-v3-turbo is available on every plan, Free included — the model the app runs depends on your hardware, never on your price, and you can force Large in settings.",
       "All cloud processing runs on Mistral, EU-hosted, with Zero Data Retention."
     ],
     "fullComparison": "See full comparison →",
@@ -197,7 +197,7 @@
         {
           "label": "Transcription",
           "rows": [
-            { "feature": "Whisper model", "values": ["Large-v3-turbo", "Large-v3-turbo", "Large-v3-turbo", "Large-v3-turbo"] },
+            { "feature": "Whisper model (auto by hardware, forceable)", "values": ["Large-v3-turbo", "Large-v3-turbo", "Large-v3-turbo", "Large-v3-turbo"] },
             { "feature": "Local transcription", "values": ["Unlimited", "Unlimited", "Unlimited", "Unlimited"] },
             { "feature": "Standard cloud (hours/mo)", "values": ["3h", "30h", "Fair use", "Custom"] },
             { "feature": "Cloud Fast (fast EU transcription)", "values": ["—", "5h/mo", "20h/mo", "Unlimited (fair use)"] }
@@ -206,7 +206,7 @@
         {
           "label": "Summarization",
           "rows": [
-            { "feature": "Cloud LLM model", "values": ["Mistral Small 3.1", "Mistral Large 3", "Mistral Large 3", "Mistral Large 3"] },
+            { "feature": "Cloud LLM model", "values": ["Mistral Small", "Mistral Large", "Mistral Large", "Mistral Large"] },
             { "feature": "Local Only model", "values": ["Llama 3B", "Llama 8B", "Your choice", "Your choice"] }
           ]
         },
@@ -267,7 +267,7 @@
       ]
     },
     "banners": [
-      "Whisper Large-v3-turbo on every plan. No degraded transcription on Free.",
+      "Whisper Large-v3-turbo on every plan, Free included. The model fits your hardware, not your price — and Large is always yours to force.",
       "All cloud LLM on Mistral, EU-hosted · ZDR active · DPA signed"
     ],
     "enterprise": {
