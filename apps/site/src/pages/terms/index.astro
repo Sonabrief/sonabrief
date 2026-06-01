@@ -1,0 +1,23 @@
+---
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import LegalPage from '../../components/LegalPage.astro';
+
+const raw = readFileSync(join(process.cwd(), '../../docs/terms.md'), 'utf-8');
+// Strip the first 5 lines: H1 title, bold metadata line, blank line, HR, blank line
+const content = raw.split('\n').slice(5).join('\n');
+---
+
+<BaseLayout
+  title="Terms of Service — Sonabrief"
+  description="Terms of Service for Sonabrief."
+  lang="en"
+>
+  <LegalPage
+    title="Terms of Service"
+    lastUpdated="June 2026"
+    version="2.1"
+    content={content}
+  />
+</BaseLayout>

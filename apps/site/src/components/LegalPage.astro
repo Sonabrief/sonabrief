@@ -1,0 +1,396 @@
+---
+import { marked } from 'marked';
+
+interface Props {
+  content: string;
+  title: string;
+  lastUpdated: string;
+  version: string;
+}
+
+const { content, title, lastUpdated, version } = Astro.props;
+
+const htmlContent = marked(content) as string;
+---
+
+<main class="legal-wrapper">
+  <div class="legal-layout">
+    <!-- Sidebar TOC (desktop) -->
+    <aside class="toc-sidebar" aria-label="Table of contents">
+      <p class="toc-heading">Contents</p>
+      <nav id="toc-nav">
+        <!-- populated by JS -->
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <article class="legal-article">
+      <h1 class="legal-h1">{title}</h1>
+
+      <p class="legal-version">Version {version} · {lastUpdated}</p>
+
+      <div class="lang-banner" role="note">
+        This document is currently available in English only.
+        Translations are in preparation.
+      </div>
+
+      <!-- Mobile TOC accordion -->
+      <details class="toc-mobile" id="toc-mobile">
+        <summary class="toc-mobile-summary">Contents ↓</summary>
+        <nav id="toc-mobile-nav" class="toc-mobile-nav">
+          <!-- populated by JS -->
+        </nav>
+      </details>
+
+      <div class="legal-content">
+        <Fragment set:html={htmlContent} />
+      </div>
+    </article>
+  </div>
+</main>
+
+<script>
+  function buildToc() {
+    const article = document.querySelector('.legal-content');
+    if (!article) return;
+
+    const headings = Array.from(article.querySelectorAll('h2')).filter(h => {
+      const text = h.textContent?.trim() ?? '';
+      // Only numbered sections (start with a digit)
+      return /^\d/.test(text);
+    });
+
+    if (headings.length === 0) return;
+
+    // Ensure each heading has an id
+    headings.forEach(h => {
+      if (!h.id) {
+        h.id = h.textContent!
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .trim()
+          .replace(/\s+/g, '-');
+      }
+    });
+
+    const makeLinks = () =>
+      headings.map(h => {
+        const a = document.createElement('a');
+        a.href = `#${h.id}`;
+        a.textContent = h.textContent!.trim();
+        a.className = 'toc-link';
+        a.addEventListener('click', e => {
+          e.preventDefault();
+          h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        return a;
+      });
+
+    const desktopNav = document.getElementById('toc-nav');
+    const mobileNav = document.getElementById('toc-mobile-nav');
+
+    if (desktopNav) {
+      makeLinks().forEach(a => { desktopNav.appendChild(a); });
+    }
+    if (mobileNav) {
+      makeLinks().forEach(a => { mobileNav.appendChild(a); });
+    }
+
+    // IntersectionObserver for active highlight
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            document.querySelectorAll('.toc-link').forEach(link => {
+              link.classList.toggle('active', (link as HTMLAnchorElement).href.endsWith(`#${id}`));
+            });
+          }
+        });
+      },
+      { rootMargin: '-10% 0px -70% 0px' }
+    );
+
+    headings.forEach(h => observer.observe(h));
+  }
+
+  buildToc();
+</script>
+
+<style>
+  .legal-wrapper {
+    background-color: var(--color-cream);
+    min-height: 100vh;
+    padding: 80px 24px 120px;
+  }
+
+  @media (max-width: 767px) {
+    .legal-wrapper {
+      padding: 48px 20px 80px;
+    }
+  }
+
+  .legal-layout {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    gap: 56px;
+    align-items: flex-start;
+  }
+
+  /* ── Sidebar TOC ── */
+  .toc-sidebar {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .legal-layout {
+      max-width: 1060px;
+    }
+
+    .toc-sidebar {
+      display: block;
+      width: 220px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 80px;
+    }
+  }
+
+  .toc-heading {
+    font-family: "Manrope", sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-stone);
+    margin-bottom: 12px;
+  }
+
+  #toc-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  :global(.toc-link) {
+    font-family: "Manrope", sans-serif;
+    font-size: 13px;
+    color: var(--color-stone);
+    text-decoration: none;
+    line-height: 1.5;
+    padding: 3px 0;
+    display: block;
+    transition: color 150ms ease;
+  }
+
+  :global(.toc-link:hover),
+  :global(.toc-link.active) {
+    color: var(--color-deep-teal);
+  }
+
+  /* ── Mobile TOC ── */
+  .toc-mobile {
+    display: block;
+    border: 1px solid var(--color-mist);
+    border-radius: 8px;
+    margin-bottom: 32px;
+    overflow: hidden;
+  }
+
+  @media (min-width: 1024px) {
+    .toc-mobile {
+      display: none;
+    }
+  }
+
+  .toc-mobile-summary {
+    font-family: "Manrope", sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-stone);
+    padding: 12px 16px;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+  }
+
+  .toc-mobile-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .toc-mobile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 8px 16px 16px;
+    border-top: 1px solid var(--color-mist);
+  }
+
+  .toc-mobile-nav :global(.toc-link) {
+    padding: 6px 0;
+    border-bottom: 1px solid transparent;
+  }
+
+  /* ── Article ── */
+  .legal-article {
+    flex: 1;
+    min-width: 0;
+    max-width: 720px;
+  }
+
+  .legal-h1 {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--color-deep-teal);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 12px;
+  }
+
+  .legal-version {
+    font-family: "Manrope", sans-serif;
+    font-size: 12px;
+    color: var(--color-stone);
+    margin-bottom: 20px;
+  }
+
+  .lang-banner {
+    border: 1px solid var(--color-mist);
+    background-color: color-mix(in srgb, var(--color-mist) 30%, transparent);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-family: "Manrope", sans-serif;
+    font-size: 13px;
+    color: var(--color-stone);
+    margin-bottom: 32px;
+  }
+
+  /* ── Legal content typography ── */
+  .legal-content :global(h1) {
+    display: none; /* title is already in .legal-h1 */
+  }
+
+  .legal-content :global(h2) {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--color-charcoal);
+    border-bottom: 1px solid var(--color-mist);
+    padding-bottom: 8px;
+    margin-top: 48px;
+    margin-bottom: 20px;
+    letter-spacing: -0.01em;
+  }
+
+  .legal-content :global(h3) {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-charcoal);
+    margin-top: 32px;
+    margin-bottom: 12px;
+  }
+
+  .legal-content :global(p) {
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--color-charcoal);
+    margin-bottom: 20px;
+    max-width: 65ch;
+  }
+
+  .legal-content :global(ul),
+  .legal-content :global(ol) {
+    font-family: "Manrope", sans-serif;
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--color-charcoal);
+    padding-left: 24px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .legal-content :global(li) {
+    max-width: 65ch;
+  }
+
+  .legal-content :global(table) {
+    font-family: "Manrope", sans-serif;
+    font-size: 13px;
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 24px;
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .legal-content :global(th) {
+    background-color: color-mix(in srgb, var(--color-mist) 40%, transparent);
+    color: var(--color-charcoal);
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 12px;
+    border: 1px solid var(--color-mist);
+  }
+
+  .legal-content :global(td) {
+    padding: 8px 12px;
+    border: 1px solid var(--color-mist);
+    color: var(--color-charcoal);
+    vertical-align: top;
+  }
+
+  .legal-content :global(tr:nth-child(even) td) {
+    background-color: color-mix(in srgb, var(--color-mist) 15%, transparent);
+  }
+
+  .legal-content :global(blockquote) {
+    border-left: 3px solid var(--color-amber);
+    padding-left: 20px;
+    margin: 28px 0;
+    background: transparent;
+  }
+
+  .legal-content :global(blockquote p) {
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    font-style: italic;
+    color: var(--color-stone);
+    margin-bottom: 0;
+  }
+
+  .legal-content :global(a) {
+    color: var(--color-deep-teal);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .legal-content :global(a:hover) {
+    opacity: 0.8;
+  }
+
+  .legal-content :global(hr) {
+    border: none;
+    border-top: 1px solid var(--color-mist);
+    margin: 40px 0;
+  }
+
+  .legal-content :global(strong) {
+    color: var(--color-charcoal);
+    font-weight: 600;
+  }
+
+  .legal-content :global(code) {
+    font-family: ui-monospace, "Cascadia Code", "Source Code Pro", Menlo, monospace;
+    font-size: 14px;
+    background-color: color-mix(in srgb, var(--color-mist) 40%, transparent);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+</style>
