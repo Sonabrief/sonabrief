@@ -21,7 +21,7 @@ const claims: string[] = t.pricing.claims ?? t.pricing.banners ?? [];
 
 function ctaHref(name: string): string {
   if (/enterprise/i.test(name)) return 'mailto:hello@sonabrief.com';
-  return 'https://app.sonabrief.com/signup';
+  return 'https://app.sonabrief.com/';
 }
 
 const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;

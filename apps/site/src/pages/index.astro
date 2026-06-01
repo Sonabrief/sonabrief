@@ -1,32 +1,18 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { getTranslations } from '../i18n/utils';
-import HeroSection from '../components/landing/HeroSection.astro';
-import ProblemSection from '../components/landing/ProblemSection.astro';
-import ManifestoSection from '../components/landing/ManifestoSection.astro';
-import HowItWorksSection from '../components/landing/HowItWorksSection.astro';
-import ThreeWaysSection from '../components/landing/ThreeWaysSection.astro';
-import MemorySection from '../components/landing/MemorySection.astro';
-import ProfessionalsSection from '../components/landing/ProfessionalsSection.astro';
-import OpenSourceSection from '../components/landing/OpenSourceSection.astro';
-import PricingSummarySection from '../components/landing/PricingSummarySection.astro';
-import FAQSection from '../components/landing/FAQSection.astro';
-
-const lang = 'en';
-const t = await getTranslations(lang);
+// Root redirect — rileva lingua browser e reindirizza
 ---
-
-<BaseLayout lang={lang} title={t.hero.h1} description={t.hero.sub}>
-  <main>
-    <HeroSection t={t} lang={lang} />
-    <ProblemSection t={t} lang={lang} />
-    <ManifestoSection t={t} lang={lang} />
-    <HowItWorksSection t={t} lang={lang} />
-    <ThreeWaysSection t={t} lang={lang} />
-    <MemorySection t={t} lang={lang} />
-    <ProfessionalsSection t={t} lang={lang} />
-    <OpenSourceSection t={t} lang={lang} />
-    <PricingSummarySection t={t} lang={lang} />
-    <FAQSection t={t} lang={lang} />
-  </main>
-</BaseLayout>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script is:inline>
+      const supported = ['it', 'en', 'fr', 'es', 'de'];
+      const preferred = (navigator.language || 'en').slice(0, 2).toLowerCase();
+      const lang = supported.includes(preferred) ? preferred : 'en';
+      window.location.replace('/' + lang + '/');
+    </script>
+    <noscript>
+      <meta http-equiv="refresh" content="0;url=/en/" />
+    </noscript>
+  </head>
+  <body></body>
+</html>

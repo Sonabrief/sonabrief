@@ -18,7 +18,7 @@ const tiers: Tier[] = t.pricing.tiers ?? [];
 
 function ctaHref(name: string): string {
   if (/enterprise/i.test(name)) return 'mailto:hello@sonabrief.com';
-  return 'https://app.sonabrief.com/signup';
+  return 'https://app.sonabrief.com/';
 }
 
 function ctaVariant(name: string, index: number): 'solid' | 'outline-teal' | 'outline-stone' {
