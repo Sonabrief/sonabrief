@@ -8,10 +8,24 @@
   },
   "hero": {
     "h1": "Un esprit privé pour vos réunions.",
-    "sub": "Sonabrief enregistre, transcrit et résume vos conversations professionnelles — sans envoyer un seul octet d'audio dans le cloud. Jamais.",
+    "sub": "Sonabrief enregistre, transcrit et résume vos conversations professionnelles, sans envoyer un seul octet d'audio dans le cloud. Jamais.",
     "cta1": "Essayer Sonabrief gratuitement →",
     "cta2": "Voir comment ça marche →",
-    "micro": "Plan gratuit disponible · Sans carte bancaire · Open source"
+    "micro": "Plan gratuit disponible · Sans carte bancaire · Open source",
+    "pillars": [
+      {
+        "num": "01",
+        "label": "audio en local"
+      },
+      {
+        "num": "02",
+        "label": "notes chiffrées"
+      },
+      {
+        "num": "03",
+        "label": "open source"
+      }
+    ]
   },
   "problem": {
     "lines": [
@@ -98,9 +112,19 @@
     "h2": "Une mémoire faite pour durer.",
     "lead": "La plupart des outils de réunion suppriment votre historique après 14 jours sur les plans gratuits. Nous pensons que votre mémoire professionnelle doit vous appartenir — pas à leur politique de conservation.",
     "tiers": [
-      { "label": "Free", "value": "Archives 7 jours" },
-      { "label": "Pro", "value": "Archives 12 mois" },
-      { "label": "Pro Unlimited", "value": "Pour toujours", "note": "(oui, vraiment)" }
+      {
+        "label": "Free",
+        "value": "Archives 7 jours"
+      },
+      {
+        "label": "Pro",
+        "value": "Archives 12 mois"
+      },
+      {
+        "label": "Pro Unlimited",
+        "value": "Pour toujours",
+        "note": "(oui, vraiment)"
+      }
     ],
     "body": "Chiffrée avec votre phrase secrète. Synchronisée sur tous vos appareils. Consultable. À vous — vraiment à vous.",
     "tradeoff": "Si vous oubliez votre phrase secrète, nous ne pouvons pas la récupérer. Les compromis sont réels. Nous ne les cachons pas."
@@ -128,7 +152,11 @@
   },
   "pricing": {
     "title": "Combien ça coûte, et pourquoi.",
-    "toggle": { "monthly": "Mensuel", "annual": "Annuel", "annualNote": "2 mois offerts" },
+    "toggle": {
+      "monthly": "Mensuel",
+      "annual": "Annuel",
+      "annualNote": "2 mois offerts"
+    },
     "tiers": [
       {
         "name": "Free",
@@ -185,83 +213,344 @@
     ],
     "fullComparison": "Voir le comparatif complet →",
     "comparison": {
-      "columns": ["Free", "Pro €9", "Pro Unlimited €19", "Enterprise"],
+      "columns": [
+        "Free",
+        "Pro €9",
+        "Pro Unlimited €19",
+        "Enterprise"
+      ],
       "groups": [
         {
           "label": "Mémoire et archives",
           "rows": [
-            { "feature": "Archives (résumés + transcriptions)", "values": ["7 jours", "12 mois", "Pour toujours", "Sur mesure"] },
-            { "feature": "Audio", "values": ["Jamais enregistré", "Jamais enregistré", "Jamais enregistré", "Jamais enregistré"] }
+            {
+              "feature": "Archives (résumés + transcriptions)",
+              "values": [
+                "7 jours",
+                "12 mois",
+                "Pour toujours",
+                "Sur mesure"
+              ]
+            },
+            {
+              "feature": "Audio",
+              "values": [
+                "Jamais enregistré",
+                "Jamais enregistré",
+                "Jamais enregistré",
+                "Jamais enregistré"
+              ]
+            }
           ]
         },
         {
           "label": "Transcription",
           "rows": [
-            { "feature": "Modèle Whisper (auto selon le matériel, forçable)", "values": ["Large-v3-turbo", "Large-v3-turbo", "Large-v3-turbo", "Large-v3-turbo"] },
-            { "feature": "Transcription locale", "values": ["Illimitée", "Illimitée", "Illimitée", "Illimitée"] },
-            { "feature": "Cloud Standard (heures/mois)", "values": ["3 h", "30 h", "Usage raisonnable", "Sur mesure"] },
-            { "feature": "Cloud Rapide (transcription rapide EU)", "values": ["—", "5 h/mois", "20 h/mois", "Illimité (usage raisonnable)"] }
+            {
+              "feature": "Modèle Whisper (auto selon le matériel, forçable)",
+              "values": [
+                "Large-v3-turbo",
+                "Large-v3-turbo",
+                "Large-v3-turbo",
+                "Large-v3-turbo"
+              ]
+            },
+            {
+              "feature": "Transcription locale",
+              "values": [
+                "Illimitée",
+                "Illimitée",
+                "Illimitée",
+                "Illimitée"
+              ]
+            },
+            {
+              "feature": "Cloud Standard (heures/mois)",
+              "values": [
+                "3 h",
+                "30 h",
+                "Usage raisonnable",
+                "Sur mesure"
+              ]
+            },
+            {
+              "feature": "Cloud Rapide (transcription rapide EU)",
+              "values": [
+                "—",
+                "5 h/mois",
+                "20 h/mois",
+                "Illimité (usage raisonnable)"
+              ]
+            }
           ]
         },
         {
           "label": "Résumé",
           "rows": [
-            { "feature": "Modèle cloud LLM", "values": ["Mistral Small", "Mistral Large", "Mistral Large", "Mistral Large"] },
-            { "feature": "Modèle Local uniquement", "values": ["Llama 3B", "Llama 8B", "Au choix", "Au choix"] }
+            {
+              "feature": "Modèle cloud LLM",
+              "values": [
+                "Mistral Small",
+                "Mistral Large",
+                "Mistral Large",
+                "Mistral Large"
+              ]
+            },
+            {
+              "feature": "Modèle Local uniquement",
+              "values": [
+                "Llama 3B",
+                "Llama 8B",
+                "Au choix",
+                "Au choix"
+              ]
+            }
           ]
         },
         {
           "label": "Modèles",
           "rows": [
-            { "feature": "Modèles système (5 langues)", "values": ["3", "7", "7", "7"] },
-            { "feature": "Modèles professionnels verticaux", "values": ["—", "10 (progressifs)", "10 (progressifs)", "10 + sur mesure"] },
-            { "feature": "Modèles personnalisés", "values": ["—", "5", "Illimités", "Illimités"] }
+            {
+              "feature": "Modèles système (5 langues)",
+              "values": [
+                "3",
+                "7",
+                "7",
+                "7"
+              ]
+            },
+            {
+              "feature": "Modèles professionnels verticaux",
+              "values": [
+                "—",
+                "10 (progressifs)",
+                "10 (progressifs)",
+                "10 + sur mesure"
+              ]
+            },
+            {
+              "feature": "Modèles personnalisés",
+              "values": [
+                "—",
+                "5",
+                "Illimités",
+                "Illimités"
+              ]
+            }
           ]
         },
         {
           "label": "Flux de travail",
           "rows": [
-            { "feature": "Exports (PDF · Word · E-mail)", "values": ["Markdown uniquement", "✓", "✓", "✓"] },
-            { "feature": "Tags & étiquettes", "values": ["—", "✓", "✓", "✓"] },
-            { "feature": "Tableau des actions", "values": ["—", "✓", "✓", "✓"] },
-            { "feature": "Briefing avant réunion", "values": ["—", "✓", "✓", "✓"] },
-            { "feature": "Recherche sémantique", "values": ["—", "✓", "✓", "✓"] },
-            { "feature": "Identification des intervenants", "values": ["—", "✓", "✓", "✓"] },
-            { "feature": "Vue client / projet", "values": ["—", "✓", "✓", "✓"] },
-            { "feature": "Calendrier (Google · Microsoft)", "values": ["—", "✓", "✓", "✓"] },
-            { "feature": "E-mail hebdomadaire des actions", "values": ["—", "✓ opt-in", "✓ opt-in", "✓ opt-in"] },
-            { "feature": "Tableau de bord analytics", "values": ["—", "✓", "✓", "✓"] }
+            {
+              "feature": "Exports (PDF · Word · E-mail)",
+              "values": [
+                "Markdown uniquement",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "feature": "Tags & étiquettes",
+              "values": [
+                "—",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "feature": "Tableau des actions",
+              "values": [
+                "—",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "feature": "Briefing avant réunion",
+              "values": [
+                "—",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "feature": "Recherche sémantique",
+              "values": [
+                "—",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "feature": "Identification des intervenants",
+              "values": [
+                "—",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "feature": "Vue client / projet",
+              "values": [
+                "—",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "feature": "Calendrier (Google · Microsoft)",
+              "values": [
+                "—",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "feature": "E-mail hebdomadaire des actions",
+              "values": [
+                "—",
+                "✓ opt-in",
+                "✓ opt-in",
+                "✓ opt-in"
+              ]
+            },
+            {
+              "feature": "Tableau de bord analytics",
+              "values": [
+                "—",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            }
           ]
         },
         {
           "label": "Synchronisation et appareils",
           "rows": [
-            { "feature": "Stockage synchronisé (zero-knowledge)", "values": ["100 Mo", "5 Go", "25 Go", "Sur mesure"] },
-            { "feature": "Multi-appareils", "values": ["✓", "✓", "✓", "✓"] },
-            { "feature": "Sauvegarde E2E automatique", "values": ["✓", "✓", "✓", "✓"] }
+            {
+              "feature": "Stockage synchronisé (zero-knowledge)",
+              "values": [
+                "100 Mo",
+                "5 Go",
+                "25 Go",
+                "Sur mesure"
+              ]
+            },
+            {
+              "feature": "Multi-appareils",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "feature": "Sauvegarde E2E automatique",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            }
           ]
         },
         {
           "label": "Sécurité et compte",
           "rows": [
-            { "feature": "Passkey (WebAuthn)", "values": ["✓", "✓", "✓", "✓"] },
-            { "feature": "Connexion par lien magique", "values": ["✓", "✓", "✓", "✓"] }
+            {
+              "feature": "Passkey (WebAuthn)",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            },
+            {
+              "feature": "Connexion par lien magique",
+              "values": [
+                "✓",
+                "✓",
+                "✓",
+                "✓"
+              ]
+            }
           ]
         },
         {
           "label": "Enterprise",
           "rows": [
-            { "feature": "API personnelle", "values": ["—", "—", "—", "✓"] },
-            { "feature": "SSO", "values": ["—", "—", "—", "✓"] },
-            { "feature": "Tableau de bord admin", "values": ["—", "—", "—", "✓"] },
-            { "feature": "Option auto-hébergement", "values": ["—", "—", "—", "✓"] },
-            { "feature": "Licence commerciale (hors AGPL)", "values": ["—", "—", "—", "✓"] }
+            {
+              "feature": "API personnelle",
+              "values": [
+                "—",
+                "—",
+                "—",
+                "✓"
+              ]
+            },
+            {
+              "feature": "SSO",
+              "values": [
+                "—",
+                "—",
+                "—",
+                "✓"
+              ]
+            },
+            {
+              "feature": "Tableau de bord admin",
+              "values": [
+                "—",
+                "—",
+                "—",
+                "✓"
+              ]
+            },
+            {
+              "feature": "Option auto-hébergement",
+              "values": [
+                "—",
+                "—",
+                "—",
+                "✓"
+              ]
+            },
+            {
+              "feature": "Licence commerciale (hors AGPL)",
+              "values": [
+                "—",
+                "—",
+                "—",
+                "✓"
+              ]
+            }
           ]
         },
         {
           "label": "Support",
           "rows": [
-            { "feature": "Support", "values": ["Communauté", "E-mail, 48 h", "Prioritaire, 24 h", "Dédié"] }
+            {
+              "feature": "Support",
+              "values": [
+                "Communauté",
+                "E-mail, 48 h",
+                "Prioritaire, 24 h",
+                "Dédié"
+              ]
+            }
           ]
         }
       ]
@@ -274,7 +563,12 @@
       "heading": "Enterprise",
       "body": "Tarifs sur mesure pour les équipes. Option auto-hébergée disponible, avec une licence commerciale (alternative à l'AGPL v3) pour les déploiements auto-hébergés modifiés. SSO, tableau de bord admin, support dédié.",
       "cta": "Nous contacter",
-      "form": { "name": "Nom", "email": "E-mail professionnel", "notes": "De quoi avez-vous besoin ?", "submit": "Envoyer" }
+      "form": {
+        "name": "Nom",
+        "email": "E-mail professionnel",
+        "notes": "De quoi avez-vous besoin ?",
+        "submit": "Envoyer"
+      }
     },
     "faq": {
       "title": "Questions difficiles. Réponses honnêtes.",
@@ -349,11 +643,39 @@
   },
   "footer": {
     "columns": {
-      "product": { "title": "Produit", "links": ["Tarifs", "Essayer gratuitement →"] },
-      "trust": { "title": "Confiance", "links": ["Sécurité", "Politique de confidentialité", "Conditions d'utilisation", "DPA sur demande"] },
-      "company": { "title": "Entreprise", "links": ["À propos", "Open source", "Contact", "GitHub →", "X →", "Bluesky →"] }
+      "product": {
+        "title": "Produit",
+        "links": [
+          "Tarifs",
+          "Essayer gratuitement →"
+        ]
+      },
+      "trust": {
+        "title": "Confiance",
+        "links": [
+          "Sécurité",
+          "Politique de confidentialité",
+          "Conditions d'utilisation",
+          "DPA sur demande"
+        ]
+      },
+      "company": {
+        "title": "Entreprise",
+        "links": [
+          "À propos",
+          "Open source",
+          "Contact",
+          "GitHub →",
+          "X →",
+          "Bluesky →"
+        ]
+      }
     },
-    "newsletter": { "heading": "Recevez nos actualités", "placeholder": "Votre e-mail", "cta": "S'inscrire" },
+    "newsletter": {
+      "heading": "Recevez nos actualités",
+      "placeholder": "Votre e-mail",
+      "cta": "S'inscrire"
+    },
     "legal": "© 2026 Sonabrief · Open source · AGPL v3"
   },
   "security": {
@@ -390,7 +712,10 @@
           "term": "XChaCha20-Poly1305",
           "plain": "Vos données sont scellées avec XChaCha20-Poly1305, la même primitive de chiffrement authentifié qu'utilisent WhatsApp et Signal."
         },
-        { "term": "Côté client", "plain": "Tout cela se passe sur votre appareil, avant que quoi que ce soit n'atteigne nos serveurs." }
+        {
+          "term": "Côté client",
+          "plain": "Tout cela se passe sur votre appareil, avant que quoi que ce soit n'atteigne nos serveurs."
+        }
       ],
       "closer": "Ce que nous stockons, ce sont des données chiffrées que nous ne pouvons pas lire. Non par choix — parce que c'est mathématiquement impossible.",
       "verifyLink": "Vérifier dans le code →"
@@ -399,17 +724,42 @@
       "title": "Trois modes de transcription",
       "intro": "Vous choisissez à chaque réunion.",
       "items": [
-        { "name": "Standard", "desc": "Transcrit sur votre machine, résumé dans le cloud européen. L'audio ne quitte jamais votre ordinateur." },
-        { "name": "Local uniquement", "desc": "Transcription et résumé tous deux sur votre machine. Rien ne sort, dans aucun mode." },
-        { "name": "Cloud Rapide", "desc": "Transcrit sur les serveurs européens de Mistral à Paris. Audio chiffré en transit, jamais enregistré. Rapide quel que soit le matériel. Pro et Pro Unlimited." }
+        {
+          "name": "Standard",
+          "desc": "Transcrit sur votre machine, résumé dans le cloud européen. L'audio ne quitte jamais votre ordinateur."
+        },
+        {
+          "name": "Local uniquement",
+          "desc": "Transcription et résumé tous deux sur votre machine. Rien ne sort, dans aucun mode."
+        },
+        {
+          "name": "Cloud Rapide",
+          "desc": "Transcrit sur les serveurs européens de Mistral à Paris. Audio chiffré en transit, jamais enregistré. Rapide quel que soit le matériel. Pro et Pro Unlimited."
+        }
       ],
       "performance": {
         "title": "Vitesse selon le matériel",
-        "headers": ["Votre matériel", "Standard (local)", "Cloud Rapide"],
+        "headers": [
+          "Votre matériel",
+          "Standard (local)",
+          "Cloud Rapide"
+        ],
         "rows": [
-          ["MacBook (série M)", "30 min → 3–6 min", "30 min → 1–2 min"],
-          ["Windows / Linux, GPU dédié", "30 min → 5–10 min", "30 min → 1–2 min"],
-          ["Windows / Linux, GPU intégré Intel", "30 min → 50–60 min", "30 min → 1–2 min"]
+          [
+            "MacBook (série M)",
+            "30 min → 3–6 min",
+            "30 min → 1–2 min"
+          ],
+          [
+            "Windows / Linux, GPU dédié",
+            "30 min → 5–10 min",
+            "30 min → 1–2 min"
+          ],
+          [
+            "Windows / Linux, GPU intégré Intel",
+            "30 min → 50–60 min",
+            "30 min → 1–2 min"
+          ]
         ]
       }
     },
@@ -421,13 +771,43 @@
     "subprocessors": {
       "title": "Nos sous-traitants",
       "intro": "La liste complète, en langage clair.",
-      "headers": ["Prestataire", "Rôle", "Localisation", "Données"],
+      "headers": [
+        "Prestataire",
+        "Rôle",
+        "Localisation",
+        "Données"
+      ],
       "rows": [
-        ["Cloudflare", "CDN, DNS et Workers", "USA", "Aucune donnée utilisateur traitée"],
-        ["Mistral AI", "LLM cloud et transcription Cloud Rapide", "Hébergé en EU", "ZDR actif, DPA signé"],
-        ["Resend", "E-mails transactionnels", "USA", "Adresse e-mail uniquement"],
-        ["Polar", "Paiements", "USA (Delaware)", "Données de facturation uniquement"],
-        ["MailerLite", "Newsletter", "USA", "Adresse e-mail uniquement (opt-in)"]
+        [
+          "Cloudflare",
+          "CDN, DNS et Workers",
+          "USA",
+          "Aucune donnée utilisateur traitée"
+        ],
+        [
+          "Mistral AI",
+          "LLM cloud et transcription Cloud Rapide",
+          "Hébergé en EU",
+          "ZDR actif, DPA signé"
+        ],
+        [
+          "Resend",
+          "E-mails transactionnels",
+          "USA",
+          "Adresse e-mail uniquement"
+        ],
+        [
+          "Polar",
+          "Paiements",
+          "USA (Delaware)",
+          "Données de facturation uniquement"
+        ],
+        [
+          "MailerLite",
+          "Newsletter",
+          "USA",
+          "Adresse e-mail uniquement (opt-in)"
+        ]
       ],
       "note": "Lorsqu'un sous-traitant est basé aux USA, il ne traite jamais de contenu de réunion lisible — uniquement les données limitées indiquées. Vos réunions restent sur votre appareil ou sont chiffrées de sorte que ni nous ni eux ne puissions les lire."
     },
@@ -439,7 +819,10 @@
         "Ouvrez les DevTools de votre navigateur — onglet Réseau.",
         "Enregistrez 30 secondes et observez les requêtes sortantes. En Local uniquement, rien ne quitte votre appareil ; en Standard, seul du texte sort — le résultat de la transcription — jamais l'audio. (Cloud Rapide est différent par conception : l'audio chiffré y est envoyé volontairement à nos serveurs européens pour être transcrit, chiffré en transit et jamais enregistré. C'est le seul mode où voir de l'audio sortir est attendu.)"
       ],
-      "codeLinks": ["La fonction qui élimine l'audio →", "La fonction de chiffrement →"]
+      "codeLinks": [
+        "La fonction qui élimine l'audio →",
+        "La fonction de chiffrement →"
+      ]
     },
     "early": {
       "title": "Nous débutons",
@@ -452,9 +835,18 @@
         "title": "Pourquoi nous l'avons créé",
         "body": "Des années passées dans les services professionnels nous ont appris combien d'informations sensibles circulent dans les salles de réunion — et combien peu de contrôle les gens ont sur leur destination. Les outils existants faisaient un compromis que nous ne pouvions accepter : la commodité en échange du contrôle de vos propres conversations. Nous voulions les deux. Alors nous avons créé Sonabrief."
       },
-      { "title": "Pourquoi l'open source", "body": "L'open source est la preuve que ce que nous disons correspond à ce que nous faisons. Lisez-le, auditez-le, forkez-le. AGPL v3." },
-      { "title": "Pourquoi le bootstrap", "body": "Pas de VC, pas de croissance à tout prix. Nous payons nos factures avec les abonnements. C'est le modèle." },
-      { "title": "Pourquoi nous ne montrons pas notre visage", "body": "C'est la marque qui parle. Quand Sonabrief aura besoin d'un visage public, il en aura un. D'ici là : hello@sonabrief.com." },
+      {
+        "title": "Pourquoi l'open source",
+        "body": "L'open source est la preuve que ce que nous disons correspond à ce que nous faisons. Lisez-le, auditez-le, forkez-le. AGPL v3."
+      },
+      {
+        "title": "Pourquoi le bootstrap",
+        "body": "Pas de VC, pas de croissance à tout prix. Nous payons nos factures avec les abonnements. C'est le modèle."
+      },
+      {
+        "title": "Pourquoi nous ne montrons pas notre visage",
+        "body": "C'est la marque qui parle. Quand Sonabrief aura besoin d'un visage public, il en aura un. D'ici là : hello@sonabrief.com."
+      },
       {
         "title": "Ce que nous ne construirons pas",
         "items": [
@@ -470,11 +862,26 @@
   "openSourcePage": {
     "intro": "Tout ce qui traite vos données est open source. Pas un geste — la façon dont nous prouvons nos promesses de confidentialité.",
     "sections": [
-      { "title": "Ce qui est ouvert", "body": "Tout le code qui touche vos données — enregistrement, transcription, chiffrement, synchronisation — est public sur GitHub." },
-      { "title": "AGPL v3, en pratique", "body": "Vous êtes libre de lire, exécuter et forker Sonabrief. Si vous distribuez une version modifiée, l'AGPL v3 vous demande de partager vos modifications sous la même licence. La distribution commerciale sans ces obligations nécessite une licence séparée." },
-      { "title": "La CLA Harmony", "body": "Les contributeurs signent un Contributor License Agreement (CLA Harmony). Il nous permet de continuer à proposer une licence commerciale aux clients Enterprise aux côtés de la licence open source, tandis que votre contribution reste ouverte." },
-      { "title": "Double licence", "body": "Les clients Enterprise peuvent choisir une licence commerciale — alternative à l'AGPL v3 — pour les déploiements auto-hébergés modifiés." },
-      { "title": "Comment contribuer", "body": "Lisez CONTRIBUTING.md, ouvrez une issue ou envoyez une pull request. Tout se passe au grand jour." }
+      {
+        "title": "Ce qui est ouvert",
+        "body": "Tout le code qui touche vos données — enregistrement, transcription, chiffrement, synchronisation — est public sur GitHub."
+      },
+      {
+        "title": "AGPL v3, en pratique",
+        "body": "Vous êtes libre de lire, exécuter et forker Sonabrief. Si vous distribuez une version modifiée, l'AGPL v3 vous demande de partager vos modifications sous la même licence. La distribution commerciale sans ces obligations nécessite une licence séparée."
+      },
+      {
+        "title": "La CLA Harmony",
+        "body": "Les contributeurs signent un Contributor License Agreement (CLA Harmony). Il nous permet de continuer à proposer une licence commerciale aux clients Enterprise aux côtés de la licence open source, tandis que votre contribution reste ouverte."
+      },
+      {
+        "title": "Double licence",
+        "body": "Les clients Enterprise peuvent choisir une licence commerciale — alternative à l'AGPL v3 — pour les déploiements auto-hébergés modifiés."
+      },
+      {
+        "title": "Comment contribuer",
+        "body": "Lisez CONTRIBUTING.md, ouvrez une issue ou envoyez une pull request. Tout se passe au grand jour."
+      }
     ],
     "repo": "github.com/sonabrief/sonabrief",
     "cta": "Voir le dépôt →"

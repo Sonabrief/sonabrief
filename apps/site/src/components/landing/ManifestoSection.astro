@@ -19,12 +19,14 @@ const linkHrefs = ['https://github.com/Sonabrief', '/security', 'https://github.
 <section class="manifesto">
   <div class="manifesto-inner">
     {items.map((item, i) => (
-      <div class="manifesto-item fade-up" data-manifesto-item>
-        <div class="manifesto-num">{item.num}</div>
-        <h3 class="manifesto-title">{item.title}</h3>
-        <p class="manifesto-body">{item.body}</p>
-        <a href={linkHrefs[i] ?? '#'} class="manifesto-link">{item.linkLabel}</a>
-      </div>
+      <article class="manifesto-item" data-manifesto-item>
+        <div class="manifesto-num" aria-hidden="true">{item.num}</div>
+        <div class="manifesto-body-col">
+          <h3 class="manifesto-title">{item.title}</h3>
+          <p class="manifesto-text">{item.body}</p>
+          <a href={linkHrefs[i] ?? '#'} class="manifesto-link">{item.linkLabel}</a>
+        </div>
+      </article>
     ))}
   </div>
 </section>
@@ -35,40 +37,64 @@ const linkHrefs = ['https://github.com/Sonabrief', '/security', 'https://github.
   }
 
   .manifesto-inner {
-    max-width: 640px;
+    max-width: 920px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 64px;
   }
 
+  /* apertura di capitolo editoriale: numero serif grande a margine, testo a destra */
   .manifesto-item {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: minmax(120px, 0.9fr) minmax(0, 2.4fr);
+    column-gap: 56px;
+    align-items: start;
+    padding: 56px 0;
+    border-top: 1px solid var(--color-mist);
+  }
+  .manifesto-item:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+  .manifesto-item:last-child {
+    padding-bottom: 0;
   }
 
   .manifesto-num {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 48px;
-    font-weight: 700;
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-optical-sizing: auto;
+    font-size: clamp(64px, 8vw, 104px);
+    line-height: 0.9;
     color: var(--color-amber);
-    line-height: 1;
-    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+    /* allineamento ottico col titolo a destra */
+    margin-top: -0.08em;
+  }
+
+  .manifesto-body-col {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 52ch;
+    padding-top: 6px;
   }
 
   .manifesto-title {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 24px;
+    font-family: var(--font-serif);
     font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(24px, 3vw, 34px);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
     color: var(--color-deep-teal);
-    line-height: 1.3;
     margin: 0;
+    text-wrap: balance;
   }
 
-  .manifesto-body {
+  .manifesto-text {
     font-family: "Manrope", sans-serif;
-    font-size: 16px;
+    font-size: 17px;
     line-height: 1.7;
     color: var(--color-stone);
     margin: 0;
@@ -79,17 +105,52 @@ const linkHrefs = ['https://github.com/Sonabrief', '/security', 'https://github.
     font-size: 15px;
     color: var(--color-deep-teal);
     text-decoration: underline;
+    text-decoration-color: var(--color-mist);
     text-underline-offset: 4px;
     align-self: flex-start;
     margin-top: 4px;
+    transition: text-decoration-color 200ms var(--ease-out-cubic);
+  }
+  .manifesto-link:hover {
+    text-decoration-color: var(--color-deep-teal);
   }
 
-  @media (max-width: 767px) {
+  /* --- reveal calmo, stagger leggero per item --- */
+  .manifesto-item {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 600ms var(--ease-out-cubic),
+      transform 600ms var(--ease-out-cubic);
+  }
+  .manifesto-item.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .manifesto-item {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  @media (max-width: 700px) {
     .manifesto {
       padding: 80px 24px;
     }
-    .manifesto-inner {
-      gap: 48px;
+    .manifesto-item {
+      grid-template-columns: 1fr;
+      row-gap: 16px;
+      column-gap: 0;
+      padding: 44px 0;
+    }
+    .manifesto-num {
+      margin-top: 0;
+    }
+    .manifesto-body-col {
+      padding-top: 0;
     }
   }
 </style>
@@ -101,15 +162,15 @@ const linkHrefs = ['https://github.com/Sonabrief', '/security', 'https://github.
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
+            entry.target.classList.add('is-visible');
             observer.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0.15 }
+      { threshold: 0.2 }
     );
     items.forEach((item) => observer.observe(item));
   } else {
-    items.forEach((item) => item.classList.add('visible'));
+    items.forEach((item) => item.classList.add('is-visible'));
   }
 </script>

@@ -6,58 +6,111 @@ interface Props {
 const { t } = Astro.props;
 
 const h1Raw: string = t.hero.h1;
+// "brief" resta in Instrument Serif italic ambra — identità del wordmark, non stile.
 const h1Html = h1Raw.replace(/brief/gi, (match) => `<em class="brief-italic">${match}</em>`);
+
+// Manifesto in miniatura: i 3 pilastri come dati mono, anticipano la sezione sotto.
+const pillars: { num: string; label: string }[] = t.hero.pillars ?? [];
+
+// L'eyebrow è il primo frammento del claim, non un'etichetta generica.
+const eyebrow = 'Una mente privata.';
 ---
 
-<section class="hero fade-up" id="hero">
+<section class="hero" id="hero">
   <div class="hero-inner">
-    <h1 class="hero-h1" set:html={h1Html}></h1>
-    <p class="hero-sub">{t.hero.sub}</p>
+    <div class="hero-lede fade-up" data-reveal style="--reveal-delay: 0ms;">
+      <p class="hero-eyebrow">{eyebrow}</p>
+      <h1 class="hero-h1" set:html={h1Html}></h1>
+    </div>
 
-    <div class="hero-cta-row">
-      <a href="https://app.sonabrief.com/" class="hero-cta-primary" plausible-event-name="CTA: Try free">{t.hero.cta1}</a>
+    <p class="hero-sub fade-up" data-reveal style="--reveal-delay: 90ms;">{t.hero.sub}</p>
+
+    <div class="hero-cta-row fade-up" data-reveal style="--reveal-delay: 170ms;">
+      <a
+        href="https://app.sonabrief.com/"
+        class="hero-cta-primary"
+        plausible-event-name="CTA: Try free"
+      >{t.hero.cta1}</a>
       <a href="#how-it-works" class="hero-cta-secondary">{t.hero.cta2}</a>
     </div>
 
-    <p class="hero-micro">{t.hero.micro}</p>
+    <p class="hero-micro fade-up" data-reveal style="--reveal-delay: 230ms;">{t.hero.micro}</p>
   </div>
+
+  {pillars.length > 0 && (
+    <aside class="hero-pillars fade-up" data-reveal style="--reveal-delay: 280ms;" aria-hidden="true">
+      <ul>
+        {pillars.map((p) => (
+          <li>
+            <span class="pillar-num">{p.num}</span>
+            <span class="pillar-label">{p.label}</span>
+          </li>
+        ))}
+      </ul>
+    </aside>
+  )}
 </section>
 
 <style>
   .hero {
-    padding: 120px 24px 80px;
     max-width: 1200px;
     margin: 0 auto;
+    padding: 104px 24px 88px;
+    display: grid;
+    /* asimmetria: blocco editoriale ampio a sinistra, colonna dati a destra */
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "lede pillars"
+      "sub  pillars"
+      "cta  pillars"
+      "micro pillars";
+    column-gap: 56px;
+    row-gap: 18px;
+    align-items: start;
   }
 
-  .hero-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 24px;
+  .hero-lede {
+    grid-area: lede;
+    max-width: 22ch;
+  }
+
+  .hero-eyebrow {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    font-size: clamp(19px, 2.2vw, 24px);
+    line-height: 1;
+    color: var(--color-amber);
+    margin: 0 0 14px;
+    white-space: nowrap;
+    /* clearance per i discender dell'italic ('p','q','y' presenti in "privata") */
+    padding-bottom: 2px;
   }
 
   .hero-h1 {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: clamp(40px, 5vw, 72px);
-    font-weight: 700;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(40px, 4.4vw, 64px);
+    line-height: 1.08;
+    letter-spacing: -0.015em;
     color: var(--color-deep-teal);
-    letter-spacing: -0.02em;
-    line-height: 1.1;
     margin: 0;
-    max-width: 14ch;
+    text-wrap: balance;
   }
 
   .hero-sub {
+    grid-area: sub;
     font-family: "Manrope", sans-serif;
     font-size: 18px;
-    line-height: 1.6;
+    line-height: 1.65;
     color: var(--color-stone);
-    max-width: 560px;
-    margin: 0;
+    max-width: 32ch;
+    margin: 8px 0 0;
   }
 
   .hero-cta-row {
+    grid-area: cta;
     display: flex;
     align-items: center;
     gap: 24px;
@@ -74,11 +127,15 @@ const h1Html = h1Raw.replace(/brief/gi, (match) => `<em class="brief-italic">${m
     padding: 14px 28px;
     border-radius: 9999px;
     text-decoration: none;
-    transition: opacity 150ms ease;
+    transition:
+      transform 220ms var(--ease-out-cubic),
+      opacity 220ms var(--ease-out-cubic);
   }
-
   .hero-cta-primary:hover {
-    opacity: 0.88;
+    opacity: 0.9;
+  }
+  .hero-cta-primary:active {
+    transform: translateY(1px);
   }
 
   .hero-cta-secondary {
@@ -88,30 +145,140 @@ const h1Html = h1Raw.replace(/brief/gi, (match) => `<em class="brief-italic">${m
     text-decoration: none;
     transition: color 150ms ease;
   }
-
   .hero-cta-secondary:hover {
     color: var(--color-deep-teal);
   }
 
   .hero-micro {
+    grid-area: micro;
     font-family: "Manrope", sans-serif;
     font-size: 13px;
     color: var(--color-stone);
-    margin: 8px 0 0;
+    margin: 6px 0 0;
   }
 
-  @media (max-width: 767px) {
+  /* colonna dati mono — il "tech" che bilancia il calore del serif */
+  .hero-pillars {
+    grid-area: pillars;
+    align-self: start;
+    /* allinea la prima riga mono con la base dell'eyebrow, non col bordo griglia */
+    margin-top: 10px;
+    padding-left: 32px;
+    border-left: 1px solid var(--color-mist);
+  }
+  .hero-pillars ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 14px;
+  }
+  .hero-pillars li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    align-items: baseline;
+    white-space: nowrap;
+  }
+  .pillar-num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--color-amber);
+    font-variant-numeric: tabular-nums;
+  }
+  .pillar-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.01em;
+    color: var(--color-stone);
+  }
+
+  /* --- reveal calmo con stagger, gestito via --reveal-delay --- */
+  .hero [data-reveal] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 600ms var(--ease-out-cubic),
+      transform 600ms var(--ease-out-cubic);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+  .hero.is-revealed [data-reveal] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero [data-reveal] {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  @media (max-width: 860px) {
     .hero {
       padding: 80px 24px 64px;
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "lede"
+        "sub"
+        "cta"
+        "micro"
+        "pillars";
+      row-gap: 22px;
+    }
+    .hero-lede,
+    .hero-sub {
+      max-width: 100%;
+    }
+    .hero-pillars {
+      align-self: start;
+      margin-top: 16px;
+      padding-left: 0;
+      padding-top: 24px;
+      border-left: none;
+      border-top: 1px solid var(--color-mist);
+    }
+    .hero-pillars ul {
+      grid-auto-flow: column;
+      grid-template-columns: repeat(3, auto);
+      justify-content: start;
+      gap: 28px;
+    }
+    .hero-pillars li {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .hero-pillars ul {
+      grid-auto-flow: row;
+      grid-template-columns: 1fr;
+      gap: 14px;
     }
   }
 </style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const el = document.getElementById('hero');
-    if (el) {
-      requestAnimationFrame(() => el.classList.add('visible'));
+  const hero = document.getElementById('hero');
+  if (hero) {
+    const reveal = () => requestAnimationFrame(() => hero.classList.add('is-revealed'));
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              reveal();
+              obs.disconnect();
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
+      obs.observe(hero);
+    } else {
+      reveal();
     }
-  });
+  }
 </script>
