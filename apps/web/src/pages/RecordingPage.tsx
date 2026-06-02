@@ -784,7 +784,8 @@ export default function RecordingPage() {
           meeting_id: meetingIdRef.current,
           language,
           mode,
-          system_prompt: templatePrompt,
+          // system_prompt NON viene più inviato: il server lo ricostruisce
+          // server-side da template_id (ownership check + fallback sicuro).
           template_id: selectedTemplate,
           audio_minutes: Math.ceil(duration / 60),
           notes: combinedNotes,

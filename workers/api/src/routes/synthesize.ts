@@ -20,14 +20,86 @@ function currentMonth(): string {
 
 const SynthesizeSchema = z.object({
   transcript: z.string().min(10).max(100_000),
+  // template_id NON è z.uuid(): gli id di sistema sono stringhe tipo
+  // 'sys_generic_it_v2', solo i custom sono UUID.
   template_id: z.string().optional(),
   language: z.enum(["it", "en", "fr", "es", "de"]).default("it"),
   meeting_id: z.string().uuid(),
-  system_prompt: z.string().min(10).max(10_000),
+  // NOTA: system_prompt NON è più accettato dal client. Il prompt viene
+  // ricostruito server-side dal template_id (vedi resolveSystemPrompt).
   audio_minutes: z.number().min(0).default(0),
   notes: z.string().max(10_000).optional(),
   mode: z.enum(['standard', 'local']).default('standard'),
 });
+
+// Prompt generico hard-coded: ultima rete di sicurezza se anche il template
+// di sistema non si carica dal DB. Non deve mai restare vuoto.
+const FALLBACK_SYSTEM_PROMPT =
+  "Sei un assistente che sintetizza meeting professionali. Ricevi la trascrizione di una conversazione e produci una sintesi strutturata, asciutta e professionale in Markdown, usando solo informazioni esplicitamente presenti nella trascrizione. Non inventare nulla.";
+
+// Replica della logica del client (RecordingPage.tsx): id del template generico
+// di sistema per lingua. 'it' usa v2, le altre lingue v1. Volutamente NON
+// centralizzato per evitare scope creep.
+function genericTemplateId(language: string): string {
+  const v = language === 'it' ? '2' : '1';
+  return `sys_generic_${language}_v${v}`;
+}
+
+// Carica il base prompt server-side dal template_id, con ownership check e
+// fallback sicuro. Non lancia mai: in ogni caso di errore ritorna un prompt
+// utilizzabile, eventualmente loggando un segnale anti-abuso.
+async function resolveSystemPrompt(
+  env: Env,
+  userId: string,
+  templateId: string | undefined,
+  language: string,
+): Promise<string> {
+  if (templateId) {
+    const tmpl = await env.DB.prepare(
+      `SELECT system_prompt, user_id, is_system FROM templates WHERE id = ?`
+    )
+      .bind(templateId)
+      .first<{ system_prompt: string; user_id: string | null; is_system: number }>();
+
+    if (tmpl) {
+      // Template di sistema: utilizzabile da chiunque.
+      if (tmpl.is_system === 1) return tmpl.system_prompt;
+      // Template custom: deve appartenere all'utente che lo richiede.
+      if (tmpl.user_id === userId) return tmpl.system_prompt;
+      // Custom di un ALTRO utente: tentativo di accesso a dati altrui.
+      // Stessa UX del fallback (silenziosa, nessun 403) ma loggato come
+      // evento DISTINTO per visibilità anti-abuso.
+      console.warn(JSON.stringify({
+        event: 'template_cross_user_access',
+        userId,
+        templateId,
+        ownerId: tmpl.user_id,
+      }));
+    } else {
+      // template_id presente ma inesistente.
+      console.warn(JSON.stringify({
+        event: 'template_not_found',
+        userId,
+        templateId,
+      }));
+    }
+  } else {
+    // template_id mancante del tutto.
+    console.warn(JSON.stringify({
+      event: 'template_id_missing',
+      userId,
+    }));
+  }
+
+  // Fallback: prompt generico di sistema nella lingua richiesta.
+  const generic = await env.DB.prepare(
+    `SELECT system_prompt FROM templates WHERE id = ? AND is_system = 1`
+  )
+    .bind(genericTemplateId(language))
+    .first<{ system_prompt: string }>();
+
+  return generic?.system_prompt ?? FALLBACK_SYSTEM_PROMPT;
+}
 
 function buildSystemPrompt(base: string, prefs: {
   profession: string | null
@@ -90,7 +162,16 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
     });
   }
 
-  const finalSystemPrompt = buildSystemPrompt(body.system_prompt ?? '', userPrefs)
+  // Prompt ricostruito server-side dal template_id (mai dal client), con
+  // ownership check e fallback sicuro. buildSystemPrompt vi aggiunge sopra
+  // le preferenze utente (anch'esse server-side).
+  const baseSystemPrompt = await resolveSystemPrompt(
+    env,
+    session.userId,
+    body.template_id,
+    body.language,
+  )
+  const finalSystemPrompt = buildSystemPrompt(baseSystemPrompt, userPrefs)
 
   // 4. Budget cap globale (solo free, solo cloud)
   if (tier === 'free' && body.mode !== 'local') {
