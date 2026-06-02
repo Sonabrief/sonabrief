@@ -202,16 +202,13 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
     .first<{ flagged: number }>()
   const isFlagged = signupRow?.flagged === 1
 
-  // 7. Local Only placeholder
+  // Local Only è gestito interamente client-side (Ollama): questa route
+  // non dovrebbe mai ricevere mode:local. Se arriva qui è un bug del client.
   if (body.mode === 'local') {
-    const msg = JSON.stringify({ type: 'error', message: 'Local Only non ancora disponibile in questa versione. Installa Ollama e riprova.' });
-    return new Response(`data: ${msg}\n\n`, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive',
-      },
-    });
+    return new Response(
+      JSON.stringify({ error: 'invalid_mode', message: 'mode:local è gestito client-side e non deve essere inviato a questa route.' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 
   // 6. SSE streaming (standard)
