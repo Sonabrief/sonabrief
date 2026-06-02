@@ -51,6 +51,36 @@ function tierFromProductId(productId: string, env: Env): { tier: "pro" | "unlimi
   return null;
 }
 
+// Etichetta tier per polar_orders: abbonamenti via tierFromProductId, pacchetti
+// minuti via EXTRA_MINUTES_MAP. NULL se product_id sconosciuto (la riga si salva comunque).
+function orderTierLabel(productId: string | undefined, env: Env): string | null {
+  if (!productId) return null;
+  const sub = tierFromProductId(productId, env);
+  if (sub) return sub.tier;
+  if (productId in EXTRA_MINUTES_MAP) return "extra-credits";
+  return null;
+}
+
+// JSON del payload per audit/riconciliazione. Se la serializzazione fallisce
+// (es. cicli), salviamo null invece di far fallire l'intero webhook.
+function rawPayloadFor(data: Record<string, any>): string | null {
+  try {
+    return JSON.stringify(data);
+  } catch {
+    return null;
+  }
+}
+
+// Primo valore numerico finito tra gli alias (Polar usa nomi diversi a seconda
+// della versione del payload). Default 0 per non scrivere NULL su colonne NOT NULL.
+function pickAmount(data: Record<string, any>, keys: string[]): number {
+  for (const k of keys) {
+    const v = data[k];
+    if (typeof v === "number" && Number.isFinite(v)) return Math.round(v);
+  }
+  return 0;
+}
+
 export async function handlePolarWebhook(req: Request, env: Env): Promise<Response> {
   const rawBody = await req.text();
   const signature = req.headers.get("webhook-signature");
@@ -139,11 +169,69 @@ async function processPolarEvent(eventType: string, data: Record<string, any>, e
       break;
     }
     case "order.created": {
+      const now = Date.now();
+      // data.id qui è l'order id (non il subscription id).
+      const orderId = data.id;
+      if (!orderId) { console.warn("[webhook-polar] order.created: missing order id"); return; }
+
+      // Ricavo reale → polar_orders. Salviamo SEMPRE, anche senza user_id (user_id nullable).
+      // Idempotenza a livello ordine: PRIMARY KEY = order.id, ON CONFLICT DO UPDATE → una sola riga.
+      const amount = pickAmount(data, ["subtotal_amount", "amount"]);
+      const taxAmount = pickAmount(data, ["tax_amount"]);
+      const discountAmount = pickAmount(data, ["discount_amount"]);
+      const netAmount = pickAmount(data, ["net_amount", "total_amount", "amount"]);
+      const refundedAmount = pickAmount(data, ["refunded_amount"]);
+      const currency = (data.currency ?? "usd") as string;
+      const status = (data.status as string) ?? "paid";
+      await env.DB.prepare(`
+        INSERT INTO polar_orders (
+          id, user_id, polar_customer_id, subscription_id, product_id, tier,
+          billing_reason, currency, amount, tax_amount, discount_amount,
+          net_amount, refunded_amount, status, raw_payload, paid_at, created_at, updated_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+          user_id = excluded.user_id,
+          polar_customer_id = excluded.polar_customer_id,
+          subscription_id = excluded.subscription_id,
+          product_id = excluded.product_id,
+          tier = excluded.tier,
+          billing_reason = excluded.billing_reason,
+          currency = excluded.currency,
+          amount = excluded.amount,
+          tax_amount = excluded.tax_amount,
+          discount_amount = excluded.discount_amount,
+          net_amount = excluded.net_amount,
+          status = excluded.status,
+          raw_payload = excluded.raw_payload,
+          paid_at = excluded.paid_at,
+          updated_at = excluded.updated_at
+      `).bind(
+        orderId,
+        userId ?? null,
+        data.customer_id ?? null,
+        data.subscription_id ?? null,
+        productId ?? null,
+        orderTierLabel(productId, env),
+        data.billing_reason ?? null,
+        currency,
+        amount,
+        taxAmount,
+        discountAmount,
+        netAmount,
+        refundedAmount,
+        status,
+        rawPayloadFor(data),
+        data.created_at ? new Date(data.created_at).getTime() : null,
+        now,
+        now,
+      ).run();
+
+      // Accredito minuti extra — invariato. Indipendente dal salvataggio ricavo.
       if (!userId) { console.warn("[webhook-polar] order.created: missing user_id in metadata"); return; }
       const minutes = EXTRA_MINUTES_MAP[productId];
       if (!minutes) { console.warn("[webhook-polar] order.created: unknown product_id:", productId); return; }
       const month = currentMonth();
-      const now = Date.now();
       await env.DB.prepare(`
         INSERT INTO cloud_transcription_usage (id, user_id, month, minutes_used, extra_minutes_purchased, last_updated)
         VALUES (?, ?, ?, 0, ?, ?)
@@ -152,6 +240,31 @@ async function processPolarEvent(eventType: string, data: Record<string, any>, e
           last_updated = excluded.last_updated
       `).bind(crypto.randomUUID(), userId, month, minutes, now, minutes).run();
       console.log(`[webhook-polar] order.created: +${minutes} min for user ${userId} in ${month}`);
+      break;
+    }
+    case "order.refunded": {
+      const orderId = data.id;
+      if (!orderId) { console.warn("[webhook-polar] order.refunded: missing order id"); return; }
+      // Importo rimborsato cumulativo riportato da Polar.
+      const refundedAmount = pickAmount(data, ["refunded_amount"]);
+      // Status esplicito di Polar se presente; altrimenti deriva dal confronto con il totale.
+      const total = pickAmount(data, ["net_amount", "total_amount", "amount"]);
+      const derivedStatus = refundedAmount > 0 && refundedAmount >= total
+        ? "refunded"
+        : "partially_refunded";
+      const status = (data.status as string) ?? derivedStatus;
+      // UPDATE only: un refund su un ordine mai visto non crea righe e non crasha.
+      const res = await env.DB.prepare(`
+        UPDATE polar_orders
+        SET refunded_amount = ?, status = ?, updated_at = ?
+        WHERE id = ?
+      `).bind(refundedAmount, status, Date.now(), orderId).run();
+      const changed = res.meta?.changes ?? 0;
+      if (changed === 0) {
+        console.warn("[webhook-polar] order.refunded: no matching order for id", orderId);
+      } else {
+        console.log(`[webhook-polar] order.refunded: order ${orderId} → ${status} (refunded ${refundedAmount})`);
+      }
       break;
     }
     default:
