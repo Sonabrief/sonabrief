@@ -20,10 +20,8 @@ interface AuthRequestBody {
 
 function getMagicLinkBase(request: Request): string {
   const origin = request.headers.get("Origin");
-  if (origin && (origin.includes("localhost") || origin.endsWith("sonabrief.com"))) {
-    return origin;
-  }
-  return "https://sonabrief.com";
+  if (origin && origin.includes("localhost")) return origin;
+  return "https://app.sonabrief.com";
 }
 
 export async function handleAuthRequest(request: Request, env: Env): Promise<Response> {
