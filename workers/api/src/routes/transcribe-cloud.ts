@@ -32,12 +32,6 @@ interface UsageRow {
   last_updated: number
 }
 
-interface TranscribeBody {
-  audioBlob: string
-  estimatedMinutes: number
-  language?: string
-}
-
 interface MistralUsage {
   prompt_audio_seconds?: number
 }
@@ -87,14 +81,6 @@ async function getOrCreateUsage(env: Env, userId: string, month: string): Promis
     .bind(row.id, row.user_id, row.month, row.minutes_used, row.extra_minutes_purchased, row.last_updated)
     .run()
   return row
-}
-
-function base64ToBytes(b64: string): Uint8Array {
-  const clean = b64.includes(',') ? (b64.split(',')[1] ?? '') : b64
-  const bin = atob(clean)
-  const bytes = new Uint8Array(bin.length)
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i)
-  return bytes
 }
 
 async function sendBudgetAlert(env: Env, totalMinutes: number, month: string): Promise<void> {
@@ -165,35 +151,31 @@ export async function handleTranscribeCloud(req: Request, env: Env): Promise<Res
     )
   }
 
-  const body = await req.json().catch(() => null) as TranscribeBody | null
-  if (!body?.audioBlob || typeof body.estimatedMinutes !== 'number') {
+  const formData = await req.formData().catch(() => null)
+  const audio = formData?.get('audio')
+  const estimatedMinutes = parseFloat(String(formData?.get('estimatedMinutes') ?? ''))
+  const language = formData?.get('language')
+  if (!(audio instanceof File) || !Number.isFinite(estimatedMinutes)) {
     return jsonResponse({ error: 'invalid_body' }, 400)
   }
 
-  const projected = usage.minutes_used + Math.max(0, Math.ceil(body.estimatedMinutes))
+  const projected = usage.minutes_used + Math.max(0, Math.ceil(estimatedMinutes))
   if (projected > hardCap) {
     return jsonResponse(
       {
         error: 'would_exceed_hard_cap',
         minutesUsed: usage.minutes_used,
-        estimatedMinutes: body.estimatedMinutes,
+        estimatedMinutes,
         hardCap,
       },
       429,
     )
   }
 
-  let bytes: Uint8Array
-  try {
-    bytes = base64ToBytes(body.audioBlob)
-  } catch {
-    return jsonResponse({ error: 'invalid_audio' }, 400)
-  }
-
   const form = new FormData()
   form.append('model', 'voxtral-mini-latest')
-  form.append('file', new Blob([bytes]), 'audio.webm')
-  if (body.language) form.append('language', body.language)
+  form.append('file', audio, 'audio.webm')
+  if (typeof language === 'string' && language) form.append('language', language)
   form.append('diarize', 'true')
   form.append('timestamp_granularities[]', 'segment')
 

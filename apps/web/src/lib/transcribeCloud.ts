@@ -37,30 +37,25 @@ export class CloudVeloceRateLimitedError extends Error {
   }
 }
 
-async function blobToBase64(blob: Blob): Promise<string> {
-  const buffer = await blob.arrayBuffer()
-  const bytes = new Uint8Array(buffer)
-  let binary = ''
-  const chunkSize = 0x8000
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize))
-  }
-  return btoa(binary)
-}
-
 export async function transcribeCloud(
   audioBlob: Blob,
   language?: string,
 ): Promise<CloudTranscribeResult> {
-  const base64 = await blobToBase64(audioBlob)
   // Stima approssimativa: 16kHz mono 16bit → 32000 byte/sec → /(16000*60*2) min
   const estimatedMinutes = audioBlob.size / (16000 * 60 * 2)
+
+  // multipart/form-data: il browser streamma il blob senza materializzarlo
+  // in memoria come stringa base64 (evita OOM sul Worker per meeting lunghi).
+  const form = new FormData()
+  form.append('audio', audioBlob, 'audio.webm')
+  form.append('estimatedMinutes', String(estimatedMinutes))
+  if (language) form.append('language', language)
 
   const res = await fetch(`${API_URL}/v1/transcribe-cloud`, {
     method: 'POST',
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ audioBlob: base64, estimatedMinutes, language }),
+    // niente Content-Type manuale: il browser imposta il boundary multipart corretto
+    body: form,
   })
 
   if (res.status === 403) {
