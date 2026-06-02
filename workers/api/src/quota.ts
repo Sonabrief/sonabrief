@@ -1,7 +1,7 @@
 import type { ModelTier } from "./providers/types";
 import type { Env } from "./lib/env";
 
-const BUDGET_CAP_USD_PHASE1 = 50
+export const BUDGET_CAP_USD = 30
 
 // Limiti per tier (minuti di audio al mese)
 const TIER_QUOTA_MINUTES: Record<ModelTier, number> = {
@@ -90,13 +90,8 @@ export async function checkQuotaAndBudget(
   };
 }
 
-function currentMonthStr(): string {
-  const d = new Date()
-  return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0')
-}
-
 export async function checkBudgetCap(env: Env): Promise<{ ok: true } | { ok: false; cost_usd: number; cap_usd: number }> {
-  const month = currentMonthStr()
+  const month = currentMonthKey()
   const row = await env.DB
     .prepare('SELECT cost_usd, cap_usd FROM budget_usage WHERE month = ?')
     .bind(month)
@@ -105,7 +100,7 @@ export async function checkBudgetCap(env: Env): Promise<{ ok: true } | { ok: fal
   if (!row) {
     await env.DB
       .prepare('INSERT INTO budget_usage (month, cost_usd, cap_usd, updated_at) VALUES (?, 0, ?, ?) ON CONFLICT(month) DO NOTHING')
-      .bind(month, BUDGET_CAP_USD_PHASE1, Date.now())
+      .bind(month, BUDGET_CAP_USD, Date.now())
       .run()
     return { ok: true }
   }

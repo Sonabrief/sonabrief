@@ -1,22 +1,10 @@
 import { z } from "zod";
 import { getUserFromSession } from "../lib/sessions";
-import { checkQuotaAndBudget, logSynthesisAndUpdateBudget, checkBudgetCap } from "../quota";
+import { checkQuotaAndBudget, logSynthesisAndUpdateBudget, checkBudgetCap, BUDGET_CAP_USD, currentMonthKey } from "../quota";
 import { synthesizeWithRouting } from "../providers";
 import { checkUnlimitedThresholds } from "../lib/unlimited-thresholds";
 import type { Env } from "../lib/env";
 
-const BUDGET_CAP_USD = 30; // fase 1-2, PSD v2.0
-
-const QUOTA_CAP: Record<"free" | "pro" | "unlimited", number | null> = {
-  free: 180,
-  pro: 3000,
-  unlimited: null,
-};
-
-function currentMonth(): string {
-  const d = new Date();
-  return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0');
-}
 
 const SynthesizeSchema = z.object({
   transcript: z.string().min(10).max(100_000),
@@ -189,47 +177,22 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
     }
   }
 
-  // 5. Quota mensile per tier (solo cloud)
+  // 5. Quota + budget check (solo cloud)
   if (body.mode !== 'local') {
-    const cap = QUOTA_CAP[tier];
-    if (cap !== null) {
-      const month = currentMonth();
-      const quotaRow = await env.DB
-        .prepare('SELECT synthesis_minutes FROM quota WHERE user_id = ? AND month = ?')
-        .bind(session.userId, month)
-        .first<{ synthesis_minutes: number }>();
-      const consumed = quotaRow?.synthesis_minutes ?? 0;
-      if (consumed + body.audio_minutes > cap) {
-        return new Response(
-          JSON.stringify({
-            error: 'quota_exceeded',
-            tier,
-            consumed,
-            cap,
-            audio_minutes: body.audio_minutes,
-            message: 'Hai raggiunto il limite mensile di sintesi cloud. Passa a Pro o usa la modalità Local Only.',
-          }),
-          { status: 429, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
-    }
-  }
-
-  // 5. Quota + budget check
-  const check = await checkQuotaAndBudget(
-    env.DB,
-    session.userId,
-    tier,
-    body.audio_minutes,
-    BUDGET_CAP_USD
-  );
-
-  if (!check.allowed) {
-    const status = check.reason === "budget_cap_reached" ? 503 : 429;
-    return new Response(
-      JSON.stringify({ error: check.reason, hint: "local_mode" }),
-      { status, headers: { "Content-Type": "application/json" } }
+    const check = await checkQuotaAndBudget(
+      env.DB,
+      session.userId,
+      tier,
+      body.audio_minutes,
+      BUDGET_CAP_USD
     );
+    if (!check.allowed) {
+      const status = check.reason === "budget_cap_reached" ? 503 : 429;
+      return new Response(
+        JSON.stringify({ error: check.reason, hint: "local_mode" }),
+        { status, headers: { "Content-Type": "application/json" } }
+      );
+    }
   }
 
   // 6. Flag check (soft enforcement)
@@ -318,7 +281,7 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
               synthesis_count = synthesis_count + 1,
               updated_at = excluded.updated_at
           `)
-          .bind(crypto.randomUUID(), session.userId, currentMonth(), body.audio_minutes, Date.now())
+          .bind(crypto.randomUUID(), session.userId, currentMonthKey(), body.audio_minutes, Date.now())
           .run();
       } catch (quotaErr) {
         console.error('[synthesize] quota update failed:', quotaErr);
@@ -329,7 +292,7 @@ export async function handleSynthesize(req: Request, env: Env): Promise<Response
         try {
           const updatedQuota = await env.DB
             .prepare('SELECT synthesis_minutes FROM quota WHERE user_id = ? AND month = ?')
-            .bind(session.userId, currentMonth())
+            .bind(session.userId, currentMonthKey())
             .first<{ synthesis_minutes: number }>()
 
           const userRow = await env.DB

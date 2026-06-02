@@ -56,6 +56,9 @@ export async function handleLemonsqueezyWebhook(
 ): Promise<Response> {
   const rawBody = await req.text()
   const signature = req.headers.get('X-Signature')
+  if (!signature) {
+    return new Response(JSON.stringify({ error: 'missing_signature' }), { status: 400 })
+  }
 
   const valid = await verifySignature(rawBody, signature, env.LEMONSQUEEZY_WEBHOOK_SECRET)
   if (!valid) {

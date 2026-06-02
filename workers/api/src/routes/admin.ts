@@ -309,7 +309,7 @@ export async function handleAdminStats(req: Request, env: Env): Promise<Response
   let extraGrossEUR = 0
   let totalExtraMinSold = 0
   for (const row of extraMinsByTier.results) {
-    const rate = EXTRA_EUR_PER_MIN[row.tier] ?? EXTRA_EUR_PER_MIN['pro']
+    const rate = EXTRA_EUR_PER_MIN[row.tier] ?? (9 / 900)
     extraGrossEUR += row.extra_minutes * rate
     totalExtraMinSold += row.extra_minutes
   }
