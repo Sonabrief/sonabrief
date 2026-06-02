@@ -12,136 +12,221 @@ interface Tier {
 }
 
 const tiers: Tier[] = t.memory.tiers ?? [];
+
+// Neutralizza i dash di rendering (prosa) senza toccare la copy.
+function clean(s: string | undefined): string | undefined {
+  return s
+    ?.replace(/(\d)\s*[—–]\s*(\d)/g, '$1-$2')
+    .replace(/\s*[—–]\s*/g, ', ');
+}
+
+const lead = clean(t.memory.lead);
+const body = clean(t.memory.body);
+const tradeoff = clean(t.memory.tradeoff);
+
+// Il climax della sezione: "Per sempre" è il punto. Riconosco l'ultimo tier
+// per evidenziarlo (serif grande, teal) a chiusura della scala ascendente.
+const isForever = (v: string) => /forever|sempre|para siempre|toujours|für immer/i.test(v);
 ---
 
-<section class="memory">
-  <div class="memory-inner">
-    <h2 class="memory-h2">{t.memory.h2}</h2>
-    <p class="memory-lead">{t.memory.lead}</p>
+<section class="mem">
+  <div class="mem-inner">
+    <header class="mem-head">
+      <h2 class="mem-h2">{t.memory.h2}</h2>
+      {lead && <p class="mem-lead">{lead}</p>}
+    </header>
 
-    <div class="memory-tiers">
-      {tiers.map((tier) => {
-        const isForever = /forever|sempre|para siempre|toujours|für immer/i.test(tier.value);
+    <!-- scala ascendente: 7 giorni -> 12 mesi -> per sempre, il valore cresce -->
+    <ol class="mem-scale">
+      {tiers.map((tier, i) => {
+        const climax = isForever(tier.value);
         return (
-          <div class="memory-tier">
-            <div class="memory-tier-label">{tier.label}</div>
-            <div class:list={['memory-tier-value', { 'memory-tier-value--big': isForever }]}>
+          <li class:list={['mem-tier', { 'mem-tier--climax': climax }]} data-mem-tier>
+            <span class="mem-label">{tier.label}</span>
+            <span class="mem-value">
               {tier.value}
-            </div>
-            {tier.note && <div class="memory-tier-note">{tier.note}</div>}
-          </div>
+              {tier.note && <span class="mem-note">{tier.note}</span>}
+            </span>
+          </li>
         );
       })}
-    </div>
+    </ol>
 
-    <p class="memory-body">{t.memory.body}</p>
-    <p class="memory-tradeoff">{t.memory.tradeoff}</p>
+    <div class="mem-prose">
+      {body && <p class="mem-body">{body}</p>}
+      {tradeoff && <p class="mem-tradeoff">{tradeoff}</p>}
+    </div>
   </div>
 </section>
 
 <style>
-  .memory {
+  .mem {
     padding: 120px 24px;
   }
 
-  .memory-inner {
+  .mem-inner {
     max-width: 880px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 48px;
   }
 
-  .memory-h2 {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: clamp(28px, 3.5vw, 40px);
-    font-weight: 700;
-    letter-spacing: -0.02em;
+  /* header asimmetrico a sinistra, coerente con ThreeWays */
+  .mem-head {
+    max-width: 720px;
+  }
+  .mem-h2 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(30px, 4vw, 48px);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
     color: var(--color-deep-teal);
     margin: 0;
+    text-wrap: balance;
   }
-
-  .memory-lead {
+  .mem-lead {
     font-family: "Manrope", sans-serif;
-    font-size: 16px;
+    font-size: 17px;
     line-height: 1.7;
     color: var(--color-stone);
-    max-width: 65ch;
+    max-width: 60ch;
+    margin: 18px 0 0;
+  }
+
+  /* la scala: righe label/valore, il valore serif cresce verso il climax */
+  .mem-scale {
+    list-style: none;
     margin: 0;
-  }
-
-  .memory-tiers {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    border-top: 1px solid var(--color-mist);
-    border-bottom: 1px solid var(--color-mist);
-    padding: 32px 0;
-    margin: 16px 0;
-  }
-
-  .memory-tier {
+    padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    align-items: flex-start;
+  }
+  .mem-tier {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    column-gap: 32px;
+    align-items: baseline;
+    padding: 24px 0;
+    border-top: 1px solid var(--color-mist);
+  }
+  .mem-tier:last-child {
+    border-bottom: 1px solid var(--color-mist);
   }
 
-  .memory-tier-label {
-    font-family: "Manrope", sans-serif;
-    font-size: 11px;
-    font-weight: 600;
+  .mem-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
     color: var(--color-stone);
   }
 
-  .memory-tier-value {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 20px;
-    font-weight: 600;
+  .mem-value {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    /* scala base; cresce sul climax */
+    font-size: 24px;
+    line-height: 1.1;
     color: var(--color-charcoal);
+    letter-spacing: -0.01em;
+    display: inline-flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 10px;
   }
 
-  .memory-tier-value--big {
-    font-size: 32px;
+  .mem-tier--climax .mem-value {
+    font-size: clamp(32px, 5vw, 52px);
     color: var(--color-deep-teal);
     letter-spacing: -0.02em;
   }
 
-  .memory-tier-note {
+  .mem-note {
     font-family: "Manrope", sans-serif;
-    font-size: 13px;
-    color: var(--color-stone);
     font-style: italic;
+    font-weight: 400;
+    font-size: 14px;
+    color: var(--color-stone);
+    letter-spacing: 0;
   }
 
-  .memory-body {
+  /* prosa di chiusura + tradeoff (il momento di onestà della copy) */
+  .mem-prose {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 62ch;
+  }
+  .mem-body {
     font-family: "Manrope", sans-serif;
     font-size: 16px;
     line-height: 1.7;
     color: var(--color-charcoal);
     margin: 0;
   }
-
-  .memory-tradeoff {
+  .mem-tradeoff {
     font-family: "Manrope", sans-serif;
-    font-style: italic;
     font-size: 15px;
+    line-height: 1.7;
     color: var(--color-stone);
     border-left: 2px solid var(--color-amber);
-    padding-left: 16px;
+    padding-left: 18px;
     margin: 0;
-    line-height: 1.7;
+  }
+
+  /* reveal calmo, stagger per tier — la scala si compone dall'alto */
+  .mem-tier {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+      opacity 600ms var(--ease-out-cubic),
+      transform 600ms var(--ease-out-cubic);
+  }
+  .mem-tier.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mem-tier {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
   }
 
   @media (max-width: 767px) {
-    .memory {
+    .mem {
       padding: 80px 24px;
     }
-    .memory-tiers {
+    .mem-tier {
       grid-template-columns: 1fr;
-      gap: 20px;
+      row-gap: 8px;
+      padding: 22px 0;
     }
   }
 </style>
+
+<script>
+  const tiers = document.querySelectorAll<HTMLElement>('[data-mem-tier]');
+  if ('IntersectionObserver' in window && tiers.length > 0) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.4 }
+    );
+    tiers.forEach((tier) => observer.observe(tier));
+  } else {
+    tiers.forEach((tier) => tier.classList.add('is-visible'));
+  }
+</script>
