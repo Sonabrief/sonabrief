@@ -11,32 +11,50 @@ interface Step {
 }
 
 const steps: Step[] = t.howItWorks.steps ?? [];
-const qualityNote: string | undefined = t.howItWorks.qualityNote;
-const cloudNote: string | undefined = t.howItWorks.cloudNote;
+const rawQuality: string | undefined = t.howItWorks.qualityNote;
+const rawCloud: string | undefined = t.howItWorks.cloudNote;
+
+// Neutralizza i dash di rendering senza toccare la copy JSON:
+// range numerico (1-2) -> trattino; dash retorico -> virgola in prosa.
+function clean(s: string | undefined): string | undefined {
+  return s
+    ?.replace(/(\d)\s*[—–]\s*(\d)/g, '$1-$2')
+    .replace(/\s*[—–]\s*/g, ', ');
+}
+
+const cleanSteps = steps.map((s) => ({ title: s.title, desc: clean(s.desc) }));
+const qualityNote = clean(rawQuality);
+const cloudNote = clean(rawCloud);
+const badge = 'Pro & Pro Unlimited';
 ---
 
 <section id="how-it-works" class="hiw">
   <div class="hiw-inner">
-    <div class="hiw-steps">
-      {steps.map((step, i) => (
-        <div class="hiw-step">
-          <div class="hiw-num">{i + 1}</div>
-          <h3 class="hiw-title">{step.title}</h3>
-          <p class="hiw-desc">{step.desc}</p>
-        </div>
+    <!-- flusso verticale: gli step sono una sequenza temporale, connessi da una linea -->
+    <ol class="hiw-flow">
+      {cleanSteps.map((step, i) => (
+        <li class="hiw-step" data-hiw-step>
+          <div class="hiw-marker" aria-hidden="true">
+            <span class="hiw-num">{String(i + 1).padStart(2, '0')}</span>
+          </div>
+          <div class="hiw-body">
+            <h3 class="hiw-title">{step.title}</h3>
+            <p class="hiw-desc">{step.desc}</p>
+          </div>
+        </li>
       ))}
+    </ol>
+
+    <div class="hiw-notes">
+      {qualityNote && <p class="hiw-quality">{qualityNote}</p>}
+
+      {cloudNote && (
+        <p class="hiw-cloud">
+          <span class="hiw-cloud-badge">{badge}</span>
+          <span class="hiw-cloud-text">{cloudNote}</span>
+        </p>
+      )}
     </div>
-
-    {qualityNote && (
-      <p class="hiw-quality">{qualityNote}</p>
-    )}
-
-    {cloudNote && (
-      <div class="hiw-cloud">
-        <span class="hiw-cloud-badge">Pro &amp; Pro Unlimited</span>
-        <p class="hiw-cloud-text">{cloudNote}</p>
-      </div>
-    )}
   </div>
 </section>
 
@@ -46,48 +64,78 @@ const cloudNote: string | undefined = t.howItWorks.cloudNote;
   }
 
   .hiw-inner {
-    max-width: 1080px;
+    max-width: 840px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: 56px;
   }
 
-  .hiw-steps {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 48px;
+  /* --- flusso a step connessi --- */
+  .hiw-flow {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    counter-reset: none;
   }
 
   .hiw-step {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    column-gap: 28px;
+    padding-bottom: 44px;
+  }
+  .hiw-step:last-child {
+    padding-bottom: 0;
+  }
+
+  /* marker: numero serif ambra + linea verticale di connessione.
+     la cella si estende a tutta l'altezza dello step così la linea
+     raggiunge sempre il marker successivo, qualunque sia l'altezza del testo */
+  .hiw-marker {
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    height: 100%;
+  }
+  .hiw-num {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-optical-sizing: auto;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--color-amber);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+  /* linea che collega un marker al successivo: mostra la sequenza */
+  .hiw-step:not(:last-child) .hiw-marker::after {
+    content: "";
+    position: absolute;
+    left: 11px;
+    top: 40px;
+    bottom: -44px;
+    width: 1px;
+    background-color: var(--color-mist);
+  }
+
+  .hiw-body {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
+    gap: 10px;
+    padding-top: 2px;
+    max-width: 56ch;
   }
-
-  .hiw-num {
-    width: 40px;
-    height: 40px;
-    border-radius: 9999px;
-    background-color: var(--color-deep-teal);
-    color: var(--color-cream);
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
   .hiw-title {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 20px;
-    font-weight: 600;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: 22px;
+    line-height: 1.2;
     color: var(--color-deep-teal);
     margin: 0;
   }
-
   .hiw-desc {
     font-family: "Manrope", sans-serif;
     font-size: 15px;
@@ -96,52 +144,111 @@ const cloudNote: string | undefined = t.howItWorks.cloudNote;
     margin: 0;
   }
 
+  /* --- note: nota editoriale a margine + riga cloud col badge (no box) --- */
+  .hiw-notes {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding-left: 92px;
+  }
+
   .hiw-quality {
     font-family: "Manrope", sans-serif;
-    font-style: italic;
     font-size: 15px;
-    color: var(--color-stone);
-    text-align: center;
-    max-width: 640px;
-    margin: 0 auto;
     line-height: 1.7;
+    color: var(--color-stone);
+    margin: 0;
+    max-width: 60ch;
   }
 
   .hiw-cloud {
-    border: 1px solid var(--color-amber);
-    border-radius: 12px;
-    padding: 24px 28px;
-    max-width: 720px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 16px;
+    align-items: baseline;
+    margin: 0;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-mist);
+    max-width: 60ch;
   }
-
   .hiw-cloud-badge {
-    font-family: "Manrope", sans-serif;
+    font-family: var(--font-mono);
     font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.04em;
     color: var(--color-amber);
+    white-space: nowrap;
   }
-
   .hiw-cloud-text {
     font-family: "Manrope", sans-serif;
     font-size: 14px;
-    line-height: 1.6;
+    line-height: 1.65;
     color: var(--color-charcoal);
-    margin: 0;
+  }
+
+  /* reveal calmo, stagger per step */
+  .hiw-step {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 600ms var(--ease-out-cubic),
+      transform 600ms var(--ease-out-cubic);
+  }
+  .hiw-step.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hiw-step {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
   }
 
   @media (max-width: 767px) {
     .hiw {
       padding: 80px 24px;
     }
-    .hiw-steps {
+    .hiw-step {
+      grid-template-columns: 48px minmax(0, 1fr);
+      column-gap: 20px;
+      padding-bottom: 36px;
+    }
+    .hiw-num {
+      font-size: 26px;
+    }
+    .hiw-step:not(:last-child) .hiw-marker::after {
+      left: 9px;
+      top: 34px;
+      bottom: -36px;
+    }
+    .hiw-notes {
+      padding-left: 0;
+    }
+    .hiw-cloud {
       grid-template-columns: 1fr;
-      gap: 40px;
+      row-gap: 6px;
     }
   }
 </style>
+
+<script>
+  const steps = document.querySelectorAll<HTMLElement>('[data-hiw-step]');
+  if ('IntersectionObserver' in window && steps.length > 0) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.3 }
+    );
+    steps.forEach((s) => observer.observe(s));
+  } else {
+    steps.forEach((s) => s.classList.add('is-visible'));
+  }
+</script>
