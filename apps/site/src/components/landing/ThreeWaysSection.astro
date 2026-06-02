@@ -3,7 +3,7 @@ interface Props {
   t: any;
   lang: string;
 }
-const { t } = Astro.props;
+const { t, lang } = Astro.props;
 
 interface Mode {
   name: string;
@@ -11,138 +11,298 @@ interface Mode {
   points: string[];
 }
 
-const modes: Mode[] = t.threeWays.modes ?? [];
+const rawModes: Mode[] = t.threeWays.modes ?? [];
 const title: string = t.threeWays.title;
-const positioning: string | undefined = t.threeWays.positioning;
+const rawPositioning: string | undefined = t.threeWays.positioning;
+// positioning è prosa: dash retorico -> virgola, range numerico -> trattino.
+const positioning = rawPositioning
+  ?.replace(/(\d)\s*[—–]\s*(\d)/g, '$1-$2')
+  .replace(/\s*[—–]\s*/g, ', ');
+
+// I punti nei JSON sono in ordine fisso: [Standard, Solo locale, Cloud Veloce]
+// in tutte le lingue. Li riordino per GRADIENTE DI PRIVACY: locale -> standard -> veloce.
+// Riconosco le modalità per parola chiave nel nome (robusto su 5 lingue).
+function kindOf(name: string): 'local' | 'fast' | 'standard' {
+  const n = name.toLowerCase();
+  if (/local|locale|lokal|uniquement/.test(n)) return 'local';
+  if (/veloce|fast|rapid|rápid|schnell/.test(n)) return 'fast';
+  return 'standard';
+}
+const order: Record<string, number> = { local: 0, standard: 1, fast: 2 };
+const modes = [...rawModes].sort((a, b) => order[kindOf(a.name)] - order[kindOf(b.name)]);
+
+// Micro-label mono dato/valore — derivati, NON dalla copy. Indicizzati per
+// [kind][punto-index]. L'ordine dei punti nei JSON è stabile in tutte le lingue.
+// I label sono concetti tecnici (motore, uscita...), scritti per lingua.
+type LabelMap = Record<'local' | 'standard' | 'fast', string[]>;
+const labelsByLang: Record<string, LabelMap> = {
+  it: {
+    local:    ['motore', 'uscita', 'velocità', 'piani'],
+    standard: ['cloud', 'al server', 'sintesi', 'modello'],
+    fast:     ['velocità', 'tempo', 'hosting', 'incluso'],
+  },
+  en: {
+    local:    ['engine', 'outbound', 'speed', 'tiers'],
+    standard: ['cloud', 'to server', 'summary', 'model'],
+    fast:     ['speed', 'time', 'hosting', 'included'],
+  },
+  fr: {
+    local:    ['moteur', 'sortant', 'vitesse', 'plans'],
+    standard: ['cloud', 'au serveur', 'résumé', 'modèle'],
+    fast:     ['vitesse', 'temps', 'hébergement', 'inclus'],
+  },
+  es: {
+    local:    ['motor', 'salida', 'velocidad', 'planes'],
+    standard: ['cloud', 'al servidor', 'resumen', 'modelo'],
+    fast:     ['velocidad', 'tiempo', 'hosting', 'incluido'],
+  },
+  de: {
+    local:    ['Engine', 'ausgehend', 'Tempo', 'Pläne'],
+    standard: ['Cloud', 'an Server', 'Synthese', 'Modell'],
+    fast:     ['Tempo', 'Zeit', 'Hosting', 'inklusive'],
+  },
+};
+const labels = labelsByLang[lang] ?? labelsByLang.en;
+
+// I valori sono la copy JSON intatta. Neutralizzo solo i dash di rendering,
+// senza modificare i file di copy:
+//  - range numerico (1–2, 30–60) -> trattino normale
+//  - dash retorico ("testo — mai l'audio") -> due punti (register mono dato/valore)
+function cleanValue(s: string): string {
+  return s
+    // range numerico: cifra (en/em-dash) cifra -> trattino semplice
+    .replace(/(\d)\s*[—–]\s*(\d)/g, '$1-$2')
+    // dash retorico residuo -> due punti
+    .replace(/\s*[—–]\s*/g, ': ');
+}
+
+const rows = modes.map((mode) => {
+  const kind = kindOf(mode.name);
+  const idx = kind === 'local' ? '01' : kind === 'standard' ? '02' : '03';
+  const labelSet = labels[kind];
+  const points = mode.points.map((p, i) => ({
+    label: labelSet[i] ?? '',
+    value: cleanValue(p),
+  }));
+  return { ...mode, kind, idx, points };
+});
 ---
 
-<section class="three-ways">
-  <div class="three-ways-inner">
-    <h2 class="three-ways-title">{title}</h2>
+<section class="tw">
+  <div class="tw-inner">
+    <header class="tw-head">
+      <h2 class="tw-title">{title}</h2>
+      {positioning && <p class="tw-positioning">{positioning}</p>}
+    </header>
 
-    <div class="three-ways-grid">
-      {modes.map((mode) => (
-        <div class="three-ways-card">
-          {mode.badge && (
-            <span class="three-ways-badge">{mode.badge}</span>
-          )}
-          <h3 class="three-ways-card-name">{mode.name}</h3>
-          <ul class="three-ways-points">
-            {mode.points.map((p) => (
-              <li>
-                <span class="three-ways-bullet" aria-hidden="true">·</span>
-                <span>{p}</span>
-              </li>
+    <div class="tw-rows">
+      {rows.map((row) => (
+        <article class="tw-row" data-tw-row>
+          <div class="tw-row-id">
+            <span class="tw-idx">{row.idx}</span>
+            <h3 class="tw-name">{row.name}</h3>
+            {row.badge && <span class="tw-badge">{row.badge}</span>}
+          </div>
+
+          <dl class="tw-data">
+            {row.points.map((p) => (
+              <div class="tw-pair">
+                <dt class="tw-label">{p.label}</dt>
+                <dd class="tw-value">{p.value}</dd>
+              </div>
             ))}
-          </ul>
-        </div>
+          </dl>
+        </article>
       ))}
     </div>
-
-    {positioning && (
-      <p class="three-ways-positioning">{positioning}</p>
-    )}
   </div>
 </section>
 
 <style>
-  .three-ways {
+  .tw {
     padding: 120px 24px;
   }
 
-  .three-ways-inner {
-    max-width: 1200px;
+  .tw-inner {
+    max-width: 1080px;
     margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 48px;
   }
 
-  .three-ways-title {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: clamp(28px, 3.5vw, 40px);
-    font-weight: 700;
-    letter-spacing: -0.02em;
+  /* header asimmetrico, allineato a sinistra (non centrato) */
+  .tw-head {
+    max-width: 760px;
+    margin-bottom: 56px;
+  }
+  .tw-title {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(30px, 4vw, 48px);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
     color: var(--color-deep-teal);
-    text-align: center;
     margin: 0;
+    text-wrap: balance;
   }
-
-  .three-ways-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-  }
-
-  .three-ways-card {
-    border: 1px solid var(--color-mist);
-    border-radius: 12px;
-    padding: 28px;
-    background-color: var(--color-cream);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .three-ways-badge {
+  .tw-positioning {
     font-family: "Manrope", sans-serif;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--color-amber);
-    align-self: flex-start;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--color-stone);
+    max-width: 56ch;
+    margin: 18px 0 0;
   }
 
-  .three-ways-card-name {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--color-deep-teal);
-    margin: 0;
+  /* le 3 modalità come righe full-width in gradiente, separate da hairline */
+  .tw-rows {
+    display: flex;
+    flex-direction: column;
+  }
+  .tw-row {
+    display: grid;
+    grid-template-columns: minmax(200px, 0.8fr) minmax(0, 2fr);
+    column-gap: 56px;
+    align-items: start;
+    padding: 40px 0;
+    border-top: 1px solid var(--color-mist);
+  }
+  .tw-row:last-child {
+    border-bottom: 1px solid var(--color-mist);
   }
 
-  .three-ways-points {
-    list-style: none;
-    padding: 0;
-    margin: 8px 0 0;
+  /* colonna sinistra: indice serif + nome modalità */
+  .tw-row-id {
     display: flex;
     flex-direction: column;
     gap: 8px;
   }
-
-  .three-ways-points li {
-    display: flex;
-    gap: 10px;
-    align-items: baseline;
-    font-family: "Manrope", sans-serif;
-    font-size: 14px;
-    line-height: 1.6;
-    color: var(--color-charcoal);
-  }
-
-  .three-ways-bullet {
+  .tw-idx {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-optical-sizing: auto;
+    font-size: clamp(40px, 5vw, 56px);
+    line-height: 0.9;
     color: var(--color-amber);
-    flex-shrink: 0;
+    letter-spacing: -0.02em;
+  }
+  .tw-name {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 1.2;
+    color: var(--color-deep-teal);
+    margin: 4px 0 0;
+  }
+  .tw-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--color-amber);
+    margin-top: 2px;
   }
 
-  .three-ways-positioning {
-    font-family: "Manrope", sans-serif;
-    font-style: italic;
-    font-size: 15px;
+  /* colonna destra: coppie label/valore — label mono, valore prosa */
+  .tw-data {
+    margin: 0;
+    display: grid;
+    gap: 14px;
+  }
+  .tw-pair {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    column-gap: 24px;
+    align-items: baseline;
+  }
+  .tw-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.01em;
     color: var(--color-stone);
-    text-align: center;
-    max-width: 640px;
-    margin: 0 auto;
-    line-height: 1.7;
+    margin: 0;
+    /* allinea otticamente con la prima riga del valore */
+    padding-top: 1px;
+  }
+  .tw-value {
+    font-family: "Manrope", sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--color-charcoal);
+    margin: 0;
   }
 
-  @media (max-width: 767px) {
-    .three-ways {
+  /* reveal calmo, stagger per riga */
+  .tw-row {
+    opacity: 0;
+    transform: translateY(22px);
+    transition:
+      opacity 600ms var(--ease-out-cubic),
+      transform 600ms var(--ease-out-cubic);
+  }
+  .tw-row.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tw-row {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .tw {
       padding: 80px 24px;
     }
-    .three-ways-grid {
+    .tw-head {
+      margin-bottom: 40px;
+    }
+    .tw-row {
       grid-template-columns: 1fr;
+      row-gap: 24px;
+      column-gap: 0;
+      padding: 36px 0;
+    }
+    .tw-row-id {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .tw-name {
+      margin-top: 0;
+    }
+    .tw-pair {
+      grid-template-columns: 84px 1fr;
+      column-gap: 16px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .tw-pair {
+      grid-template-columns: 1fr;
+      gap: 2px;
     }
   }
 </style>
+
+<script>
+  const rows = document.querySelectorAll<HTMLElement>('[data-tw-row]');
+  if ('IntersectionObserver' in window && rows.length > 0) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.25 }
+    );
+    rows.forEach((r) => observer.observe(r));
+  } else {
+    rows.forEach((r) => r.classList.add('is-visible'));
+  }
+</script>
