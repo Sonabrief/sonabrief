@@ -27,17 +27,14 @@ const {
 
   <div class="pricing-card-price-row">
     <span class="pricing-card-price">{price}</span>
-    <span class="pricing-card-period">{period}</span>
+    {period && <span class="pricing-card-period">{period}</span>}
   </div>
 
-  <p class="pricing-card-description">{description}</p>
+  {description && <p class="pricing-card-description">{description}</p>}
 
   <ul class="pricing-card-features">
     {features.map((feature) => (
-      <li>
-        <span class="pricing-card-bullet" aria-hidden="true">·</span>
-        {feature}
-      </li>
+      <li>{feature}</li>
     ))}
   </ul>
 
@@ -54,46 +51,51 @@ const {
   .pricing-card {
     border: 1px solid var(--color-mist);
     border-radius: 16px;
-    padding: 32px;
+    padding: 30px 28px;
     display: flex;
     flex-direction: column;
     gap: 0;
-    background-color: var(--color-cream);
+    background-color: transparent;
   }
 
+  /* tier consigliato: bordo teal pieno, leggero rialzo cromatico */
   .pricing-card--highlighted {
-    border: 2px solid var(--color-deep-teal);
-    background-color: #ffffff;
+    border: 1.5px solid var(--color-deep-teal);
+    background-color: color-mix(in srgb, var(--color-deep-teal) 4%, transparent);
   }
 
+  /* nome tier in mono — coerente col register dati */
   .pricing-card-name {
-    font-family: "Manrope", sans-serif;
+    font-family: var(--font-mono);
     font-size: 12px;
-    font-weight: 600;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
     color: var(--color-stone);
-    margin: 0 0 20px;
+    margin: 0 0 18px;
   }
 
   .pricing-card-price-row {
     display: flex;
     align-items: baseline;
-    gap: 4px;
-    margin-bottom: 12px;
+    gap: 6px;
+    margin-bottom: 24px;
   }
 
+  /* il prezzo è il momento: serif grande */
   .pricing-card-price {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 48px;
-    font-weight: 700;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: 46px;
     color: var(--color-deep-teal);
     line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
   }
 
   .pricing-card-period {
-    font-family: "Manrope", sans-serif;
-    font-size: 14px;
+    font-family: var(--font-mono);
+    font-size: 13px;
     color: var(--color-stone);
   }
 
@@ -105,30 +107,27 @@ const {
     margin: 0 0 24px;
   }
 
+  /* feature senza bullet: hairline tra le righe, register editoriale */
   .pricing-card-features {
     list-style: none;
     padding: 0;
-    margin: 0 0 32px;
+    margin: 0 0 28px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
     flex: 1;
   }
 
   .pricing-card-features li {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
     font-family: "Manrope", sans-serif;
     font-size: 14px;
+    line-height: 1.45;
     color: var(--color-charcoal);
+    padding: 11px 0;
+    border-top: 1px solid var(--color-mist);
   }
-
-  .pricing-card-bullet {
-    color: var(--color-amber);
-    font-size: 16px;
-    line-height: 1;
-    flex-shrink: 0;
+  .pricing-card-features li:first-child {
+    border-top: none;
+    padding-top: 0;
   }
 
   .pricing-card-cta {
@@ -144,13 +143,19 @@ const {
     border: 1.5px solid var(--color-deep-teal);
     color: var(--color-deep-teal);
     background: transparent;
-    transition: background-color 150ms ease, color 150ms ease;
+    transition:
+      background-color 200ms var(--ease-out-cubic),
+      color 200ms var(--ease-out-cubic),
+      transform 200ms var(--ease-out-cubic);
     box-sizing: border-box;
   }
 
   .pricing-card-cta:hover {
     background-color: var(--color-deep-teal);
     color: var(--color-cream);
+  }
+  .pricing-card-cta:active {
+    transform: translateY(1px);
   }
 
   .pricing-card-cta--highlighted {
