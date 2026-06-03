@@ -252,7 +252,7 @@ export default function OnboardingPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4 }}
-          className="force-light min-h-screen bg-background flex items-center justify-center px-6 py-12"
+          className="min-h-screen bg-background flex items-center justify-center px-6 py-12"
         >
           <div className="w-full max-w-lg text-center">
             <motion.div
@@ -304,7 +304,7 @@ export default function OnboardingPage() {
 
   // ── Wizard ────────────────────────────────────────────────────────────────
   return (
-    <div className="force-light min-h-screen bg-background flex items-center justify-center px-6 py-12">
+    <div className="min-h-screen bg-background flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-lg">
         <img src="/logo.svg" alt="Sonabrief" className="mb-10 h-7 w-auto" />
 

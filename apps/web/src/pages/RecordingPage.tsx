@@ -891,11 +891,6 @@ export default function RecordingPage() {
       rootStyle.textContent = document.documentElement.getAttribute('style') ?? ''
       pipWin.document.head.appendChild(rootStyle)
 
-      // Copia classe dark se presente
-      if (document.documentElement.classList.contains('dark')) {
-        pipWin.document.documentElement.classList.add('dark')
-      }
-
       pipWin.document.body.style.cssText = 'margin:0;padding:0;background:var(--background,#fff);'
 
       // Mount React nell'iframe PiP

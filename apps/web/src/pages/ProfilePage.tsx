@@ -106,31 +106,12 @@ export default function ProfilePage() {
   const [weeklyReminder, setWeeklyReminder] = useState(false)
   const [whisperOverride, setWhisperOverride] = useState<WhisperModelId | null>(null)
   const detectedModel = useMemo(() => detectWhisperModel(), [])
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>(() =>
-    (localStorage.getItem('sb_theme') as 'light' | 'dark' | 'system') ?? 'system'
-  )
   const [calendarConnected, setCalendarConnected] = useState<{ google: boolean; microsoft: boolean }>({ google: false, microsoft: false })
   const [syncEnabled, setSyncEnabled] = useState(false)
   const [showSyncDisableConfirm, setShowSyncDisableConfirm] = useState(false)
   const [showOllamaModal, setShowOllamaModal] = useState(false)
 
   useBackupScheduler(tier, backupFrequency, (at) => setLastBackupAt(at))
-
-  useEffect(() => {
-    const root = document.documentElement
-    if (theme === 'dark') {
-      root.classList.add('dark')
-      localStorage.setItem('sb_theme', 'dark')
-    } else if (theme === 'light') {
-      root.classList.remove('dark')
-      localStorage.setItem('sb_theme', 'light')
-    } else {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      if (prefersDark) root.classList.add('dark')
-      else root.classList.remove('dark')
-      localStorage.setItem('sb_theme', 'system')
-    }
-  }, [theme])
 
   async function refreshPasskeys() {
     try {
@@ -226,6 +207,8 @@ export default function ProfilePage() {
   }, [passkeySupported])
 
   useEffect(() => {
+    localStorage.removeItem('sb_theme')
+    localStorage.removeItem('sb_preferences')
     const saved = localStorage.getItem('sb_last_backup_at')
     if (saved) setLastBackupAt(Number(saved))
     const freq = localStorage.getItem('sb_backup_frequency') as BackupFrequency | null
@@ -550,25 +533,6 @@ export default function ProfilePage() {
               </SectionHeading>
             </div>
             <div className="rounded-lg border border-border bg-card px-5 py-4 space-y-5">
-              <div className="space-y-1.5">
-                <label className="text-sm text-muted-foreground">{t('profile.theme_label')}</label>
-                <div className="flex gap-2">
-                  {(['light', 'system', 'dark'] as const).map(themeKey => (
-                    <button
-                      key={themeKey}
-                      onClick={() => setTheme(themeKey)}
-                      className={`flex-1 rounded-md border px-3 py-2 text-sm font-medium transition-colors motion-reduce:transition-none ${
-                        theme === themeKey
-                          ? 'border-primary bg-primary/10 text-primary'
-                          : 'border-border bg-card text-muted-foreground hover:bg-border'
-                      }`}
-                    >
-                      {themeKey === 'light' ? `☀️ ${t('profile.theme_light')}` : themeKey === 'dark' ? `🌙 ${t('profile.theme_dark')}` : `💻 ${t('profile.theme_system')}`}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               <div className="space-y-1.5">
                 <label htmlFor="language-select" className="text-sm text-muted-foreground">
                   {t('profile.language_label')}
