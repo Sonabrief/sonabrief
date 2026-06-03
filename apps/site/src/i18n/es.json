@@ -64,14 +64,14 @@
       },
       {
         "title": "Transcribe",
-        "desc": "En tu máquina con Whisper — o con Cloud Rápido, nuestra nube europea rápida (Pro y Pro Unlimited). En ambos casos, nunca se conserva ningún archivo de audio."
+        "desc": "En tu máquina con Whisper, o con Cloud Rápido, nuestra nube europea rápida (Pro y Pro Unlimited). En ambos casos, nunca se conserva ningún archivo de audio."
       },
       {
         "title": "Resume",
-        "desc": "Mistral EU con Zero Data Retention, u Ollama totalmente en local. Solo el texto transcrito — nunca el audio."
+        "desc": "Mistral EU con Zero Data Retention, u Ollama totalmente en local. Solo el texto transcrito, nunca el audio."
       }
     ],
-    "qualityNote": "La calidad de la transcripción no depende de cuánto pagas. Whisper Large-v3-turbo — el mismo modelo que usan los investigadores — está disponible en todos los planes, incluido el Free, y se ejecuta por completo en tu máquina. Por defecto, la app elige el modelo adecuado para tu hardware; cuando quieras, puedes forzar Large-v3-turbo en los ajustes.",
+    "qualityNote": "La calidad de la transcripción no depende de cuánto pagas. Whisper Large-v3-turbo (el mismo modelo que usan los investigadores) está disponible en todos los planes, incluido el Free, y se ejecuta por completo en tu máquina. Por defecto, la app elige el modelo adecuado para tu hardware; cuando quieras, puedes forzar Large-v3-turbo en los ajustes.",
     "cloudNote": "En Pro y Pro Unlimited, Cloud Rápido transcribe en la nube europea: 30 minutos de audio en 1–2 minutos, sea cual sea tu hardware."
   },
   "threeWays": {
@@ -81,7 +81,7 @@
         "name": "Standard",
         "points": [
           "Mistral, alojado en EU, ZDR activo, DPA firmado",
-          "Al servidor solo llega el texto transcrito — nunca el audio",
+          "Al servidor solo llega el texto transcrito, nunca el audio",
           "Calidad de resumen excelente, gran velocidad",
           "Free: Mistral Small · Pro y Pro Unlimited: Mistral Large"
         ]
@@ -90,7 +90,7 @@
         "name": "Solo local",
         "points": [
           "Ollama, por completo en tu máquina",
-          "Cero bytes salen — nunca, en ningún modo",
+          "Cero bytes salen: nunca, en ningún modo",
           "Más lento, requiere hardware capaz",
           "Disponible en todos los planes, incluido el Free"
         ]
@@ -99,18 +99,18 @@
         "name": "Cloud Rápido",
         "badge": "Pro y Pro Unlimited",
         "points": [
-          "Plena velocidad en cualquier máquina — incluso un portátil Windows antiguo",
+          "Plena velocidad en cualquier máquina, incluso un portátil Windows antiguo",
           "30 minutos de audio, transcritos en 1–2 minutos",
-          "Con Mistral, alojado en Europa en París — audio cifrado en tránsito, nunca guardado",
+          "Con Mistral, alojado en Europa en París, audio cifrado en tránsito, nunca guardado",
           "5 h/mes incluidas en Pro · 20 h/mes en Pro Unlimited"
         ]
       }
     ],
-    "positioning": "La única herramienta de reuniones con elección de privacidad en tres niveles, infraestructura 100 % europea y transcripción local ilimitada en todos los planes — incluido el Free."
+    "positioning": "La única herramienta de reuniones con elección de privacidad en tres niveles, infraestructura 100 % europea y transcripción local ilimitada en todos los planes, incluido el Free."
   },
   "memory": {
     "h2": "Una memoria hecha para durar.",
-    "lead": "La mayoría de las herramientas de reuniones borran tu historial a los 14 días en los planes gratuitos. Creemos que tu memoria profesional debería ser tuya — no de su política de retención.",
+    "lead": "La mayoría de las herramientas de reuniones borran tu historial a los 14 días en los planes gratuitos. Creemos que tu memoria profesional debería ser tuya, no de su política de retención.",
     "tiers": [
       {
         "label": "Free",
@@ -126,7 +126,7 @@
         "note": "(sí, de verdad)"
       }
     ],
-    "body": "Cifrada con tu contraseña. Sincronizada en todos tus dispositivos. Con búsqueda. Tuya — tuya de verdad.",
+    "body": "Cifrada con tu contraseña. Sincronizada en todos tus dispositivos. Con búsqueda. Tuya, tuya de verdad.",
     "tradeoff": "Si olvidas tu contraseña, no podemos recuperarla. Los compromisos son reales. No los ocultamos."
   },
   "professionals": {
@@ -140,14 +140,14 @@
       "Investigadores que realizan entrevistas cualitativas."
     ],
     "close": "Si tus reuniones contienen cosas que la nube no debería ver, entiendes exactamente por qué lo creamos.",
-    "aside": "(Y si no — Sonabrief también funciona para ti.)"
+    "aside": "(Y si no: Sonabrief también funciona para ti.)"
   },
   "openSource": {
     "h2": "Open source. Verificable, no solo declarable.",
     "body": "Todo lo que maneja tus datos está en GitHub. Auditable por cualquiera. Forkable. Inspeccionable. Bajo licencia AGPL v3.",
     "cta1": "Míralo en GitHub →",
     "cta2": "Lee nuestra arquitectura de seguridad →",
-    "builtWith": "Construido con Whisper · Ollama · Mistral · libsodium · Cloudflare Workers — estándares abiertos, código abierto.",
+    "builtWith": "Construido con Whisper · Ollama · Mistral · libsodium · Cloudflare Workers: estándares abiertos, código abierto.",
     "contribute": "¿Quieres contribuir? Firma nuestro Harmony CLA. Ofrecemos doble licencia para Enterprise."
   },
   "pricing": {
@@ -208,7 +208,7 @@
       }
     ],
     "claims": [
-      "Whisper Large-v3-turbo está disponible en todos los planes, incluido el Free — el modelo que ejecuta la app depende de tu hardware, nunca de tu precio, y puedes forzar Large en los ajustes.",
+      "Whisper Large-v3-turbo está disponible en todos los planes, incluido el Free: el modelo que ejecuta la app depende de tu hardware, nunca de tu precio, y puedes forzar Large en los ajustes.",
       "Todo el procesamiento en la nube se ejecuta en Mistral, alojado en EU, con Zero Data Retention."
     ],
     "fullComparison": "Ver la comparativa completa →",
@@ -556,7 +556,7 @@
       ]
     },
     "banners": [
-      "Whisper Large-v3-turbo en todos los planes, incluido el Free. El modelo se ajusta a tu hardware, no a tu precio — y Large siempre se puede forzar.",
+      "Whisper Large-v3-turbo en todos los planes, incluido el Free. El modelo se ajusta a tu hardware, no a tu precio, y Large siempre se puede forzar.",
       "Todo el LLM cloud en Mistral, alojado en EU · ZDR activo · DPA firmado"
     ],
     "enterprise": {
@@ -575,11 +575,11 @@
       "items": [
         {
           "q": "¿Ofrecéis reembolsos?",
-          "a": "Si Sonabrief no es para ti, escribe a hello@sonabrief.com dentro de los 14 días siguientes a tu pago y te lo devolvemos — planes anuales incluidos. Sin formularios, sin fricción."
+          "a": "Si Sonabrief no es para ti, escribe a hello@sonabrief.com dentro de los 14 días siguientes a tu pago y te lo devolvemos, planes anuales incluidos. Sin formularios, sin fricción."
         },
         {
           "q": "¿Qué pasa si bajo de plan?",
-          "a": "Todo lo que supere el límite de retención de tu nuevo plan sigue disponible 30 días más, marcado como caducando — tiempo para exportarlo o cambiar de idea. Después se elimina. Tu audio no estaba guardado de todos modos, así que no hay nada más que limpiar."
+          "a": "Todo lo que supere el límite de retención de tu nuevo plan sigue disponible 30 días más, marcado como caducando: tiempo para exportarlo o cambiar de idea. Después se elimina. Tu audio no estaba guardado de todos modos, así que no hay nada más que limpiar."
         },
         {
           "q": "¿Cómo se gestiona el IVA de la UE?",
@@ -587,15 +587,15 @@
         },
         {
           "q": "¿Cuándo se me cobra?",
-          "a": "Los planes mensuales se renuevan cada mes en tu fecha de alta. Los anuales se renuevan una vez al año e incluyen dos meses gratis. Cancela cuando quieras desde tu cuenta — el siguiente cobro se detiene y conservas el acceso hasta el final del periodo."
+          "a": "Los planes mensuales se renuevan cada mes en tu fecha de alta. Los anuales se renuevan una vez al año e incluyen dos meses gratis. Cancela cuando quieras desde tu cuenta: el siguiente cobro se detiene y conservas el acceso hasta el final del periodo."
         },
         {
           "q": "¿Puedo compartir una cuenta con mi equipo?",
-          "a": "Las cuentas son personales. Pro Unlimited añade multidispositivo para usar tu cuenta en todas tus máquinas. Para varias personas, Enterprise ofrece una configuración multipuesto de verdad — escríbenos."
+          "a": "Las cuentas son personales. Pro Unlimited añade multidispositivo para usar tu cuenta en todas tus máquinas. Para varias personas, Enterprise ofrece una configuración multipuesto de verdad: escríbenos."
         },
         {
           "q": "¿Hay descuento para estudiantes?",
-          "a": "No. El plan Free es real, con transcripción local ilimitada — eso ya cubre mucho. Preferimos mantener los precios simples a gestionar casos especiales."
+          "a": "No. El plan Free es real, con transcripción local ilimitada: eso ya cubre mucho. Preferimos mantener los precios simples a gestionar casos especiales."
         }
       ]
     }
@@ -605,15 +605,15 @@
     "items": [
       {
         "q": "¿Subís mi audio a algún sitio?",
-        "a": "No. El audio se procesa en memoria en tu dispositivo, se transcribe y luego se elimina. Nunca llega a nuestros servidores, ni siquiera como archivo temporal. Puedes verificarlo en nuestro código — la función concreta está enlazada en nuestra página /security."
+        "a": "No. El audio se procesa en memoria en tu dispositivo, se transcribe y luego se elimina. Nunca llega a nuestros servidores, ni siquiera como archivo temporal. Puedes verificarlo en nuestro código: la función concreta está enlazada en nuestra página /security."
       },
       {
         "q": "¿Cuáles son los tres modos de transcripción?",
-        "a": "Standard transcribe en local y resume en la nube europea. Solo local mantiene todo en tu máquina. Cloud Rápido (Pro y Pro Unlimited) transcribe en los servidores europeos de Mistral en París — rápido sea cual sea el hardware, con el audio cifrado en tránsito y nunca guardado. Eliges en cada reunión."
+        "a": "Standard transcribe en local y resume en la nube europea. Solo local mantiene todo en tu máquina. Cloud Rápido (Pro y Pro Unlimited) transcribe en los servidores europeos de Mistral en París, rápido sea cual sea el hardware, con el audio cifrado en tránsito y nunca guardado. Eliges en cada reunión."
       },
       {
         "q": "¿Y si olvido mi contraseña?",
-        "a": "No podemos recuperarla — ese es el sentido del cifrado zero-knowledge. Durante la configuración recibes 12 palabras de recuperación (estándar BIP39). Anótalas y guárdalas en un lugar seguro. Si pierdes tanto la contraseña como las palabras de recuperación, tu archivo cifrado queda ilegible. Los compromisos son reales."
+        "a": "No podemos recuperarla: ese es el sentido del cifrado zero-knowledge. Durante la configuración recibes 12 palabras de recuperación (estándar BIP39). Anótalas y guárdalas en un lugar seguro. Si pierdes tanto la contraseña como las palabras de recuperación, tu archivo cifrado queda ilegible. Los compromisos son reales."
       },
       {
         "q": "¿Vuestro LLM en la nube está realmente alojado en EU?",
@@ -625,11 +625,11 @@
       },
       {
         "q": "¿Por qué 9 €/mes y no menos?",
-        "a": "El plan Free existe y es real — no está recortado. El Pro es para quienes necesitan un historial más largo, mejor calidad de LLM y el conjunto completo de funciones. Necesitamos ingresos para seguir siendo independientes y mantener la infraestructura. Así de simple."
+        "a": "El plan Free existe y es real, no está recortado. El Pro es para quienes necesitan un historial más largo, mejor calidad de LLM y el conjunto completo de funciones. Necesitamos ingresos para seguir siendo independientes y mantener la infraestructura. Así de simple."
       },
       {
         "q": "¿Funciona en móvil?",
-        "a": "Sonabrief es una progressive web app — instálala desde tu navegador en cualquier dispositivo. La grabación desde el móvil llegará en una próxima actualización. La sincronización y la lectura del archivo ya funcionan en móvil."
+        "a": "Sonabrief es una progressive web app: instálala desde tu navegador en cualquier dispositivo. La grabación desde el móvil llegará en una próxima actualización. La sincronización y la lectura del archivo ya funcionan en móvil."
       },
       {
         "q": "¿Qué idiomas admite?",
@@ -683,7 +683,7 @@
       "title": "La promesa",
       "lines": [
         "El audio de tus reuniones nunca se guarda como archivo.",
-        "Todo lo que se deriva de él — transcripciones, resúmenes, notas — vive donde tú decides: cifrado en nuestros servidores con zero-knowledge, solo en tu máquina, o ambos.",
+        "Todo lo que se deriva de él (transcripciones, resúmenes, notas) vive donde tú decides: cifrado en nuestros servidores con zero-knowledge, solo en tu máquina, o ambos.",
         "Tú eliges."
       ],
       "link": "Lee los detalles →"
@@ -696,7 +696,7 @@
         "Cada bloque eliminado al transcribirse",
         "No queda audio"
       ],
-      "body": "Ningún archivo de audio — ni .wav, ni .mp3, ni .webm — se escribe nunca en el disco. Nunca. Durante la grabación, el audio permanece en memoria; para resistir un fallo del navegador en una reunión larga, bloques cortos viven un par de minutos en la base de datos local cifrada del navegador y se borran solos en cuanto se transcriben. Al terminar la reunión no queda audio en ningún sitio.",
+      "body": "Ningún archivo de audio (ni .wav, ni .mp3, ni .webm) se escribe nunca en el disco. Nunca. Durante la grabación, el audio permanece en memoria; para resistir un fallo del navegador en una reunión larga, bloques cortos viven un par de minutos en la base de datos local cifrada del navegador y se borran solos en cuanto se transcriben. Al terminar la reunión no queda audio en ningún sitio.",
       "codeNote": "No es un eslogan de marketing. La función exacta que descarta tu audio está en nuestro código open source.",
       "codeLink": "Mira la función en GitHub →"
     },
@@ -706,7 +706,7 @@
       "points": [
         {
           "term": "Argon2id",
-          "plain": "Tus 12 palabras de recuperación se convierten en tu clave de cifrado mediante Argon2id, una función de derivación deliberadamente lenta. Por eso, si olvidas tu contraseña, nadie — nosotros incluidos — puede recuperarla."
+          "plain": "Tus 12 palabras de recuperación se convierten en tu clave de cifrado mediante Argon2id, una función de derivación deliberadamente lenta. Por eso, si olvidas tu contraseña, nadie, nosotros incluidos, puede recuperarla."
         },
         {
           "term": "XChaCha20-Poly1305",
@@ -717,7 +717,7 @@
           "plain": "Todo esto ocurre en tu dispositivo, antes de que nada llegue a nuestros servidores."
         }
       ],
-      "closer": "Lo que almacenamos son datos cifrados que no podemos leer. No porque elijamos no hacerlo — porque matemáticamente no podemos.",
+      "closer": "Lo que almacenamos son datos cifrados que no podemos leer. No porque elijamos no hacerlo, sino porque matemáticamente no podemos.",
       "verifyLink": "Verifícalo en el código →"
     },
     "modes": {
@@ -765,7 +765,7 @@
     },
     "mistral": {
       "title": "LLM en la nube: Mistral, EU, Zero Data Retention",
-      "body": "Nuestro LLM en la nube procesa solo el texto transcrito — nunca el audio. Se ejecuta en infraestructura de Mistral alojada en EU, con Zero Data Retention activo para nuestra organización y un Data Processing Agreement firmado.",
+      "body": "Nuestro LLM en la nube procesa solo el texto transcrito, nunca el audio. Se ejecuta en infraestructura de Mistral alojada en EU, con Zero Data Retention activo para nuestra organización y un Data Processing Agreement firmado.",
       "cta": "Solicita la referencia del DPA (PDF) →"
     },
     "subprocessors": {
@@ -809,15 +809,15 @@
           "Solo dirección de email (opt-in)"
         ]
       ],
-      "note": "Cuando un subencargado está en EE. UU., nunca procesa contenido legible de reuniones — solo los datos limitados indicados. Tus reuniones se quedan en tu dispositivo o están cifradas de modo que ni nosotros ni ellos podemos leerlas."
+      "note": "Cuando un subencargado está en EE. UU., nunca procesa contenido legible de reuniones, solo los datos limitados indicados. Tus reuniones se quedan en tu dispositivo o están cifradas de modo que ni nosotros ni ellos podemos leerlas."
     },
     "verify": {
       "title": "Compruébalo tú mismo",
       "intro": "No nos creas sin más.",
       "steps": [
         "Inicia una grabación en modo Standard o Solo local.",
-        "Abre las DevTools de tu navegador — pestaña Red.",
-        "Graba 30 segundos y observa las peticiones salientes. En Solo local no sale nada de tu dispositivo; en Standard solo sale texto — el resultado de la transcripción — nunca el audio. (Cloud Rápido es distinto a propósito: ahí el audio cifrado se envía deliberadamente a nuestros servidores europeos para transcribirlo, cifrado en tránsito y nunca guardado. Es el único modo en el que ver audio saliente es lo esperado.)"
+        "Abre las DevTools de tu navegador: pestaña Red.",
+        "Graba 30 segundos y observa las peticiones salientes. En Solo local no sale nada de tu dispositivo; en Standard solo sale texto (el resultado de la transcripción), nunca el audio. (Cloud Rápido es distinto a propósito: ahí el audio cifrado se envía deliberadamente a nuestros servidores europeos para transcribirlo, cifrado en tránsito y nunca guardado. Es el único modo en el que ver audio saliente es lo esperado.)"
       ],
       "codeLinks": [
         "La función que descarta el audio →",
@@ -826,14 +826,14 @@
     },
     "early": {
       "title": "Estamos empezando",
-      "body": "Somos un producto pequeño e independiente. Aún no publicamos métricas de transparencia agregadas — nuestra base de usuarios todavía es demasiado pequeña para que los números signifiquen algo. Lo haremos cuando lo hagan. Hasta entonces, la prueba es nuestro código."
+      "body": "Somos un producto pequeño e independiente. Aún no publicamos métricas de transparencia agregadas: nuestra base de usuarios todavía es demasiado pequeña para que los números signifiquen algo. Lo haremos cuando lo hagan. Hasta entonces, la prueba es nuestro código."
     }
   },
   "about": {
     "sections": [
       {
         "title": "Por qué lo creamos",
-        "body": "Años trabajando en servicios profesionales nos enseñaron cuánta información sensible circula por las salas de reuniones — y qué poco control tiene la gente sobre dónde acaba. Las herramientas existentes hacían un trato que no podíamos aceptar: comodidad a cambio del control sobre tus propias conversaciones. Queríamos ambas cosas. Así que creamos Sonabrief."
+        "body": "Años trabajando en servicios profesionales nos enseñaron cuánta información sensible circula por las salas de reuniones, y qué poco control tiene la gente sobre dónde acaba. Las herramientas existentes hacían un trato que no podíamos aceptar: comodidad a cambio del control sobre tus propias conversaciones. Queríamos ambas cosas. Así que creamos Sonabrief."
       },
       {
         "title": "Por qué open source",
@@ -861,11 +861,11 @@
     "contact": "hello@sonabrief.com"
   },
   "openSourcePage": {
-    "intro": "Todo lo que maneja tus datos es open source. No un gesto — la forma en que demostramos nuestras promesas de privacidad.",
+    "intro": "Todo lo que maneja tus datos es open source. No un gesto: la forma en que demostramos nuestras promesas de privacidad.",
     "sections": [
       {
         "title": "Qué está abierto",
-        "body": "Todo el código que toca tus datos — grabación, transcripción, cifrado, sincronización — es público en GitHub."
+        "body": "Todo el código que toca tus datos (grabación, transcripción, cifrado, sincronización) es público en GitHub."
       },
       {
         "title": "AGPL v3, en la práctica",
@@ -877,7 +877,7 @@
       },
       {
         "title": "Doble licencia",
-        "body": "Los clientes Enterprise pueden elegir una licencia comercial — alternativa a la AGPL v3 — para despliegues self-hosted modificados."
+        "body": "Los clientes Enterprise pueden elegir una licencia comercial (alternativa a la AGPL v3) para despliegues self-hosted modificados."
       },
       {
         "title": "Cómo contribuir",
