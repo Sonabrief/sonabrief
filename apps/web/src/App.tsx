@@ -21,6 +21,7 @@ import TemplatesPage from './pages/TemplatesPage';
 import RequireAuth from './components/RequireAuth';
 import SyncGate from './components/SyncGate';
 import ProRoute from './components/ProRoute';
+import CheckoutPage from './pages/CheckoutPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import ProfilePage from './pages/ProfilePage';
@@ -102,6 +103,9 @@ function AnimatedRoutes() {
         } />
         <Route path="/profile" element={
           <PageWrapper><RequireAuth><ProfilePage /></RequireAuth></PageWrapper>
+        } />
+        <Route path="/checkout" element={
+          <PageWrapper><RequireAuth><CheckoutPage /></RequireAuth></PageWrapper>
         } />
         <Route path="/terms" element={<PageWrapper><TermsPage /></PageWrapper>} />
         <Route path="/privacy" element={<PageWrapper><PrivacyPage /></PageWrapper>} />

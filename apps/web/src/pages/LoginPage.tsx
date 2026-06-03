@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { KeyRound, Mic, Brain, Archive } from 'lucide-react'
 import { API_URL } from '../config'
@@ -8,12 +8,20 @@ import { isWebAuthnSupported, loginWithPasskey } from '../lib/webauthn'
 export default function LoginPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [passkeyLoading, setPasskeyLoading] = useState(false)
   const passkeySupported = isWebAuthnSupported()
+
+  useEffect(() => {
+    const plan = searchParams.get('plan')
+    if (plan === 'pro' || plan === 'pro_unlimited') {
+      localStorage.setItem('sb_intent_plan', plan)
+    }
+  }, [])
 
   async function handlePasskeyLogin() {
     setPasskeyLoading(true); setError(null)

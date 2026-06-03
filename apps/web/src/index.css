@@ -94,6 +94,29 @@
     --sidebar-ring: oklch(0.316 0.053 194);
 }
 
+.force-light {
+    color-scheme: light;
+    --primary-hover:        oklch(0.27 0.047 194);
+    --background:           oklch(0.978 0.010 88);
+    --foreground:           oklch(0.137 0.007 280);
+    --card:                 oklch(0.990 0.005 88);
+    --card-foreground:      oklch(0.137 0.007 280);
+    --popover:              oklch(0.990 0.005 88);
+    --popover-foreground:   oklch(0.137 0.007 280);
+    --primary:              oklch(0.316 0.053 194);
+    --primary-foreground:   oklch(0.978 0.010 88);
+    --secondary:            oklch(0.960 0.008 194);
+    --secondary-foreground: oklch(0.137 0.007 280);
+    --muted:                oklch(0.950 0.010 88);
+    --muted-foreground:     oklch(0.520 0.010 194);
+    --accent:               oklch(0.672 0.083 62);
+    --accent-foreground:    oklch(0.137 0.007 280);
+    --destructive:          oklch(0.460 0.155 28);
+    --border:               oklch(0.900 0.008 88);
+    --input:                oklch(0.900 0.008 88);
+    --ring:                 oklch(0.316 0.053 194);
+}
+
 .dark {
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);

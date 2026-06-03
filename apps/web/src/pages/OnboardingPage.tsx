@@ -16,9 +16,10 @@ const LANGUAGES = [
   { code: 'de', label: 'Deutsch' },
 ]
 
-// Step 1-4 sempre presenti, 5-8 solo se syncEnabled
+// Step 1-4 sempre presenti, 5-8 solo se syncEnabled, +1 per plan step (sempre)
 const BASE_STEPS = 4
 const SYNC_STEPS = 4
+const PLAN_STEPS = 1
 
 function ProgressBar({ step, totalSteps }: { step: number; totalSteps: number }) {
   const { t } = useTranslation()
@@ -108,10 +109,22 @@ export default function OnboardingPage() {
   const [checkInputs, setCheckInputs] = useState<[string, string, string]>(['', '', ''])
   const [step8Attempted, setStep8Attempted] = useState(false)
 
-  const totalSteps = syncEnabled ? BASE_STEPS + SYNC_STEPS : BASE_STEPS
+  // Step piano — penultimo step (sempre)
+  const [selectedPlan, setSelectedPlan] = useState<'free' | 'pro' | 'pro_unlimited'>('free')
+
+  const totalSteps = (syncEnabled ? BASE_STEPS + SYNC_STEPS : BASE_STEPS) + PLAN_STEPS
+
+  // Numero fisso fuori dallo spazio degli step sync (1-8), uguale in entrambi i percorsi.
+  // Evita la collisione con {step === 5} (intro sync) nel percorso no-sync.
+  const planStep = BASE_STEPS + SYNC_STEPS + 1
 
   useEffect(() => {
     setPhrase(generateRecoveryPhrase())
+    const savedPlan = localStorage.getItem('sb_intent_plan')
+    if (savedPlan === 'pro' || savedPlan === 'pro_unlimited') {
+      setSelectedPlan(savedPlan)
+      localStorage.removeItem('sb_intent_plan')
+    }
     if (location.state?.startAtStep) {
       setStep(location.state.startAtStep)
     }
@@ -180,10 +193,10 @@ export default function OnboardingPage() {
   async function handleActivate() {
     await persistKeyToSession()
     localStorage.setItem('sonabrief_sync_enabled', 'true')
-    await handleSaveAndFinish()
+    setStep(planStep)
   }
 
-  async function handleSaveAndFinish() {
+  async function handleSaveAndFinish(plan: 'free' | 'pro' | 'pro_unlimited' = selectedPlan) {
     setSaving(true)
     await savePreferences({
       language,
@@ -198,7 +211,13 @@ export default function OnboardingPage() {
       display_name: displayName.trim() || null,
     })
     setSaving(false)
-    setDone(true)
+    if (plan === 'pro') {
+      window.location.href = '/checkout?plan=pro'
+    } else if (plan === 'pro_unlimited') {
+      window.location.href = '/checkout?plan=pro_unlimited'
+    } else {
+      setDone(true)
+    }
   }
 
   function canProceed(): boolean {
@@ -210,13 +229,14 @@ export default function OnboardingPage() {
     if (step === 6) return step6Valid
     if (step === 7) return true
     if (step === 8) return true
+    if (step === planStep) return true
     return false
   }
 
   function handleNext() {
-    // Step 4: se non sync, salva e vai alla schermata finale
+    // Step 4: se non sync, vai allo step piano
     if (step === 4 && !syncEnabled) {
-      handleSaveAndFinish()
+      setStep(planStep)
       return
     }
     setStep(s => s + 1)
@@ -232,7 +252,7 @@ export default function OnboardingPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4 }}
-          className="min-h-screen bg-background flex items-center justify-center px-6 py-12"
+          className="force-light min-h-screen bg-background flex items-center justify-center px-6 py-12"
         >
           <div className="w-full max-w-lg text-center">
             <motion.div
@@ -284,7 +304,7 @@ export default function OnboardingPage() {
 
   // ── Wizard ────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-6 py-12">
+    <div className="force-light min-h-screen bg-background flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-lg">
         <img src="/logo.svg" alt="Sonabrief" className="mb-10 h-7 w-auto" />
 
@@ -640,6 +660,76 @@ export default function OnboardingPage() {
           </div>
         )}
 
+        {/* Step Piano */}
+        {step === planStep && (
+          <div>
+            <StepTitle
+              title={t('onboarding.plan_title')}
+              sub={t('onboarding.plan_hint')}
+            />
+            <div className="flex flex-col gap-3">
+              {/* Free */}
+              <button
+                type="button"
+                onClick={() => setSelectedPlan('free')}
+                aria-pressed={selectedPlan === 'free'}
+                className={optionCardWide(selectedPlan === 'free')}
+              >
+                <p className={`text-sm font-medium ${selectedPlan === 'free' ? 'text-primary' : 'text-foreground'}`}>
+                  {t('onboarding.plan_free_name')}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {t('onboarding.plan_free_desc')}
+                </p>
+              </button>
+
+              {/* Pro */}
+              <button
+                type="button"
+                onClick={() => setSelectedPlan('pro')}
+                aria-pressed={selectedPlan === 'pro'}
+                className={`w-full text-left rounded-lg border px-5 py-4 transition-colors motion-reduce:transition-none ${
+                  selectedPlan === 'pro'
+                    ? 'border-amber-400 bg-amber-50'
+                    : 'border-border bg-card hover:bg-border'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <p className={`text-sm font-medium ${selectedPlan === 'pro' ? 'text-amber-700' : 'text-foreground'}`}>
+                    {t('onboarding.plan_pro_name')}
+                  </p>
+                  <span className="font-mono text-xs text-muted-foreground">{t('onboarding.plan_pro_price')}</span>
+                </div>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {t('onboarding.plan_pro_desc')}
+                </p>
+              </button>
+
+              {/* Pro Unlimited */}
+              <button
+                type="button"
+                onClick={() => setSelectedPlan('pro_unlimited')}
+                aria-pressed={selectedPlan === 'pro_unlimited'}
+                className={`w-full text-left rounded-lg border px-5 py-4 transition-colors motion-reduce:transition-none ${
+                  selectedPlan === 'pro_unlimited'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border bg-card hover:bg-border'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <p className={`text-sm font-medium ${selectedPlan === 'pro_unlimited' ? 'text-primary' : 'text-foreground'}`}>
+                    {t('onboarding.plan_pro_unlimited_name')}
+                  </p>
+                  <span className={`font-mono text-xs ${selectedPlan === 'pro_unlimited' ? 'text-primary' : 'text-muted-foreground'}`}>{t('onboarding.plan_pro_unlimited_price')}</span>
+                </div>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {t('onboarding.plan_pro_unlimited_desc')}
+                </p>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Navigation */}
         <div className="mt-8 flex items-center justify-between">
           {step > 1 ? (
@@ -649,6 +739,11 @@ export default function OnboardingPage() {
                 if (step === 8) {
                   setStep8Attempted(false)
                   setCheckInputs(['', '', ''])
+                }
+                if (step === planStep) {
+                  // torna all'ultimo step del percorso attivo
+                  setStep(syncEnabled ? 8 : 4)
+                  return
                 }
                 setStep(s => s - 1)
               }}
@@ -683,6 +778,19 @@ export default function OnboardingPage() {
               >
                 {saving ? t('onboarding.saving') : t('onboarding.activate_sync')}
               </button>
+            ) : step === planStep ? (
+              <button
+                type="button"
+                onClick={() => handleSaveAndFinish(selectedPlan)}
+                disabled={saving}
+                className="rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-40 motion-reduce:transition-none"
+              >
+                {saving
+                  ? t('onboarding.saving')
+                  : selectedPlan === 'free'
+                    ? t('onboarding.plan_cta_free')
+                    : t('onboarding.plan_cta_paid')}
+              </button>
             ) : step === 4 ? (
               <button
                 type="button"
@@ -690,7 +798,7 @@ export default function OnboardingPage() {
                 disabled={saving}
                 className="rounded-md bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-(--primary-hover) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-40 motion-reduce:transition-none"
               >
-                {saving ? t('onboarding.saving') : syncEnabled ? t('onboarding.continue') : t('onboarding.open_dashboard')}
+                {saving ? t('onboarding.saving') : t('onboarding.continue')}
               </button>
             ) : (
               <button
