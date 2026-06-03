@@ -476,6 +476,7 @@
   "pricing.per_month": "/ month",
   "pricing.per_year": "/ year",
   "pricing.current_plan": "Current plan",
+  "pricing.included_in_plan": "Included in your plan",
   "pricing.start_now": "Start now",
   "pricing.loading": "Loading...",
   "pricing.payment_note": "Payments handled by Polar (Merchant of Record). VAT included automatically.",

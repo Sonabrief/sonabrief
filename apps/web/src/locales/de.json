@@ -476,6 +476,7 @@
   "pricing.per_month": "/ Monat",
   "pricing.per_year": "/ Jahr",
   "pricing.current_plan": "Aktueller Plan",
+  "pricing.included_in_plan": "In deinem Plan enthalten",
   "pricing.start_now": "Jetzt starten",
   "pricing.loading": "Laden...",
   "pricing.payment_note": "Zahlungen abgewickelt über Polar (Merchant of Record). MwSt. automatisch enthalten.",

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { API_URL } from '../config'
+import { useTier } from '../hooks/useTier'
 
 type Tier = 'pro_monthly' | 'pro_annual' | 'unlimited_monthly' | 'unlimited_annual'
 
@@ -15,9 +16,19 @@ interface PlanCard {
   highlight?: boolean
 }
 
+const TIER_ORDER: Record<string, number> = { free: 0, pro: 1, unlimited: 2 }
+
+// plan.tier è Tier | null (pro_monthly | pro_annual | unlimited_monthly | unlimited_annual | null)
+function planFamily(cardTier: Tier | null): 'free' | 'pro' | 'unlimited' {
+  if (!cardTier) return 'free'
+  if (cardTier.startsWith('pro_')) return 'pro'
+  return 'unlimited'
+}
+
 export default function PricingPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { tier: userTier, loading: tierLoading } = useTier()
   const [billing, setBilling] = useState<'monthly' | 'annual'>('monthly')
   const [loading, setLoading] = useState<Tier | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -195,26 +206,46 @@ export default function PricingPage() {
               </ul>
 
               <div className="mt-8">
-                {plan.tier ? (
-                  <button
-                    onClick={() => handleUpgrade(plan.tier!)}
-                    disabled={loading !== null}
-                    className={`w-full rounded-lg px-4 py-3 text-sm font-medium transition ${
-                      plan.highlight
-                        ? 'bg-[#1A4D52] text-white hover:bg-[#143a3e]'
-                        : 'border border-[#1A4D52] text-[#1A4D52] hover:bg-[#1A4D52] hover:text-white'
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    {loading === plan.tier ? t('pricing.loading') : t('pricing.start_now')}
-                  </button>
-                ) : (
-                  <button
-                    disabled
-                    className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-400 cursor-default"
-                  >
-                    {t('pricing.current_plan')}
-                  </button>
-                )}
+                {tierLoading ? (
+                  <div className="w-full rounded-lg border border-gray-200 px-4 py-3 h-[46px] animate-pulse bg-gray-100" />
+                ) : (() => {
+                  const family = planFamily(plan.tier)
+                  const userOrder = TIER_ORDER[userTier]
+                  const planOrder = TIER_ORDER[family]
+                  if (family === userTier) {
+                    return (
+                      <button
+                        disabled
+                        className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-400 cursor-default"
+                      >
+                        {t('pricing.current_plan')}
+                      </button>
+                    )
+                  }
+                  if (planOrder < userOrder) {
+                    return (
+                      <button
+                        disabled
+                        className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm text-gray-400 cursor-default"
+                      >
+                        {t('pricing.included_in_plan')}
+                      </button>
+                    )
+                  }
+                  return plan.tier ? (
+                    <button
+                      onClick={() => handleUpgrade(plan.tier!)}
+                      disabled={loading !== null}
+                      className={`w-full rounded-lg px-4 py-3 text-sm font-medium transition ${
+                        plan.highlight
+                          ? 'bg-[#1A4D52] text-white hover:bg-[#143a3e]'
+                          : 'border border-[#1A4D52] text-[#1A4D52] hover:bg-[#1A4D52] hover:text-white'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
+                    >
+                      {loading === plan.tier ? t('pricing.loading') : t('pricing.start_now')}
+                    </button>
+                  ) : null
+                })()}
               </div>
             </div>
           ))}

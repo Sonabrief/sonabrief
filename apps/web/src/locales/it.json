@@ -476,6 +476,7 @@
   "pricing.per_month": "/ mese",
   "pricing.per_year": "/ anno",
   "pricing.current_plan": "Piano attuale",
+  "pricing.included_in_plan": "Incluso nel tuo piano",
   "pricing.start_now": "Inizia ora",
   "pricing.loading": "Caricamento...",
   "pricing.payment_note": "Pagamenti gestiti da Polar (Merchant of Record). IVA inclusa automaticamente.",
