@@ -18,6 +18,9 @@ const tiers: Tier[] = t.pricing.tiers ?? [];
 
 function ctaHref(name: string): string {
   if (/enterprise/i.test(name)) return 'mailto:hello@sonabrief.com';
+  const n = name.toLowerCase();
+  if (/unlimited|illimit|ilimit|unbegrenzt/.test(n)) return 'https://app.sonabrief.com/?intent=pro&plan=pro_unlimited';
+  if (/\bpro\b/.test(n)) return 'https://app.sonabrief.com/?intent=pro&plan=pro';
   return 'https://app.sonabrief.com/';
 }
 
