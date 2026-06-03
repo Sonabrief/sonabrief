@@ -11,110 +11,230 @@ interface AboutSection {
   items?: string[];
 }
 
-const sections: AboutSection[] = t.about?.sections ?? [];
+function clean(s: string): string {
+  return s.replace(/(\d)\s*[—–]\s*(\d)/g, '$1-$2').replace(/\s*[—–]\s*/g, ', ');
+}
+
+const rawSections: AboutSection[] = t.about?.sections ?? [];
+const sections = rawSections.map((s) => ({
+  title: clean(s.title),
+  body: s.body ? clean(s.body) : undefined,
+  items: s.items ? s.items.map(clean) : undefined,
+}));
 const contact: string = t.about?.contact ?? '';
+const contactLabel: string = t.about?.contactLabel ?? '';
+
+// L'apertura: la prima sezione è il "perché" fondante, la tratto come lead
+// editoriale grande; le restanti come principi numerati.
+const [lead, ...principles] = sections;
 ---
 
 <section class="about">
   <div class="about-inner">
-    {sections.map((s) => (
-      <div class="about-section fade-up" data-about-section>
-        <h2 class="about-h2">{s.title}</h2>
-        {s.body && <p class="about-body">{s.body}</p>}
-        {s.items && (
-          <ul class="about-list">
-            {s.items.map((item) => (
-              <li class="about-list-item">{item}</li>
-            ))}
-          </ul>
-        )}
-      </div>
-    ))}
+    {lead && (
+      <header class="about-lead fade-up" data-about-reveal>
+        <h1 class="about-lead-title">{lead.title}</h1>
+        {lead.body && <p class="about-lead-body">{lead.body}</p>}
+      </header>
+    )}
+
+    <!-- principi come voci numerate: numero serif ambra a margine + contenuto -->
+    <ol class="about-principles">
+      {principles.map((s, i) => (
+        <li class="about-principle fade-up" data-about-reveal>
+          <span class="about-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <div class="about-principle-body">
+            <h2 class="about-h2">{s.title}</h2>
+            {s.body && <p class="about-body">{s.body}</p>}
+            {s.items && (
+              <ul class="about-list">
+                {s.items.map((item) => (
+                  <li class="about-list-item">{item}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </li>
+      ))}
+    </ol>
 
     {contact && (
-      <div class="about-section fade-up" data-about-section>
+      <p class="about-contact-row fade-up" data-about-reveal>
+        {contactLabel && <span class="about-contact-label">{contactLabel} </span>}
         <a href={`mailto:${contact}`} class="about-contact">{contact}</a>
-      </div>
+      </p>
     )}
   </div>
 </section>
 
 <style>
   .about {
-    padding: 120px var(--gutter);
+    padding: clamp(96px, 12vw, 132px) 0 clamp(80px, 10vw, 120px);
   }
 
   .about-inner {
-    max-width: var(--container-prose);
-    margin: 0 auto;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
     display: flex;
     flex-direction: column;
-    gap: 64px;
+    gap: clamp(56px, 7vw, 80px);
   }
 
-  .about-section {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .about-h2 {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: clamp(24px, 3vw, 32px);
-    font-weight: 700;
+  /* apertura editoriale: il "perché" fondante, grande */
+  .about-lead-title {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(36px, 5vw, 60px);
+    line-height: 1.06;
     letter-spacing: -0.02em;
     color: var(--color-deep-teal);
     margin: 0;
-    line-height: 1.2;
+    max-width: 14ch;
+    text-wrap: pretty;
+  }
+  .about-lead-body {
+    font-family: "Manrope", sans-serif;
+    font-size: 18px;
+    line-height: 1.75;
+    color: var(--color-stone);
+    margin: 24px 0 0;
+    max-width: 62ch;
   }
 
+  /* principi numerati: chiusura di capitolo editoriale */
+  .about-principles {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .about-principle {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 640px);
+    column-gap: 40px;
+    align-items: start;
+    padding: 48px 0;
+    border-top: 1px solid var(--color-mist);
+  }
+  .about-principle:last-child {
+    border-bottom: 1px solid var(--color-mist);
+  }
+
+  .about-num {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-optical-sizing: auto;
+    font-size: clamp(40px, 5vw, 56px);
+    line-height: 0.9;
+    color: var(--color-amber);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .about-principle-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 6px;
+  }
+  .about-h2 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(24px, 3vw, 34px);
+    letter-spacing: -0.01em;
+    color: var(--color-deep-teal);
+    margin: 0;
+    line-height: 1.16;
+    text-wrap: balance;
+  }
   .about-body {
     font-family: "Manrope", sans-serif;
     font-size: 16px;
     line-height: 1.75;
     color: var(--color-stone);
     margin: 0;
-    max-width: 65ch;
   }
 
+  /* lista (es. "Cosa non costruiremo"): righe con hairline, niente bullet */
   .about-list {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 4px 0 0;
     display: flex;
     flex-direction: column;
-    gap: 12px;
   }
-
   .about-list-item {
     font-family: "Manrope", sans-serif;
     font-size: 16px;
-    line-height: 1.7;
-    color: var(--color-stone);
-    border-left: 2px solid var(--color-mist);
-    padding-left: 16px;
+    line-height: 1.6;
+    color: var(--color-charcoal);
+    padding: 12px 0;
+    border-top: 1px solid var(--color-mist);
+  }
+  .about-list-item:first-child {
+    border-top: none;
   }
 
-  .about-contact {
+  .about-contact-row {
+    padding-top: 8px;
+    margin: 0;
+  }
+  .about-contact-label {
     font-family: "Manrope", sans-serif;
-    font-size: 16px;
+    font-size: 15px;
+    color: var(--color-stone);
+  }
+  .about-contact {
+    font-family: var(--font-mono);
+    font-size: 15px;
     color: var(--color-deep-teal);
     text-decoration: underline;
+    text-decoration-color: var(--color-mist);
     text-underline-offset: 4px;
+    transition: text-decoration-color 200ms var(--ease-out-cubic);
+  }
+  .about-contact:hover {
+    text-decoration-color: var(--color-deep-teal);
+  }
+
+  /* reveal calmo, stagger */
+  [data-about-reveal] {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 600ms var(--ease-out-cubic),
+      transform 600ms var(--ease-out-cubic);
+  }
+  [data-about-reveal].visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-about-reveal] {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
   }
 
   @media (max-width: 767px) {
-    .about {
-      padding: 80px var(--gutter);
+    .about-principle {
+      grid-template-columns: 1fr;
+      row-gap: 12px;
+      padding: 40px 0;
     }
-    .about-inner {
-      gap: 48px;
+    .about-principle-body {
+      padding-top: 0;
     }
   }
 </style>
 
 <script>
-  const items = document.querySelectorAll<HTMLElement>('[data-about-section]');
+  const items = document.querySelectorAll<HTMLElement>('[data-about-reveal]');
   if ('IntersectionObserver' in window && items.length > 0) {
     const observer = new IntersectionObserver(
       (entries) => {
