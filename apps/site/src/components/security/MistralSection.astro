@@ -4,9 +4,13 @@ interface Props {
 }
 const { t } = Astro.props;
 
-const title: string = t.security.mistral.title;
-const body: string = t.security.mistral.body;
-const cta: string = t.security.mistral.cta;
+function clean(s: string): string {
+  return s.replace(/(\d)\s*[—–]\s*(\d)/g, '$1-$2').replace(/\s*[—–]\s*/g, ', ');
+}
+
+const title: string = clean(t.security.mistral.title);
+const body: string = clean(t.security.mistral.body);
+const cta: string = clean(t.security.mistral.cta);
 
 const mailto = 'mailto:hello@sonabrief.com?subject=DPA reference request';
 ---
@@ -20,35 +24,40 @@ const mailto = 'mailto:hello@sonabrief.com?subject=DPA reference request';
 </section>
 
 <style>
+  /* blocco editoriale di respiro: H2 serif grande, body largo, una CTA */
   .mistral {
-    padding: 80px var(--gutter);
+    padding: clamp(64px, 8vw, 96px) 0;
   }
 
   .mistral-inner {
-    max-width: var(--container-prose);
-    margin: 0 auto;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
     display: flex;
     flex-direction: column;
     gap: 24px;
   }
 
   .mistral-h2 {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: clamp(24px, 3vw, 32px);
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(28px, 3.6vw, 44px);
+    letter-spacing: -0.015em;
     color: var(--color-deep-teal);
     margin: 0;
-    line-height: 1.2;
+    line-height: 1.12;
+    max-width: 22ch;
+    text-wrap: balance;
   }
 
   .mistral-body {
     font-family: "Manrope", sans-serif;
-    font-size: 16px;
+    font-size: 17px;
     line-height: 1.75;
     color: var(--color-stone);
     margin: 0;
-    max-width: var(--container-prose);
+    max-width: 62ch;
   }
 
   .mistral-cta {
@@ -56,13 +65,13 @@ const mailto = 'mailto:hello@sonabrief.com?subject=DPA reference request';
     font-size: 15px;
     color: var(--color-deep-teal);
     text-decoration: underline;
+    text-decoration-color: var(--color-mist);
     text-underline-offset: 4px;
     width: fit-content;
+    margin-top: 8px;
+    transition: text-decoration-color 200ms var(--ease-out-cubic);
   }
-
-  @media (max-width: 767px) {
-    .mistral {
-      padding: 56px var(--gutter);
-    }
+  .mistral-cta:hover {
+    text-decoration-color: var(--color-deep-teal);
   }
 </style>

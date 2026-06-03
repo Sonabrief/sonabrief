@@ -4,11 +4,15 @@ interface Props {
 }
 const { t } = Astro.props;
 
-const title: string = t.security.subprocessors.title;
-const intro: string = t.security.subprocessors.intro;
-const headers: string[] = t.security.subprocessors.headers ?? [];
-const rows: string[][] = t.security.subprocessors.rows ?? [];
-const note: string = t.security.subprocessors.note;
+function clean(s: string): string {
+  return s.replace(/(\d)\s*[—–]\s*(\d)/g, '$1-$2').replace(/\s*[—–]\s*/g, ', ');
+}
+
+const title: string = clean(t.security.subprocessors.title);
+const intro: string = clean(t.security.subprocessors.intro);
+const headers: string[] = (t.security.subprocessors.headers ?? []).map(clean);
+const rows: string[][] = (t.security.subprocessors.rows ?? []).map((r: string[]) => r.map(clean));
+const note: string = clean(t.security.subprocessors.note);
 ---
 
 <section class="subp">
@@ -43,33 +47,37 @@ const note: string = t.security.subprocessors.note;
 
 <style>
   .subp {
-    padding: 80px var(--gutter);
+    padding: clamp(64px, 8vw, 96px) 0;
   }
 
   .subp-inner {
-    max-width: var(--container-prose);
-    margin: 0 auto;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 28px;
   }
 
   .subp-h2 {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: clamp(24px, 3vw, 32px);
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(28px, 3.6vw, 44px);
+    letter-spacing: -0.015em;
     color: var(--color-deep-teal);
     margin: 0;
-    line-height: 1.2;
+    line-height: 1.12;
+    text-wrap: balance;
   }
 
   .subp-intro {
     font-family: "Manrope", sans-serif;
-    font-size: 16px;
-    line-height: 1.75;
+    font-size: 17px;
+    line-height: 1.7;
     color: var(--color-stone);
     margin: 0;
+    max-width: 56ch;
   }
 
   .subp-table-wrap {
@@ -86,12 +94,13 @@ const note: string = t.security.subprocessors.note;
   }
 
   .subp-th {
-    font-family: "Manrope", sans-serif;
-    font-size: 14px;
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     text-align: left;
-    color: var(--color-charcoal);
-    padding: 12px 16px;
+    color: var(--color-stone);
+    padding: 14px 16px;
     background-color: color-mix(in srgb, var(--color-mist) 40%, transparent);
     border-bottom: 1px solid var(--color-mist);
   }

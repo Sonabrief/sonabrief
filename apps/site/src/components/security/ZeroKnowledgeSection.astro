@@ -4,26 +4,36 @@ interface Props {
 }
 const { t } = Astro.props;
 
-const title: string = t.security.zeroKnowledge.title;
-const intro: string = t.security.zeroKnowledge.intro;
-const points: { term: string; plain: string }[] = t.security.zeroKnowledge.points ?? [];
-const closer: string = t.security.zeroKnowledge.closer;
-const verifyLink: string = t.security.zeroKnowledge.verifyLink;
+function clean(s: string): string {
+  return s.replace(/(\d)\s*[—–]\s*(\d)/g, '$1-$2').replace(/\s*[—–]\s*/g, ', ');
+}
 
-// Backs the XChaCha20-Poly1305 claim: real encrypt() in the open source repo.
+const title: string = clean(t.security.zeroKnowledge.title);
+const intro: string = clean(t.security.zeroKnowledge.intro);
+const rawPoints: { term: string; plain: string }[] = t.security.zeroKnowledge.points ?? [];
+const points = rawPoints.map((p) => ({ term: p.term, plain: clean(p.plain) }));
+const closer: string = clean(t.security.zeroKnowledge.closer);
+const verifyLink: string = clean(t.security.zeroKnowledge.verifyLink);
+
 const verifyHref =
   'https://github.com/Sonabrief/sonabrief/blob/main/apps/web/src/lib/crypto.ts#L29-L48';
 ---
 
 <section class="zk">
   <div class="zk-inner">
-    <h2 class="zk-h2">{title}</h2>
-    <p class="zk-intro">{intro}</p>
+    <header class="zk-head">
+      <h2 class="zk-h2">{title}</h2>
+      <p class="zk-intro">{intro}</p>
+    </header>
 
-    <div class="zk-points">
-      {
-        points.map((p) => (
-          <div class="zk-point">
+    <!-- glossario tecnico: numero serif a margine + primitiva (mono) + spiegazione.
+         Il register mono fa emergere i nomi crittografici, ciò che convince
+         chi legge con attenzione (compliance). -->
+    <ol class="zk-points">
+      {points.map((p, i) => (
+        <li class="zk-point">
+          <span class="zk-idx" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+          <div class="zk-body">
             <p class="zk-term">{p.term}</p>
             <p class="zk-plain">{p.plain}</p>
             {p.term === 'XChaCha20-Poly1305' && (
@@ -32,9 +42,9 @@ const verifyHref =
               </a>
             )}
           </div>
-        ))
-      }
-    </div>
+        </li>
+      ))}
+    </ol>
 
     <p class="zk-closer">{closer}</p>
   </div>
@@ -42,94 +52,123 @@ const verifyHref =
 
 <style>
   .zk {
-    padding: 80px var(--gutter);
+    padding: clamp(64px, 8vw, 96px) 0;
   }
 
   .zk-inner {
-    max-width: var(--container-prose);
-    margin: 0 auto;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 48px;
   }
 
+  .zk-head {
+    max-width: 60ch;
+  }
   .zk-h2 {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: clamp(24px, 3vw, 32px);
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(28px, 3.6vw, 44px);
+    letter-spacing: -0.015em;
     color: var(--color-deep-teal);
     margin: 0;
-    line-height: 1.2;
+    line-height: 1.12;
+    text-wrap: balance;
   }
-
   .zk-intro {
     font-family: "Manrope", sans-serif;
-    font-size: 16px;
-    line-height: 1.75;
+    font-size: 17px;
+    line-height: 1.7;
     color: var(--color-stone);
-    margin: 0;
+    margin: 16px 0 0;
   }
 
   .zk-points {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 32px;
+  }
+  .zk-point {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 640px);
+    column-gap: 28px;
+    align-items: start;
+    padding: 28px 0;
+    border-top: 1px solid var(--color-mist);
+  }
+  .zk-point:last-child {
+    border-bottom: 1px solid var(--color-mist);
   }
 
-  .zk-point {
+  .zk-idx {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-optical-sizing: auto;
+    font-size: 28px;
+    line-height: 1;
+    color: var(--color-amber);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .zk-body {
     display: flex;
     flex-direction: column;
     gap: 10px;
   }
-
   .zk-term {
-    font-family: "Manrope", sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0.02em;
     color: var(--color-deep-teal);
-    border-left: 3px solid var(--color-amber);
-    padding-left: 12px;
     margin: 0;
   }
-
   .zk-plain {
     font-family: "Manrope", sans-serif;
     font-size: 15px;
     line-height: 1.7;
     color: var(--color-stone);
     margin: 0;
-    margin-left: 16px;
   }
-
   .zk-verify-link {
     font-family: "Manrope", sans-serif;
     font-size: 15px;
     color: var(--color-deep-teal);
     text-decoration: underline;
+    text-decoration-color: var(--color-mist);
     text-underline-offset: 4px;
     width: fit-content;
-    margin-left: 16px;
+    margin-top: 2px;
+    transition: text-decoration-color 200ms var(--ease-out-cubic);
+  }
+  .zk-verify-link:hover {
+    text-decoration-color: var(--color-deep-teal);
   }
 
+  /* il closer è l'affermazione forte: "matematicamente non possiamo" */
   .zk-closer {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 18px;
-    line-height: 1.6;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(20px, 2.4vw, 26px);
+    line-height: 1.3;
     color: var(--color-deep-teal);
-    border: 1px solid var(--color-mist);
-    background-color: rgba(255, 255, 255, 0.6);
-    border-radius: 0.75rem;
-    padding: 24px;
-    max-width: 600px;
+    border-left: 2px solid var(--color-amber);
+    padding-left: 24px;
+    max-width: 30ch;
     margin: 0;
+    text-wrap: balance;
   }
 
   @media (max-width: 767px) {
-    .zk {
-      padding: 56px var(--gutter);
+    .zk-point {
+      grid-template-columns: 1fr;
+      row-gap: 12px;
+      padding: 24px 0;
     }
   }
 </style>

@@ -4,10 +4,14 @@ interface Props {
 }
 const { t } = Astro.props;
 
-const title: string = t.security.verify.title;
-const intro: string = t.security.verify.intro;
-const steps: string[] = t.security.verify.steps ?? [];
-const codeLinks: string[] = t.security.verify.codeLinks ?? [];
+function clean(s: string): string {
+  return s.replace(/(\d)\s*[—–]\s*(\d)/g, '$1-$2').replace(/\s*[—–]\s*/g, ', ');
+}
+
+const title: string = clean(t.security.verify.title);
+const intro: string = clean(t.security.verify.intro);
+const steps: string[] = (t.security.verify.steps ?? []).map(clean);
+const codeLinks: string[] = (t.security.verify.codeLinks ?? []).map(clean);
 
 // Real paths in the open source repo:
 //  - the function that discards audio after transcription
@@ -19,15 +23,16 @@ const codeHrefs = [
 ---
 
 <section class="verify">
-  <div class="verify-box">
-    <h2 class="verify-title">{title}</h2>
+  <div class="verify-inner">
+    <div class="verify-box">
+      <h2 class="verify-title">{title}</h2>
     <p class="verify-intro">{intro}</p>
 
     <ol class="verify-steps">
       {
         steps.map((step, i) => (
           <li class="verify-step">
-            <span class="verify-num" aria-hidden="true">{i + 1}</span>
+            <span class="verify-num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
             <span class="verify-step-text">{step}</span>
           </li>
         ))
@@ -43,40 +48,46 @@ const codeHrefs = [
         ))
       }
     </div>
+    </div>
   </div>
 </section>
 
 <style>
   .verify {
-    padding: 80px var(--gutter);
-    display: flex;
-    justify-content: center;
+    padding: clamp(64px, 8vw, 96px) 0;
   }
 
+  /* stesso container delle altre sezioni: niente larghezza propria */
+  .verify-inner {
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  /* il blocco "fallo da solo": riquadro distinto, numeri serif ambra a margine */
   .verify-box {
-    max-width: var(--container-prose);
-    width: 100%;
-    border: 2px solid var(--color-deep-teal);
-    background-color: #ffffff;
-    border-radius: 1rem;
-    padding: 40px;
+    border: 1.5px solid var(--color-deep-teal);
+    background-color: color-mix(in srgb, var(--color-deep-teal) 4%, var(--color-cream));
+    border-radius: 16px;
+    padding: clamp(28px, 4vw, 48px);
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 28px;
   }
 
   .verify-title {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(24px, 3vw, 36px);
+    letter-spacing: -0.015em;
     color: var(--color-deep-teal);
     margin: 0;
-    line-height: 1.2;
+    line-height: 1.14;
   }
 
   .verify-intro {
-    font-family: "Plus Jakarta Sans", sans-serif;
+    font-family: "Manrope", sans-serif;
     font-size: 16px;
     line-height: 1.6;
     color: var(--color-stone);
@@ -89,31 +100,32 @@ const codeHrefs = [
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: 20px;
-    counter-reset: none;
   }
 
   .verify-step {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    column-gap: 20px;
+    align-items: start;
+    padding: 18px 0;
+    border-top: 1px solid color-mix(in srgb, var(--color-deep-teal) 14%, transparent);
+  }
+  .verify-step:first-child {
+    border-top: none;
+    padding-top: 0;
+  }
+  .verify-step:last-child {
+    padding-bottom: 0;
   }
 
   .verify-num {
-    flex: 0 0 auto;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background-color: var(--color-deep-teal);
-    color: var(--color-cream);
-    font-family: "Manrope", sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 1px;
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-optical-sizing: auto;
+    font-size: 28px;
+    line-height: 1;
+    color: var(--color-amber);
+    font-variant-numeric: tabular-nums;
   }
 
   .verify-step-text {
@@ -121,6 +133,7 @@ const codeHrefs = [
     font-size: 15px;
     line-height: 1.7;
     color: var(--color-charcoal);
+    padding-top: 4px;
   }
 
   .verify-links {

@@ -4,8 +4,11 @@ interface Props {
 }
 const { t } = Astro.props;
 
-const title: string = t.security.early.title;
-const body: string = t.security.early.body;
+function clean(s: string): string {
+  return s.replace(/(\d)\s*[—–]\s*(\d)/g, '$1-$2').replace(/\s*[—–]\s*/g, ', ');
+}
+const title: string = clean(t.security.early.title);
+const body: string = clean(t.security.early.body);
 ---
 
 <section class="early">
@@ -16,41 +19,40 @@ const body: string = t.security.early.body;
 </section>
 
 <style>
+  /* nota editoriale di chiusura: hairline sopra, testo onesto, contenuto */
   .early {
-    padding: 80px var(--gutter) 120px;
+    padding: clamp(56px, 7vw, 80px) 0 clamp(96px, 11vw, 128px);
   }
 
   .early-inner {
-    max-width: var(--container-prose);
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
   }
-
+  /* il blocco testo vero, con hairline che lo stacca come epilogo */
+  .early-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 760px);
+  }
   .early-h2 {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: clamp(24px, 3vw, 32px);
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(22px, 2.8vw, 30px);
+    letter-spacing: -0.01em;
     color: var(--color-deep-teal);
-    margin: 0;
-    line-height: 1.2;
+    margin: 0 0 16px;
+    line-height: 1.16;
+    padding-top: 32px;
+    border-top: 1px solid var(--color-mist);
   }
 
   .early-body {
     font-family: "Manrope", sans-serif;
-    font-style: italic;
     font-size: 16px;
     line-height: 1.8;
     color: var(--color-stone);
     margin: 0;
-    max-width: var(--container-prose);
-  }
-
-  @media (max-width: 767px) {
-    .early {
-      padding: 56px var(--gutter) 80px;
-    }
+    max-width: 62ch;
   }
 </style>
