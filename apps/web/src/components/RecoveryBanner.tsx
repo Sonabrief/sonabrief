@@ -113,19 +113,19 @@ export function RecoveryBanner() {
         return (
           <div
             key={o.sessionId}
-            className="flex items-start justify-between gap-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-950"
+            className="flex items-start justify-between gap-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3"
           >
             <div>
-              <p className="text-sm font-medium text-amber-900 dark:text-amber-100">
+              <p className="text-sm font-medium text-amber-900">
                 {t('recovery_banner.recording_title')}
               </p>
-              <p className="text-xs text-amber-700 dark:text-amber-300">
+              <p className="text-xs text-amber-700">
                 {t('recovery_banner.recording_info', { date, minutes })}
               </p>
             </div>
             <button
               onClick={() => dismiss(o.sessionId)}
-              className="shrink-0 text-xs font-medium text-amber-700 underline hover:text-amber-900 dark:text-amber-300"
+              className="shrink-0 text-xs font-medium text-amber-700 underline hover:text-amber-900"
             >
               {t('recovery_banner.delete')}
             </button>

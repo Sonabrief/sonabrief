@@ -304,7 +304,7 @@ export default function ArchivePage() {
                           </div>
                         )}
                         {!meeting.hasSynthesis && (
-                          <span className="mt-1.5 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                          <span className="mt-1.5 inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-700">
                             {t('archive.transcript_only_badge')}
                           </span>
                         )}
@@ -316,7 +316,7 @@ export default function ArchivePage() {
                             <span className={`mt-1 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
                               daysLeft <= 3
                                 ? 'bg-destructive/10 text-destructive'
-                                : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
+                                : 'bg-amber-100 text-amber-800'
                             }`}>
                               {daysLeft === 1 ? t('archive.expires_today') : t('archive.expires_in_days', { days: daysLeft })}
                             </span>

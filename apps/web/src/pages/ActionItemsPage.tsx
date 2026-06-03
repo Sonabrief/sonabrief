@@ -34,10 +34,10 @@ function DeadlineBadge({ item, t }: { item: ActionItem; t: TFunction }) {
   const threeDays = 3 * 24 * 60 * 60 * 1000
   const dateStr = new Date(item.dueDate).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' })
   if (!item.completed && item.dueDate < now) {
-    return <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-700 dark:bg-red-900/30 dark:text-red-400">{t('action_items.expired_label', { date: dateStr })}</span>
+    return <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs text-red-700">{t('action_items.expired_label', { date: dateStr })}</span>
   }
   if (!item.completed && item.dueDate <= now + threeDays) {
-    return <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">{t('action_items.due_label', { date: dateStr })}</span>
+    return <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs text-amber-700">{t('action_items.due_label', { date: dateStr })}</span>
   }
   if (!item.completed) {
     return <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{dateStr}</span>

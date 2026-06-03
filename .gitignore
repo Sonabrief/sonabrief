@@ -144,3 +144,7 @@ vite.config.ts.timestamp-*
 
 # Cloudflare Wrangler local state
 .wrangler/
+
+# Claude Code agent artifacts
+.agents/
+skills-lock.json

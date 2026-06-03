@@ -870,6 +870,7 @@ export default function RecordingPage() {
       setPipActive(true)
 
       // Copia i fogli di stile nella finestra PiP
+      // @ts-ignore — StyleSheetList is iterable at runtime but TS lib doesn't reflect it
       ;[...document.styleSheets].forEach(sheet => {
         try {
           if (sheet.href) {
@@ -1057,7 +1058,7 @@ export default function RecordingPage() {
                   <svg className="h-4 w-4 shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
-                  <p className="text-sm font-semibold text-green-700 dark:text-green-400">{t('recording.ready')}</p>
+                  <p className="text-sm font-semibold text-green-700">{t('recording.ready')}</p>
                 </motion.div>
               )}
             </AnimatePresence>

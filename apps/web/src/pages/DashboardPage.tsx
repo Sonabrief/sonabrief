@@ -72,7 +72,7 @@ const TIER_LABEL: Record<string, string> = {
 function TierBadge({ tier }: { tier: string }) {
   if (tier === 'unlimited') {
     return (
-      <span className="inline-flex items-center rounded-full border border-amber-200 dark:border-amber-800 bg-amber-100 dark:bg-amber-900/30 px-2.5 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-300">
+      <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-800">
         {TIER_LABEL.unlimited}
       </span>
     )
@@ -536,7 +536,7 @@ export default function DashboardPage() {
                               <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
                                 daysLeft <= 3
                                   ? 'bg-destructive/10 text-destructive'
-                                  : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400'
+                                  : 'bg-amber-100 text-amber-800'
                               }`}>
                                 {daysLeft === 1 ? t('dashboard.expires_today') : t('dashboard.expires_in_days', { days: daysLeft })}
                               </span>
@@ -602,7 +602,7 @@ export default function DashboardPage() {
                         if (dl <= now + 3 * 24 * 60 * 60 * 1000)
                           return {
                             text: new Date(dl).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' }),
-                            className: 'text-amber-600 dark:text-amber-400',
+                            className: 'text-amber-600',
                           }
                         return {
                           text: new Date(dl).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short', year: 'numeric' }),
