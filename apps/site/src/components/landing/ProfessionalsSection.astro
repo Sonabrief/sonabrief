@@ -10,7 +10,14 @@ function clean(s: string): string {
 }
 
 const lead = clean(t.professionals.lead);
-const roles: string[] = (t.professionals.roles ?? []).map(clean);
+const rawRoles: string[] = (t.professionals.roles ?? []).map(clean);
+// scambio posizione 4 (Commercialisti, lungo) e 5 (Medici, corto) per bilanciare
+// la griglia 2 colonne: il blocco lungo non resta isolato in alto a destra.
+// La copy JSON non cambia; è solo l'ordine di posizionamento visivo.
+const roles = [...rawRoles];
+if (roles.length >= 5) {
+  [roles[3], roles[4]] = [roles[4], roles[3]];
+}
 const close = clean(t.professionals.close);
 const aside = clean(t.professionals.aside);
 ---
