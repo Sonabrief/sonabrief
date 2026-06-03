@@ -53,27 +53,28 @@ const eyebrow = 'Una mente privata.';
 
 <style>
   .hero {
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: 112px 24px 96px;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding: clamp(88px, 11vw, 128px) var(--gutter) clamp(72px, 9vw, 104px);
     display: grid;
-    /* editoriale a sinistra (largo, respira), colonna dati accostata a destra
-       ma NON all'estrema: gutter contenuto, niente buco centrale.
-       align-items: end ancora la mono in basso, all'altezza dei CTA. */
-    grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
+    /* l'H1 grande sfrutta l'orizzontale (riempie la prima riga full-width);
+       sotto, sub+CTA a sinistra e la colonna mono a destra distribuiscono
+       lo spazio invece di lasciare un vuoto. */
+    grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
-      "lede  pillars"
-      "sub   pillars"
-      "cta   pillars"
-      "micro pillars";
-    column-gap: clamp(40px, 7vw, 96px);
-    row-gap: 20px;
+      "lede    lede"
+      "sub     pillars"
+      "cta     pillars"
+      "micro   pillars";
+    column-gap: clamp(48px, 8vw, 120px);
+    row-gap: 28px;
     align-items: end;
   }
 
   .hero-lede {
     grid-area: lede;
     align-self: start;
+    margin-bottom: 8px;
   }
 
   .hero-eyebrow {
@@ -93,13 +94,14 @@ const eyebrow = 'Una mente privata.';
     font-family: var(--font-serif);
     font-weight: 500;
     font-optical-sizing: auto;
-    font-size: clamp(40px, 4.4vw, 64px);
-    line-height: 1.08;
-    letter-spacing: -0.015em;
+    /* grande: riempie la larghezza dell'hero, l'editoriale è il momento */
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
     color: var(--color-deep-teal);
     margin: 0;
-    max-width: 9ch;
-    text-wrap: pretty;
+    max-width: 15ch;
+    text-wrap: balance;
   }
 
   .hero-sub {
@@ -220,7 +222,7 @@ const eyebrow = 'Una mente privata.';
 
   @media (max-width: 860px) {
     .hero {
-      padding: 80px 24px 64px;
+      padding: clamp(72px, 12vw, 96px) var(--gutter) 64px;
       grid-template-columns: 1fr;
       grid-template-areas:
         "lede"
@@ -229,6 +231,10 @@ const eyebrow = 'Una mente privata.';
         "micro"
         "pillars";
       row-gap: 22px;
+    }
+    .hero-h1 {
+      font-size: clamp(38px, 9vw, 60px);
+      max-width: 100%;
     }
     .hero-lede,
     .hero-sub {

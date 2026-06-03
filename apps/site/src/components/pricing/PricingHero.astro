@@ -21,10 +21,13 @@ function ctaHref(name: string): string {
   return 'https://app.sonabrief.com/';
 }
 
-function ctaVariant(name: string, index: number): 'solid' | 'outline-teal' | 'outline-stone' {
-  if (/enterprise/i.test(name)) return 'outline-stone';
-  if (index === 2) return 'solid';
-  return 'outline-teal';
+// gerarchia a 3 livelli identica al riepilogo in home (locale-safe):
+// Pro Unlimited = strong (teal pieno), Pro = soft (amber tenue), resto = none.
+function emphasisFor(name: string): 'none' | 'soft' | 'strong' {
+  const n = name.toLowerCase();
+  if (/unlimited|illimit|ilimit|unbegrenzt/.test(n)) return 'strong';
+  if (/\bpro\b/.test(n)) return 'soft';
+  return 'none';
 }
 ---
 
@@ -57,11 +60,16 @@ function ctaVariant(name: string, index: number): 'solid' | 'outline-teal' | 'ou
     </div>
 
     <div class="ph-cards">
-      {tiers.map((tier, i) => {
-        const variant = ctaVariant(tier.name, i);
+      {tiers.map((tier) => {
+        const emphasis = emphasisFor(tier.name);
         const hasAnnual = !!tier.priceAnnual;
         return (
-          <div class:list={['ph-card', { 'ph-card--highlighted': i === 2 }]}>
+          <div
+            class:list={[
+              'ph-card',
+              { 'ph-card--soft': emphasis === 'soft', 'ph-card--strong': emphasis === 'strong' },
+            ]}
+          >
             <p class="ph-card-name">{tier.name}</p>
 
             <div class="ph-card-price-row">
@@ -78,7 +86,10 @@ function ctaVariant(name: string, index: number): 'solid' | 'outline-teal' | 'ou
 
             <a
               href={ctaHref(tier.name)}
-              class:list={['ph-card-cta', `ph-card-cta--${variant}`]}
+              class:list={[
+                'ph-card-cta',
+                { 'ph-card-cta--soft': emphasis === 'soft', 'ph-card-cta--strong': emphasis === 'strong' },
+              ]}
             >
               {tier.cta}
             </a>
@@ -91,12 +102,13 @@ function ctaVariant(name: string, index: number): 'solid' | 'outline-teal' | 'ou
 
 <style>
   .ph {
-    padding: 120px 24px 48px;
+    padding: clamp(88px, 11vw, 120px) 0 48px;
   }
 
   .ph-inner {
-    max-width: 1200px;
-    margin: 0 auto;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
     display: flex;
     flex-direction: column;
     gap: 32px;
@@ -173,16 +185,22 @@ function ctaVariant(name: string, index: number): 'solid' | 'outline-teal' | 'ou
     border: 1px solid var(--color-mist);
     border-radius: 16px;
     padding: 24px;
-    background-color: var(--color-cream);
+    background-color: transparent;
     display: flex;
     flex-direction: column;
     gap: 16px;
     text-align: left;
   }
 
-  .ph-card--highlighted {
-    border: 2px solid var(--color-deep-teal);
-    background-color: #ffffff;
+  /* gerarchia a 3 livelli, identica al riepilogo in home.
+     soft (Pro): amber tenue. strong (Pro Unlimited): teal pieno. */
+  .ph-card--soft {
+    border: 1.5px solid color-mix(in srgb, var(--color-amber) 55%, var(--color-mist));
+    background-color: color-mix(in srgb, var(--color-amber) 7%, transparent);
+  }
+  .ph-card--strong {
+    border: 1.5px solid var(--color-deep-teal);
+    background-color: color-mix(in srgb, var(--color-deep-teal) 6%, transparent);
   }
 
   .ph-card-name {
@@ -233,35 +251,38 @@ function ctaVariant(name: string, index: number): 'solid' | 'outline-teal' | 'ou
     transition: background-color 150ms ease, color 150ms ease, opacity 150ms ease;
   }
 
-  .ph-card-cta--outline-teal {
+  /* CTA di default (none = Free/Enterprise): outline teal */
+  .ph-card-cta {
     color: var(--color-deep-teal);
     background: transparent;
-    border-color: var(--color-deep-teal);
   }
-
-  .ph-card-cta--outline-teal:hover {
+  .ph-card-cta:hover {
     background-color: var(--color-deep-teal);
     color: var(--color-cream);
   }
+  .ph-card-cta:active {
+    transform: translateY(1px);
+  }
 
-  .ph-card-cta--solid {
+  /* soft (Pro): outline amber, si riempie amber su hover */
+  .ph-card-cta--soft {
+    border-color: var(--color-amber);
+    color: color-mix(in srgb, var(--color-amber) 75%, var(--color-charcoal));
+  }
+  .ph-card-cta--soft:hover {
+    background-color: var(--color-amber);
+    color: var(--color-charcoal);
+  }
+
+  /* strong (Pro Unlimited): teal pieno, il più appariscente */
+  .ph-card-cta--strong {
     color: var(--color-cream);
     background-color: var(--color-deep-teal);
     border-color: var(--color-deep-teal);
   }
-
-  .ph-card-cta--solid:hover {
-    opacity: 0.88;
-  }
-
-  .ph-card-cta--outline-stone {
-    color: var(--color-stone);
-    background: transparent;
-    border-color: var(--color-stone);
-  }
-
-  .ph-card-cta--outline-stone:hover {
-    background-color: var(--color-stone);
+  .ph-card-cta--strong:hover {
+    opacity: 0.9;
+    background-color: var(--color-deep-teal);
     color: var(--color-cream);
   }
 

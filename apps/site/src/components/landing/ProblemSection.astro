@@ -39,19 +39,21 @@ const punch = lines[lines.length - 1] ?? '';
 
 <style>
   .problem {
-    padding: 128px 24px;
+    padding: var(--section-y) 0;
   }
 
-  /* crescendo asimmetrico: il setup (caso generale) a sinistra, l'affondo
-     "Per te, no." si stacca spostato a destra. Lo scarto orizzontale crea
-     la tensione del restringimento del fuoco. SENZA numeri (non anticipa
-     il manifesto). */
+  /* crescendo centrato: setup (caso generale) sopra, affondo "Per te, no."
+     grande sotto. Tutto il blocco centrato. SENZA numeri (non anticipa il
+     manifesto). */
   .problem-inner {
-    max-width: 1000px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 56px;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 40px;
   }
 
   .problem-setup {
@@ -70,24 +72,21 @@ const punch = lines[lines.length - 1] ?? '';
     letter-spacing: -0.01em;
     color: var(--color-stone);
     margin: 0;
-    text-wrap: pretty;
+    text-wrap: balance;
   }
 
-  /* l'affondo: grande, teal, spostato a destra come una replica */
+  /* l'affondo: grande, teal, centrato — è il punto */
   .problem-punch {
     color: var(--color-deep-teal);
     font-weight: 500;
     font-size: clamp(38px, 5.5vw, 64px);
     line-height: 1.05;
-    margin-left: auto;
-    margin-right: clamp(0px, 6vw, 96px);
-    text-align: right;
+    margin: 0;
   }
 
   @media (max-width: 700px) {
     .problem-punch {
-      margin-right: 0;
-      text-align: left;
+      text-align: center;
     }
   }
 
