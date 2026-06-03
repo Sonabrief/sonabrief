@@ -30,17 +30,17 @@ const badge = 'Pro & Pro Unlimited';
 
 <section id="how-it-works" class="hiw">
   <div class="hiw-inner">
-    <!-- flusso verticale: gli step sono una sequenza temporale, connessi da una linea -->
-    <ol class="hiw-flow">
+    <!-- flusso ORIZZONTALE: la sequenza temporale si legge da sinistra a destra.
+         Niente numeri (quelli stanno al manifesto): il flusso stesso è il device. -->
+    <ol class="hiw-flow" data-hiw-flow>
       {cleanSteps.map((step, i) => (
         <li class="hiw-step" data-hiw-step>
           <div class="hiw-marker" aria-hidden="true">
-            <span class="hiw-num">{String(i + 1).padStart(2, '0')}</span>
+            <span class="hiw-dot"></span>
+            {i < cleanSteps.length - 1 && <span class="hiw-arrow">→</span>}
           </div>
-          <div class="hiw-body">
-            <h3 class="hiw-title">{step.title}</h3>
-            <p class="hiw-desc">{step.desc}</p>
-          </div>
+          <h3 class="hiw-title">{step.title}</h3>
+          <p class="hiw-desc">{step.desc}</p>
         </li>
       ))}
     </ol>
@@ -64,69 +64,71 @@ const badge = 'Pro & Pro Unlimited';
   }
 
   .hiw-inner {
-    max-width: 840px;
+    max-width: 1080px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 56px;
+    gap: 64px;
   }
 
-  /* --- flusso a step connessi --- */
+  /* --- flusso orizzontale a 3 tappe --- */
   .hiw-flow {
     list-style: none;
     margin: 0;
     padding: 0;
-    counter-reset: none;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
   }
 
   .hiw-step {
-    display: grid;
-    grid-template-columns: 64px minmax(0, 1fr);
-    column-gap: 28px;
-    padding-bottom: 44px;
-  }
-  .hiw-step:last-child {
-    padding-bottom: 0;
-  }
-
-  /* marker: numero serif ambra + linea verticale di connessione.
-     la cella si estende a tutta l'altezza dello step così la linea
-     raggiunge sempre il marker successivo, qualunque sia l'altezza del testo */
-  .hiw-marker {
-    position: relative;
-    display: flex;
-    justify-content: flex-start;
-    align-items: flex-start;
-    height: 100%;
-  }
-  .hiw-num {
-    font-family: var(--font-serif);
-    font-weight: 400;
-    font-optical-sizing: auto;
-    font-size: 32px;
-    line-height: 1;
-    color: var(--color-amber);
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.01em;
-  }
-  /* linea che collega un marker al successivo: mostra la sequenza */
-  .hiw-step:not(:last-child) .hiw-marker::after {
-    content: "";
-    position: absolute;
-    left: 11px;
-    top: 40px;
-    bottom: -44px;
-    width: 1px;
-    background-color: var(--color-mist);
-  }
-
-  .hiw-body {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding-top: 2px;
-    max-width: 56ch;
+    gap: 14px;
   }
+
+  /* marker: pallino discreto sulla linea + freccia verso la tappa successiva */
+  .hiw-marker {
+    position: relative;
+    height: 9px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+  }
+  .hiw-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 9999px;
+    background-color: var(--color-deep-teal);
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  /* linea orizzontale che attraversa la tappa, sotto il pallino */
+  .hiw-marker::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    transform: translateY(-50%);
+    background-color: var(--color-mist);
+  }
+  /* la freccia siede a destra, sul connettore tra una tappa e l'altra */
+  .hiw-arrow {
+    position: absolute;
+    right: -24px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: "Manrope", sans-serif;
+    font-size: 15px;
+    line-height: 1;
+    color: var(--color-amber);
+    background-color: var(--color-cream);
+    padding: 0 4px;
+    z-index: 2;
+  }
+
   .hiw-title {
     font-family: var(--font-serif);
     font-weight: 500;
@@ -144,23 +146,21 @@ const badge = 'Pro & Pro Unlimited';
     margin: 0;
   }
 
-  /* --- note: nota editoriale a margine + riga cloud col badge (no box) --- */
+  /* --- note: nota editoriale + riga cloud col badge (no box) --- */
   .hiw-notes {
     display: flex;
     flex-direction: column;
-    gap: 28px;
-    padding-left: 92px;
+    gap: 24px;
+    max-width: 720px;
   }
-
   .hiw-quality {
     font-family: "Manrope", sans-serif;
     font-size: 15px;
     line-height: 1.7;
     color: var(--color-stone);
     margin: 0;
-    max-width: 60ch;
+    max-width: 62ch;
   }
-
   .hiw-cloud {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -169,7 +169,7 @@ const badge = 'Pro & Pro Unlimited';
     margin: 0;
     padding-top: 20px;
     border-top: 1px solid var(--color-mist);
-    max-width: 60ch;
+    max-width: 62ch;
   }
   .hiw-cloud-badge {
     font-family: var(--font-mono);
@@ -185,15 +185,17 @@ const badge = 'Pro & Pro Unlimited';
     color: var(--color-charcoal);
   }
 
-  /* reveal calmo, stagger per step */
+  /* reveal calmo: le tappe entrano in sequenza, L->R */
   .hiw-step {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(18px);
     transition:
       opacity 600ms var(--ease-out-cubic),
       transform 600ms var(--ease-out-cubic);
   }
-  .hiw-step.is-visible {
+  .hiw-step:nth-child(2) { transition-delay: 90ms; }
+  .hiw-step:nth-child(3) { transition-delay: 180ms; }
+  .hiw-flow.is-visible .hiw-step {
     opacity: 1;
     transform: translateY(0);
   }
@@ -206,49 +208,52 @@ const badge = 'Pro & Pro Unlimited';
     }
   }
 
+  /* tablet: 3 -> verticale, la freccia ruota a "giù" */
   @media (max-width: 767px) {
     .hiw {
       padding: 80px 24px;
     }
-    .hiw-step {
-      grid-template-columns: 48px minmax(0, 1fr);
-      column-gap: 20px;
-      padding-bottom: 36px;
-    }
-    .hiw-num {
-      font-size: 26px;
-    }
-    .hiw-step:not(:last-child) .hiw-marker::after {
-      left: 9px;
-      top: 34px;
-      bottom: -36px;
-    }
-    .hiw-notes {
-      padding-left: 0;
-    }
-    .hiw-cloud {
+    .hiw-flow {
       grid-template-columns: 1fr;
-      row-gap: 6px;
+      gap: 36px;
+    }
+    .hiw-marker {
+      margin-bottom: 4px;
+    }
+    /* in verticale la linea orizzontale non ha senso: la nascondo,
+       tengo solo il pallino come ancora discreta */
+    .hiw-marker::before {
+      display: none;
+    }
+    .hiw-arrow {
+      right: auto;
+      left: 0;
+      top: auto;
+      bottom: -28px;
+      transform: rotate(90deg);
+      background-color: transparent;
     }
   }
 </style>
 
 <script>
-  const steps = document.querySelectorAll<HTMLElement>('[data-hiw-step]');
-  if ('IntersectionObserver' in window && steps.length > 0) {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.3 }
-    );
-    steps.forEach((s) => observer.observe(s));
-  } else {
-    steps.forEach((s) => s.classList.add('is-visible'));
+  const flow = document.querySelector<HTMLElement>('[data-hiw-flow]');
+  if (flow) {
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add('is-visible');
+              obs.disconnect();
+            }
+          });
+        },
+        { threshold: 0.3 }
+      );
+      obs.observe(flow);
+    } else {
+      flow.classList.add('is-visible');
+    }
   }
 </script>
