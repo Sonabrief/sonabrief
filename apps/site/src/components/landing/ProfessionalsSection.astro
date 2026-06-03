@@ -5,21 +5,36 @@ interface Props {
 }
 const { t } = Astro.props;
 
-const roles: string[] = t.professionals.roles ?? [];
+function clean(s: string): string {
+  return s.replace(/(\d)\s*[—–]\s*(\d)/g, '$1-$2').replace(/\s*[—–]\s*/g, ', ');
+}
+
+const lead = clean(t.professionals.lead);
+const roles: string[] = (t.professionals.roles ?? []).map(clean);
+const close = clean(t.professionals.close);
+const aside = clean(t.professionals.aside);
 ---
 
 <section class="pros">
   <div class="pros-inner">
-    <p class="pros-lead">{t.professionals.lead}</p>
+    <p class="pros-lead">{lead}</p>
 
-    <div class="pros-roles">
-      {roles.map((role) => (
-        <p class="pros-role">{role}</p>
+    <!-- i 6 ruoli come griglia 2 colonne con indice mono discreto:
+         layout-family nuova nello scroll, distinta da Memory (label/valore)
+         e dal manifesto (numeri serif giganti). -->
+    <ul class="pros-roles">
+      {roles.map((role, i) => (
+        <li class="pros-role" data-pros-role style={`--role-delay: ${i * 70}ms;`}>
+          <span class="pros-idx">{String(i + 1).padStart(2, '0')}</span>
+          <span class="pros-role-text">{role}</span>
+        </li>
       ))}
-    </div>
+    </ul>
 
-    <p class="pros-close">{t.professionals.close}</p>
-    <p class="pros-aside">{t.professionals.aside}</p>
+    <div class="pros-foot">
+      <p class="pros-close">{close}</p>
+      <p class="pros-aside">{aside}</p>
+    </div>
   </div>
 </section>
 
@@ -29,45 +44,72 @@ const roles: string[] = t.professionals.roles ?? [];
   }
 
   .pros-inner {
-    max-width: 720px;
+    max-width: 920px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 48px;
   }
 
+  /* lead come apertura editoriale */
   .pros-lead {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 20px;
+    font-family: var(--font-serif);
     font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(26px, 3.4vw, 40px);
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    color: var(--color-deep-teal);
+    margin: 0;
+    max-width: 22ch;
+    text-wrap: balance;
+  }
+
+  /* griglia 2 colonne, indice mono + ruolo */
+  .pros-roles {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 56px;
+    row-gap: 0;
+  }
+  .pros-role {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 18px;
+    align-items: baseline;
+    padding: 18px 0;
+    border-top: 1px solid var(--color-mist);
+  }
+  .pros-idx {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-amber);
+    font-variant-numeric: tabular-nums;
+  }
+  .pros-role-text {
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
     line-height: 1.5;
     color: var(--color-charcoal);
-    margin: 0;
   }
 
-  .pros-roles {
+  /* chiusura: l'affermazione close in evidenza + aside leggera */
+  .pros-foot {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    margin: 8px 0;
+    max-width: 60ch;
   }
-
-  .pros-role {
-    font-family: "Manrope", sans-serif;
-    font-size: 18px;
-    line-height: 1.5;
-    color: var(--color-charcoal);
-    margin: 0;
-  }
-
   .pros-close {
     font-family: "Manrope", sans-serif;
-    font-size: 16px;
-    line-height: 1.7;
+    font-size: 18px;
+    line-height: 1.6;
     color: var(--color-charcoal);
     margin: 0;
   }
-
   .pros-aside {
     font-family: "Manrope", sans-serif;
     font-style: italic;
@@ -76,12 +118,60 @@ const roles: string[] = t.professionals.roles ?? [];
     margin: 0;
   }
 
+  /* reveal: i ruoli entrano in stagger */
+  .pros-role {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity 500ms var(--ease-out-cubic),
+      transform 500ms var(--ease-out-cubic);
+    transition-delay: var(--role-delay, 0ms);
+  }
+  .pros-roles.is-visible .pros-role {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pros-role {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
   @media (max-width: 767px) {
     .pros {
       padding: 80px 24px;
     }
-    .pros-role {
-      font-size: 16px;
+    .pros-roles {
+      grid-template-columns: 1fr;
+      column-gap: 0;
+    }
+    .pros-lead {
+      max-width: 100%;
     }
   }
 </style>
+
+<script>
+  const grid = document.querySelector<HTMLElement>('.pros-roles');
+  if (grid) {
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add('is-visible');
+              obs.disconnect();
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      obs.observe(grid);
+    } else {
+      grid.classList.add('is-visible');
+    }
+  }
+</script>
