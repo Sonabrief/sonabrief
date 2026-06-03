@@ -209,7 +209,7 @@ export default function PricingPage() {
 
               <div className="mt-8">
                 {tierLoading ? (
-                  <div className="w-full rounded-lg border border-gray-200 px-4 py-3 h-[46px] animate-pulse bg-gray-100" />
+                  <div className="w-full rounded-lg border border-gray-200 px-4 py-3 h-11.5 animate-pulse bg-gray-100" />
                 ) : (() => {
                   const family = planFamily(plan.tier)
                   const userOrder = TIER_ORDER[userTier]
