@@ -7,7 +7,9 @@ interface Props {
   features: string[];
   cta: string;
   ctaHref: string;
-  highlighted?: boolean;
+  // gerarchia a 3 livelli: none (Free/Enterprise), soft (Pro, amber tenue),
+  // strong (Pro Unlimited, teal pieno). Solo colori brand, niente badge urlati.
+  emphasis?: 'none' | 'soft' | 'strong';
 }
 
 const {
@@ -18,11 +20,16 @@ const {
   features,
   cta,
   ctaHref,
-  highlighted = false,
+  emphasis = 'none',
 } = Astro.props;
 ---
 
-<div class:list={['pricing-card', { 'pricing-card--highlighted': highlighted }]}>
+<div
+  class:list={[
+    'pricing-card',
+    { 'pricing-card--soft': emphasis === 'soft', 'pricing-card--strong': emphasis === 'strong' },
+  ]}
+>
   <p class="pricing-card-name">{name}</p>
 
   <div class="pricing-card-price-row">
@@ -40,7 +47,10 @@ const {
 
   <a
     href={ctaHref}
-    class:list={['pricing-card-cta', { 'pricing-card-cta--highlighted': highlighted }]}
+    class:list={[
+      'pricing-card-cta',
+      { 'pricing-card-cta--soft': emphasis === 'soft', 'pricing-card-cta--strong': emphasis === 'strong' },
+    ]}
     plausible-event-name={ctaHref.includes('app.sonabrief.com') ? 'CTA: Try free' : undefined}
   >
     {cta}
@@ -58,10 +68,16 @@ const {
     background-color: transparent;
   }
 
-  /* tier consigliato: bordo teal pieno, leggero rialzo cromatico */
-  .pricing-card--highlighted {
+  /* gerarchia a 3 livelli, solo colori brand, niente badge.
+     soft (Pro): bordo + sfondo amber tenue, risalto morbido. */
+  .pricing-card--soft {
+    border: 1.5px solid color-mix(in srgb, var(--color-amber) 55%, var(--color-mist));
+    background-color: color-mix(in srgb, var(--color-amber) 7%, transparent);
+  }
+  /* strong (Pro Unlimited): teal pieno, il più appariscente. */
+  .pricing-card--strong {
     border: 1.5px solid var(--color-deep-teal);
-    background-color: color-mix(in srgb, var(--color-deep-teal) 4%, transparent);
+    background-color: color-mix(in srgb, var(--color-deep-teal) 6%, transparent);
   }
 
   /* nome tier in mono — coerente col register dati */
@@ -158,14 +174,24 @@ const {
     transform: translateY(1px);
   }
 
-  .pricing-card-cta--highlighted {
+  /* soft (Pro): CTA outline amber, si riempie amber su hover */
+  .pricing-card-cta--soft {
+    border-color: var(--color-amber);
+    color: color-mix(in srgb, var(--color-amber) 75%, var(--color-charcoal));
+  }
+  .pricing-card-cta--soft:hover {
+    background-color: var(--color-amber);
+    color: var(--color-charcoal);
+  }
+
+  /* strong (Pro Unlimited): CTA teal pieno, il più appariscente */
+  .pricing-card-cta--strong {
     background-color: var(--color-deep-teal);
     color: var(--color-cream);
     border-color: var(--color-deep-teal);
   }
-
-  .pricing-card-cta--highlighted:hover {
-    opacity: 0.88;
+  .pricing-card-cta--strong:hover {
+    opacity: 0.9;
     background-color: var(--color-deep-teal);
     color: var(--color-cream);
   }

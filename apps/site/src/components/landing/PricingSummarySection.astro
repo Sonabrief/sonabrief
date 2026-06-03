@@ -28,6 +28,15 @@ function ctaHref(name: string): string {
   return 'https://app.sonabrief.com/';
 }
 
+// gerarchia a 3 livelli, dedotta dal nome (robusta su 5 lingue):
+// Pro Unlimited = strong (teal pieno), Pro = soft (amber tenue), resto = none.
+function emphasisFor(name: string): 'none' | 'soft' | 'strong' {
+  const n = name.toLowerCase();
+  if (/unlimited|illimit|ilimit|unbegrenzt/.test(n)) return 'strong';
+  if (/\bpro\b/.test(n)) return 'soft';
+  return 'none';
+}
+
 const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
 ---
 
@@ -58,7 +67,7 @@ const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
     </header>
 
     <div class="pricing-grid">
-      {tiers.map((tier, i) => (
+      {tiers.map((tier) => (
         <div
           class="pricing-slot"
           data-monthly-price={tier.price}
@@ -72,7 +81,7 @@ const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
             features={(tier.highlights ?? []).map(clean)}
             cta={tier.cta}
             ctaHref={ctaHref(tier.name)}
-            highlighted={i === 1}
+            emphasis={emphasisFor(tier.name)}
           />
         </div>
       ))}
