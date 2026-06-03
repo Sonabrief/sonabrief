@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <script is:inline>
-      const supported = ['it', 'en', 'fr', 'es', 'de'];
+      const supported = ['en', 'it', 'fr', 'es', 'de'];
       const preferred = (navigator.language || 'en').slice(0, 2).toLowerCase();
       const lang = supported.includes(preferred) ? preferred : 'en';
       window.location.replace('/' + lang + '/');
