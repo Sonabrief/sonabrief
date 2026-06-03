@@ -438,6 +438,10 @@
   "checkout.plan_pro_unlimited": "Pro Unlimited",
   "checkout.title": "Sie sind dabei, {{plan}} zu aktivieren.",
   "checkout.subtitle": "Wir leiten Sie zur Kasse weiter — nur wenige Sekunden.",
+  "checkout.error_title": "Etwas ist schiefgelaufen",
+  "checkout.error_subtitle": "Wir konnten die Kasse nicht öffnen. Versuchen Sie es erneut, oder wählen Sie Ihren Plan auf der Preisseite.",
+  "checkout.retry": "Erneut versuchen",
+  "checkout.go_pricing": "Zu den Preisen",
   "checkout.manual_link_hint": "Keine automatische Weiterleitung?",
   "checkout.manual_link_cta": "Hier klicken.",
 

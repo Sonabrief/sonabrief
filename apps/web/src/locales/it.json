@@ -438,6 +438,10 @@
   "checkout.plan_pro_unlimited": "Pro Unlimited",
   "checkout.title": "Stai per attivare {{plan}}.",
   "checkout.subtitle": "Ti portiamo al checkout — ci vorranno solo pochi secondi.",
+  "checkout.error_title": "Qualcosa è andato storto",
+  "checkout.error_subtitle": "Non siamo riusciti ad aprire il checkout. Riprova, oppure scegli il piano dalla pagina dei prezzi.",
+  "checkout.retry": "Riprova",
+  "checkout.go_pricing": "Vai ai prezzi",
   "checkout.manual_link_hint": "Non vieni reindirizzato?",
   "checkout.manual_link_cta": "Clicca qui.",
 
