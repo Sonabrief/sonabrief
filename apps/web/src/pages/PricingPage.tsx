@@ -55,6 +55,7 @@ export default function PricingPage() {
       description: t('pricing.pro_desc'),
       features: [
         t('pricing.pro_feature_1'),
+        t('pricing.pro_feature_cloud'),
         t('pricing.pro_feature_2'),
         t('pricing.pro_feature_3'),
         t('pricing.pro_feature_4'),
@@ -72,6 +73,7 @@ export default function PricingPage() {
       description: t('pricing.unlimited_desc'),
       features: [
         t('pricing.unlimited_feature_1'),
+        t('pricing.unlimited_feature_cloud'),
         t('pricing.unlimited_feature_mistral'),
         t('pricing.unlimited_feature_2'),
         t('pricing.unlimited_feature_3'),
