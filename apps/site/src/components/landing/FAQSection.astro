@@ -12,14 +12,25 @@ interface FAQEntry {
   a: string;
 }
 
+function clean(s: string): string {
+  return s.replace(/(\d)\s*[—–]\s*(\d)/g, '$1-$2').replace(/\s*[—–]\s*/g, ', ');
+}
+
 const rawItems: FAQEntry[] = t.faq.items ?? [];
-const items = rawItems.map((it) => ({ question: it.q, answer: it.a }));
+const items = rawItems.map((it) => ({ question: clean(it.q), answer: clean(it.a) }));
 ---
 
 <section class="faq">
   <div class="faq-inner">
-    <h2 class="faq-title">{t.faq.title}</h2>
-    <AccordionFAQ items={items} />
+    <!-- header a 2 colonne: titolo serif fisso a sinistra, accordion a destra.
+         Layout-family distinta da Pricing (card grid) che precede; il titolo
+         "ancora" la lista mentre si apre/chiude. -->
+    <div class="faq-aside">
+      <h2 class="faq-title">{t.faq.title}</h2>
+    </div>
+    <div class="faq-list">
+      <AccordionFAQ items={items} />
+    </div>
   </div>
 </section>
 
@@ -29,25 +40,42 @@ const items = rawItems.map((it) => ({ question: it.q, answer: it.a }));
   }
 
   .faq-inner {
-    max-width: 800px;
+    max-width: 1080px;
     margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr);
+    column-gap: 64px;
+    align-items: start;
+  }
+
+  .faq-aside {
+    position: sticky;
+    top: 96px;
   }
 
   .faq-title {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: clamp(28px, 3.5vw, 40px);
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(28px, 3.4vw, 42px);
+    line-height: 1.12;
+    letter-spacing: -0.015em;
     color: var(--color-deep-teal);
     margin: 0;
+    max-width: 16ch;
+    text-wrap: balance;
   }
 
-  @media (max-width: 767px) {
+  @media (max-width: 860px) {
     .faq {
       padding: 80px 24px;
+    }
+    .faq-inner {
+      grid-template-columns: 1fr;
+      row-gap: 32px;
+    }
+    .faq-aside {
+      position: static;
     }
   }
 </style>
