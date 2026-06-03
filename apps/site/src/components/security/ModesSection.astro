@@ -45,13 +45,17 @@ const cloudColIndex = (perf?.headers?.length ?? 1) - 1;
 
 <section class="modes">
   <div class="modes-inner">
-    <h2 class="modes-h2">{title}</h2>
-    <p class="modes-intro">{intro}</p>
+    <h2 class="modes-h2 reveal" data-reveal style="--i: 0">{title}</h2>
+    <p class="modes-intro reveal" data-reveal style="--i: 1">{intro}</p>
 
     <div class="modes-cards">
       {
-        items.map((m) => (
-          <div class="modes-card" style={`border-left-color:${borderByKind[kindOf(m.name)] ?? 'var(--color-mist)'}`}>
+        items.map((m, i) => (
+          <div
+            class="modes-card reveal"
+            data-reveal
+            style={`--i: ${i + 2}; border-left-color:${borderByKind[kindOf(m.name)] ?? 'var(--color-mist)'}`}
+          >
             <p class="modes-card-name">{m.name}</p>
             <p class="modes-card-desc">{m.desc}</p>
           </div>
@@ -59,7 +63,7 @@ const cloudColIndex = (perf?.headers?.length ?? 1) - 1;
       }
     </div>
 
-    <div class="modes-table-wrap">
+    <div class="modes-table-wrap reveal" data-reveal style="--i: 5">
       <table class="modes-table">
         <caption class="modes-table-caption">{perf.title}</caption>
         <thead>

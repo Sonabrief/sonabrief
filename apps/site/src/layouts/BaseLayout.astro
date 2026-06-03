@@ -50,5 +50,32 @@ const hreflangs = [
     <Navbar lang={lang} />
     <slot />
     <Footer currentLang={lang} />
+
+    <script>
+      // Observer reveal globale: aggancia ogni .reveal[data-reveal] della pagina
+      // e aggiunge .is-in quando entra in viewport. Idempotente (se un componente
+      // ha già il suo observer, aggiungere is-in due volte è un no-op).
+      // reduced-motion è gestito in CSS (.reveal collassa a visibile).
+      (() => {
+        const els = document.querySelectorAll<HTMLElement>('.reveal[data-reveal]:not(.is-in)');
+        if (!els.length) return;
+        if (!('IntersectionObserver' in window)) {
+          els.forEach((el) => el.classList.add('is-in'));
+          return;
+        }
+        const obs = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                e.target.classList.add('is-in');
+                obs.unobserve(e.target);
+              }
+            });
+          },
+          { threshold: 0.15, rootMargin: '0px 0px -8% 0px' }
+        );
+        els.forEach((el) => obs.observe(el));
+      })();
+    </script>
   </body>
 </html>

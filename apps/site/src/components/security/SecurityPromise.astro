@@ -18,18 +18,18 @@ const punch = lines[lines.length - 1] ?? '';
 
 <section class="promise">
   <div class="promise-inner">
-    <p class="promise-eyebrow">{title}</p>
+    <p class="promise-eyebrow reveal" data-reveal style="--i: 0">{title}</p>
 
     <!-- apertura editoriale: le righe come affermazione grande, l'ultima
          ("Scegli tu.") come affondo. È la prima impressione della pagina. -->
     <div class="promise-lines">
-      {setup.map((line) => (
-        <p class="promise-line">{line}</p>
+      {setup.map((line, i) => (
+        <p class="promise-line reveal" data-reveal style={`--i: ${i + 1}`}>{line}</p>
       ))}
-      <p class="promise-line promise-line--punch">{punch}</p>
+      <p class="promise-line promise-line--punch reveal" data-reveal style={`--i: ${setup.length + 1}`}>{punch}</p>
     </div>
 
-    <a class="promise-link" href="#audio-section">{link}</a>
+    <a class="promise-link reveal" data-reveal style={`--i: ${setup.length + 2}`} href="#audio-section">{link}</a>
   </div>
 </section>
 

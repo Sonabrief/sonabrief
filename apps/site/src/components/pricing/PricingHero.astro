@@ -33,9 +33,9 @@ function emphasisFor(name: string): 'none' | 'soft' | 'strong' {
 
 <section class="ph">
   <div class="ph-inner">
-    <h1 class="ph-h1">{t.pricing.title}</h1>
+    <h1 class="ph-h1 reveal" data-reveal style="--i: 0">{t.pricing.title}</h1>
 
-    <div class="ph-toggle-row">
+    <div class="ph-toggle-row reveal" data-reveal style="--i: 1">
       <div class="ph-toggle" role="tablist" aria-label="Billing period">
         <button
           type="button"
@@ -60,15 +60,17 @@ function emphasisFor(name: string): 'none' | 'soft' | 'strong' {
     </div>
 
     <div class="ph-cards">
-      {tiers.map((tier) => {
+      {tiers.map((tier, i) => {
         const emphasis = emphasisFor(tier.name);
         const hasAnnual = !!tier.priceAnnual;
         return (
           <div
             class:list={[
-              'ph-card',
+              'ph-card reveal',
               { 'ph-card--soft': emphasis === 'soft', 'ph-card--strong': emphasis === 'strong' },
             ]}
+            data-reveal
+            style={`--i: ${i + 2}`}
           >
             <p class="ph-card-name">{tier.name}</p>
 

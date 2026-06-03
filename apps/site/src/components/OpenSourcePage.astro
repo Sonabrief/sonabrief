@@ -10,10 +10,15 @@ interface OSSection {
   body: string;
 }
 
-const intro: string = t.openSourcePage?.intro ?? '';
-const sections: OSSection[] = t.openSourcePage?.sections ?? [];
+function clean(s: string): string {
+  return s.replace(/(\d)\s*[—–]\s*(\d)/g, '$1-$2').replace(/\s*[—–]\s*/g, ', ');
+}
+
+const intro: string = clean(t.openSourcePage?.intro ?? '');
+const rawSections: OSSection[] = t.openSourcePage?.sections ?? [];
+const sections = rawSections.map((s) => ({ title: clean(s.title), body: clean(s.body) }));
 const repo: string = t.openSourcePage?.repo ?? '';
-const cta: string = t.openSourcePage?.cta ?? '';
+const cta: string = clean(t.openSourcePage?.cta ?? '');
 ---
 
 <section class="osp">
@@ -22,12 +27,17 @@ const cta: string = t.openSourcePage?.cta ?? '';
       <p class="osp-intro fade-up" data-osp-section>{intro}</p>
     )}
 
-    {sections.map((s) => (
-      <div class="osp-section fade-up" data-osp-section>
-        <h3 class="osp-h3">{s.title}</h3>
-        <p class="osp-body">{s.body}</p>
-      </div>
-    ))}
+    <!-- sezioni come split editoriale: titolo serif a sinistra, body a destra.
+         Layout-family diversa da /about (numeri a margine) e dalla sezione
+         OpenSource scura in home (chip teal). -->
+    <div class="osp-sections">
+      {sections.map((s) => (
+        <article class="osp-section fade-up" data-osp-section>
+          <h3 class="osp-h3">{s.title}</h3>
+          <p class="osp-body">{s.body}</p>
+        </article>
+      ))}
+    </div>
 
     <div class="osp-repo fade-up" data-osp-section>
       <code class="osp-repo-text">{repo}</code>
@@ -40,40 +50,60 @@ const cta: string = t.openSourcePage?.cta ?? '';
 
 <style>
   .osp {
-    padding: 120px var(--gutter);
+    padding: clamp(96px, 12vw, 132px) 0 clamp(80px, 10vw, 120px);
   }
 
   .osp-inner {
-    max-width: var(--container-prose);
-    margin: 0 auto;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
     display: flex;
     flex-direction: column;
-    gap: 48px;
+    gap: clamp(48px, 6vw, 72px);
   }
 
+  /* intro come apertura editoriale grande */
   .osp-intro {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 20px;
+    font-family: var(--font-serif);
     font-weight: 500;
-    line-height: 1.5;
+    font-optical-sizing: auto;
+    font-size: clamp(28px, 4vw, 48px);
+    line-height: 1.14;
+    letter-spacing: -0.015em;
     color: var(--color-deep-teal);
     margin: 0;
-    max-width: 60ch;
+    max-width: 24ch;
+    text-wrap: balance;
   }
 
-  .osp-section {
+  .osp-sections {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+  }
+
+  /* split: titolo serif a sinistra, body a destra */
+  .osp-section {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr);
+    column-gap: clamp(40px, 6vw, 80px);
+    align-items: start;
+    padding: 36px 0;
+    border-top: 1px solid var(--color-mist);
+  }
+  .osp-section:last-child {
+    border-bottom: 1px solid var(--color-mist);
   }
 
   .osp-h3 {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 22px;
-    font-weight: 600;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(20px, 2.4vw, 28px);
     color: var(--color-deep-teal);
     margin: 0;
-    line-height: 1.3;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
   }
 
   .osp-body {
@@ -82,21 +112,23 @@ const cta: string = t.openSourcePage?.cta ?? '';
     line-height: 1.75;
     color: var(--color-stone);
     margin: 0;
-    max-width: 65ch;
+    max-width: 60ch;
   }
 
+  /* repo + CTA: chiusura, riga con codice mono e bottone */
   .osp-repo {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 16px 24px;
     border: 1.5px solid var(--color-deep-teal);
-    border-radius: 12px;
-    padding: 16px;
+    border-radius: 14px;
+    padding: 18px 20px;
     flex-wrap: wrap;
+    background-color: color-mix(in srgb, var(--color-deep-teal) 4%, var(--color-cream));
   }
 
   .osp-repo-text {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-family: var(--font-mono);
     font-size: 14px;
     color: var(--color-charcoal);
     flex: 1;
@@ -109,22 +141,45 @@ const cta: string = t.openSourcePage?.cta ?? '';
     font-weight: 500;
     color: var(--color-cream);
     background-color: var(--color-deep-teal);
-    padding: 10px 20px;
+    padding: 11px 22px;
     border-radius: 9999px;
     text-decoration: none;
-    transition: opacity 150ms ease;
+    transition:
+      opacity 200ms var(--ease-out-cubic),
+      transform 200ms var(--ease-out-cubic);
+  }
+  .osp-cta:hover {
+    opacity: 0.9;
+  }
+  .osp-cta:active {
+    transform: translateY(1px);
   }
 
-  .osp-cta:hover {
-    opacity: 0.88;
+  /* reveal */
+  [data-osp-section] {
+    opacity: 0;
+    transform: translateY(var(--reveal-distance));
+    transition:
+      opacity 600ms var(--ease-out-cubic),
+      transform 600ms var(--ease-out-cubic);
+  }
+  [data-osp-section].visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-osp-section] {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
   }
 
   @media (max-width: 767px) {
-    .osp {
-      padding: 80px var(--gutter);
-    }
-    .osp-inner {
-      gap: 40px;
+    .osp-section {
+      grid-template-columns: 1fr;
+      row-gap: 12px;
+      padding: 32px 0;
     }
   }
 </style>

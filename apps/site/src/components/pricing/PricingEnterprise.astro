@@ -11,7 +11,7 @@ const form = e.form ?? {};
 
 <section class="pe">
   <div class="pe-inner">
-    <div class="pe-card">
+    <div class="pe-card reveal" data-reveal style="--i: 0">
       <h2 class="pe-h2">{e.heading}</h2>
       <p class="pe-body">{e.body}</p>
 
@@ -39,32 +39,35 @@ const form = e.form ?? {};
 
 <style>
   .pe {
-    padding: 48px 24px 96px;
+    padding: 48px 0 clamp(80px, 9vw, 96px);
   }
 
   .pe-inner {
-    max-width: 1200px;
-    margin: 0 auto;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
   }
 
   .pe-card {
-    background-color: var(--color-mist);
-    border-radius: 24px;
-    padding: 48px;
+    background-color: color-mix(in srgb, var(--color-mist) 55%, var(--color-cream));
+    border: 1px solid var(--color-mist);
+    border-radius: 20px;
+    padding: clamp(28px, 4vw, 48px);
     max-width: 720px;
-    margin: 0 auto;
     display: flex;
     flex-direction: column;
     gap: 16px;
   }
 
   .pe-h2 {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: clamp(24px, 3vw, 32px);
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(26px, 3.4vw, 40px);
+    letter-spacing: -0.015em;
     color: var(--color-deep-teal);
     margin: 0;
+    line-height: 1.14;
   }
 
   .pe-body {
@@ -131,11 +134,23 @@ const form = e.form ?? {};
     border-radius: 9999px;
     cursor: pointer;
     align-self: flex-start;
-    transition: opacity 150ms ease;
+    transition:
+      opacity 200ms var(--ease-out-cubic),
+      transform 200ms var(--ease-out-cubic);
   }
 
   .pe-submit:hover {
-    opacity: 0.88;
+    opacity: 0.94;
+    transform: translateY(-1px);
+  }
+  .pe-submit:active {
+    transform: translateY(1px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pe-submit:hover,
+    .pe-submit:active {
+      transform: none;
+    }
   }
 
   @media (max-width: 767px) {

@@ -28,9 +28,9 @@ const codeHref =
     <ol class="audio-flow" role="list" aria-label={flow.join(' → ')}>
       {flow.map((step, i) => (
         <li
-          class:list={['audio-step fade-up', { 'audio-step--final': i === flow.length - 1 }]}
-          data-audio-box
-          style={`transition-delay:${i * 120}ms`}
+          class:list={['audio-step reveal', { 'audio-step--final': i === flow.length - 1 }]}
+          data-reveal
+          style={`--i: ${i}`}
         >
           <span class="audio-marker" aria-hidden="true">
             <span class="audio-dot"></span>
@@ -40,9 +40,9 @@ const codeHref =
       ))}
     </ol>
 
-    <p class="audio-body">{body}</p>
-    <p class="audio-codenote">{codeNote}</p>
-    <a class="audio-codelink" href={codeHref} target="_blank" rel="noopener noreferrer">{codeLink}</a>
+    <p class="audio-body reveal" data-reveal style={`--i: ${flow.length}`}>{body}</p>
+    <p class="audio-codenote reveal" data-reveal style={`--i: ${flow.length + 1}`}>{codeNote}</p>
+    <a class="audio-codelink reveal" data-reveal style={`--i: ${flow.length + 2}`} href={codeHref} target="_blank" rel="noopener noreferrer">{codeLink}</a>
   </div>
 </section>
 
@@ -165,27 +165,7 @@ const codeHref =
 
   @media (max-width: 767px) {
     .audio {
-      padding: 56px var(--gutter);
+      padding: 56px 0;
     }
   }
 </style>
-
-<script>
-  const boxes = document.querySelectorAll<HTMLElement>('#audio-section [data-audio-box]');
-  if ('IntersectionObserver' in window && boxes.length > 0) {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.25 }
-    );
-    boxes.forEach((box) => observer.observe(box));
-  } else {
-    boxes.forEach((box) => box.classList.add('visible'));
-  }
-</script>

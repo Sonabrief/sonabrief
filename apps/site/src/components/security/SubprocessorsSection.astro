@@ -17,10 +17,10 @@ const note: string = clean(t.security.subprocessors.note);
 
 <section class="subp">
   <div class="subp-inner">
-    <h2 class="subp-h2">{title}</h2>
-    <p class="subp-intro">{intro}</p>
+    <h2 class="subp-h2 reveal" data-reveal style="--i: 0">{title}</h2>
+    <p class="subp-intro reveal" data-reveal style="--i: 1">{intro}</p>
 
-    <div class="subp-table-wrap">
+    <div class="subp-table-wrap reveal" data-reveal style="--i: 2">
       <table class="subp-table">
         <thead>
           <tr>
@@ -41,7 +41,7 @@ const note: string = clean(t.security.subprocessors.note);
       </table>
     </div>
 
-    <p class="subp-note">{note}</p>
+    <p class="subp-note reveal" data-reveal style="--i: 3">{note}</p>
   </div>
 </section>
 

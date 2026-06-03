@@ -28,13 +28,16 @@ function classifyValue(v: string): 'check' | 'dash' | 'text' {
 
 <section class="ptf">
   <div class="ptf-inner">
-    <div class="ptf-scroll">
+    <div class="ptf-scroll reveal" data-reveal style="--i: 0">
       <table class="ptf-table">
         <thead>
           <tr>
             <th class="ptf-th ptf-th--feature"></th>
             {columns.map((c, i) => (
-              <th class:list={['ptf-th', { 'ptf-th--highlight': i === 2 }]}>{c}</th>
+              <th class:list={[
+                'ptf-th',
+                { 'ptf-th--soft': i === 1, 'ptf-th--strong': i === 2 },
+              ]}>{c}</th>
             ))}
           </tr>
         </thead>
@@ -59,7 +62,7 @@ function classifyValue(v: string): 'check' | 'dash' | 'text' {
                       <td class:list={[
                         'ptf-cell',
                         `ptf-cell--${kind}`,
-                        { 'ptf-cell--highlight': i === 2 },
+                        { 'ptf-cell--soft': i === 1, 'ptf-cell--strong': i === 2 },
                       ]}>
                         {kind === 'check' ? '✓' : kind === 'dash' ? '—' : v}
                       </td>
@@ -85,12 +88,13 @@ function classifyValue(v: string): 'check' | 'dash' | 'text' {
 
 <style>
   .ptf {
-    padding: 48px 24px 96px;
+    padding: 48px 0 clamp(80px, 9vw, 96px);
   }
 
   .ptf-inner {
-    max-width: 1200px;
-    margin: 0 auto;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
   }
 
   .ptf-scroll {
@@ -123,10 +127,19 @@ function classifyValue(v: string): 'check' | 'dash' | 'text' {
     min-width: 220px;
   }
 
-  .ptf-th--highlight {
-    background-color: #ffffff;
-    border-left: 1px solid var(--color-mist);
-    border-right: 1px solid var(--color-mist);
+  /* colonne evidenziate, coerenti con la gerarchia delle card:
+     soft (Pro) = amber tenue, strong (Pro Unlimited) = teal tenue.
+     Solo campitura morbida (niente bordi verticali, che galleggiavano come
+     bande staccate sopra l'header). L'header chiude la colonna con un cap
+     arrotondato in alto: la colonna si legge come un blocco unico card->tabella. */
+  .ptf-th--soft {
+    background-color: color-mix(in srgb, var(--color-amber) 12%, var(--color-cream));
+    border-radius: 10px 10px 0 0;
+    color: color-mix(in srgb, var(--color-amber) 70%, var(--color-charcoal));
+  }
+  .ptf-th--strong {
+    background-color: color-mix(in srgb, var(--color-deep-teal) 12%, var(--color-cream));
+    border-radius: 10px 10px 0 0;
   }
 
   .ptf-group-row {
@@ -180,10 +193,12 @@ function classifyValue(v: string): 'check' | 'dash' | 'text' {
     color: var(--color-stone);
   }
 
-  .ptf-cell--highlight {
-    background-color: #ffffff;
-    border-left: 1px solid var(--color-mist);
-    border-right: 1px solid var(--color-mist);
+  /* celle dati: solo campitura morbida, niente bordi verticali */
+  .ptf-cell--soft {
+    background-color: color-mix(in srgb, var(--color-amber) 7%, transparent);
+  }
+  .ptf-cell--strong {
+    background-color: color-mix(in srgb, var(--color-deep-teal) 6%, transparent);
   }
 
   .ptf-banners {

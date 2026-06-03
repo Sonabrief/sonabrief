@@ -204,7 +204,7 @@ const [lead, ...principles] = sections;
   /* reveal calmo, stagger */
   [data-about-reveal] {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(var(--reveal-distance));
     transition:
       opacity 600ms var(--ease-out-cubic),
       transform 600ms var(--ease-out-cubic);

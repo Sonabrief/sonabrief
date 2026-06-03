@@ -21,7 +21,7 @@ const verifyHref =
 
 <section class="zk">
   <div class="zk-inner">
-    <header class="zk-head">
+    <header class="zk-head reveal" data-reveal style="--i: 0">
       <h2 class="zk-h2">{title}</h2>
       <p class="zk-intro">{intro}</p>
     </header>
@@ -31,7 +31,7 @@ const verifyHref =
          chi legge con attenzione (compliance). -->
     <ol class="zk-points">
       {points.map((p, i) => (
-        <li class="zk-point">
+        <li class="zk-point reveal" data-reveal style={`--i: ${i + 1}`}>
           <span class="zk-idx" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
           <div class="zk-body">
             <p class="zk-term">{p.term}</p>
@@ -46,7 +46,7 @@ const verifyHref =
       ))}
     </ol>
 
-    <p class="zk-closer">{closer}</p>
+    <p class="zk-closer reveal" data-reveal style={`--i: ${points.length + 1}`}>{closer}</p>
   </div>
 </section>
 
