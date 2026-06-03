@@ -4,11 +4,15 @@ interface Props {
 }
 const { t } = Astro.props;
 
-const title: string = t.security.audio.title;
-const flow: string[] = t.security.audio.flow ?? [];
-const body: string = t.security.audio.body;
-const codeNote: string = t.security.audio.codeNote;
-const codeLink: string = t.security.audio.codeLink;
+function clean(s: string): string {
+  return s.replace(/(\d)\s*[—–]\s*(\d)/g, '$1-$2').replace(/\s*[—–]\s*/g, ', ');
+}
+
+const title: string = clean(t.security.audio.title);
+const flow: string[] = (t.security.audio.flow ?? []).map(clean);
+const body: string = clean(t.security.audio.body);
+const codeNote: string = clean(t.security.audio.codeNote);
+const codeLink: string = clean(t.security.audio.codeLink);
 
 const codeHref =
   'https://github.com/Sonabrief/sonabrief/blob/main/apps/web/src/lib/chunkStore.ts#L86-L90';
@@ -18,39 +22,33 @@ const codeHref =
   <div class="audio-inner">
     <h2 class="audio-h2">{title}</h2>
 
-    <div class="audio-diagram" role="img" aria-label={flow.join(' → ')}>
-      {
-        flow.map((step, i) => (
-          <>
-            <div
-              class:list={['audio-box fade-up', { 'audio-box-final': i === flow.length - 1 }]}
-              data-audio-box
-              style={`transition-delay:${i * 150}ms`}
-            >
-              <span class="audio-box-text">{step}</span>
-            </div>
-            {i < flow.length - 1 && (
-              <span class="audio-arrow fade-up" data-audio-box style={`transition-delay:${i * 150 + 75}ms`} aria-hidden="true">
-                <span class="audio-arrow-h">→</span>
-                <span class="audio-arrow-v">↓</span>
-              </span>
-            )}
-          </>
-        ))
-      }
-    </div>
+    <!-- flusso VERTICALE a scendere: ogni passo su una riga, connettore verticale,
+         l'ultimo step ("zero audio residuo") chiude evidenziato. Più leggibile dei
+         box orizzontali per un flusso sequenziale su pagina critica. -->
+    <ol class="audio-flow" role="list" aria-label={flow.join(' → ')}>
+      {flow.map((step, i) => (
+        <li
+          class:list={['audio-step fade-up', { 'audio-step--final': i === flow.length - 1 }]}
+          data-audio-box
+          style={`transition-delay:${i * 120}ms`}
+        >
+          <span class="audio-marker" aria-hidden="true">
+            <span class="audio-dot"></span>
+          </span>
+          <span class="audio-step-text">{step}</span>
+        </li>
+      ))}
+    </ol>
 
     <p class="audio-body">{body}</p>
-
     <p class="audio-codenote">{codeNote}</p>
-
     <a class="audio-codelink" href={codeHref} target="_blank" rel="noopener noreferrer">{codeLink}</a>
   </div>
 </section>
 
 <style>
   .audio {
-    padding: 80px 24px;
+    padding: 88px 24px;
   }
 
   .audio-inner {
@@ -62,65 +60,77 @@ const codeHref =
   }
 
   .audio-h2 {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: clamp(24px, 3vw, 32px);
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(26px, 3.4vw, 40px);
+    letter-spacing: -0.015em;
     color: var(--color-deep-teal);
     margin: 0;
-    line-height: 1.2;
+    line-height: 1.14;
+    text-wrap: balance;
   }
 
-  .audio-diagram {
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    flex-wrap: wrap;
-    gap: 8px;
+  /* flusso verticale a scendere */
+  .audio-flow {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .audio-step {
+    position: relative;
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    column-gap: 18px;
+    align-items: start;
+    padding-bottom: 28px;
+  }
+  .audio-step:last-child {
+    padding-bottom: 0;
   }
 
-  .audio-box {
-    flex: 1 1 0;
-    min-width: 0;
+  /* marker + linea verticale di connessione a scendere */
+  .audio-marker {
+    position: relative;
     display: flex;
-    align-items: center;
     justify-content: center;
-    text-align: center;
-    border: 1px solid var(--color-mist);
-    background-color: var(--color-cream);
-    border-radius: 10px;
-    padding: 16px 12px;
+    padding-top: 5px;
+    height: 100%;
   }
-
-  .audio-box-final {
-    border-color: var(--color-deep-teal);
+  .audio-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 9999px;
+    border: 1.5px solid var(--color-deep-teal);
+    background-color: var(--color-cream);
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  .audio-step:not(:last-child) .audio-marker::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 18px;
+    bottom: -28px;
+    width: 1px;
+    transform: translateX(-50%);
+    background-color: var(--color-mist);
+  }
+  /* l'ultimo step: dot pieno teal, il flusso si chiude */
+  .audio-step--final .audio-dot {
     background-color: var(--color-deep-teal);
   }
 
-  .audio-box-text {
+  .audio-step-text {
     font-family: "Manrope", sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    line-height: 1.4;
+    font-size: 16px;
+    line-height: 1.5;
     color: var(--color-charcoal);
+    padding-top: 1px;
   }
-
-  .audio-box-final .audio-box-text {
-    color: var(--color-cream);
+  .audio-step--final .audio-step-text {
     font-weight: 600;
-  }
-
-  .audio-arrow {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-stone);
-    font-size: 18px;
-    flex: 0 0 auto;
-  }
-
-  .audio-arrow-v {
-    display: none;
+    color: var(--color-deep-teal);
   }
 
   .audio-body {
@@ -131,7 +141,6 @@ const codeHref =
     margin: 0;
     max-width: 680px;
   }
-
   .audio-codenote {
     font-family: "Manrope", sans-serif;
     font-style: italic;
@@ -140,32 +149,23 @@ const codeHref =
     color: var(--color-stone);
     margin: 0;
   }
-
   .audio-codelink {
     font-family: "Manrope", sans-serif;
     font-size: 15px;
     color: var(--color-deep-teal);
     text-decoration: underline;
+    text-decoration-color: var(--color-mist);
     text-underline-offset: 4px;
     width: fit-content;
+    transition: text-decoration-color 200ms var(--ease-out-cubic);
+  }
+  .audio-codelink:hover {
+    text-decoration-color: var(--color-deep-teal);
   }
 
   @media (max-width: 767px) {
     .audio {
       padding: 56px 24px;
-    }
-    .audio-diagram {
-      flex-direction: column;
-      align-items: stretch;
-    }
-    .audio-box {
-      flex: 1 1 auto;
-    }
-    .audio-arrow-h {
-      display: none;
-    }
-    .audio-arrow-v {
-      display: block;
     }
   }
 </style>

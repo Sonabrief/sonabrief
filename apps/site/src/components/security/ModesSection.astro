@@ -6,11 +6,27 @@ const { t } = Astro.props;
 
 const title: string = t.security.modes.title;
 const intro: string = t.security.modes.intro;
-const items: { name: string; desc: string }[] = t.security.modes.items ?? [];
+const rawItems: { name: string; desc: string }[] = t.security.modes.items ?? [];
 const perf: { title: string; headers: string[]; rows: string[][] } = t.security.modes.performance;
 
-// border colors in declared order: Standard = Mist, Local = Stone, Cloud = Amber
-const borderColors = ['var(--color-mist)', 'var(--color-stone)', 'var(--color-amber)'];
+// riordino per gradiente di privacy come in home (ThreeWays):
+// Solo locale -> Standard -> Cloud Veloce. Riconosco la modalità dal nome (5 lingue).
+function kindOf(name: string): 'local' | 'fast' | 'standard' {
+  const n = name.toLowerCase();
+  if (/local|locale|lokal|uniquement/.test(n)) return 'local';
+  if (/veloce|fast|rapid|rápid|schnell/.test(n)) return 'fast';
+  return 'standard';
+}
+const order: Record<string, number> = { local: 0, standard: 1, fast: 2 };
+const items = [...rawItems].sort((a, b) => order[kindOf(a.name)] - order[kindOf(b.name)]);
+
+// colore del bordo legato alla modalità (non alla posizione):
+// local = Stone, standard = Mist, fast (Cloud) = Amber.
+const borderByKind: Record<string, string> = {
+  local: 'var(--color-stone)',
+  standard: 'var(--color-mist)',
+  fast: 'var(--color-amber)',
+};
 
 // The "Cloud Fast" column is the last column of the performance table.
 const cloudColIndex = (perf?.headers?.length ?? 1) - 1;
@@ -23,8 +39,8 @@ const cloudColIndex = (perf?.headers?.length ?? 1) - 1;
 
     <div class="modes-cards">
       {
-        items.map((m, i) => (
-          <div class="modes-card" style={`border-left-color:${borderColors[i] ?? 'var(--color-mist)'}`}>
+        items.map((m) => (
+          <div class="modes-card" style={`border-left-color:${borderByKind[kindOf(m.name)] ?? 'var(--color-mist)'}`}>
             <p class="modes-card-name">{m.name}</p>
             <p class="modes-card-desc">{m.desc}</p>
           </div>
