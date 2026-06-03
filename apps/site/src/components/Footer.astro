@@ -1,22 +1,17 @@
 ---
 import { getTranslations } from '../i18n/utils';
+import LanguageSwitcher from './LanguageSwitcher.astro';
 
 interface Props {
   currentLang?: string;
+  currentPath?: string;
 }
-const { currentLang = 'en' } = Astro.props;
+const { currentLang = 'en', currentPath = '' } = Astro.props;
 const t = await getTranslations(currentLang);
 
 const prefix = currentLang === 'en' ? '' : `/${currentLang}`;
 const homeHref = currentLang === 'en' ? '/' : `/${currentLang}/`;
 
-const langLinks = [
-  { code: 'en', label: 'EN', href: '/' },
-  { code: 'it', label: 'IT', href: '/it/' },
-  { code: 'fr', label: 'FR', href: '/fr/' },
-  { code: 'es', label: 'ES', href: '/es/' },
-  { code: 'de', label: 'DE', href: '/de/' },
-];
 
 const productLinks: string[] = t.footer.columns.product.links ?? [];
 const trustLinks: string[] = t.footer.columns.trust.links ?? [];
@@ -146,20 +141,7 @@ function isExternal(href: string | null): boolean {
       </form>
 
       <!-- Language switcher -->
-      <nav class="footer-lang" aria-label="Language switcher">
-        {langLinks.map(({ code, label, href }, i) => (
-          <>
-            <a
-              href={href}
-              class:list={['footer-lang-link', { active: code === currentLang }]}
-              aria-current={code === currentLang ? 'page' : undefined}
-            >
-              {label}
-            </a>
-            {i < langLinks.length - 1 && <span class="footer-lang-sep" aria-hidden="true">·</span>}
-          </>
-        ))}
-      </nav>
+      <LanguageSwitcher currentLang={currentLang} currentPath={currentPath} />
 
       <!-- Copyright -->
       <p class="footer-copyright">{t.footer.legal}</p>
@@ -311,36 +293,6 @@ function isExternal(href: string | null): boolean {
 
   .footer-form-btn:hover {
     opacity: 0.88;
-  }
-
-  /* Language switcher */
-  .footer-lang {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .footer-lang-link {
-    font-family: "Manrope", sans-serif;
-    font-size: 12px;
-    color: var(--color-stone);
-    text-decoration: none;
-    transition: color 150ms ease;
-  }
-
-  .footer-lang-link:hover,
-  .footer-lang-link.active {
-    color: var(--color-deep-teal);
-  }
-
-  .footer-lang-link.active {
-    font-weight: 700;
-  }
-
-  .footer-lang-sep {
-    font-size: 12px;
-    color: var(--color-mist);
-    user-select: none;
   }
 
   /* Copyright */

@@ -49,7 +49,7 @@ const hreflangs = [
   <body class="grain-texture">
     <Navbar lang={lang} />
     <slot />
-    <Footer currentLang={lang} />
+    <Footer currentLang={lang} currentPath={currentPath} />
 
     <script>
       // Observer reveal globale: aggancia ogni .reveal[data-reveal] della pagina
