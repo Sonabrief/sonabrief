@@ -21,11 +21,11 @@ const mailto = 'mailto:hello@sonabrief.com?subject=DPA reference request';
 
 <style>
   .mistral {
-    padding: 80px 24px;
+    padding: 80px var(--gutter);
   }
 
   .mistral-inner {
-    max-width: 680px;
+    max-width: var(--container-prose);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -48,7 +48,7 @@ const mailto = 'mailto:hello@sonabrief.com?subject=DPA reference request';
     line-height: 1.75;
     color: var(--color-stone);
     margin: 0;
-    max-width: 680px;
+    max-width: var(--container-prose);
   }
 
   .mistral-cta {
@@ -62,7 +62,7 @@ const mailto = 'mailto:hello@sonabrief.com?subject=DPA reference request';
 
   @media (max-width: 767px) {
     .mistral {
-      padding: 56px 24px;
+      padding: 56px var(--gutter);
     }
   }
 </style>

@@ -101,12 +101,13 @@ const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
 
 <style>
   .pricing-summary {
-    padding: 120px 24px;
+    padding: var(--section-y) 0;
   }
 
   .pricing-summary-inner {
-    max-width: 1200px;
-    margin: 0 auto;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
     display: flex;
     flex-direction: column;
     gap: 32px;
@@ -218,9 +219,6 @@ const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
   }
 
   @media (max-width: 639px) {
-    .pricing-summary {
-      padding: 80px 24px;
-    }
     .pricing-grid {
       grid-template-columns: 1fr;
     }

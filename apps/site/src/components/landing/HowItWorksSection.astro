@@ -60,12 +60,13 @@ const badge = 'Pro & Pro Unlimited';
 
 <style>
   .hiw {
-    padding: 120px 24px;
+    padding: var(--section-y) 0;
   }
 
   .hiw-inner {
-    max-width: 1080px;
-    margin: 0 auto;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
     display: flex;
     flex-direction: column;
     gap: 64px;
@@ -146,12 +147,15 @@ const badge = 'Pro & Pro Unlimited';
     margin: 0;
   }
 
-  /* --- note: nota editoriale + riga cloud col badge (no box) --- */
+  /* --- note: distribuite a 2 colonne, riempiono la larghezza come gli step
+     sopra (niente più colonna stretta a sinistra). Su mobile collassano. --- */
   .hiw-notes {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    max-width: 720px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+    padding-top: 8px;
+    border-top: 1px solid var(--color-mist);
   }
   .hiw-quality {
     font-family: "Manrope", sans-serif;
@@ -159,7 +163,7 @@ const badge = 'Pro & Pro Unlimited';
     line-height: 1.7;
     color: var(--color-stone);
     margin: 0;
-    max-width: 62ch;
+    padding-top: 24px;
   }
   .hiw-cloud {
     display: grid;
@@ -167,9 +171,7 @@ const badge = 'Pro & Pro Unlimited';
     column-gap: 16px;
     align-items: baseline;
     margin: 0;
-    padding-top: 20px;
-    border-top: 1px solid var(--color-mist);
-    max-width: 62ch;
+    padding-top: 24px;
   }
   .hiw-cloud-badge {
     font-family: var(--font-mono);
@@ -210,12 +212,13 @@ const badge = 'Pro & Pro Unlimited';
 
   /* tablet: 3 -> verticale, la freccia ruota a "giù" */
   @media (max-width: 767px) {
-    .hiw {
-      padding: 80px 24px;
-    }
     .hiw-flow {
       grid-template-columns: 1fr;
       gap: 36px;
+    }
+    .hiw-notes {
+      grid-template-columns: 1fr;
+      gap: 24px;
     }
     .hiw-marker {
       margin-bottom: 4px;

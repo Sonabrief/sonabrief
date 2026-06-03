@@ -36,12 +36,13 @@ const items = rawItems.map((it) => ({ question: clean(it.q), answer: clean(it.a)
 
 <style>
   .faq {
-    padding: 120px 24px;
+    padding: var(--section-y) 0;
   }
 
   .faq-inner {
-    max-width: 1080px;
-    margin: 0 auto;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
     display: grid;
     grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr);
     column-gap: 64px;
@@ -67,9 +68,6 @@ const items = rawItems.map((it) => ({ question: clean(it.q), answer: clean(it.a)
   }
 
   @media (max-width: 860px) {
-    .faq {
-      padding: 80px 24px;
-    }
     .faq-inner {
       grid-template-columns: 1fr;
       row-gap: 32px;

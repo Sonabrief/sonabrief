@@ -43,11 +43,11 @@ const note: string = t.security.subprocessors.note;
 
 <style>
   .subp {
-    padding: 80px 24px;
+    padding: 80px var(--gutter);
   }
 
   .subp-inner {
-    max-width: 680px;
+    max-width: var(--container-prose);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -120,7 +120,7 @@ const note: string = t.security.subprocessors.note;
 
   @media (max-width: 767px) {
     .subp {
-      padding: 56px 24px;
+      padding: 56px var(--gutter);
     }
   }
 </style>

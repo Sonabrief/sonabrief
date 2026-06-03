@@ -33,12 +33,13 @@ const linkHrefs = ['https://github.com/Sonabrief', '/security', 'https://github.
 
 <style>
   .manifesto {
-    padding: 120px 24px;
+    padding: var(--section-y) 0;
   }
 
   .manifesto-inner {
-    max-width: 920px;
-    margin: 0 auto;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
     display: flex;
     flex-direction: column;
   }
@@ -46,7 +47,7 @@ const linkHrefs = ['https://github.com/Sonabrief', '/security', 'https://github.
   /* apertura di capitolo editoriale: numero serif grande a margine, testo a destra */
   .manifesto-item {
     display: grid;
-    grid-template-columns: minmax(120px, 0.9fr) minmax(0, 2.4fr);
+    grid-template-columns: 160px minmax(0, 600px);
     column-gap: 56px;
     align-items: start;
     padding: 56px 0;

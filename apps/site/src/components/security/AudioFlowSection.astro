@@ -48,11 +48,11 @@ const codeHref =
 
 <style>
   .audio {
-    padding: 88px 24px;
+    padding: 88px var(--gutter);
   }
 
   .audio-inner {
-    max-width: 680px;
+    max-width: var(--container-prose);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -139,7 +139,7 @@ const codeHref =
     line-height: 1.75;
     color: var(--color-stone);
     margin: 0;
-    max-width: 680px;
+    max-width: var(--container-prose);
   }
   .audio-codenote {
     font-family: "Manrope", sans-serif;
@@ -165,7 +165,7 @@ const codeHref =
 
   @media (max-width: 767px) {
     .audio {
-      padding: 56px 24px;
+      padding: 56px var(--gutter);
     }
   }
 </style>

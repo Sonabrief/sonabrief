@@ -23,11 +23,11 @@ const link: string = t.security.promise.link;
 
 <style>
   .promise {
-    padding: 120px 24px 80px;
+    padding: 120px var(--gutter) 80px;
   }
 
   .promise-inner {
-    max-width: 720px;
+    max-width: var(--container-prose);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -82,7 +82,7 @@ const link: string = t.security.promise.link;
 
   @media (max-width: 767px) {
     .promise {
-      padding: 80px 24px 56px;
+      padding: 80px var(--gutter) 56px;
     }
   }
 </style>

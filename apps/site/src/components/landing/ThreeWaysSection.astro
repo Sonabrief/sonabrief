@@ -120,12 +120,13 @@ const rows = modes.map((mode) => {
 
 <style>
   .tw {
-    padding: 120px 24px;
+    padding: var(--section-y) 0;
   }
 
   .tw-inner {
-    max-width: 1080px;
-    margin: 0 auto;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
   }
 
   /* header asimmetrico, allineato a sinistra (non centrato) */
@@ -252,9 +253,6 @@ const rows = modes.map((mode) => {
   }
 
   @media (max-width: 760px) {
-    .tw {
-      padding: 80px 24px;
-    }
     .tw-head {
       margin-bottom: 40px;
     }

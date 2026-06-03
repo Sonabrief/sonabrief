@@ -61,12 +61,13 @@ const isForever = (v: string) => /forever|sempre|para siempre|toujours|für imme
 
 <style>
   .mem {
-    padding: 120px 24px;
+    padding: var(--section-y) 0;
   }
 
   .mem-inner {
-    max-width: 880px;
-    margin: 0 auto;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
     display: flex;
     flex-direction: column;
     gap: 48px;
@@ -200,9 +201,6 @@ const isForever = (v: string) => /forever|sempre|para siempre|toujours|für imme
   }
 
   @media (max-width: 767px) {
-    .mem {
-      padding: 80px 24px;
-    }
     .mem-tier {
       grid-template-columns: 1fr;
       row-gap: 8px;

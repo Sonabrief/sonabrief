@@ -121,7 +121,7 @@ const htmlContent = marked(content) as string;
   .legal-wrapper {
     background-color: var(--color-cream);
     min-height: 100vh;
-    padding: 80px 24px 120px;
+    padding: 80px var(--gutter) 120px;
   }
 
   @media (max-width: 767px) {
@@ -236,7 +236,7 @@ const htmlContent = marked(content) as string;
   .legal-article {
     flex: 1;
     min-width: 0;
-    max-width: 720px;
+    max-width: var(--container-prose);
   }
 
   .legal-h1 {

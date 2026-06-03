@@ -53,6 +53,16 @@
 
   /* Motion — easing calmo condiviso */
   --ease-out-cubic: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* Layout — UN sistema di container condiviso.
+     Tutte le sezioni si allineano allo stesso bordo: niente più salti.
+     --container       = larghezza standard del contenuto (sezioni "wide")
+     --container-prose = larghezza per prosa/lettura, centrata DENTRO lo stesso bordo
+     --gutter          = margine orizzontale laterale coerente */
+  --container: 1120px;
+  --container-prose: 720px;
+  --gutter: clamp(20px, 5vw, 40px);
+  --section-y: clamp(80px, 10vw, 120px);
 }
 
 html,
@@ -60,6 +70,26 @@ body {
   background-color: var(--color-cream);
   font-family: "Plus Jakarta Sans", sans-serif;
   color: var(--color-charcoal);
+}
+
+/* Utility container condivise. Una sezione mette .section (padding verticale +
+   gutter) e dentro un .container o .container-prose per la larghezza.
+   La prosa è allineata al bordo SINISTRO del container wide, non ri-centrata,
+   così lo scroll non fa saltare il margine. */
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.container-prose {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.container-prose > * {
+  max-width: var(--container-prose);
 }
 
 .grain-texture::after {

@@ -74,11 +74,11 @@ const cloudColIndex = (perf?.headers?.length ?? 1) - 1;
 
 <style>
   .modes {
-    padding: 80px 24px;
+    padding: 80px var(--gutter);
   }
 
   .modes-inner {
-    max-width: 680px;
+    max-width: var(--container-prose);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -182,7 +182,7 @@ const cloudColIndex = (perf?.headers?.length ?? 1) - 1;
 
   @media (max-width: 767px) {
     .modes {
-      padding: 56px 24px;
+      padding: 56px var(--gutter);
     }
   }
 </style>

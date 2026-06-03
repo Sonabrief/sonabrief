@@ -47,12 +47,13 @@ const aside = clean(t.professionals.aside);
 
 <style>
   .pros {
-    padding: 120px 24px;
+    padding: var(--section-y) 0;
   }
 
   .pros-inner {
-    max-width: 920px;
-    margin: 0 auto;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
     display: flex;
     flex-direction: column;
     gap: 48px;
@@ -148,9 +149,6 @@ const aside = clean(t.professionals.aside);
   }
 
   @media (max-width: 767px) {
-    .pros {
-      padding: 80px 24px;
-    }
     .pros-roles {
       grid-template-columns: 1fr;
       column-gap: 0;

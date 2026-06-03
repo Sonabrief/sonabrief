@@ -68,12 +68,13 @@ const hasStack = stackItems.length >= 2;
   .oss {
     background-color: var(--color-deep-teal);
     color: var(--color-cream);
-    padding: 120px 24px;
+    padding: var(--section-y) 0;
   }
 
   .oss-inner {
-    max-width: 880px;
-    margin: 0 auto;
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -187,9 +188,6 @@ const hasStack = stackItems.length >= 2;
   }
 
   @media (max-width: 767px) {
-    .oss {
-      padding: 80px 24px;
-    }
     .oss-h2 {
       max-width: 100%;
     }

@@ -40,11 +40,11 @@ const cta: string = t.openSourcePage?.cta ?? '';
 
 <style>
   .osp {
-    padding: 120px 24px;
+    padding: 120px var(--gutter);
   }
 
   .osp-inner {
-    max-width: 720px;
+    max-width: var(--container-prose);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -121,7 +121,7 @@ const cta: string = t.openSourcePage?.cta ?? '';
 
   @media (max-width: 767px) {
     .osp {
-      padding: 80px 24px;
+      padding: 80px var(--gutter);
     }
     .osp-inner {
       gap: 40px;

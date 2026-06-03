@@ -17,11 +17,11 @@ const body: string = t.security.early.body;
 
 <style>
   .early {
-    padding: 80px 24px 120px;
+    padding: 80px var(--gutter) 120px;
   }
 
   .early-inner {
-    max-width: 680px;
+    max-width: var(--container-prose);
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -45,12 +45,12 @@ const body: string = t.security.early.body;
     line-height: 1.8;
     color: var(--color-stone);
     margin: 0;
-    max-width: 680px;
+    max-width: var(--container-prose);
   }
 
   @media (max-width: 767px) {
     .early {
-      padding: 56px 24px 80px;
+      padding: 56px var(--gutter) 80px;
     }
   }
 </style>

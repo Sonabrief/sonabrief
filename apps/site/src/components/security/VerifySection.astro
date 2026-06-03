@@ -48,13 +48,13 @@ const codeHrefs = [
 
 <style>
   .verify {
-    padding: 80px 24px;
+    padding: 80px var(--gutter);
     display: flex;
     justify-content: center;
   }
 
   .verify-box {
-    max-width: 720px;
+    max-width: var(--container-prose);
     width: 100%;
     border: 2px solid var(--color-deep-teal);
     background-color: #ffffff;
@@ -141,7 +141,7 @@ const codeHrefs = [
 
   @media (max-width: 767px) {
     .verify {
-      padding: 56px 24px;
+      padding: 56px var(--gutter);
     }
     .verify-box {
       padding: 28px;
