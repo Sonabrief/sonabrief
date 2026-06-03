@@ -25,7 +25,7 @@ const items = rawItems.map((it) => ({ question: clean(it.q), answer: clean(it.a)
     <!-- header a 2 colonne: titolo serif fisso a sinistra, accordion a destra.
          Layout-family distinta da Pricing (card grid) che precede; il titolo
          "ancora" la lista mentre si apre/chiude. -->
-    <div class="faq-aside">
+    <div class="faq-aside reveal" data-faq-reveal>
       <h2 class="faq-title">{t.faq.title}</h2>
     </div>
     <div class="faq-list">
@@ -77,3 +77,25 @@ const items = rawItems.map((it) => ({ question: clean(it.q), answer: clean(it.a)
     }
   }
 </style>
+
+<script>
+  const el = document.querySelector<HTMLElement>('[data-faq-reveal]');
+  if (el) {
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add('is-in');
+              obs.disconnect();
+            }
+          });
+        },
+        { threshold: 0.3 }
+      );
+      obs.observe(el);
+    } else {
+      el.classList.add('is-in');
+    }
+  }
+</script>

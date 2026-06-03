@@ -35,12 +35,12 @@ const stackItems = stackRaw
 const hasStack = stackItems.length >= 2;
 ---
 
-<section class="oss">
+<section class="oss" data-oss>
   <div class="oss-inner">
-    <h2 class="oss-h2">{h2}</h2>
-    <p class="oss-body">{body}</p>
+    <h2 class="oss-h2 reveal" data-reveal style="--i: 0">{h2}</h2>
+    <p class="oss-body reveal" data-reveal style="--i: 1">{body}</p>
 
-    <div class="oss-cta-row">
+    <div class="oss-cta-row reveal" data-reveal style="--i: 2">
       <a href="https://github.com/Sonabrief" class="oss-cta oss-cta--primary" target="_blank" rel="noopener noreferrer" plausible-event-name="CTA: GitHub">
         {clean(t.openSource.cta1)}
       </a>
@@ -48,7 +48,7 @@ const hasStack = stackItems.length >= 2;
     </div>
 
     {hasStack ? (
-      <div class="oss-stack" aria-label="Open-source stack">
+      <div class="oss-stack reveal" data-reveal style="--i: 3" aria-label="Open-source stack">
         <ul class="oss-stack-list">
           {stackItems.map((item) => (
             <li class="oss-chip">{item}</li>
@@ -57,12 +57,35 @@ const hasStack = stackItems.length >= 2;
         {builtTail && <p class="oss-stack-tail">{builtTail}</p>}
       </div>
     ) : (
-      <p class="oss-meta">{clean(rawBuilt)}</p>
+      <p class="oss-meta reveal" data-reveal style="--i: 3">{clean(rawBuilt)}</p>
     )}
 
-    <p class="oss-meta">{contribute}</p>
+    <p class="oss-meta reveal" data-reveal style="--i: 4">{contribute}</p>
   </div>
 </section>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-oss]');
+  const els = root?.querySelectorAll<HTMLElement>('[data-reveal]');
+  if (els && els.length) {
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add('is-in');
+              obs.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      els.forEach((el) => obs.observe(el));
+    } else {
+      els.forEach((el) => el.classList.add('is-in'));
+    }
+  }
+</script>
 
 <style>
   .oss {
@@ -132,7 +155,14 @@ const hasStack = stackItems.length >= 2;
     color: var(--color-deep-teal);
   }
   .oss-cta--primary:hover {
-    opacity: 0.92;
+    opacity: 0.94;
+    transform: translateY(-1px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .oss-cta:hover,
+    .oss-cta:active {
+      transform: none;
+    }
   }
   .oss-cta:not(.oss-cta--primary):hover {
     background-color: var(--color-cream);

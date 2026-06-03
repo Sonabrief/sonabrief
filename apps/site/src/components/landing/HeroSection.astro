@@ -17,15 +17,16 @@ const eyebrow = 'Una mente privata.';
 ---
 
 <section class="hero" id="hero">
-  <div class="hero-inner">
-    <div class="hero-lede fade-up" data-reveal style="--reveal-delay: 0ms;">
-      <p class="hero-eyebrow">{eyebrow}</p>
-      <h1 class="hero-h1" set:html={h1Html}></h1>
-    </div>
+  <div class="hero-lede fade-up" data-reveal style="--reveal-delay: 0ms;">
+    <p class="hero-eyebrow">{eyebrow}</p>
+    <h1 class="hero-h1" set:html={h1Html}></h1>
+  </div>
 
-    <p class="hero-sub fade-up" data-reveal style="--reveal-delay: 90ms;">{t.hero.sub}</p>
+  <p class="hero-sub fade-up" data-reveal style="--reveal-delay: 90ms;">{t.hero.sub}</p>
 
-    <div class="hero-cta-row fade-up" data-reveal style="--reveal-delay: 170ms;">
+  <!-- riga azione: CTA a sinistra, microcopy a destra, sulla stessa linea -->
+  <div class="hero-action-row fade-up" data-reveal style="--reveal-delay: 150ms;">
+    <div class="hero-cta-row">
       <a
         href="https://app.sonabrief.com/"
         class="hero-cta-primary"
@@ -34,11 +35,12 @@ const eyebrow = 'Una mente privata.';
       <a href="#how-it-works" class="hero-cta-secondary">{t.hero.cta2}</a>
     </div>
 
-    <p class="hero-micro fade-up" data-reveal style="--reveal-delay: 230ms;">{t.hero.micro}</p>
+    <p class="hero-micro">{t.hero.micro}</p>
   </div>
 
+  <!-- striscia dati mono full-width, separata da hairline -->
   {pillars.length > 0 && (
-    <aside class="hero-pillars fade-up" data-reveal style="--reveal-delay: 280ms;" aria-hidden="true">
+    <aside class="hero-pillars fade-up" data-reveal style="--reveal-delay: 220ms;" aria-hidden="true">
       <ul>
         {pillars.map((p) => (
           <li>
@@ -52,29 +54,21 @@ const eyebrow = 'Una mente privata.';
 </section>
 
 <style>
+  /* Composizione: stack verticale. Titolo full-width, sub largo, poi UNA riga
+     orizzontale (CTA sinistra + microcopy destra), poi striscia dati mono
+     full-width separata da hairline. Niente colonne contrapposte, niente
+     vuoto centrale. */
   .hero {
     max-width: var(--container);
     margin-inline: auto;
     padding: clamp(88px, 11vw, 128px) var(--gutter) clamp(72px, 9vw, 104px);
-    display: grid;
-    /* l'H1 grande sfrutta l'orizzontale (riempie la prima riga full-width);
-       sotto, sub+CTA a sinistra e la colonna mono a destra distribuiscono
-       lo spazio invece di lasciare un vuoto. */
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "lede    lede"
-      "sub     pillars"
-      "cta     pillars"
-      "micro   pillars";
-    column-gap: clamp(48px, 8vw, 120px);
-    row-gap: 28px;
-    align-items: end;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(32px, 4vw, 44px);
   }
 
   .hero-lede {
-    grid-area: lede;
-    align-self: start;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
   }
 
   .hero-eyebrow {
@@ -100,27 +94,33 @@ const eyebrow = 'Una mente privata.';
     letter-spacing: -0.02em;
     color: var(--color-deep-teal);
     margin: 0;
-    max-width: 15ch;
-    text-wrap: balance;
+    max-width: 14ch;
+    text-wrap: pretty;
   }
 
   .hero-sub {
-    grid-area: sub;
     font-family: "Manrope", sans-serif;
     font-size: 18px;
     line-height: 1.65;
     color: var(--color-stone);
-    max-width: 32ch;
-    margin: 8px 0 0;
+    max-width: 52ch;
+    margin: 0;
+  }
+
+  /* riga azione: CTA a sinistra, microcopy a destra, sulla stessa linea */
+  .hero-action-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px 40px;
+    flex-wrap: wrap;
   }
 
   .hero-cta-row {
-    grid-area: cta;
     display: flex;
     align-items: center;
     gap: 24px;
     flex-wrap: wrap;
-    margin-top: 8px;
   }
 
   .hero-cta-primary {
@@ -136,11 +136,19 @@ const eyebrow = 'Una mente privata.';
       transform 220ms var(--ease-out-cubic),
       opacity 220ms var(--ease-out-cubic);
   }
+  /* hover fisico: micro-sollevamento (1px), si sente appena */
   .hero-cta-primary:hover {
-    opacity: 0.9;
+    opacity: 0.94;
+    transform: translateY(-1px);
   }
   .hero-cta-primary:active {
     transform: translateY(1px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-cta-primary:hover,
+    .hero-cta-primary:active {
+      transform: none;
+    }
   }
 
   .hero-cta-secondary {
@@ -155,28 +163,26 @@ const eyebrow = 'Una mente privata.';
   }
 
   .hero-micro {
-    grid-area: micro;
     font-family: "Manrope", sans-serif;
     font-size: 13px;
     color: var(--color-stone);
-    margin: 6px 0 0;
+    margin: 0;
   }
 
-  /* colonna dati mono — il "tech" che bilancia il calore del serif.
-     ancorata in basso (align-items:end della griglia) così sta all'altezza
-     dei CTA, non galleggia isolata in alto. */
+  /* striscia dati mono full-width, separata da hairline: i 3 pilastri
+     distribuiti su 3 colonne, anticipano il manifesto sotto. */
   .hero-pillars {
-    grid-area: pillars;
-    align-self: end;
-    padding-left: 32px;
-    border-left: 1px solid var(--color-mist);
+    padding-top: 24px;
+    border-top: 1px solid var(--color-mist);
   }
   .hero-pillars ul {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 16px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px 40px;
+    max-width: 720px;
   }
   .hero-pillars li {
     display: grid;
@@ -201,10 +207,10 @@ const eyebrow = 'Una mente privata.';
   /* --- reveal calmo con stagger, gestito via --reveal-delay --- */
   .hero [data-reveal] {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(var(--reveal-distance));
     transition:
-      opacity 600ms var(--ease-out-cubic),
-      transform 600ms var(--ease-out-cubic);
+      opacity var(--reveal-duration) var(--ease-out-cubic),
+      transform var(--reveal-duration) var(--ease-out-cubic);
     transition-delay: var(--reveal-delay, 0ms);
   }
   .hero.is-revealed [data-reveal] {
@@ -223,46 +229,26 @@ const eyebrow = 'Una mente privata.';
   @media (max-width: 860px) {
     .hero {
       padding: clamp(72px, 12vw, 96px) var(--gutter) 64px;
-      grid-template-columns: 1fr;
-      grid-template-areas:
-        "lede"
-        "sub"
-        "cta"
-        "micro"
-        "pillars";
-      row-gap: 22px;
+      gap: 28px;
     }
     .hero-h1 {
       font-size: clamp(38px, 9vw, 60px);
       max-width: 100%;
     }
-    .hero-lede,
     .hero-sub {
       max-width: 100%;
     }
-    .hero-pillars {
-      align-self: start;
-      margin-top: 16px;
-      padding-left: 0;
-      padding-top: 24px;
-      border-left: none;
-      border-top: 1px solid var(--color-mist);
-    }
-    .hero-pillars ul {
-      grid-auto-flow: column;
-      grid-template-columns: repeat(3, auto);
-      justify-content: start;
-      gap: 28px;
-    }
-    .hero-pillars li {
-      grid-template-columns: 1fr;
-      gap: 4px;
+    /* la riga azione impila: CTA sopra, microcopy sotto */
+    .hero-action-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
     }
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 540px) {
+    /* striscia mono: da 3 colonne a impilata su schermi stretti */
     .hero-pillars ul {
-      grid-auto-flow: row;
       grid-template-columns: 1fr;
       gap: 14px;
     }

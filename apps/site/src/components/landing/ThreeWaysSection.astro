@@ -234,10 +234,10 @@ const rows = modes.map((mode) => {
   /* reveal calmo, stagger per riga */
   .tw-row {
     opacity: 0;
-    transform: translateY(22px);
+    transform: translateY(var(--reveal-distance));
     transition:
-      opacity 600ms var(--ease-out-cubic),
-      transform 600ms var(--ease-out-cubic);
+      opacity var(--reveal-duration) var(--ease-out-cubic),
+      transform var(--reveal-duration) var(--ease-out-cubic);
   }
   .tw-row.is-visible {
     opacity: 1;

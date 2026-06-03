@@ -16,7 +16,7 @@ const { items } = Astro.props;
     const panelId = `accordion-panel-${i}`;
     const btnId = `accordion-btn-${i}`;
     return (
-      <div class="accordion-item">
+      <div class="accordion-item reveal" data-reveal style={`--i: ${Math.min(i, 5)}`}>
         <dt>
           <button
             id={btnId}
@@ -98,8 +98,14 @@ const { items } = Astro.props;
   .accordion-panel {
     overflow: hidden;
     max-height: 0;
-    transition: max-height 300ms ease-out;
+    transition: max-height 300ms var(--ease-out-cubic);
     margin: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .accordion-panel {
+      transition: none;
+    }
   }
 
   .accordion-panel-inner {
@@ -138,4 +144,25 @@ const { items } = Astro.props;
       }
     });
   });
+
+  // reveal on-scroll: le righe entrano in sequenza
+  const revealEls = document.querySelectorAll<HTMLElement>('.accordion [data-reveal]');
+  if (revealEls.length) {
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add('is-in');
+              obs.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.1 }
+      );
+      revealEls.forEach((el) => obs.observe(el));
+    } else {
+      revealEls.forEach((el) => el.classList.add('is-in'));
+    }
+  }
 </script>

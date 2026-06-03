@@ -129,10 +129,10 @@ const aside = clean(t.professionals.aside);
   /* reveal: i ruoli entrano in stagger */
   .pros-role {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(var(--reveal-distance));
     transition:
-      opacity 500ms var(--ease-out-cubic),
-      transform 500ms var(--ease-out-cubic);
+      opacity var(--reveal-duration) var(--ease-out-cubic),
+      transform var(--reveal-duration) var(--ease-out-cubic);
     transition-delay: var(--role-delay, 0ms);
   }
   .pros-roles.is-visible .pros-role {

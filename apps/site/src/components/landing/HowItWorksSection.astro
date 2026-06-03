@@ -190,10 +190,10 @@ const badge = 'Pro & Pro Unlimited';
   /* reveal calmo: le tappe entrano in sequenza, L->R */
   .hiw-step {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(var(--reveal-distance));
     transition:
-      opacity 600ms var(--ease-out-cubic),
-      transform 600ms var(--ease-out-cubic);
+      opacity var(--reveal-duration) var(--ease-out-cubic),
+      transform var(--reveal-duration) var(--ease-out-cubic);
   }
   .hiw-step:nth-child(2) { transition-delay: 90ms; }
   .hiw-step:nth-child(3) { transition-delay: 180ms; }

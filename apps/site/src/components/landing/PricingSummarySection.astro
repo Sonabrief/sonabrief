@@ -43,7 +43,7 @@ const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
 <section class="pricing-summary">
   <div class="pricing-summary-inner">
     <!-- header asimmetrico: titolo serif a sinistra, toggle a destra -->
-    <header class="pricing-head">
+    <header class="pricing-head reveal" data-reveal style="--i: 0">
       <h2 class="pricing-summary-title">{t.pricing.title}</h2>
 
       <div class="pricing-toggle" role="tablist" aria-label="Billing period">
@@ -67,9 +67,11 @@ const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
     </header>
 
     <div class="pricing-grid">
-      {tiers.map((tier) => (
+      {tiers.map((tier, i) => (
         <div
-          class="pricing-slot"
+          class="pricing-slot reveal"
+          data-reveal
+          style={`--i: ${i + 1}`}
           data-monthly-price={tier.price}
           data-annual-price={tier.priceAnnual ?? tier.price}
         >
@@ -248,4 +250,25 @@ const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
       });
     });
   });
+
+  // reveal on-scroll: header + card in stagger
+  const revealEls = document.querySelectorAll<HTMLElement>('.pricing-summary [data-reveal]');
+  if (revealEls.length) {
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add('is-in');
+              obs.unobserve(e.target);
+            }
+          });
+        },
+        { threshold: 0.15 }
+      );
+      revealEls.forEach((el) => obs.observe(el));
+    } else {
+      revealEls.forEach((el) => el.classList.add('is-in'));
+    }
+  }
 </script>

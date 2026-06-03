@@ -93,10 +93,10 @@ const punch = lines[lines.length - 1] ?? '';
   /* reveal: le righe entrano in crescendo, una dopo l'altra */
   .problem-line {
     opacity: 0;
-    transform: translateY(16px);
+    transform: translateY(var(--reveal-distance));
     transition:
-      opacity 600ms var(--ease-out-cubic),
-      transform 600ms var(--ease-out-cubic);
+      opacity var(--reveal-duration) var(--ease-out-cubic),
+      transform var(--reveal-duration) var(--ease-out-cubic);
     transition-delay: var(--line-delay, 0ms);
   }
   .problem-inner.is-visible .problem-line {

@@ -54,6 +54,12 @@
   /* Motion — easing calmo condiviso */
   --ease-out-cubic: cubic-bezier(0.32, 0.72, 0, 1);
 
+  /* Motion — scala reveal condivisa ("si sente appena", Linear-tier).
+     fade + risalita minima, stagger breve. Niente blur/scale/parallax. */
+  --reveal-duration: 600ms;
+  --reveal-stagger: 70ms;
+  --reveal-distance: 16px;
+
   /* Layout — UN sistema di container condiviso.
      Tutte le sezioni si allineano allo stesso bordo: niente più salti.
      --container       = larghezza standard del contenuto (sezioni "wide")
@@ -111,19 +117,33 @@ body {
   font-weight: 400;
 }
 
+/* Reveal condiviso. Una sezione marca i figli con .reveal (o .fade-up, alias
+   legacy) + style="--i:N" per lo stagger, e aggiunge .is-in quando entrano in
+   viewport (via IntersectionObserver). Stagger = --i * --reveal-stagger.
+   fade + risalita minima, una sola scala per tutto il sito. */
+.reveal,
 .fade-up {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 400ms ease-out, transform 400ms ease-out;
+  transform: translateY(var(--reveal-distance));
+  transition:
+    opacity var(--reveal-duration) var(--ease-out-cubic),
+    transform var(--reveal-duration) var(--ease-out-cubic);
+  transition-delay: calc(var(--i, 0) * var(--reveal-stagger));
 }
-
+.reveal.is-in,
+.reveal.visible,
+.fade-up.is-in,
 .fade-up.visible {
   opacity: 1;
   transform: translateY(0);
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal.is-in,
+  .reveal.visible,
   .fade-up,
+  .fade-up.is-in,
   .fade-up.visible {
     opacity: 1;
     transform: none;
