@@ -12,6 +12,7 @@ interface PlanCard {
   cycle: string
   description: string
   features: string[]
+  intro?: string
   tier: Tier | null
   highlight?: boolean
 }
@@ -71,15 +72,15 @@ export default function PricingPage() {
       price: billing === 'monthly' ? '€19' : '€189',
       cycle: billing === 'monthly' ? t('pricing.per_month') : t('pricing.per_year'),
       description: t('pricing.unlimited_desc'),
+      intro: t('pricing.unlimited_intro'),
       features: [
+        t('pricing.unlimited_feature_archive'),
         t('pricing.unlimited_feature_1'),
         t('pricing.unlimited_feature_cloud'),
-        t('pricing.unlimited_feature_mistral'),
-        t('pricing.unlimited_feature_2'),
         t('pricing.unlimited_feature_3'),
         t('pricing.unlimited_feature_4'),
+        t('pricing.unlimited_feature_2'),
         t('pricing.unlimited_feature_5'),
-        t('pricing.unlimited_feature_6'),
       ],
       tier: billing === 'monthly' ? 'unlimited_monthly' : 'unlimited_annual',
     },
@@ -198,6 +199,9 @@ export default function PricingPage() {
                 <span className="text-sm text-gray-500">{plan.cycle}</span>
               </div>
 
+              {plan.intro && (
+                <p className="mt-6 -mb-2 text-sm font-semibold text-gray-900">{plan.intro}</p>
+              )}
               <ul className="mt-6 flex flex-col gap-2">
                 {plan.features.map(f => (
                   <li key={f} className="flex items-start gap-2 text-sm text-gray-700">
