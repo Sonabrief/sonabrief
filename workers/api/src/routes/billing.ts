@@ -1,5 +1,6 @@
 import type { Env } from '../lib/env'
 import { getUserFromSession } from '../lib/sessions'
+import { getUserTier } from '../lib/tier'
 
 interface BillingStatus {
   tier: string
@@ -32,7 +33,10 @@ export async function handleBillingStatus(req: Request, env: Env): Promise<Respo
     .bind(session.userId)
     .first<{ tier: string; billing_cycle: string | null; status: string; renews_at: number | null }>()
 
-  const tier = license?.tier ?? 'free'
+  // Tier effettivo: un comp attivo (assegnato dal founder) prevale sul tier
+  // reale. Così l'app sblocca le feature del comp senza che esista alcuna
+  // licenza Polar. billing_cycle/status/renews_at restano quelli reali.
+  const tier = await getUserTier(session.userId, env)
   const billing_cycle = license?.billing_cycle ?? null
   const status = license?.status ?? 'active'
   const renews_at = license?.renews_at ?? null

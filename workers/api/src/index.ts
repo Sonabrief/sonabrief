@@ -19,6 +19,9 @@ import {
   handleAdminWhitelistList,
   handleAdminWhitelistAdd,
   handleAdminWhitelistRemove,
+  handleAdminCompList,
+  handleAdminCompAdd,
+  handleAdminCompRemove,
 } from "./routes/admin";
 import { handleGetPreferences, handleSavePreferences, handlePatchPreferences } from "./routes/preferences";
 import { handleDeleteAccount } from "./routes/account";
@@ -106,6 +109,12 @@ export default {
       response = await handleAdminWhitelistAdd(request, env);
     } else if (url.pathname === "/admin/whitelist" && request.method === "DELETE") {
       response = await handleAdminWhitelistRemove(request, env);
+    } else if (url.pathname === "/admin/comp" && request.method === "GET") {
+      response = await handleAdminCompList(request, env);
+    } else if (url.pathname === "/admin/comp" && request.method === "POST") {
+      response = await handleAdminCompAdd(request, env);
+    } else if (url.pathname === "/admin/comp" && request.method === "DELETE") {
+      response = await handleAdminCompRemove(request, env);
     } else if (url.pathname === '/v1/preferences' && request.method === 'GET') {
       response = await handleGetPreferences(request, env)
     } else if (url.pathname === '/v1/preferences' && request.method === 'POST') {

@@ -460,3 +460,127 @@ export async function handleAdminWhitelistRemove(req: Request, env: Env): Promis
     headers: { ...cors, "Content-Type": "application/json" },
   })
 }
+
+// ── Comp utenze ──────────────────────────────────────────────────────────────
+// Assegnazione manuale di un tier (pro|unlimited) gratis, separata da Polar.
+// Vive in comp_grants, non tocca licenses/polar_orders, non entra in nessuna
+// metrica di revenue. Vedi migration 0033 e lib/tier.ts per la risoluzione.
+
+const COMP_TIERS = ['pro', 'unlimited'] as const
+
+export async function handleAdminCompList(req: Request, env: Env): Promise<Response> {
+  const auth = await requireFounder(req, env)
+  if (!auth.ok) return auth.response
+  const cors = corsHeaders(req, env)
+
+  // Solo i comp attivi (non scaduti). expires_at > now.
+  const rows = await env.DB.prepare(`
+    SELECT c.user_id, c.tier, c.expires_at, c.granted_by, c.notes, c.created_at, u.email
+    FROM comp_grants c
+    LEFT JOIN users u ON u.id = c.user_id
+    WHERE c.expires_at > ?
+    ORDER BY c.created_at DESC
+    LIMIT 200
+  `).bind(Date.now()).all()
+
+  return new Response(JSON.stringify({ ok: true, entries: rows.results }), {
+    headers: { ...cors, "Content-Type": "application/json" },
+  })
+}
+
+export async function handleAdminCompAdd(req: Request, env: Env): Promise<Response> {
+  const auth = await requireFounder(req, env)
+  if (!auth.ok) return auth.response
+  const cors = corsHeaders(req, env)
+
+  const body = await req.json().catch(() => null) as
+    | { email?: string; tier?: string; expires_at?: number; notes?: string }
+    | null
+  const email = body?.email?.trim().toLowerCase()
+  const tier = body?.tier?.trim()
+  const expiresAt = body?.expires_at
+
+  if (!email) {
+    return new Response(JSON.stringify({ ok: false, error: "email_required" }), {
+      status: 400,
+      headers: { ...cors, "Content-Type": "application/json" },
+    })
+  }
+  if (!tier || !COMP_TIERS.includes(tier as (typeof COMP_TIERS)[number])) {
+    return new Response(JSON.stringify({ ok: false, error: "invalid_tier" }), {
+      status: 400,
+      headers: { ...cors, "Content-Type": "application/json" },
+    })
+  }
+  if (typeof expiresAt !== "number" || !Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
+    return new Response(JSON.stringify({ ok: false, error: "invalid_expiry" }), {
+      status: 400,
+      headers: { ...cors, "Content-Type": "application/json" },
+    })
+  }
+
+  const user = await env.DB.prepare('SELECT id FROM users WHERE email = ?').bind(email).first<{ id: string }>()
+  if (!user) {
+    return new Response(JSON.stringify({ ok: false, error: "user_not_found" }), {
+      status: 404,
+      headers: { ...cors, "Content-Type": "application/json" },
+    })
+  }
+
+  const now = Date.now()
+  const notes = body?.notes?.trim() || null
+
+  // Un comp attivo per utente: UPSERT su user_id. Riassegnare aggiorna tier/scadenza.
+  await env.DB.prepare(`
+    INSERT INTO comp_grants (user_id, tier, expires_at, granted_by, notes, created_at)
+    VALUES (?, ?, ?, ?, ?, ?)
+    ON CONFLICT(user_id) DO UPDATE SET
+      tier = excluded.tier,
+      expires_at = excluded.expires_at,
+      granted_by = excluded.granted_by,
+      notes = excluded.notes,
+      created_at = excluded.created_at
+  `).bind(user.id, tier, expiresAt, auth.userId, notes, now).run()
+
+  await env.DB.prepare(`
+    INSERT INTO comp_grants_log (user_id, email, action, tier, expires_at, actor, notes, created_at)
+    VALUES (?, ?, 'grant', ?, ?, ?, ?, ?)
+  `).bind(user.id, email, tier, expiresAt, auth.userId, notes, now).run()
+
+  return new Response(JSON.stringify({ ok: true, userId: user.id }), {
+    headers: { ...cors, "Content-Type": "application/json" },
+  })
+}
+
+export async function handleAdminCompRemove(req: Request, env: Env): Promise<Response> {
+  const auth = await requireFounder(req, env)
+  if (!auth.ok) return auth.response
+  const cors = corsHeaders(req, env)
+
+  const url = new URL(req.url)
+  const userId = url.searchParams.get("user_id")
+  if (!userId) {
+    return new Response(JSON.stringify({ ok: false, error: "user_id_required" }), {
+      status: 400,
+      headers: { ...cors, "Content-Type": "application/json" },
+    })
+  }
+
+  const existing = await env.DB
+    .prepare(`SELECT c.tier, c.expires_at, u.email FROM comp_grants c LEFT JOIN users u ON u.id = c.user_id WHERE c.user_id = ?`)
+    .bind(userId)
+    .first<{ tier: string; expires_at: number; email: string | null }>()
+
+  await env.DB.prepare('DELETE FROM comp_grants WHERE user_id = ?').bind(userId).run()
+
+  if (existing) {
+    await env.DB.prepare(`
+      INSERT INTO comp_grants_log (user_id, email, action, tier, expires_at, actor, notes, created_at)
+      VALUES (?, ?, 'revoke', ?, ?, ?, NULL, ?)
+    `).bind(userId, existing.email, existing.tier, existing.expires_at, auth.userId, Date.now()).run()
+  }
+
+  return new Response(JSON.stringify({ ok: true }), {
+    headers: { ...cors, "Content-Type": "application/json" },
+  })
+}

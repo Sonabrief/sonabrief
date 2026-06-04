@@ -10,6 +10,7 @@ import {
 import { AlertTriangle } from 'lucide-react'
 import { API_URL } from '../config'
 import { fetchWhitelist, addToWhitelist, removeFromWhitelist, type WhitelistEntry } from '../lib/admin'
+import { fetchComps, addComp, removeComp, type CompEntry, type CompTier } from '../lib/admin'
 import i18n from '../i18n'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -463,6 +464,15 @@ export default function AdminPage() {
   const [newNotes, setNewNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
+  const [compEntries, setCompEntries] = useState<CompEntry[]>([])
+  const [compLoading, setCompLoading] = useState(true)
+  const [compError, setCompError] = useState<string | null>(null)
+  const [compEmail, setCompEmail] = useState('')
+  const [compTier, setCompTier] = useState<CompTier>('pro')
+  const [compExpiry, setCompExpiry] = useState('')
+  const [compNotes, setCompNotes] = useState('')
+  const [compSubmitting, setCompSubmitting] = useState(false)
+
   async function loadWhitelist() {
     setWlLoading(true)
     setWlError(null)
@@ -504,6 +514,55 @@ export default function AdminPage() {
     }
   }
 
+  async function loadComps() {
+    setCompLoading(true)
+    setCompError(null)
+    try {
+      const entries = await fetchComps()
+      setCompEntries(entries)
+    } catch (e) {
+      setCompError(e instanceof Error ? e.message : 'fetch_failed')
+    } finally {
+      setCompLoading(false)
+    }
+  }
+
+  async function handleCompAdd(e: React.FormEvent) {
+    e.preventDefault()
+    if (!compEmail.trim() || !compExpiry) return
+    // datetime-local è ora locale: Date(...) la interpreta come locale, .getTime() dà ms UTC.
+    const expiresAt = new Date(compExpiry).getTime()
+    if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
+      setCompError('invalid_expiry')
+      return
+    }
+    setCompSubmitting(true)
+    setCompError(null)
+    try {
+      await addComp(compEmail.trim(), compTier, expiresAt, compNotes.trim() || null)
+      setCompEmail('')
+      setCompExpiry('')
+      setCompNotes('')
+      setCompTier('pro')
+      await loadComps()
+    } catch (err) {
+      setCompError(err instanceof Error ? err.message : 'add_failed')
+    } finally {
+      setCompSubmitting(false)
+    }
+  }
+
+  async function handleCompRemove(userId: string) {
+    if (!window.confirm('Revocare il comp per questo utente?')) return
+    setCompError(null)
+    try {
+      await removeComp(userId)
+      await loadComps()
+    } catch (err) {
+      setCompError(err instanceof Error ? err.message : 'remove_failed')
+    }
+  }
+
   async function loadStats() {
     setLoading(true)
     setError(null)
@@ -526,6 +585,7 @@ export default function AdminPage() {
 
   useEffect(() => { loadStats() }, [])
   useEffect(() => { loadWhitelist() }, [])
+  useEffect(() => { loadComps() }, [])
 
   if (loading && !stats) {
     return (
@@ -820,6 +880,82 @@ export default function AdminPage() {
                   className="rounded-lg bg-primary text-primary-foreground px-4 py-2 text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                   {submitting ? 'Aggiungo...' : 'Aggiungi alla whitelist'}
+                </button>
+              </form>
+            </>
+          )}
+        </Section>
+
+        {/* Comp utenze — tier manuale, gratis, separato da Polar */}
+        <Section title="Comp utenze">
+          {compLoading ? (
+            <p className="text-sm text-muted-foreground">Caricamento...</p>
+          ) : (
+            <>
+              {compError && (
+                <div role="alert" className="mb-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  {compError}
+                </div>
+              )}
+
+              {compEntries.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nessun comp attivo</p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {compEntries.map(c => (
+                    <div key={c.user_id} className="flex items-center justify-between text-sm gap-2 py-1">
+                      <span className="text-foreground flex-1 truncate">{c.email ?? c.user_id}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${c.tier === 'unlimited' ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'}`}>
+                        {c.tier === 'unlimited' ? 'Unlimited' : 'Pro'}
+                      </span>
+                      <span className="text-muted-foreground text-xs w-36 text-right">scade {formatDate(c.expires_at)}</span>
+                      <span className="text-muted-foreground text-xs flex-1 truncate">{c.notes ?? '—'}</span>
+                      <button
+                        onClick={() => handleCompRemove(c.user_id)}
+                        className="text-xs px-2 py-1 rounded border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
+                      >
+                        Revoca
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <form onSubmit={handleCompAdd} className="mt-6 flex flex-col gap-2 sm:flex-row sm:items-center">
+                <input
+                  type="email"
+                  value={compEmail}
+                  onChange={ev => setCompEmail(ev.target.value)}
+                  placeholder="email@esempio.it"
+                  className="flex-1 rounded-lg border border-border px-3 py-2 text-sm bg-background focus:outline-none focus:border-primary"
+                />
+                <select
+                  value={compTier}
+                  onChange={ev => setCompTier(ev.target.value as CompTier)}
+                  className="rounded-lg border border-border px-3 py-2 text-sm bg-background focus:outline-none focus:border-primary"
+                >
+                  <option value="pro">Pro</option>
+                  <option value="unlimited">Unlimited</option>
+                </select>
+                <input
+                  type="datetime-local"
+                  value={compExpiry}
+                  onChange={ev => setCompExpiry(ev.target.value)}
+                  className="rounded-lg border border-border px-3 py-2 text-sm bg-background focus:outline-none focus:border-primary"
+                />
+                <input
+                  type="text"
+                  value={compNotes}
+                  onChange={ev => setCompNotes(ev.target.value)}
+                  placeholder="Note (opzionale)"
+                  className="flex-1 rounded-lg border border-border px-3 py-2 text-sm bg-background focus:outline-none focus:border-primary"
+                />
+                <button
+                  type="submit"
+                  disabled={!compEmail || !compExpiry || compSubmitting}
+                  className="rounded-lg bg-primary text-primary-foreground px-4 py-2 text-sm hover:opacity-90 transition-opacity disabled:opacity-50"
+                >
+                  {compSubmitting ? 'Assegno...' : 'Assegna comp'}
                 </button>
               </form>
             </>

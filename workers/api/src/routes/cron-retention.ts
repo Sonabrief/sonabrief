@@ -13,6 +13,26 @@ export async function handleRetentionCleanup(env: Env): Promise<void> {
     .bind(now)
     .run();
 
+  // Pulisci comp scaduti: l'utente è già tornato al tier reale via check on-read
+  // (getUserTier ignora i comp con expires_at <= now). Qui rimuoviamo le righe
+  // morte e lasciamo una traccia 'expire' nel log di audit. Nessun impatto su
+  // licenses/Polar/revenue.
+  const expiredComps = await env.DB.prepare(`
+    SELECT c.user_id, c.tier, c.expires_at, u.email
+    FROM comp_grants c
+    LEFT JOIN users u ON u.id = c.user_id
+    WHERE c.expires_at <= ?
+  `).bind(now).all<{ user_id: string; tier: string; expires_at: number; email: string | null }>();
+
+  for (const c of expiredComps.results) {
+    await env.DB.prepare(`
+      INSERT INTO comp_grants_log (user_id, email, action, tier, expires_at, actor, notes, created_at)
+      VALUES (?, ?, 'expire', ?, ?, NULL, NULL, ?)
+    `).bind(c.user_id, c.email, c.tier, c.expires_at, now).run();
+  }
+
+  await env.DB.prepare(`DELETE FROM comp_grants WHERE expires_at <= ?`).bind(now).run();
+
   for (const [tier, days] of Object.entries(RETENTION_DAYS)) {
     const cutoff = now - days * 24 * 60 * 60 * 1000;
 

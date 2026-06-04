@@ -35,3 +35,47 @@ export async function removeFromWhitelist(userId: string): Promise<void> {
   const data = await res.json() as { ok: boolean; error?: string }
   if (!data.ok) throw new Error(data.error ?? 'remove_failed')
 }
+
+export type CompTier = 'pro' | 'unlimited'
+
+export interface CompEntry {
+  user_id: string
+  email: string | null
+  tier: CompTier
+  expires_at: number
+  granted_by: string | null
+  notes: string | null
+  created_at: number
+}
+
+export async function fetchComps(): Promise<CompEntry[]> {
+  const res = await fetch(`${API_URL}/admin/comp`, { credentials: 'include' })
+  const data = await res.json() as { ok: boolean; entries?: CompEntry[]; error?: string }
+  if (!data.ok) throw new Error(data.error ?? 'fetch_failed')
+  return data.entries ?? []
+}
+
+export async function addComp(
+  email: string,
+  tier: CompTier,
+  expiresAt: number,
+  notes: string | null,
+): Promise<void> {
+  const res = await fetch(`${API_URL}/admin/comp`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, tier, expires_at: expiresAt, notes }),
+  })
+  const data = await res.json() as { ok: boolean; error?: string }
+  if (!data.ok) throw new Error(data.error ?? 'add_failed')
+}
+
+export async function removeComp(userId: string): Promise<void> {
+  const res = await fetch(`${API_URL}/admin/comp?user_id=${encodeURIComponent(userId)}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  })
+  const data = await res.json() as { ok: boolean; error?: string }
+  if (!data.ok) throw new Error(data.error ?? 'remove_failed')
+}
