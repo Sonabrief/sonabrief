@@ -28,30 +28,38 @@ const TABLES_WITH_USER_ID = [
   // antiabuse / whitelist
   'signup_signals',
   'user_whitelist',
+  // comp manuali (FK ON DELETE CASCADE, ma esplicito come le altre)
+  'comp_grants',
 ]
 
-export async function handleDeleteAccount(req: Request, env: Env): Promise<Response> {
-  const session = await getUserFromSession(req, env)
-  if (!session) {
-    return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401 })
-  }
-
-  const { userId } = session
-
+/**
+ * Cancellazione GDPR Art. 17: rimuove TUTTI i dati di un utente (D1 + blob R2).
+ * Fonte di verità unica della cascade — usata sia dall'endpoint self-service
+ * (handleDeleteAccount) sia da operazioni amministrative. Nessun SQL ad hoc
+ * duplicato altrove.
+ *
+ * Atomica lato D1: tutte le DELETE in un unico batch (transazione). Se una
+ * fallisce, l'intero batch viene annullato — niente cancellazione parziale.
+ * La riga `users` (fonte di verità) sparisce solo se TUTTI i dati collegati
+ * sono stati rimossi.
+ *
+ * polar_orders ha FK ON DELETE SET NULL (non CASCADE): cancellando users la
+ * riga ordine resterebbe orfana con user_id=NULL. La rimuoviamo esplicitamente
+ * così l'utente sparisce anche dalle viste revenue.
+ */
+export async function deleteUserData(userId: string, env: Env): Promise<void> {
   // Leggi la lista dei blob R2 PRIMA di cancellare i metadati sync_blobs.
   const { results: blobs } = await env.DB
     .prepare('SELECT meeting_id FROM sync_blobs WHERE user_id = ?')
     .bind(userId)
     .all<{ meeting_id: string }>()
 
-  // Cancellazione GDPR Art. 17 atomica: tutte le DELETE in un'unica transazione
-  // D1 (batch). Se una fallisce, l'intero batch viene annullato — niente
-  // cancellazione parziale. La fonte di verità (riga users) sparisce solo se
-  // TUTTI i dati collegati sono stati rimossi.
   const statements = [
     ...TABLES_WITH_USER_ID.map(table =>
       env.DB.prepare(`DELETE FROM ${table} WHERE user_id = ?`).bind(userId)
     ),
+    // Ordini Polar: FK SET NULL, va cancellato esplicitamente (prima di users).
+    env.DB.prepare('DELETE FROM polar_orders WHERE user_id = ?').bind(userId),
     // Template custom (is_system=1 = curati da noi, da preservare).
     // synthesis_log.template_id ha ON DELETE SET NULL, già gestito nel batch.
     env.DB.prepare('DELETE FROM templates WHERE user_id = ? AND is_system = 0').bind(userId),
@@ -62,8 +70,7 @@ export async function handleDeleteAccount(req: Request, env: Env): Promise<Respo
 
   // I blob R2 NON sono nella transazione D1. Cancellarli DOPO il commit, in
   // best-effort: l'account è già rimosso da D1 (fonte di verità), quindi un
-  // errore R2 lascia solo blob orfani — lo logghiamo ma NON lo propaghiamo,
-  // così la cancellazione GDPR risponde comunque 204.
+  // errore R2 lascia solo blob orfani — lo logghiamo ma NON lo propaghiamo.
   try {
     await Promise.all(
       (blobs ?? []).map(b => env.BLOBS.delete(`${userId}/${b.meeting_id}.sbb`))
@@ -71,6 +78,15 @@ export async function handleDeleteAccount(req: Request, env: Env): Promise<Respo
   } catch (err) {
     console.error('[account] R2 blob cleanup failed after account deletion:', userId, err)
   }
+}
+
+export async function handleDeleteAccount(req: Request, env: Env): Promise<Response> {
+  const session = await getUserFromSession(req, env)
+  if (!session) {
+    return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401 })
+  }
+
+  await deleteUserData(session.userId, env)
 
   return new Response(null, { status: 204 })
 }
