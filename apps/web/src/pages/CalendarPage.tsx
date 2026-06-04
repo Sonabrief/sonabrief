@@ -3,11 +3,12 @@ import { motion, AnimatePresence } from 'motion/react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
-import { Mic, RefreshCw } from 'lucide-react'
+import { Mic, RefreshCw, Link as LinkIcon } from 'lucide-react'
 import { SiGooglecalendar } from 'react-icons/si'
 import { BiLogoMicrosoft } from 'react-icons/bi'
 import { API_URL } from '../config'
 import { AppNav } from '../components/AppNav'
+import { parseIcs, type IcsEvent } from '../lib/ics'
 import i18n from '../i18n'
 
 interface CalendarEvent {
@@ -23,6 +24,65 @@ interface CalendarState {
   connected: boolean
   events: CalendarEvent[]
   error?: string
+}
+
+type Provider = 'google' | 'microsoft' | 'ics'
+
+// Converte una data iCalendar (RFC 5545) in ISO string per riusare la stessa
+// pipeline di formatting/sort/grouping degli eventi OAuth.
+//   - "20260604T140000Z"  → UTC
+//   - "20260604T140000"   → ora locale (no Z)
+//   - "20260604"          → all-day, mezzanotte locale
+function icsDateToIso(value: string): string | null {
+  if (!value) return null
+  const m = value.match(/^(\d{4})(\d{2})(\d{2})(?:T(\d{2})(\d{2})(\d{2})(Z)?)?$/)
+  if (!m) {
+    const d = new Date(value)
+    return isNaN(d.getTime()) ? null : d.toISOString()
+  }
+  const [, y, mo, da, hh, mi, ss, z] = m
+  if (!hh) {
+    return new Date(Number(y), Number(mo) - 1, Number(da)).toISOString()
+  }
+  if (z) {
+    return new Date(Date.UTC(Number(y), Number(mo) - 1, Number(da), Number(hh), Number(mi), Number(ss))).toISOString()
+  }
+  return new Date(Number(y), Number(mo) - 1, Number(da), Number(hh), Number(mi), Number(ss)).toISOString()
+}
+
+// Mappa un IcsEvent nella forma CalendarEvent usata dalla lista. Scarta eventi
+// senza data di inizio valida. Gli attendees ICS (CN + mailto) vengono mappati
+// nella stessa shape degli eventi OAuth.
+// Filtro finestra: tieni solo eventi che intersecano [ora, ora+7g], cioè
+// dtend (o dtstart se manca dtend) >= ora E dtstart <= ora+7g.
+function icsToCalendarEvents(parsed: IcsEvent[]): CalendarEvent[] {
+  const now = Date.now()
+  const windowEnd = now + 7 * 24 * 60 * 60 * 1000
+  const out: CalendarEvent[] = []
+  for (const e of parsed) {
+    const start = icsDateToIso(e.dtstart)
+    if (!start) continue
+    const end = icsDateToIso(e.dtend) ?? start
+    const startMs = new Date(start).getTime()
+    const endMs = new Date(end).getTime()
+    if (endMs < now || startMs > windowEnd) continue
+    out.push({
+      id: e.uid || `${start}-${e.summary}`,
+      title: e.summary || '(senza titolo)',
+      start,
+      end,
+      attendees: e.attendees.map(a => ({ email: a.email, name: a.name })),
+      meetingUrl: extractMeetingUrlFromIcs(e),
+    })
+  }
+  return out
+}
+
+// Cerca un link riunione (Teams/Meet) in location o description del VEVENT.
+function extractMeetingUrlFromIcs(e: IcsEvent): string | null {
+  const haystack = `${e.location} ${e.description}`
+  const match = haystack.match(/https:\/\/(?:teams\.microsoft\.com|meet\.google\.com)\/[^\s"<>]+/)
+  return match?.[0] ?? null
 }
 
 function formatEventDate(iso: string): string {
@@ -41,7 +101,7 @@ function formatDuration(start: string, end: string): string {
   return m > 0 ? `${h}h ${m}min` : `${h}h`
 }
 
-function groupByDay(events: (CalendarEvent & { provider: 'google' | 'microsoft' })[], t: TFunction) {
+function groupByDay(events: (CalendarEvent & { provider: Provider })[], t: TFunction) {
   const groups: { label: string; date: string; events: typeof events }[] = []
   for (const event of events) {
     const day = new Date(event.start).toDateString()
@@ -149,7 +209,7 @@ function AttendeesList({ attendees }: { attendees: { email: string; name?: strin
 function EventCard({
   event, provider, index, t,
 }: {
-  event: CalendarEvent; provider: 'google' | 'microsoft'; index: number; t: TFunction
+  event: CalendarEvent; provider: Provider; index: number; t: TFunction
 }) {
   const navigate = useNavigate()
 
@@ -175,7 +235,9 @@ function EventCard({
           <div className="flex items-center gap-1.5 mb-0.5">
             {provider === 'google'
               ? <SiGooglecalendar size={12} color="#1A73E8" />
-              : <BiLogoMicrosoft size={12} color="#0078D4" />}
+              : provider === 'microsoft'
+                ? <BiLogoMicrosoft size={12} color="#0078D4" />
+                : <LinkIcon size={12} className="text-muted-foreground" />}
             <p className="text-sm font-medium text-foreground">{event.title}</p>
           </div>
           <p className="mt-0.5 text-xs text-muted-foreground">
@@ -205,6 +267,44 @@ export default function CalendarPage() {
   const [microsoft, setMicrosoft] = useState<CalendarState | null>(null)
   const [loading, setLoading] = useState(true)
   const [connecting, setConnecting] = useState<'google' | 'microsoft' | null>(null)
+
+  // Import ICS via URL. Gli eventi vivono solo in state (come google/microsoft);
+  // l'URL NON viene salvato da nessuna parte (storage cifrato in un passo futuro).
+  const [icsUrl, setIcsUrl] = useState('')
+  const [icsEvents, setIcsEvents] = useState<CalendarEvent[]>([])
+  const [icsImporting, setIcsImporting] = useState(false)
+  const [icsStatus, setIcsStatus] = useState<{ kind: 'success' | 'error'; message: string } | null>(null)
+
+  async function importIcs() {
+    const url = icsUrl.trim()
+    if (!url || icsImporting) return
+    setIcsImporting(true)
+    setIcsStatus(null)
+    try {
+      const res = await fetch(`${API_URL}/v1/calendar/ics-proxy`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      })
+      if (!res.ok) {
+        // 413 → feed troppo grande: messaggio specifico. Altri errori → generico.
+        if (res.status === 413) {
+          setIcsStatus({ kind: 'error', message: t('calendar.ics_too_large') })
+          return
+        }
+        throw new Error('import failed')
+      }
+      const text = await res.text()
+      const events = icsToCalendarEvents(parseIcs(text))
+      setIcsEvents(events)
+      setIcsStatus({ kind: 'success', message: t('calendar.ics_imported', { count: events.length }) })
+    } catch {
+      setIcsStatus({ kind: 'error', message: t('calendar.ics_error') })
+    } finally {
+      setIcsImporting(false)
+    }
+  }
 
   async function loadCalendars() {
     setLoading(true)
@@ -248,9 +348,10 @@ export default function CalendarPage() {
   const allEvents = [
     ...(google?.events ?? []).map(e => ({ ...e, provider: 'google' as const })),
     ...(microsoft?.events ?? []).map(e => ({ ...e, provider: 'microsoft' as const })),
+    ...icsEvents.map(e => ({ ...e, provider: 'ics' as const })),
   ].sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
 
-  const isConnected = !!(google?.connected || microsoft?.connected)
+  const isConnected = !!(google?.connected || microsoft?.connected) || icsEvents.length > 0
 
   return (
     <div className="min-h-screen bg-background">
@@ -292,6 +393,47 @@ export default function CalendarPage() {
               <ProviderCard name="microsoft" label="Microsoft 365" connected={!!microsoft?.connected} connecting={connecting === 'microsoft'} onConnect={connectMicrosoft} onDisconnect={disconnectMicrosoft} t={t} />
             </motion.div>
           )}
+
+          {/* Import calendario via URL ICS — alternativa stateless al connect OAuth */}
+          <div className="rounded-lg border border-border bg-card p-5">
+            <div className="mb-3 flex items-center gap-2">
+              <LinkIcon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+              <span className="text-sm font-medium text-foreground">{t('calendar.ics_title')}</span>
+            </div>
+            <p className="mb-3 text-xs text-muted-foreground">{t('calendar.ics_hint')}</p>
+            <form
+              onSubmit={e => { e.preventDefault(); importIcs() }}
+              className="flex flex-col gap-2 sm:flex-row"
+            >
+              <input
+                type="url"
+                inputMode="url"
+                value={icsUrl}
+                onChange={e => setIcsUrl(e.target.value)}
+                placeholder={t('calendar.ics_placeholder')}
+                aria-label={t('calendar.ics_title')}
+                className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              />
+              <button
+                type="submit"
+                disabled={icsImporting || icsUrl.trim().length === 0}
+                className="flex items-center justify-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-50 motion-reduce:transition-none"
+              >
+                {icsImporting && <RefreshCw className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />}
+                {icsImporting ? t('calendar.ics_importing') : t('calendar.ics_import')}
+              </button>
+            </form>
+            {icsImporting ? (
+              <p className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground" aria-live="polite">
+                <RefreshCw className="h-3 w-3 animate-spin" aria-hidden="true" />
+                {t('calendar.ics_importing')}
+              </p>
+            ) : icsStatus && (
+              <p className={`mt-3 text-xs ${icsStatus.kind === 'success' ? 'text-primary' : 'text-destructive'}`} aria-live="polite">
+                {icsStatus.message}
+              </p>
+            )}
+          </div>
 
           <AnimatePresence mode="wait">
             {loading ? (

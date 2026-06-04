@@ -29,6 +29,7 @@ import { handleSendWeeklyReminder } from "./routes/email-reminder";
 import { handleTranscribeCloud, handleTranscribeCloudQuota, handleTranscribeCloudCheckout } from "./routes/transcribe-cloud";
 import { handleRetentionCleanup } from "./routes/cron-retention";
 import { handleGoogleStart, handleGoogleCallback, handleCalendarEvents, handleCalendarDisconnect, handleMicrosoftStart, handleMicrosoftCallback, handleMicrosoftCalendarEvents, handleMicrosoftDisconnect } from "./routes/calendar";
+import { handleIcsProxy } from "./routes/ics-proxy";
 import {
   handleWebAuthnRegisterOptions,
   handleWebAuthnRegisterVerify,
@@ -137,6 +138,8 @@ export default {
       response = await handleMicrosoftCalendarEvents(request, env)
     } else if (url.pathname === '/v1/calendar/microsoft/disconnect' && request.method === 'POST') {
       response = await handleMicrosoftDisconnect(request, env)
+    } else if (url.pathname === '/v1/calendar/ics-proxy' && request.method === 'POST') {
+      response = await handleIcsProxy(request, env)
     } else if (url.pathname === '/v1/email/reminder' && request.method === 'POST') {
       response = await handleSendWeeklyReminder(request, env)
     } else if (url.pathname === '/v1/account' && request.method === 'DELETE') {
