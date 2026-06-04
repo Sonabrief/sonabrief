@@ -7,9 +7,11 @@ interface Props {
   features: string[];
   cta: string;
   ctaHref: string;
-  // gerarchia a 3 livelli: none (Free/Enterprise), soft (Pro, amber tenue),
-  // strong (Pro Unlimited, teal pieno). Solo colori brand, niente badge urlati.
+  // gerarchia a 3 livelli: none (Free/Enterprise/Pro Unlimited), soft (amber
+  // tenue), strong (Pro, teal pieno = piano-ancora consigliato).
   emphasis?: 'none' | 'soft' | 'strong';
+  // badge "Più scelto" (solo su Pro). Vuoto = nessun badge.
+  badge?: string;
 }
 
 const {
@@ -21,6 +23,7 @@ const {
   cta,
   ctaHref,
   emphasis = 'none',
+  badge = '',
 } = Astro.props;
 ---
 
@@ -30,6 +33,7 @@ const {
     { 'pricing-card--soft': emphasis === 'soft', 'pricing-card--strong': emphasis === 'strong' },
   ]}
 >
+  {badge && <span class="pricing-card-badge">{badge}</span>}
   <p class="pricing-card-name">{name}</p>
 
   <div class="pricing-card-price-row">
@@ -59,6 +63,7 @@ const {
 
 <style>
   .pricing-card {
+    position: relative;
     border: 1px solid var(--color-mist);
     border-radius: 16px;
     padding: 30px 28px;
@@ -66,6 +71,24 @@ const {
     flex-direction: column;
     gap: 0;
     background-color: transparent;
+  }
+
+  /* badge "Più scelto": pill ambra centrata sul bordo alto, come app /pricing */
+  .pricing-card-badge {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: "Manrope", sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-cream);
+    background-color: var(--color-amber);
+    padding: 5px 14px;
+    border-radius: 9999px;
+    white-space: nowrap;
   }
 
   /* gerarchia a 3 livelli, solo colori brand, niente badge.
@@ -149,6 +172,9 @@ const {
   .pricing-card-cta {
     display: block;
     width: 100%;
+    /* ancorata in fondo: con .pricing-card-features { flex:1 } la CTA resta
+       in basso, allineata tra card di altezza uguale anche con liste diverse. */
+    margin-top: auto;
     text-align: center;
     font-family: "Manrope", sans-serif;
     font-size: 14px;

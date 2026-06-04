@@ -31,13 +31,19 @@ function ctaHref(name: string): string {
   return 'https://app.sonabrief.com/';
 }
 
-// gerarchia a 3 livelli, dedotta dal nome (robusta su 5 lingue):
-// Pro Unlimited = strong (teal pieno), Pro = soft (amber tenue), resto = none.
-function emphasisFor(name: string): 'none' | 'soft' | 'strong' {
+// Pro è il piano-ancora consigliato: evidenza forte (bordo scuro + CTA piena)
+// + badge "Più scelto". Pro Unlimited torna card normale (outline).
+// NB: "Pro Unlimited" matcha anche \bpro\b, quindi va escluso PRIMA.
+function emphasisFor(name: string): 'none' | 'strong' {
   const n = name.toLowerCase();
-  if (/unlimited|illimit|ilimit|unbegrenzt/.test(n)) return 'strong';
-  if (/\bpro\b/.test(n)) return 'soft';
+  if (/unlimited|illimit|ilimit|unbegrenzt/.test(n)) return 'none';
+  if (/\bpro\b/.test(n)) return 'strong';
   return 'none';
+}
+
+// badge "Più scelto" solo su Pro (stesso piano dell'evidenza forte).
+function isMostPopular(name: string): boolean {
+  return emphasisFor(name) === 'strong';
 }
 
 const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
@@ -49,23 +55,30 @@ const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
     <header class="pricing-head reveal" data-reveal style="--i: 0">
       <h2 class="pricing-summary-title">{t.pricing.title}</h2>
 
-      <div class="pricing-toggle" role="tablist" aria-label="Billing period">
-        <button
-          type="button"
-          class="pricing-toggle-btn is-active"
-          data-period="monthly"
-          aria-pressed="true"
-        >
-          {t.pricing.toggle?.monthly ?? 'Monthly'}
-        </button>
-        <button
-          type="button"
-          class="pricing-toggle-btn"
-          data-period="annual"
-          aria-pressed="false"
-        >
-          {t.pricing.toggle?.annual ?? 'Annual'}
-        </button>
+      <div class="pricing-toggle-row">
+        <div class="pricing-toggle" role="tablist" aria-label="Billing period">
+          <button
+            type="button"
+            class="pricing-toggle-btn is-active"
+            data-period="monthly"
+            aria-pressed="true"
+          >
+            {t.pricing.toggle?.monthly ?? 'Monthly'}
+          </button>
+          <button
+            type="button"
+            class="pricing-toggle-btn"
+            data-period="annual"
+            aria-pressed="false"
+          >
+            {t.pricing.toggle?.annual ?? 'Annual'}
+          </button>
+        </div>
+        {t.pricing.toggle?.annualNote && (
+          <span class="pricing-annual-note" id="pricing-annual-note" hidden>
+            {t.pricing.toggle.annualNote}
+          </span>
+        )}
       </div>
     </header>
 
@@ -87,6 +100,7 @@ const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
             cta={tier.cta}
             ctaHref={ctaHref(tier.name)}
             emphasis={emphasisFor(tier.name)}
+            badge={isMostPopular(tier.name) ? (t.pricing.mostPopular ?? '') : ''}
           />
         </div>
       ))}
@@ -138,6 +152,15 @@ const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
     text-wrap: balance;
   }
 
+  /* toggle + nota "2 mesi gratis" affiancati */
+  .pricing-toggle-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+
   .pricing-toggle {
     display: inline-flex;
     border: 1px solid var(--color-mist);
@@ -145,6 +168,23 @@ const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
     padding: 4px;
     gap: 4px;
     flex-shrink: 0;
+  }
+
+  /* nota annuale: ambra discreta, stesso register del badge /pricing */
+  .pricing-annual-note {
+    font-family: "Manrope", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-amber);
+    border: 1px solid color-mix(in srgb, var(--color-amber) 50%, transparent);
+    padding: 5px 12px;
+    border-radius: 9999px;
+    white-space: nowrap;
+  }
+  .pricing-annual-note[hidden] {
+    display: none;
   }
 
   .pricing-toggle-btn {
@@ -169,6 +209,17 @@ const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 20px;
+    /* equal-height: tutte le colonne alte come la più alta (default stretch),
+       reso esplicito. La card riempie lo slot -> 4 box di pari altezza. */
+    align-items: stretch;
+  }
+
+  /* lo slot (grid item) si estende all'altezza di riga; la card lo riempie */
+  .pricing-slot {
+    display: flex;
+  }
+  .pricing-slot > :global(.pricing-card) {
+    width: 100%;
   }
 
   .pricing-claims {
@@ -234,6 +285,8 @@ const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
   const toggles = document.querySelectorAll<HTMLButtonElement>('.pricing-toggle-btn');
   const slots = document.querySelectorAll<HTMLElement>('.pricing-slot');
 
+  const annualNote = document.getElementById('pricing-annual-note');
+
   toggles.forEach((btn) => {
     btn.addEventListener('click', () => {
       const period = btn.getAttribute('data-period');
@@ -251,6 +304,9 @@ const pricingPath = lang === 'en' ? '/pricing' : `/${lang}/pricing`;
           priceEl.textContent = period === 'annual' ? annual : monthly;
         }
       });
+
+      // "2 mesi gratis" visibile solo su Annuale
+      if (annualNote) annualNote.hidden = period !== 'annual';
     });
   });
 

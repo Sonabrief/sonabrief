@@ -59,7 +59,7 @@
   "howItWorks": {
     "steps": [
       {
-        "title": "Aufnehmen (lokal)",
+        "title": "Aufnehmen",
         "desc": "Ihr Mikrofon und Ihr Audio bleiben auf Ihrem Mac oder PC."
       },
       {
@@ -117,7 +117,7 @@
           "Mistral, in der EU gehostet, ZDR aktiv, DPA unterzeichnet",
           "Nur der transkribierte Text erreicht den Server, nie das Audio",
           "Ausgezeichnete Zusammenfassungsqualität, hohe Geschwindigkeit",
-          "Free: Mistral Small · Pro und Pro Unlimited: Mistral Large"
+          "Free: Mistral Small · Pro und Pro Unlimited: Mistral Large 3"
         ]
       },
       {
@@ -144,7 +144,7 @@
   },
   "memory": {
     "h2": "Ein Gedächtnis, das bleibt.",
-    "lead": "Die meisten Meeting-Tools löschen Ihren Verlauf nach 14 Tagen in den kostenlosen Plänen. Wir finden, Ihr berufliches Gedächtnis sollte Ihnen gehören, nicht deren Aufbewahrungsrichtlinie.",
+    "lead": "Andere Tools behandeln Ihren Verlauf als ihre Aufbewahrungsrichtlinie und löschen ihn früher oder später. Wir finden, Ihr berufliches Gedächtnis gehört Ihnen. Free ist ein ehrlicher Vorgeschmack darauf. Mit Pro behalten Sie es 12 Monate, mit Pro Unlimited für immer. Sie entscheiden, nicht eine Richtlinie.",
     "tiers": [
       {
         "label": "Free",
@@ -186,6 +186,7 @@
   },
   "pricing": {
     "title": "Was es kostet, und warum.",
+    "mostPopular": "Beliebteste Wahl",
     "toggle": {
       "monthly": "Monatlich",
       "annual": "Jährlich",
@@ -198,45 +199,51 @@
         "period": "für immer",
         "highlights": [
           "Unbegrenzte lokale Transkription",
-          "Cloud Standard: 3 Std./Monat",
-          "Whisper Large-v3-turbo",
-          "Archiv 7 Tage"
+          "Verarbeitete Meeting-Stunden: 3 Std./Monat",
+          "Archiv 7 Tage",
+          "Modus Nur lokal",
+          "Markdown-Export"
         ],
         "cta": "Kostenlos testen"
       },
       {
         "name": "Pro",
         "price": "€9",
-        "priceAnnual": "€90",
+        "priceAnnual": "€89",
         "period": "/Monat",
         "highlights": [
           "Alles aus Free",
-          "Cloud Standard: 30 Std./Monat",
+          "Verarbeitete Meeting-Stunden: 30 Std./Monat",
           "Cloud Schnell: 5 Std./Monat",
-          "Archiv 12 Monate · Kalender"
+          "Archiv 12 Monate",
+          "Dashboard, Briefings und Vorlagen"
         ],
-        "cta": "Pro wählen"
+        "cta": "Pro entdecken →"
       },
       {
         "name": "Pro Unlimited",
         "price": "€19",
-        "priceAnnual": "€190",
+        "priceAnnual": "€189",
         "period": "/Monat",
         "highlights": [
-          "Alles aus Pro",
-          "Cloud Schnell: 20 Std./Monat",
+          "Alles aus Pro, plus:",
           "Archiv für immer",
-          "Zusammenfassungen mit Mistral Large"
+          "Unbegrenzte verarbeitete Meeting-Stunden",
+          "Cloud Schnell: 20 Std./Monat",
+          "Unbegrenzte eigene Vorlagen",
+          "Verschlüsseltes Backup und Synced-Archiv 25 GB"
         ],
-        "cta": "Pro Unlimited wählen"
+        "cta": "Pro Unlimited entdecken →"
       },
       {
         "name": "Enterprise",
         "price": "Individuell",
         "highlights": [
           "Self-Hosting-Option",
-          "Cloud Schnell: unbegrenzt (faire Nutzung)",
-          "DPA- und Compliance-Support"
+          "Cloud Schnell unbegrenzt (faire Nutzung)",
+          "DPA- und Compliance-Support",
+          "Dedizierter Support",
+          "Synced-Archiv nach Maß"
         ],
         "cta": "Kontakt aufnehmen"
       }
@@ -325,9 +332,9 @@
               "feature": "Cloud-LLM-Modell",
               "values": [
                 "Mistral Small",
-                "Mistral Large",
-                "Mistral Large",
-                "Mistral Large"
+                "Mistral Large 3",
+                "Mistral Large 3",
+                "Mistral Large 3"
               ]
             },
             {

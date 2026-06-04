@@ -59,12 +59,12 @@
   "howItWorks": {
     "steps": [
       {
-        "title": "Record (local)",
+        "title": "Record",
         "desc": "Your microphone and audio stay on your Mac or PC."
       },
       {
         "title": "Transcribe",
-        "desc": "On your machine with Whisper, or through Cloud Fast, our fast EU cloud (Pro & Pro Unlimited). Either way, no audio file is ever kept."
+        "desc": "On your machine with Whisper, or through Fast Cloud, our fast EU cloud (Pro & Pro Unlimited). Either way, no audio file is ever kept."
       },
       {
         "title": "Summarize",
@@ -72,7 +72,7 @@
       }
     ],
     "qualityNote": "Transcription quality doesn't depend on what you pay. Whisper Large-v3-turbo (the same model researchers use) is available on every plan, including Free, and runs entirely on your machine. By default the app picks the right model for your hardware; you can force Large-v3-turbo in settings whenever you want.",
-    "cloudNote": "On Pro and Pro Unlimited, Cloud Fast transcribes in the EU cloud: 30 minutes of audio in 1–2 minutes, whatever your hardware."
+    "cloudNote": "On Pro and Pro Unlimited, Fast Cloud transcribes in the EU cloud: 30 minutes of audio in 1–2 minutes, whatever your hardware."
   },
   "outputSample": {
     "h2": "Leave the meeting with this, already done.",
@@ -117,7 +117,7 @@
           "Mistral, EU-hosted, ZDR active, DPA signed",
           "Only transcribed text reaches the server, never audio",
           "Excellent summary quality, great speed",
-          "Free: Mistral Small · Pro & Pro Unlimited: Mistral Large"
+          "Free: Mistral Small · Pro & Pro Unlimited: Mistral Large 3"
         ]
       },
       {
@@ -130,7 +130,7 @@
         ]
       },
       {
-        "name": "Cloud Fast",
+        "name": "Fast Cloud",
         "badge": "Pro & Pro Unlimited",
         "points": [
           "Full speed on any machine, even an older Windows laptop",
@@ -144,7 +144,7 @@
   },
   "memory": {
     "h2": "A memory built to last.",
-    "lead": "Most meeting tools delete your history after 14 days on free plans. We think your professional memory should belong to you, not their retention policy.",
+    "lead": "Other tools treat your history as their retention policy, and sooner or later they delete it. We think your professional memory is yours. Free is an honest taste of it. With Pro you keep it for 12 months, with Pro Unlimited forever. You decide, not a policy.",
     "tiers": [
       {
         "label": "Free",
@@ -186,6 +186,7 @@
   },
   "pricing": {
     "title": "What it costs, and why.",
+    "mostPopular": "Most popular",
     "toggle": {
       "monthly": "Monthly",
       "annual": "Annual",
@@ -197,46 +198,52 @@
         "price": "€0",
         "period": "forever",
         "highlights": [
-          "Unlimited Local transcription",
-          "Standard cloud: 3h/mo",
-          "Whisper Large-v3-turbo",
-          "7-day archive"
+          "Unlimited local transcription",
+          "Meeting hours processed: 3h/mo",
+          "7-day archive",
+          "Local Only mode",
+          "Markdown export"
         ],
         "cta": "Try free"
       },
       {
         "name": "Pro",
         "price": "€9",
-        "priceAnnual": "€90",
+        "priceAnnual": "€89",
         "period": "/mo",
         "highlights": [
           "Everything in Free",
-          "Standard cloud: 30h/mo",
-          "Cloud Fast: 5h/mo",
-          "12-month archive · Calendar"
+          "Meeting hours processed: 30h/mo",
+          "Fast Cloud: 5h/mo",
+          "12-month archive",
+          "Dashboard, briefings & templates"
         ],
-        "cta": "Choose Pro"
+        "cta": "Explore Pro →"
       },
       {
         "name": "Pro Unlimited",
         "price": "€19",
-        "priceAnnual": "€190",
+        "priceAnnual": "€189",
         "period": "/mo",
         "highlights": [
-          "Everything in Pro",
-          "Cloud Fast: 20h/mo",
+          "Everything in Pro, plus:",
           "Forever archive",
-          "Mistral Large summaries"
+          "Unlimited meeting hours processed",
+          "Fast Cloud: 20h/mo",
+          "Unlimited custom templates",
+          "Encrypted backup & 25GB Synced archive"
         ],
-        "cta": "Choose Pro Unlimited"
+        "cta": "Explore Pro Unlimited →"
       },
       {
         "name": "Enterprise",
         "price": "Custom",
         "highlights": [
           "Self-hosted option",
-          "Cloud Fast: unlimited (fair use)",
-          "DPA & compliance support"
+          "Fast Cloud unlimited (fair use)",
+          "DPA & compliance support",
+          "Dedicated support",
+          "Custom Synced archive"
         ],
         "cta": "Contact us"
       }
@@ -299,7 +306,7 @@
               ]
             },
             {
-              "feature": "Standard cloud (hours/mo)",
+              "feature": "Standard Cloud (hours/mo)",
               "values": [
                 "3h",
                 "30h",
@@ -308,7 +315,7 @@
               ]
             },
             {
-              "feature": "Cloud Fast (fast EU transcription)",
+              "feature": "Fast Cloud (fast EU transcription)",
               "values": [
                 "—",
                 "5h/mo",
@@ -325,9 +332,9 @@
               "feature": "Cloud LLM model",
               "values": [
                 "Mistral Small",
-                "Mistral Large",
-                "Mistral Large",
-                "Mistral Large"
+                "Mistral Large 3",
+                "Mistral Large 3",
+                "Mistral Large 3"
               ]
             },
             {
@@ -643,7 +650,7 @@
       },
       {
         "q": "What are the three transcription modes?",
-        "a": "Standard transcribes locally and summarizes in the EU cloud. Local Only keeps everything on your machine. Cloud Fast (Pro and Pro Unlimited) transcribes through Mistral's EU servers in Paris, fast on any hardware, with audio encrypted in transit and never saved. You choose per meeting."
+        "a": "Standard transcribes locally and summarizes in the EU cloud. Local Only keeps everything on your machine. Fast Cloud (Pro and Pro Unlimited) transcribes through Mistral's EU servers in Paris, fast on any hardware, with audio encrypted in transit and never saved. You choose per meeting."
       },
       {
         "q": "What if I forget my passphrase?",
@@ -767,7 +774,7 @@
           "desc": "Transcription and summary both on your machine. Nothing leaves, in any mode."
         },
         {
-          "name": "Cloud Fast",
+          "name": "Fast Cloud",
           "desc": "Transcribed through Mistral's EU servers in Paris. Audio encrypted in transit, never saved. Fast on any hardware. Pro and Pro Unlimited."
         }
       ],
@@ -776,7 +783,7 @@
         "headers": [
           "Your hardware",
           "Standard (local)",
-          "Cloud Fast"
+          "Fast Cloud"
         ],
         "rows": [
           [
@@ -820,7 +827,7 @@
         ],
         [
           "Mistral AI",
-          "Cloud LLM & Cloud Fast transcription",
+          "Cloud LLM & Fast Cloud transcription",
           "EU-hosted",
           "ZDR active, DPA signed"
         ],
@@ -851,7 +858,7 @@
       "steps": [
         "Start a recording in Standard or Local Only mode.",
         "Open your browser's DevTools: Network tab.",
-        "Record for 30 seconds and watch the outbound requests. In Local Only, nothing leaves your device at all; in Standard, only text (the transcription result), never audio. (Cloud Fast is different by design: there, encrypted audio is sent to our EU servers to be transcribed, encrypted in transit and never saved. That's the one mode where seeing audio leave is expected.)"
+        "Record for 30 seconds and watch the outbound requests. In Local Only, nothing leaves your device at all; in Standard, only text (the transcription result), never audio. (Fast Cloud is different by design: there, encrypted audio is sent to our EU servers to be transcribed, encrypted in transit and never saved. That's the one mode where seeing audio leave is expected.)"
       ],
       "codeLinks": [
         "The function that discards audio →",

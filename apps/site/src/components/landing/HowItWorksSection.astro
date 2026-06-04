@@ -252,7 +252,9 @@ const badge = 'Pro & Pro Unlimited';
             }
           });
         },
-        { threshold: 0.3 }
+        // threshold 0.05: si attiva appena il flow entra in viewport,
+        // evitando il gap visivo da passi invisibili su schermi piccoli.
+        { threshold: 0.05 }
       );
       obs.observe(flow);
     } else {
