@@ -15,6 +15,7 @@ export interface IcsEvent {
   location: string
   description: string
   attendees: IcsAttendee[]
+  status?: string
 }
 
 // Unfolding: per RFC 5545 le righe lunghe vengono spezzate e la continuazione
@@ -93,6 +94,7 @@ export function parseIcs(text: string): IcsEvent[] {
           location: current.location ?? '',
           description: current.description ?? '',
           attendees: current.attendees ?? [],
+          status: current.status,
         })
       }
       current = null
@@ -118,6 +120,9 @@ export function parseIcs(text: string): IcsEvent[] {
         break
       case 'DESCRIPTION':
         current.description = unescapeText(value)
+        break
+      case 'STATUS':
+        current.status = value
         break
       case 'ATTENDEE': {
         const a = parseAttendee(params, value)

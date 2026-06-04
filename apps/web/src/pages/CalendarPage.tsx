@@ -61,6 +61,9 @@ function icsToCalendarEvents(parsed: IcsEvent[]): CalendarEvent[] {
   const windowEnd = now + 7 * 24 * 60 * 60 * 1000
   const out: CalendarEvent[] = []
   for (const e of parsed) {
+    // Scarta solo gli eventi esplicitamente annullati; status assente (undefined)
+    // è trattato come valido e NON viene escluso.
+    if (e.status?.trim().toUpperCase() === 'CANCELLED') continue
     const start = icsDateToIso(e.dtstart)
     if (!start) continue
     const end = icsDateToIso(e.dtend) ?? start
