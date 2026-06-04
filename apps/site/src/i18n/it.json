@@ -74,6 +74,40 @@
     "qualityNote": "La qualità della trascrizione non dipende da quanto paghi. Whisper Large-v3-turbo (lo stesso modello usato dai ricercatori) è disponibile su ogni piano, Free incluso, e gira interamente sul tuo computer. Di default l'app sceglie il modello adatto al tuo hardware; quando vuoi, puoi forzare Large-v3-turbo dalle impostazioni.",
     "cloudNote": "Su Pro e Pro Unlimited, Cloud Veloce trascrive nel cloud europeo: 30 minuti di audio in 1–2 minuti, indipendentemente dal tuo hardware."
   },
+  "outputSample": {
+    "h2": "Esci dalla riunione con questo, già pronto.",
+    "intro": "Ogni conversazione diventa un brief strutturato — sintesi, decisioni, e chi fa cosa. Da usare o da inviare in trenta secondi.",
+    "docLabel": "Brief — Primo incontro cliente",
+    "blocks": [
+      {
+        "heading": "Sintesi esecutiva",
+        "paragraph": "Primo incontro conoscitivo con un cliente che gestisce un e-commerce di articoli per la casa, circa 8.000 ordini al mese. Il problema principale è il calo del tasso di conversione su mobile dopo il recente restyling del sito. Il cliente cerca supporto per diagnosticare le cause e definire un piano di ottimizzazione su 90 giorni. Budget e tempistiche da confermare, ma c'è interesse concreto a partire entro il mese."
+      },
+      {
+        "heading": "Argomenti trattati",
+        "items": [
+          "Situazione attuale — il conversion rate mobile è sceso dal 2,4% all'1,6% nelle ultime sei settimane, in concomitanza con il nuovo checkout",
+          "Ipotesi sul calo — il cliente sospetta il flusso di pagamento a tre step; nessun A/B test è stato fatto prima del rilascio",
+          "Obiettivo — tornare almeno al 2,2% di conversione mobile entro fine trimestre, senza rifare l'intero sito",
+          "Vincoli — team di sviluppo interno di due persone già sovraccarico; ogni modifica passa da loro"
+        ]
+      },
+      {
+        "heading": "Decisioni prese",
+        "items": [
+          "Si parte con un audit diagnostico di due settimane prima di proporre qualsiasi intervento"
+        ]
+      },
+      {
+        "heading": "Prossimi passi",
+        "items": [
+          "Inviare una proposta con scope e prezzo dell'audit entro venerdì",
+          "Il cliente condivide accesso in sola lettura a Google Analytics e alla piattaforma e-commerce",
+          { "text": "Verificare col team di sviluppo la fattibilità di un rollback parziale del checkout", "note": "da note personali: il cliente tiene a non scontentare gli sviluppatori interni — toccare il tema con cautela nella proposta" }
+        ]
+      }
+    ]
+  },
   "threeWays": {
     "title": "Tre modi per usarlo.",
     "modes": [

@@ -1,0 +1,300 @@
+---
+interface Props {
+  t: any;
+  lang: string;
+}
+const { t } = Astro.props;
+
+// Blocco del brief: o un paragrafo (sintesi) o una lista di voci.
+// Una voce può essere stringa semplice oppure { text, note } dove `note`
+// è l'inciso "(da note personali: ...)" — il dettaglio differenziante,
+// reso con accento ambra.
+interface BriefBlock {
+  heading: string;
+  paragraph?: string;
+  items?: Array<string | { text: string; note?: string }>;
+}
+
+const o = t.outputSample;
+const blocks: BriefBlock[] = o?.blocks ?? [];
+
+// Neutralizza i dash di rendering come nelle altre sezioni (Memory, Pros):
+// i range numerici diventano trattini semplici, gli incisi diventano virgole.
+// NON tocco i dash dentro le note personali — lì l'em-dash fa parte della
+// voce editoriale che vogliamo mostrare nel documento.
+function clean(s: string | undefined): string | undefined {
+  return s
+    ?.replace(/(\d)\s*[—–]\s*(\d)/g, '$1-$2')
+    .replace(/\s*[—–]\s*/g, ', ');
+}
+
+function isObjItem(
+  i: string | { text: string; note?: string }
+): i is { text: string; note?: string } {
+  return typeof i === 'object' && i !== null;
+}
+---
+
+<section class="out">
+  <div class="out-inner">
+    <header class="out-head">
+      <h2 class="out-h2">{o.h2}</h2>
+      <p class="out-intro">{clean(o.intro)}</p>
+    </header>
+
+    <!-- Il brief come documento reale: superficie chiara su sfondo cream,
+         bordo mist, una sola elevazione. Reso in-page (mai un'immagine). -->
+    <article class="doc" data-out-doc aria-label={o.docLabel}>
+      <div class="doc-bar">
+        <span class="doc-dot" aria-hidden="true"></span>
+        <span class="doc-label">{o.docLabel}</span>
+      </div>
+
+      <div class="doc-body">
+        {blocks.map((block) => (
+          <section class="doc-block">
+            <h3 class="doc-h">{block.heading}</h3>
+
+            {block.paragraph && (
+              <p class="doc-p">{clean(block.paragraph)}</p>
+            )}
+
+            {block.items && (
+              <ul class="doc-list">
+                {block.items.map((item) => {
+                  if (isObjItem(item)) {
+                    return (
+                      <li class="doc-li">
+                        {clean(item.text)}
+                        {item.note && (
+                          <span class="doc-note"> ({item.note})</span>
+                        )}
+                      </li>
+                    );
+                  }
+                  return <li class="doc-li">{clean(item)}</li>;
+                })}
+              </ul>
+            )}
+          </section>
+        ))}
+      </div>
+    </article>
+  </div>
+</section>
+
+<style>
+  .out {
+    padding: var(--section-y) 0;
+  }
+
+  .out-inner {
+    max-width: var(--container);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+  }
+
+  /* header coerente con Memory: serif teal a sinistra, intro Manrope */
+  .out-head {
+    max-width: 720px;
+  }
+  .out-h2 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(30px, 4vw, 48px);
+    line-height: 1.1;
+    letter-spacing: -0.015em;
+    color: var(--color-deep-teal);
+    margin: 0;
+    text-wrap: balance;
+  }
+  .out-intro {
+    font-family: "Manrope", sans-serif;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--color-stone);
+    max-width: 56ch;
+    margin: 18px 0 0;
+  }
+
+  /* il documento: cornice nota/foglio, una sola elevazione,
+     ombra tinta sul cream (mai nero puro) */
+  .doc {
+    background: #FFFEFB;
+    border: 1px solid var(--color-mist);
+    border-radius: 14px;
+    box-shadow: 0 1px 0 var(--color-mist), 0 18px 40px -28px rgba(26, 77, 82, 0.28);
+    overflow: hidden;
+    max-width: 760px;
+  }
+
+  /* barra superiore: etichetta del documento in mono, come metadato */
+  .doc-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 28px;
+    border-bottom: 1px solid var(--color-mist);
+  }
+  .doc-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-amber);
+    flex: none;
+  }
+  .doc-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-stone);
+  }
+
+  .doc-body {
+    padding: 40px 44px 44px;
+    display: flex;
+    flex-direction: column;
+    gap: 34px;
+  }
+
+  .doc-block {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* i quattro header del documento: serif teal, distinti e leggibili,
+     con un filo mist sopra che li scandisce come sezioni di una nota */
+  .doc-h {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    font-optical-sizing: auto;
+    font-size: 21px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--color-deep-teal);
+    margin: 0;
+  }
+  .doc-block + .doc-block .doc-h {
+    padding-top: 26px;
+    border-top: 1px solid var(--color-mist);
+  }
+
+  .doc-p {
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--color-charcoal);
+    margin: 0;
+    max-width: 64ch;
+  }
+
+  .doc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 64ch;
+  }
+  /* trattino discreto come marcatore di voce, mono/stone come gli indici */
+  .doc-li {
+    position: relative;
+    padding-left: 22px;
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--color-charcoal);
+  }
+  .doc-li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--color-stone);
+  }
+
+  /* l'inciso "(da note personali: ...)": il dettaglio differenziante,
+     accento ambra, leggero corsivo per separarlo dal corpo della voce */
+  .doc-note {
+    color: var(--color-amber);
+    font-style: italic;
+  }
+
+  /* reveal calmo: header e documento entrano una volta sola */
+  .out-head,
+  .doc {
+    opacity: 0;
+    transform: translateY(var(--reveal-distance));
+    transition:
+      opacity var(--reveal-duration) var(--ease-out-cubic),
+      transform var(--reveal-duration) var(--ease-out-cubic);
+  }
+  .doc {
+    transition-delay: 90ms;
+  }
+  .out.is-visible .out-head,
+  .out.is-visible .doc {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .out-head,
+    .doc {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  /* mobile: documento leggibile, padding ridotto, tipografia scalata */
+  @media (max-width: 767px) {
+    .doc-bar {
+      padding: 14px 20px;
+    }
+    .doc-body {
+      padding: 28px 22px 30px;
+      gap: 28px;
+    }
+    .doc-h {
+      font-size: 19px;
+    }
+    .doc-block + .doc-block .doc-h {
+      padding-top: 22px;
+    }
+    .doc-p,
+    .doc-li {
+      font-size: 15px;
+    }
+  }
+</style>
+
+<script>
+  // Reveal una volta sola, coerente con le altre sezioni landing.
+  const section = document.querySelector<HTMLElement>('.out');
+  if (section) {
+    if ('IntersectionObserver' in window) {
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) {
+              e.target.classList.add('is-visible');
+              obs.disconnect();
+            }
+          });
+        },
+        { threshold: 0.2 }
+      );
+      obs.observe(section);
+    } else {
+      section.classList.add('is-visible');
+    }
+  }
+</script>

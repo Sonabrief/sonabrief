@@ -74,6 +74,40 @@
     "qualityNote": "La calidad de la transcripción no depende de cuánto pagas. Whisper Large-v3-turbo (el mismo modelo que usan los investigadores) está disponible en todos los planes, incluido el Free, y se ejecuta por completo en tu máquina. Por defecto, la app elige el modelo adecuado para tu hardware; cuando quieras, puedes forzar Large-v3-turbo en los ajustes.",
     "cloudNote": "En Pro y Pro Unlimited, Cloud Rápido transcribe en la nube europea: 30 minutos de audio en 1–2 minutos, sea cual sea tu hardware."
   },
+  "outputSample": {
+    "h2": "Sal de la reunión con esto, ya listo.",
+    "intro": "Cada conversación se convierte en un brief estructurado — resumen, decisiones y quién hace qué. Para usar o enviar en treinta segundos.",
+    "docLabel": "Brief — Primera reunión con cliente",
+    "blocks": [
+      {
+        "heading": "Resumen ejecutivo",
+        "paragraph": "Primera reunión exploratoria con un cliente que gestiona un e-commerce de artículos para el hogar, unos 8.000 pedidos al mes. El problema principal es la caída de la tasa de conversión en móvil tras el reciente rediseño del sitio. El cliente busca apoyo para diagnosticar las causas y definir un plan de optimización a 90 días. Presupuesto y plazos por confirmar, pero hay un interés concreto en empezar dentro del mes."
+      },
+      {
+        "heading": "Temas tratados",
+        "items": [
+          "Situación actual — la conversión móvil bajó del 2,4 % al 1,6 % en las últimas seis semanas, coincidiendo con el nuevo checkout",
+          "Hipótesis sobre la caída — el cliente sospecha del flujo de pago en tres pasos; no se hizo ningún test A/B antes del lanzamiento",
+          "Objetivo — volver al menos al 2,2 % de conversión móvil antes de fin de trimestre, sin rehacer todo el sitio",
+          "Restricciones — un equipo de desarrollo interno de dos personas ya sobrecargado; cada cambio pasa por ellos"
+        ]
+      },
+      {
+        "heading": "Decisiones tomadas",
+        "items": [
+          "Se empieza con una auditoría diagnóstica de dos semanas antes de proponer cualquier intervención"
+        ]
+      },
+      {
+        "heading": "Próximos pasos",
+        "items": [
+          "Enviar una propuesta con el alcance y el precio de la auditoría antes del viernes",
+          "El cliente comparte acceso de solo lectura a Google Analytics y a la plataforma de e-commerce",
+          { "text": "Verificar con el equipo de desarrollo la viabilidad de un rollback parcial del checkout", "note": "de notas personales: al cliente le importa no molestar a los desarrolladores internos — tratar el tema con cautela en la propuesta" }
+        ]
+      }
+    ]
+  },
   "threeWays": {
     "title": "Tres formas de usarlo.",
     "modes": [

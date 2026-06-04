@@ -74,6 +74,40 @@
     "qualityNote": "Transcription quality doesn't depend on what you pay. Whisper Large-v3-turbo (the same model researchers use) is available on every plan, including Free, and runs entirely on your machine. By default the app picks the right model for your hardware; you can force Large-v3-turbo in settings whenever you want.",
     "cloudNote": "On Pro and Pro Unlimited, Cloud Fast transcribes in the EU cloud: 30 minutes of audio in 1–2 minutes, whatever your hardware."
   },
+  "outputSample": {
+    "h2": "Leave the meeting with this, already done.",
+    "intro": "Every conversation becomes a structured brief — summary, decisions, and who does what. Ready to use or send in thirty seconds.",
+    "docLabel": "Brief — First client meeting",
+    "blocks": [
+      {
+        "heading": "Executive summary",
+        "paragraph": "First exploratory meeting with a client running a homeware e-commerce store, roughly 8,000 orders a month. The core problem is the drop in mobile conversion rate after the recent site restyling. The client is looking for help to diagnose the causes and define a 90-day optimization plan. Budget and timing to be confirmed, but there's concrete interest in starting within the month."
+      },
+      {
+        "heading": "Topics covered",
+        "items": [
+          "Current situation — mobile conversion rate fell from 2.4% to 1.6% over the last six weeks, in line with the new checkout",
+          "Hypotheses on the drop — the client suspects the three-step payment flow; no A/B test was run before release",
+          "Goal — get back to at least 2.2% mobile conversion by the end of the quarter, without rebuilding the whole site",
+          "Constraints — a two-person in-house development team already overloaded; every change goes through them"
+        ]
+      },
+      {
+        "heading": "Decisions made",
+        "items": [
+          "Start with a two-week diagnostic audit before proposing any intervention"
+        ]
+      },
+      {
+        "heading": "Next steps",
+        "items": [
+          "Send a proposal with the audit's scope and price by Friday",
+          "The client shares read-only access to Google Analytics and the e-commerce platform",
+          { "text": "Check with the dev team whether a partial rollback of the checkout is feasible", "note": "from personal notes: the client cares about not upsetting the in-house developers — touch on this carefully in the proposal" }
+        ]
+      }
+    ]
+  },
   "threeWays": {
     "title": "Three ways to use it.",
     "modes": [

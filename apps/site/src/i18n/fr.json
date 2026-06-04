@@ -74,6 +74,40 @@
     "qualityNote": "La qualité de transcription ne dépend pas de ce que vous payez. Whisper Large-v3-turbo (le modèle qu'utilisent les chercheurs) est disponible sur chaque plan, Free compris, et s'exécute entièrement sur votre machine. Par défaut, l'application choisit le modèle adapté à votre matériel ; vous pouvez forcer Large-v3-turbo dans les réglages quand vous le souhaitez.",
     "cloudNote": "Sur Pro et Pro Unlimited, Cloud Rapide transcrit dans le cloud européen : 30 minutes d'audio en 1 à 2 minutes, quel que soit votre matériel."
   },
+  "outputSample": {
+    "h2": "Sortez de la réunion avec ceci, déjà prêt.",
+    "intro": "Chaque conversation devient un brief structuré — synthèse, décisions, et qui fait quoi. À utiliser ou à envoyer en trente secondes.",
+    "docLabel": "Brief — Première rencontre client",
+    "blocks": [
+      {
+        "heading": "Synthèse exécutive",
+        "paragraph": "Première rencontre exploratoire avec un client qui gère un e-commerce d'articles pour la maison, environ 8 000 commandes par mois. Le problème principal est la baisse du taux de conversion sur mobile après le récent restylage du site. Le client cherche un accompagnement pour diagnostiquer les causes et définir un plan d'optimisation sur 90 jours. Budget et délais à confirmer, mais il y a un intérêt concret à démarrer dans le mois."
+      },
+      {
+        "heading": "Sujets abordés",
+        "items": [
+          "Situation actuelle — le taux de conversion mobile est passé de 2,4 % à 1,6 % au cours des six dernières semaines, en parallèle du nouveau checkout",
+          "Hypothèses sur la baisse — le client soupçonne le tunnel de paiement en trois étapes ; aucun test A/B n'a été réalisé avant la mise en ligne",
+          "Objectif — revenir à au moins 2,2 % de conversion mobile d'ici la fin du trimestre, sans refaire tout le site",
+          "Contraintes — une équipe de développement interne de deux personnes déjà surchargée ; chaque modification passe par elle"
+        ]
+      },
+      {
+        "heading": "Décisions prises",
+        "items": [
+          "On commence par un audit diagnostique de deux semaines avant de proposer toute intervention"
+        ]
+      },
+      {
+        "heading": "Prochaines étapes",
+        "items": [
+          "Envoyer une proposition avec le périmètre et le prix de l'audit avant vendredi",
+          "Le client partage un accès en lecture seule à Google Analytics et à la plateforme e-commerce",
+          { "text": "Vérifier avec l'équipe de développement la faisabilité d'un rollback partiel du checkout", "note": "d'après des notes personnelles : le client tient à ne pas contrarier les développeurs internes — aborder le sujet avec précaution dans la proposition" }
+        ]
+      }
+    ]
+  },
   "threeWays": {
     "title": "Trois façons de l'utiliser.",
     "modes": [
