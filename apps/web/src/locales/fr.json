@@ -135,6 +135,7 @@
   "calendar.ics_imported": "{{count}} événements importés",
   "calendar.ics_error": "Échec de l'importation. Vérifiez l'URL et réessayez.",
   "calendar.ics_too_large": "Calendrier trop volumineux. Dans Outlook, réduisez la période de publication.",
+  "calendar.ics_remove": "Supprimer le calendrier",
   "calendar.refresh_aria": "Actualiser le calendrier",
   "calendar.audio_source": "Source audio",
   "calendar.no_calendar_title": "Aucun calendrier connecté",

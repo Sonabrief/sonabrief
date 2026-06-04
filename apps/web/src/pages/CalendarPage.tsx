@@ -9,6 +9,7 @@ import { BiLogoMicrosoft } from 'react-icons/bi'
 import { API_URL } from '../config'
 import { AppNav } from '../components/AppNav'
 import { parseIcs, type IcsEvent } from '../lib/ics'
+import { getIcsSource, setIcsSource, deleteIcsSource } from '../lib/db'
 import i18n from '../i18n'
 
 interface CalendarEvent {
@@ -268,16 +269,18 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true)
   const [connecting, setConnecting] = useState<'google' | 'microsoft' | null>(null)
 
-  // Import ICS via URL. Gli eventi vivono solo in state (come google/microsoft);
-  // l'URL NON viene salvato da nessuna parte (storage cifrato in un passo futuro).
+  // Import ICS via URL. Gli eventi vivono in state; l'URL viene persistito in
+  // Dexie (calendar_sources) dopo un import riuscito per il re-import all'avvio.
   const [icsUrl, setIcsUrl] = useState('')
   const [icsEvents, setIcsEvents] = useState<CalendarEvent[]>([])
   const [icsImporting, setIcsImporting] = useState(false)
   const [icsStatus, setIcsStatus] = useState<{ kind: 'success' | 'error'; message: string } | null>(null)
 
-  async function importIcs() {
-    const url = icsUrl.trim()
-    if (!url || icsImporting) return
+  // Esegue l'import dato un URL. `persist` controlla se salvare l'URL dopo il
+  // successo (true per azione utente, false per re-import automatico: l'URL è
+  // già salvato). Su errore NON tocca lo storage. Ritorna l'esito.
+  async function runIcsImport(url: string, persist: boolean): Promise<boolean> {
+    if (!url || icsImporting) return false
     setIcsImporting(true)
     setIcsStatus(null)
     try {
@@ -291,7 +294,7 @@ export default function CalendarPage() {
         // 413 → feed troppo grande: messaggio specifico. Altri errori → generico.
         if (res.status === 413) {
           setIcsStatus({ kind: 'error', message: t('calendar.ics_too_large') })
-          return
+          return false
         }
         throw new Error('import failed')
       }
@@ -299,11 +302,28 @@ export default function CalendarPage() {
       const events = icsToCalendarEvents(parseIcs(text))
       setIcsEvents(events)
       setIcsStatus({ kind: 'success', message: t('calendar.ics_imported', { count: events.length }) })
+      if (persist) await setIcsSource(url)
+      return true
     } catch {
+      // Errore (anche temporaneo): mostra il generico, NON cancella l'URL salvato.
       setIcsStatus({ kind: 'error', message: t('calendar.ics_error') })
+      return false
     } finally {
       setIcsImporting(false)
     }
+  }
+
+  // Submit del form: usa l'URL digitato e lo persiste.
+  function importIcs() {
+    void runIcsImport(icsUrl.trim(), true)
+  }
+
+  // Rimuove il calendario ICS salvato e svuota gli eventi dallo state.
+  async function removeIcs() {
+    await deleteIcsSource()
+    setIcsEvents([])
+    setIcsUrl('')
+    setIcsStatus(null)
   }
 
   async function loadCalendars() {
@@ -318,6 +338,26 @@ export default function CalendarPage() {
   }
 
   useEffect(() => { loadCalendars() }, [])
+
+  // Re-import ICS all'avvio: se c'è un source salvato, pre-compila il campo e
+  // re-importa in background (persist=false, l'URL è già salvato). Indipendente
+  // da loadCalendars così non blocca gli OAuth né viceversa.
+  useEffect(() => {
+    getIcsSource().then(source => {
+      if (!source) return
+      setIcsUrl(source.url)
+      void runIcsImport(source.url, false)
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Tasto Aggiorna: rifetcha gli OAuth E re-importa l'ICS salvato (se presente).
+  async function refreshAll() {
+    const reimportSaved = getIcsSource().then(source => {
+      if (source) return runIcsImport(source.url, false)
+    })
+    await Promise.all([loadCalendars(), reimportSaved])
+  }
 
   async function connectGoogle() {
     setConnecting('google')
@@ -367,7 +407,7 @@ export default function CalendarPage() {
             {t('calendar.title')}
           </motion.h1>
           <button
-            onClick={loadCalendars}
+            onClick={refreshAll}
             disabled={loading}
             className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-border hover:text-foreground disabled:opacity-40 motion-reduce:transition-none"
             aria-label={t('calendar.refresh_aria')}
@@ -432,6 +472,15 @@ export default function CalendarPage() {
               <p className={`mt-3 text-xs ${icsStatus.kind === 'success' ? 'text-primary' : 'text-destructive'}`} aria-live="polite">
                 {icsStatus.message}
               </p>
+            )}
+            {icsEvents.length > 0 && (
+              <button
+                type="button"
+                onClick={removeIcs}
+                className="mt-3 text-xs text-destructive transition-colors hover:underline motion-reduce:transition-none"
+              >
+                {t('calendar.ics_remove')}
+              </button>
             )}
           </div>
 

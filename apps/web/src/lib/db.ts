@@ -75,6 +75,13 @@ export interface RecordingSession {
   status?: 'active' | 'interrupted'
 }
 
+export interface CalendarSource {
+  id?: number          // auto-increment (++id)
+  url: string
+  type: 'ics'
+  createdAt: number
+}
+
 class SonabriefDB extends Dexie {
   meetings!: Table<Meeting>
   transcripts!: Table<Transcript>
@@ -83,6 +90,7 @@ class SonabriefDB extends Dexie {
   embeddings!: Table<Embedding>
   recording_chunks!: Table<RecordingChunk>
   recording_sessions!: Table<RecordingSession>
+  calendar_sources!: Table<CalendarSource>
 
   constructor() {
     super('sonabrief')
@@ -95,7 +103,28 @@ class SonabriefDB extends Dexie {
     this.version(7).stores({ meetings: '&id, startedAt, mode, clientName, projectStream', transcripts: '&id, meetingId', notes: '&id, meetingId', action_items: '&id, meetingId, completed, createdAt', embeddings: '&meetingId, createdAt', recording_chunks: '&id, sessionId, chunkIndex, status, createdAt', recording_sessions: '&sessionId, updatedAt' })
     this.version(8).stores({ meetings: '&id, startedAt, mode, clientName, projectStream, *tags', transcripts: '&id, meetingId', notes: '&id, meetingId', action_items: '&id, meetingId, completed, createdAt', embeddings: '&meetingId, createdAt', recording_chunks: '&id, sessionId, chunkIndex, status, createdAt', recording_sessions: '&sessionId, updatedAt' })
     this.version(9).stores({ meetings: '&id, startedAt, mode, clientName, projectStream, *tags', transcripts: '&id, meetingId', notes: '&id, meetingId', action_items: '&id, meetingId, completed, createdAt', embeddings: '&meetingId, createdAt', recording_chunks: '&id, sessionId, chunkIndex, status, createdAt', recording_sessions: '&sessionId, updatedAt' })
+    this.version(10).stores({ meetings: '&id, startedAt, mode, clientName, projectStream, *tags', transcripts: '&id, meetingId', notes: '&id, meetingId', action_items: '&id, meetingId, completed, createdAt', embeddings: '&meetingId, createdAt', recording_chunks: '&id, sessionId, chunkIndex, status, createdAt', recording_sessions: '&sessionId, updatedAt', calendar_sources: '++id, type, createdAt' })
   }
 }
 
 export const db = new SonabriefDB()
+
+// === Calendar sources (feed ICS persistito, in chiaro come il resto del DB) ===
+//
+// Gestiamo UN SOLO source ICS: setIcsSource sostituisce l'esistente (clear +
+// add) invece di accumulare, così non servono indici univoci sull'URL.
+
+export async function getIcsSource(): Promise<CalendarSource | null> {
+  return (await db.calendar_sources.where('type').equals('ics').first()) ?? null
+}
+
+export async function setIcsSource(url: string): Promise<void> {
+  await db.transaction('rw', db.calendar_sources, async () => {
+    await db.calendar_sources.where('type').equals('ics').delete()
+    await db.calendar_sources.add({ url, type: 'ics', createdAt: Date.now() })
+  })
+}
+
+export async function deleteIcsSource(): Promise<void> {
+  await db.calendar_sources.where('type').equals('ics').delete()
+}
