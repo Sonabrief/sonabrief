@@ -5,8 +5,8 @@ import SecurityPage from '../../components/security/SecurityPage.astro';
 
 const lang = 'en';
 const t = await getTranslations(lang);
-const title = `${t.nav.security} — Sonabrief`;
-const description: string = t.security.promise.lines?.[0] ?? t.hero.sub;
+const title = t.seo?.security?.title ?? `${t.nav.security} — Sonabrief`;
+const description: string = t.seo?.security?.description ?? t.security.promise.lines?.[0] ?? t.hero.sub;
 ---
 
 <BaseLayout lang={lang} title={title} description={description} currentPath="security">

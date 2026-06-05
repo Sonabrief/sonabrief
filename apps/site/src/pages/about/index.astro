@@ -5,10 +5,11 @@ import AboutPage from '../../components/AboutPage.astro';
 
 const lang = 'en';
 const t = await getTranslations(lang);
-const title: string = t.about?.sections?.[0]?.title ?? 'About';
+const title: string = t.seo?.about?.title ?? t.about?.sections?.[0]?.title ?? 'About';
+const description: string = t.seo?.about?.description ?? t.hero.sub;
 ---
 
-<BaseLayout lang={lang} title={title} description={t.hero.sub} currentPath="about">
+<BaseLayout lang={lang} title={title} description={description} currentPath="about">
   <main>
     <AboutPage t={t} lang={lang} />
   </main>

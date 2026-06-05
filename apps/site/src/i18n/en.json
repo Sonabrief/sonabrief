@@ -1,4 +1,34 @@
 {
+  "seo": {
+    "home": {
+      "title": "Private AI Meeting Notes & Summaries — Sonabrief",
+      "description": "Record meetings and get a send-ready summary in seconds. Audio stays on your computer and is never saved. Local transcription, EU cloud, open source."
+    },
+    "security": {
+      "title": "Privacy & Security Architecture — Sonabrief",
+      "description": "How Sonabrief protects your meetings: audio never saved, zero-knowledge encrypted sync, EU-hosted AI with Zero Data Retention. Verify it in our code."
+    },
+    "pricing": {
+      "title": "Pricing — Free, Pro & Enterprise Plans — Sonabrief",
+      "description": "Free plan with unlimited local transcription. Pro from €9/mo for cloud summaries, longer archive and the full workflow. Transparent, no hidden tiers."
+    },
+    "about": {
+      "title": "About Sonabrief — Private, Open-Source Meeting Notes",
+      "description": "Why we built a meeting assistant that keeps your audio on your device: bootstrapped, open source, and honest about every trade-off."
+    },
+    "openSource": {
+      "title": "Open Source — Auditable Privacy — Sonabrief",
+      "description": "Every line that handles your data is public on GitHub under AGPL v3. Read it, audit it, fork it. Privacy you can verify, not just read."
+    },
+    "privacy": {
+      "title": "Privacy Policy — Sonabrief",
+      "description": "How Sonabrief handles your data, written in plain language. Your meeting audio is never stored."
+    },
+    "terms": {
+      "title": "Terms of Service — Sonabrief",
+      "description": "The terms that govern your use of Sonabrief."
+    }
+  },
   "nav": {
     "security": "Security",
     "openSource": "Open source",

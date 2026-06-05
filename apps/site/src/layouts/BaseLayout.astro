@@ -8,6 +8,12 @@ interface Props {
   description?: string;
   lang?: string;
   currentPath?: string;
+  /** Path to the social share image, relative to site root. */
+  ogImage?: string;
+  /** Open Graph object type. */
+  ogType?: 'website' | 'article';
+  /** Emit <meta name="robots" content="noindex"> (use on 404, redirect pages). */
+  noindex?: boolean;
 }
 
 const {
@@ -15,10 +21,18 @@ const {
   description = 'Open-source meeting assistant. Audio never leaves your computer.',
   lang = 'en',
   currentPath = '',
+  ogImage = '/og.png',
+  ogType = 'website',
+  noindex = false,
 } = Astro.props;
 
 const base = 'https://sonabrief.com';
 const path = currentPath ? `${currentPath}/`.replace(/\/\/$/, '/') : '';
+// For en the canonical lives at the root (no /en/ prefix); other langs are prefixed.
+const langPath = lang === 'en' ? `${base}/${path}` : `${base}/${lang}/${path}`;
+const canonical = langPath;
+const ogImageUrl = new URL(ogImage, base).href;
+
 const hreflangs = [
   { lang: 'en', href: `${base}/${path}` },
   { lang: 'it', href: `${base}/it/${path}` },
@@ -26,6 +40,46 @@ const hreflangs = [
   { lang: 'es', href: `${base}/es/${path}` },
   { lang: 'de', href: `${base}/de/${path}` },
 ];
+
+const ogLocaleMap: Record<string, string> = {
+  en: 'en_US',
+  it: 'it_IT',
+  fr: 'fr_FR',
+  es: 'es_ES',
+  de: 'de_DE',
+};
+const ogLocale = ogLocaleMap[lang] ?? 'en_US';
+const ogLocaleAlternates = Object.values(ogLocaleMap).filter((l) => l !== ogLocale);
+
+// Structured data: brand + the product, surfaced on every page.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${base}/#organization`,
+      name: 'Sonabrief',
+      url: base,
+      logo: `${base}/logo.svg`,
+      sameAs: ['https://github.com/sonabrief/sonabrief'],
+    },
+    {
+      '@type': 'SoftwareApplication',
+      '@id': `${base}/#software`,
+      name: 'Sonabrief',
+      applicationCategory: 'BusinessApplication',
+      operatingSystem: 'macOS, Windows, Linux, Web',
+      url: base,
+      description,
+      publisher: { '@id': `${base}/#organization` },
+      offers: [
+        { '@type': 'Offer', name: 'Free', price: '0', priceCurrency: 'EUR' },
+        { '@type': 'Offer', name: 'Pro', price: '9', priceCurrency: 'EUR' },
+        { '@type': 'Offer', name: 'Pro Unlimited', price: '19', priceCurrency: 'EUR' },
+      ],
+    },
+  ],
+};
 ---
 
 <!doctype html>
@@ -34,14 +88,38 @@ const hreflangs = [
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
-<title>{title}</title>
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <title>{title}</title>
 
-    <link rel="canonical" href={`${base}/${path}`} />
+    <link rel="canonical" href={canonical} />
 
     {hreflangs.map(({ lang: l, href }) => (
       <link rel="alternate" hreflang={l} href={href} />
     ))}
     <link rel="alternate" hreflang="x-default" href={`${base}/${path}`} />
+
+    {/* Open Graph */}
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content="Sonabrief" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content={ogLocale} />
+    {ogLocaleAlternates.map((l) => (
+      <meta property="og:locale:alternate" content={l} />
+    ))}
+
+    {/* Twitter Card */}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    {/* Structured data */}
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
     <script defer data-domain="sonabrief.com,app.sonabrief.com" src="https://plausible.io/js/script.hash.js"></script>
     <!-- data-api="/api/event" --><!-- uncomment to proxy events and bypass ad-blockers -->

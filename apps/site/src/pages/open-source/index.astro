@@ -5,10 +5,11 @@ import OpenSourcePage from '../../components/OpenSourcePage.astro';
 
 const lang = 'en';
 const t = await getTranslations(lang);
-const title: string = t.nav?.openSource ?? 'Open source';
+const title: string = t.seo?.openSource?.title ?? t.nav?.openSource ?? 'Open source';
+const description: string = t.seo?.openSource?.description ?? t.openSourcePage?.intro ?? '';
 ---
 
-<BaseLayout lang={lang} title={title} description={t.openSourcePage?.intro ?? ''} currentPath="open-source">
+<BaseLayout lang={lang} title={title} description={description} currentPath="open-source">
   <main>
     <OpenSourcePage t={t} lang={lang} />
   </main>

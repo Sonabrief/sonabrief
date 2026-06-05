@@ -8,9 +8,11 @@ import PricingFAQ from '../../components/pricing/PricingFAQ.astro';
 
 const lang = 'en';
 const t = await getTranslations(lang);
+const title = t.seo?.pricing?.title ?? t.pricing.title;
+const description: string = t.seo?.pricing?.description ?? t.hero.sub;
 ---
 
-<BaseLayout lang={lang} title={t.pricing.title} description={t.hero.sub} currentPath="pricing">
+<BaseLayout lang={lang} title={title} description={description} currentPath="pricing">
   <main>
     <PricingHero t={t} lang={lang} />
     <PricingTableFull t={t} lang={lang} />

@@ -33,6 +33,7 @@ const langs = [
         class:list={['lang-switcher-link', { active: code === currentLang }]}
         aria-current={code === currentLang ? 'page' : undefined}
         lang={code}
+        data-lang-choice
       >
         {label}
       </a>
@@ -42,6 +43,20 @@ const langs = [
     </>
   ))}
 </nav>
+
+<script is:inline>
+  // When the user explicitly picks a language, remember it so the root
+  // homepage's auto-redirect (src/pages/index.astro) never overrides them again.
+  document.querySelectorAll('[data-lang-choice]').forEach((el) => {
+    el.addEventListener('click', () => {
+      try {
+        localStorage.setItem('sb-lang-chosen', '1');
+      } catch (_) {
+        /* localStorage unavailable → no-op */
+      }
+    });
+  });
+</script>
 
 <style>
   .lang-switcher {
