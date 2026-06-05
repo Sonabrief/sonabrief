@@ -1,0 +1,19 @@
+---
+// fr /compare/[slug] — only generated for entries translated into fr.
+import { getCollection } from 'astro:content';
+import ComparePage from '../../../components/pseo/ComparePage.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('compare');
+  return entries
+    .filter((entry) => entry.data.i18n['fr'] != null)
+    .map((entry) => ({
+      params: { slug: entry.data.slug },
+      props: { entry: entry.data },
+    }));
+}
+
+const { entry } = Astro.props;
+---
+
+<ComparePage entry={entry} lang="fr" />

@@ -1,0 +1,142 @@
+---
+// Shared renderer for /for/[slug] across all 5 languages.
+import { marked } from 'marked';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { resolveCopy, buildAvailableHreflangs } from '../../content/pseo-utils';
+import type { LangCode } from '../../content/pseo-utils';
+
+interface Props {
+  entry: any;
+  lang: LangCode;
+}
+
+const { entry, lang } = Astro.props;
+
+const { slug, profession, painPoints, i18n } = entry;
+
+const { copy, isFallback } = resolveCopy(i18n, lang);
+
+// BaseLayout prepends the lang for canonical/OG, so pass the lang-less path.
+const pathWithoutLang = `for/${slug}`;
+const currentPath = pathWithoutLang;
+const hreflangAlternates = buildAvailableHreflangs(i18n, pathWithoutLang);
+const noindex = isFallback;
+
+const introHtml = marked(copy.intro) as string;
+---
+
+<BaseLayout
+  lang={lang}
+  title={copy.title}
+  description={copy.description}
+  currentPath={currentPath}
+  hreflangAlternates={hreflangAlternates}
+  noindex={noindex}
+>
+  <main class="pseo-wrapper">
+    <article class="pseo-article">
+      <div class="pseo-draft-banner" role="note">
+        ⚠️ Placeholder copy for "{profession}" — not for production.
+      </div>
+
+      <h1 class="pseo-h1">{copy.title}</h1>
+
+      {painPoints && painPoints.length > 0 && (
+        <ul class="pseo-painpoints" aria-label="Pain points">
+          {painPoints.map((p: string) => <li>{p}</li>)}
+        </ul>
+      )}
+
+      <div class="pseo-intro" set:html={introHtml} />
+
+      {copy.faq && copy.faq.length > 0 && (
+        <section class="pseo-faq" aria-label="FAQ">
+          <h2 class="pseo-h2">FAQ</h2>
+          {copy.faq.map((item: { q: string; a: string }) => (
+            <details class="pseo-faq-item">
+              <summary>{item.q}</summary>
+              <p>{item.a}</p>
+            </details>
+          ))}
+        </section>
+      )}
+    </article>
+  </main>
+</BaseLayout>
+
+<style>
+  .pseo-wrapper {
+    background-color: var(--color-cream);
+    min-height: 100vh;
+    padding: 80px var(--gutter) 120px;
+  }
+  @media (max-width: 767px) {
+    .pseo-wrapper { padding: 48px 20px 80px; }
+  }
+  .pseo-article {
+    max-width: var(--container-prose, 760px);
+    margin: 0 auto;
+  }
+  .pseo-draft-banner {
+    border: 1px solid var(--color-amber, #c98a2b);
+    background: color-mix(in srgb, var(--color-amber, #c98a2b) 14%, transparent);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-family: "Manrope", sans-serif;
+    font-size: 13px;
+    color: var(--color-charcoal);
+    margin-bottom: 32px;
+  }
+  .pseo-h1 {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--color-deep-teal);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+  .pseo-h2 {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--color-charcoal);
+    margin: 48px 0 20px;
+  }
+  .pseo-painpoints {
+    font-family: "Manrope", sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--color-stone);
+    padding-left: 20px;
+    margin-bottom: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .pseo-intro :global(p) {
+    font-family: "Manrope", sans-serif;
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--color-charcoal);
+    margin-bottom: 20px;
+    max-width: 65ch;
+  }
+  .pseo-faq-item {
+    border-bottom: 1px solid var(--color-mist);
+    padding: 12px 0;
+  }
+  .pseo-faq-item summary {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--color-charcoal);
+  }
+  .pseo-faq-item p {
+    font-family: "Manrope", sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--color-charcoal);
+    margin-top: 8px;
+  }
+</style>

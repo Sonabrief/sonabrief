@@ -1,0 +1,18 @@
+---
+// EN /compare/[slug] — canonical, root-served (no lang prefix).
+import { getCollection } from 'astro:content';
+import ComparePage from '../../components/pseo/ComparePage.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('compare');
+  // EN exists for every entry (schema requires i18n.en), so generate all.
+  return entries.map((entry) => ({
+    params: { slug: entry.data.slug },
+    props: { entry: entry.data },
+  }));
+}
+
+const { entry } = Astro.props;
+---
+
+<ComparePage entry={entry} lang="en" />

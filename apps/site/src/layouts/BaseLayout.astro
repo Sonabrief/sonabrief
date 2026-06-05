@@ -14,6 +14,13 @@ interface Props {
   ogType?: 'website' | 'article';
   /** Emit <meta name="robots" content="noindex"> (use on 404, redirect pages). */
   noindex?: boolean;
+  /**
+   * Override the hreflang alternates. Defaults to the 5 fixed site languages.
+   * pSEO pages pass only the languages an entry is actually translated into,
+   * so we never advertise an alternate that 404s. Shape: [{ lang, href }].
+   * x-default is derived from whichever entry has lang === 'en'.
+   */
+  hreflangAlternates?: { lang: string; href: string }[];
 }
 
 const {
@@ -24,6 +31,7 @@ const {
   ogImage = '/og.png',
   ogType = 'website',
   noindex = false,
+  hreflangAlternates,
 } = Astro.props;
 
 const base = 'https://sonabrief.com';
@@ -33,13 +41,19 @@ const langPath = lang === 'en' ? `${base}/${path}` : `${base}/${lang}/${path}`;
 const canonical = langPath;
 const ogImageUrl = new URL(ogImage, base).href;
 
-const hreflangs = [
+// Default: the 5 fixed site languages (every standard page is fully localized).
+// pSEO pages pass `hreflangAlternates` with only the translated languages.
+const hreflangs = hreflangAlternates ?? [
   { lang: 'en', href: `${base}/${path}` },
   { lang: 'it', href: `${base}/it/${path}` },
   { lang: 'fr', href: `${base}/fr/${path}` },
   { lang: 'es', href: `${base}/es/${path}` },
   { lang: 'de', href: `${base}/de/${path}` },
 ];
+
+// x-default points at the EN alternate when present, else the first one.
+const xDefaultHref =
+  hreflangs.find((h) => h.lang === 'en')?.href ?? hreflangs[0]?.href ?? `${base}/${path}`;
 
 const ogLocaleMap: Record<string, string> = {
   en: 'en_US',
@@ -96,7 +110,7 @@ const jsonLd = {
     {hreflangs.map(({ lang: l, href }) => (
       <link rel="alternate" hreflang={l} href={href} />
     ))}
-    <link rel="alternate" hreflang="x-default" href={`${base}/${path}`} />
+    <link rel="alternate" hreflang="x-default" href={xDefaultHref} />
 
     {/* Open Graph */}
     <meta property="og:type" content={ogType} />

@@ -1,0 +1,19 @@
+---
+// fr /for/[slug] — only generated for entries translated into fr.
+import { getCollection } from 'astro:content';
+import ForPage from '../../../components/pseo/ForPage.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('for');
+  return entries
+    .filter((entry) => entry.data.i18n['fr'] != null)
+    .map((entry) => ({
+      params: { slug: entry.data.slug },
+      props: { entry: entry.data },
+    }));
+}
+
+const { entry } = Astro.props;
+---
+
+<ForPage entry={entry} lang="fr" />

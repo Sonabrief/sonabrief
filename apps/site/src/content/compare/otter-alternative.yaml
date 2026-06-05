@@ -1,0 +1,101 @@
+# ⚠️ PLACEHOLDER DATA — DO NOT SHIP. Copy & competitor facts are invented and
+# must be replaced with verified content in the dedicated copy session.
+# Translations: only EN + IT are present on purpose, to exercise the
+# "language not yet translated" path (fr/es/de intentionally absent).
+
+slug: otter-alternative
+competitor: "[PLACEHOLDER] Otter.ai"
+category: "meeting-transcription"
+# `verified` deliberately omitted → marks this entry as NOT fact-checked yet.
+# sources deliberately omitted until we have real citations.
+
+differentiators:
+  # Only fill rows we can actually verify. These are PLACEHOLDERS.
+  - label: "[PLACEHOLDER] Audio storage"
+    sonabrief: "[PLACEHOLDER] Never stored — processed locally"
+    competitor: "[PLACEHOLDER] Uploaded to vendor cloud"
+  - label: "[PLACEHOLDER] Open source"
+    sonabrief: "[PLACEHOLDER] Yes, AGPL v3"
+    competitor: "[PLACEHOLDER] No"
+  - label: "[PLACEHOLDER] Pricing entry point"
+    # `competitor` left blank intentionally — shows optional-field handling.
+    sonabrief: "[PLACEHOLDER] Free tier, Pro from €9/mo"
+
+i18n:
+  en:
+    title: "[PLACEHOLDER] Otter.ai Alternative — Private Meeting Notes | Sonabrief"
+    description: "[PLACEHOLDER] Looking for an Otter.ai alternative that keeps your audio on your device? Sonabrief transcribes locally and never stores recordings."
+    intro: |
+      **[PLACEHOLDER — replace with verified, original copy. ~300+ words.]**
+
+      If you are searching for an alternative to a popular meeting-transcription
+      tool, you are probably weighing three things: where your audio goes, how
+      much the tool costs once you outgrow the free plan, and whether you can
+      actually trust the privacy claims on the marketing page. This placeholder
+      paragraph exists only to validate the rendering pipeline and the 300-word
+      minimum length requirement; none of the specific claims below are verified.
+
+      Sonabrief takes a different architectural stance from most cloud-first
+      transcription products. Audio is processed on your own machine, which
+      means the raw recording never has to leave your computer to become a
+      written summary. That single design decision changes the privacy
+      conversation: instead of asking you to trust a retention policy, the tool
+      removes the need to send the sensitive artifact at all.
+
+      This placeholder also stands in for the comparison narrative we will write
+      later — the honest, side-by-side framing of what each tool does well and
+      where the trade-offs land. We will not claim parity where it does not
+      exist, and we will not invent competitor weaknesses. Every factual row in
+      the differentiators table will carry a verified source before this page is
+      allowed to ship.
+
+      The remaining sentences are filler to comfortably exceed the minimum word
+      count so layout, typography, and the markdown-to-HTML rendering path can be
+      exercised end to end. Lorem-style padding is intentionally avoided so the
+      placeholder reads naturally during review. Replace this entire block with
+      researched, original prose during the copy session, and remember to add the
+      `verified` date and at least one entry to `sources` at that time.
+    faq:
+      - q: "[PLACEHOLDER] Is my meeting audio uploaded anywhere?"
+        a: "[PLACEHOLDER] No — this answer will describe local processing once verified."
+      - q: "[PLACEHOLDER] How much does Sonabrief cost compared to alternatives?"
+        a: "[PLACEHOLDER] Placeholder answer; pricing details to be confirmed against /pricing."
+
+  it:
+    title: "[PLACEHOLDER] Alternativa a Otter.ai — Note riunioni private | Sonabrief"
+    description: "[PLACEHOLDER] Cerchi un'alternativa a Otter.ai che tenga l'audio sul tuo dispositivo? Sonabrief trascrive in locale e non salva mai le registrazioni."
+    intro: |
+      **[PLACEHOLDER — sostituire con copy verificato e originale. ~300+ parole.]**
+
+      Se stai cercando un'alternativa a uno strumento di trascrizione riunioni
+      molto diffuso, probabilmente stai valutando tre cose: dove finisce il tuo
+      audio, quanto costa lo strumento una volta superato il piano gratuito, e se
+      puoi davvero fidarti delle promesse sulla privacy della pagina marketing.
+      Questo paragrafo placeholder serve solo a validare il rendering e il
+      requisito di lunghezza minima; nessuna delle affermazioni qui è verificata.
+
+      Sonabrief adotta una scelta architetturale diversa rispetto alla maggior
+      parte dei prodotti cloud-first. L'audio viene elaborato sul tuo computer:
+      la registrazione grezza non deve mai lasciare il dispositivo per diventare
+      un riepilogo scritto. Questa singola decisione cambia il discorso sulla
+      privacy: invece di chiederti di fidarti di una policy di conservazione,
+      lo strumento elimina del tutto la necessità di inviare il file sensibile.
+
+      Questo testo segnaposto rappresenta anche la narrazione comparativa che
+      scriveremo più avanti — un confronto onesto e affiancato di cosa fa bene
+      ciascuno strumento e dove stanno i compromessi. Non rivendicheremo parità
+      dove non esiste e non inventeremo debolezze del concorrente. Ogni riga
+      della tabella avrà una fonte verificata prima della pubblicazione.
+
+      Le frasi rimanenti sono riempitivo per superare con margine il conteggio
+      minimo di parole, così da poter testare layout, tipografia e il percorso
+      di rendering da markdown a HTML. Sostituire l'intero blocco con prosa
+      originale e documentata durante la sessione dedicata al copy, e aggiungere
+      la data `verified` e almeno una voce in `sources`.
+    faq:
+      - q: "[PLACEHOLDER] Il mio audio viene caricato da qualche parte?"
+        a: "[PLACEHOLDER] No — risposta da verificare sull'elaborazione locale."
+      - q: "[PLACEHOLDER] Quanto costa Sonabrief rispetto alle alternative?"
+        a: "[PLACEHOLDER] Risposta segnaposto; dettagli prezzi da confermare con /pricing."
+
+  # fr / es / de intentionally absent → not translated yet.

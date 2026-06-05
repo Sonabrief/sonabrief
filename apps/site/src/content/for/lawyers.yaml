@@ -1,0 +1,88 @@
+# ⚠️ PLACEHOLDER DATA — DO NOT SHIP. Copy is invented and must be replaced with
+# verified content in the dedicated copy session.
+# Translations: only EN + IT present on purpose (fr/es/de intentionally absent).
+
+slug: lawyers
+profession: "[PLACEHOLDER] Lawyers"
+
+painPoints:
+  - "[PLACEHOLDER] Client confidentiality and privilege"
+  - "[PLACEHOLDER] Accurate records of consultations"
+  - "[PLACEHOLDER] Time spent writing up meeting notes"
+
+i18n:
+  en:
+    title: "[PLACEHOLDER] Sonabrief for Lawyers — Confidential Meeting Notes"
+    description: "[PLACEHOLDER] A meeting assistant for lawyers that keeps client audio on your device. Local transcription, no cloud uploads of the raw recording."
+    intro: |
+      **[PLACEHOLDER — replace with verified, original copy. ~300+ words.]**
+
+      Lawyers operate under confidentiality obligations that most generic
+      productivity tools were never designed to respect. When a transcription
+      service uploads raw client audio to a third-party cloud, it introduces a
+      data-handling question that can be difficult to answer to a client, a
+      regulator, or a bar association. This placeholder paragraph stands in for
+      the researched argument we will write later and makes no verified claims.
+
+      The core idea is simple to state: the sensitive artifact in a legal
+      consultation is the recording itself. If that recording is processed on
+      the practitioner's own machine and never uploaded, the surface area for a
+      confidentiality incident shrinks dramatically. Sonabrief is built around
+      that principle, and this page will eventually explain — honestly and
+      specifically — how that maps to a legal professional's day-to-day work.
+
+      We will cover the realistic workflow: capturing a consultation, generating
+      a usable written summary, and keeping a defensible record, without the raw
+      audio ever leaving the device. We will also be candid about what the tool
+      does not do and where a firm's own compliance review is still required.
+      Nothing here is legal advice, and that disclaimer will appear in the final
+      copy as well.
+
+      The remaining sentences exist to comfortably clear the minimum word count
+      so the rendering pipeline, typography, and markdown-to-HTML path can be
+      validated before any real copy is written. Replace this entire block with
+      original, profession-specific prose during the dedicated copy session.
+    faq:
+      - q: "[PLACEHOLDER] Does client audio get uploaded to the cloud?"
+        a: "[PLACEHOLDER] Placeholder answer about local processing, to be verified."
+      - q: "[PLACEHOLDER] Is this suitable for privileged conversations?"
+        a: "[PLACEHOLDER] Placeholder; final copy will include an appropriate disclaimer."
+
+  it:
+    title: "[PLACEHOLDER] Sonabrief per Avvocati — Note riunioni riservate"
+    description: "[PLACEHOLDER] Un assistente riunioni per avvocati che tiene l'audio dei clienti sul tuo dispositivo. Trascrizione locale, nessun upload della registrazione grezza."
+    intro: |
+      **[PLACEHOLDER — sostituire con copy verificato e originale. ~300+ parole.]**
+
+      Gli avvocati operano sotto obblighi di riservatezza che la maggior parte
+      degli strumenti di produttività generici non è mai stata progettata per
+      rispettare. Quando un servizio di trascrizione carica l'audio grezzo del
+      cliente su un cloud di terze parti, introduce una questione di trattamento
+      dei dati difficile da spiegare a un cliente, a un'autorità o all'ordine.
+      Questo paragrafo segnaposto rappresenta l'argomentazione che scriveremo in
+      seguito e non contiene affermazioni verificate.
+
+      L'idea di fondo è semplice: l'elemento sensibile in una consulenza legale è
+      la registrazione stessa. Se viene elaborata sul computer del professionista
+      e mai caricata, la superficie di rischio per un incidente di riservatezza
+      si riduce drasticamente. Sonabrief è costruito attorno a questo principio,
+      e questa pagina spiegherà — in modo onesto e specifico — come si traduce
+      nel lavoro quotidiano di un professionista legale.
+
+      Tratteremo il flusso realistico: registrare una consulenza, generare un
+      riepilogo scritto utilizzabile e mantenere un record difendibile, senza che
+      l'audio grezzo lasci mai il dispositivo. Saremo anche chiari su ciò che lo
+      strumento non fa e dove resta necessaria una valutazione di conformità
+      dello studio. Nulla qui costituisce consulenza legale, e questo avviso
+      comparirà anche nel copy finale.
+
+      Le frasi rimanenti servono a superare con margine il conteggio minimo di
+      parole, così da validare il rendering, la tipografia e il percorso da
+      markdown a HTML prima di scrivere il copy reale.
+    faq:
+      - q: "[PLACEHOLDER] L'audio del cliente viene caricato nel cloud?"
+        a: "[PLACEHOLDER] Risposta segnaposto sull'elaborazione locale, da verificare."
+      - q: "[PLACEHOLDER] È adatto a conversazioni coperte da segreto professionale?"
+        a: "[PLACEHOLDER] Segnaposto; il copy finale includerà un disclaimer adeguato."
+
+  # fr / es / de intentionally absent → not translated yet.
