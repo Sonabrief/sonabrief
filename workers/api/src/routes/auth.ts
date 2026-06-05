@@ -9,7 +9,6 @@ import {
   checkAndUpdateIPThrottle,
   recordSignupSignals,
   isUserWhitelisted,
-  isTrustedASN,
 } from "../lib/antiabuse";
 
 interface AuthRequestBody {
@@ -58,11 +57,11 @@ export async function handleAuthRequest(request: Request, env: Env): Promise<Res
   // Whitelist check: utenti già whitelistati bypassano tutti i controlli successivi
   const userWhitelisted = existingUser ? await isUserWhitelisted(existingUser.id, env) : false
 
-  // ASN aziendali trusted (Cloudflare passa cf.asn nativamente)
-  const asn = (request as any).cf?.asn as number | undefined
-  const asnTrusted = isTrustedASN(asn)
-
-  if (!existingUser && isDatacenterIP(ip) && !asnTrusted) {
+  // Datacenter-IP block per nuovi signup. Il bypass è un attributo dell'UTENTE
+  // (già in user_whitelist: payment_auto o admin_override), non della rete.
+  // L'ASN cloud da solo NON garantisce più bypass: è la provenienza tipica
+  // degli abuser, non dei clienti enterprise (che entrano via pagamento/override).
+  if (!existingUser && !userWhitelisted && isDatacenterIP(ip)) {
     return new Response(JSON.stringify({ ok: false, error: "datacenter_ip_blocked" }), {
       status: 403,
       headers: { ...cors, "Content-Type": "application/json" },
@@ -72,7 +71,7 @@ export async function handleAuthRequest(request: Request, env: Env): Promise<Res
   const ipHash = await hashIP(ip);
 
   // Check 3: IP throttling — solo per nuovi signup, non per re-login
-  if (!existingUser && !asnTrusted) {
+  if (!existingUser && !userWhitelisted) {
     const throttle = await checkAndUpdateIPThrottle(ipHash, env);
     if (!throttle.allowed) {
       return new Response(JSON.stringify({ ok: false, error: "rate_limited", reason: throttle.reason }), {

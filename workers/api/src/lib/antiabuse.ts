@@ -143,24 +143,6 @@ export async function recordSignupSignals(
 
 // === WHITELIST ===
 
-/** ASN aziendali trusted (Autonomous System Numbers).
- * Aggiunti via PR quando un cliente Enterprise richiede whitelist della propria rete.
- * Cloudflare passa request.cf.asn nativamente — zero costo API esterne.
- */
-const TRUSTED_ASNS = new Set<number>([
-  16509,  // Amazon AWS (include WorkSpaces — utenti remoti su VM)
-  14618,  // Amazon AWS (range secondario)
-  15169,  // Google Cloud / Workspace
-  8075,   // Microsoft (Azure + M365)
-  13335,  // Cloudflare (Zero Trust enterprise)
-  396982, // Google Cloud (range secondario)
-])
-
-export function isTrustedASN(asn: number | undefined): boolean {
-  if (asn === undefined) return false
-  return TRUSTED_ASNS.has(asn)
-}
-
 export async function isUserWhitelisted(userId: string, env: Env): Promise<boolean> {
   const row = await env.DB
     .prepare('SELECT user_id FROM user_whitelist WHERE user_id = ?')

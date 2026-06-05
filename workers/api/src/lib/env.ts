@@ -35,8 +35,15 @@ export interface Env {
   // Feature flags
   MAINTENANCE_MODE?: string;
 
-  // Budget caps
+  // Admin
+  FOUNDER_EMAIL: string;
+
+  // Budget caps & cost/pricing model — valori reali iniettati come secret
   CLOUD_BUDGET_CAP_EUR?: string;
+  VOXTRAL_COST_USD_PER_MIN?: string;
+  POLAR_FEE_RATE?: string;
+  POLAR_FEE_FIXED_EUR?: string;
+  USD_EUR_RATE?: string;
 
   // Lemon Squeezy (backup, non rimuovere)
   LEMONSQUEEZY_API_KEY?: string;

@@ -3,8 +3,6 @@ import { getUserFromSession } from '../lib/sessions'
 import { corsHeaders } from '../lib/cors'
 import { addUserToWhitelist, removeUserFromWhitelist } from '../lib/antiabuse'
 
-const FOUNDER_EMAIL = 'sonabrief.app@gmail.com'
-
 async function requireFounder(req: Request, env: Env): Promise<{ ok: true; userId: string } | { ok: false; response: Response }> {
   const cors = corsHeaders(req, env)
   const session = await getUserFromSession(req, env)
@@ -21,7 +19,9 @@ async function requireFounder(req: Request, env: Env): Promise<{ ok: true; userI
     .prepare('SELECT email FROM users WHERE id = ?')
     .bind(session.userId)
     .first<{ email: string }>()
-  if (!user || user.email !== FOUNDER_EMAIL) {
+  // Fail-safe: se FOUNDER_EMAIL non è iniettato, env.FOUNDER_EMAIL è undefined
+  // e nessuna email match → accesso admin negato (fail closed).
+  if (!user || user.email !== env.FOUNDER_EMAIL) {
     return {
       ok: false,
       response: new Response(JSON.stringify({ ok: false, error: "forbidden" }), {
@@ -288,11 +288,15 @@ export async function handleAdminStats(req: Request, env: Env): Promise<Response
     .all<{ date: string; count: number }>()
 
   // Valori derivati Cloud Veloce
+  // Costi/fee/cambio: valori reali iniettati come secret in produzione.
+  // Fallback neutri (0 / 1) solo per dev locale — MAI i numeri reali nel repo.
+  const voxtralCostPerMin = parseFloat(env.VOXTRAL_COST_USD_PER_MIN ?? '0')
+  const usdEurRate = parseFloat(env.USD_EUR_RATE ?? '1')
   const cvTotalMinutes = cloudVeloceAgg?.total_minutes ?? 0
-  const cvEstimatedCostUSD = cvTotalMinutes * 0.003
-  const cvBudgetCapEUR = parseFloat(env.CLOUD_BUDGET_CAP_EUR ?? '50')
+  const cvEstimatedCostUSD = cvTotalMinutes * voxtralCostPerMin
+  const cvBudgetCapEUR = parseFloat(env.CLOUD_BUDGET_CAP_EUR ?? '0')
   const cvBudgetUsedPercent = cvBudgetCapEUR > 0
-    ? (cvEstimatedCostUSD / 1.08 / cvBudgetCapEUR) * 100
+    ? (cvEstimatedCostUSD / usdEurRate / cvBudgetCapEUR) * 100
     : 0
   const synthesisCostUSD = budget?.cost_usd ?? 0
   const ordersCount = extraCreditsOrders?.cnt ?? 0
@@ -303,8 +307,8 @@ export async function handleAdminStats(req: Request, env: Env): Promise<Response
     pro: 9 / 900,
     unlimited: 9 / 1200,
   }
-  const POLAR_FEE_RATE = 0.055   // 4% base + 1.5% international
-  const POLAR_FEE_FIXED_EUR = 0.40
+  const POLAR_FEE_RATE = parseFloat(env.POLAR_FEE_RATE ?? '0')
+  const POLAR_FEE_FIXED_EUR = parseFloat(env.POLAR_FEE_FIXED_EUR ?? '0')
 
   let extraGrossEUR = 0
   let totalExtraMinSold = 0
@@ -315,7 +319,7 @@ export async function handleAdminStats(req: Request, env: Env): Promise<Response
   }
 
   const extraPolarFeesEUR = extraGrossEUR * POLAR_FEE_RATE + ordersCount * POLAR_FEE_FIXED_EUR
-  const extraVoxtralCostEUR = totalExtraMinSold * 0.003 / 1.08
+  const extraVoxtralCostEUR = totalExtraMinSold * voxtralCostPerMin / usdEurRate
   const extraNetEUR = extraGrossEUR - extraPolarFeesEUR - extraVoxtralCostEUR
 
   return new Response(JSON.stringify({
@@ -323,7 +327,7 @@ export async function handleAdminStats(req: Request, env: Env): Promise<Response
       total_users: totalUsers?.cnt ?? 0,
       mrr_eur: Math.round(mrr * 100) / 100,
       budget_used_usd: synthesisCostUSD,
-      budget_cap_usd: budget?.cap_usd ?? 50,
+      budget_cap_usd: budget?.cap_usd ?? 0,
     },
     tiers: tierCounts.results,
     synth_by_provider: synthStats.results,

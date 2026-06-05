@@ -93,7 +93,7 @@ async function sendBudgetAlert(env: Env, totalMinutes: number, month: string): P
       },
       body: JSON.stringify({
         from: 'Sonabrief <alerts@sonabrief.com>',
-        to: 'sonabrief.app@gmail.com',
+        to: env.FOUNDER_EMAIL ?? 'noreply@localhost',
         subject: '⚠️ Cloud Veloce: 80% budget raggiunto',
         html: `<p>Il consumo Cloud Veloce per il mese <strong>${month}</strong> ha raggiunto <strong>${totalMinutes} minuti</strong> (soglia 80% di ${GLOBAL_BUDGET_MINUTES} min).</p>`,
       }),

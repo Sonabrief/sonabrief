@@ -6,8 +6,6 @@ const THRESHOLDS = [
   { hours: 300, action: 'rate_limit' as const },
 ]
 
-const FOUNDER_EMAIL = 'sonabrief.app@gmail.com'
-
 function currentMonth(): string {
   const d = new Date()
   return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0')
@@ -28,7 +26,7 @@ async function sendAlertEmail(env: Env, userId: string, userEmail: string, hours
     },
     body: JSON.stringify({
       from: 'Sonabrief Alerts <hello@sonabrief.com>',
-      to: FOUNDER_EMAIL,
+      to: env.FOUNDER_EMAIL ?? 'noreply@localhost',
       subject,
       html,
     }),
