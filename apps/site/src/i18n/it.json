@@ -199,7 +199,7 @@
         "period": "per sempre",
         "highlights": [
           "Trascrizione locale illimitata",
-          "Ore di meeting elaborate: 3h/mese",
+          "Sintesi cloud: 3h/mese",
           "Archivio 7 giorni",
           "Modalità Solo locale",
           "Export Markdown"
@@ -213,7 +213,7 @@
         "period": "/mese",
         "highlights": [
           "Tutto del Free",
-          "Ore di meeting elaborate: 30h/mese",
+          "Sintesi cloud: 30h/mese",
           "Cloud Veloce: 5h/mese",
           "Archivio 12 mesi",
           "Dashboard, briefing e template"
@@ -228,7 +228,7 @@
         "highlights": [
           "Tutto del Pro, più:",
           "Archivio per sempre",
-          "Ore di meeting elaborate illimitate",
+          "Sintesi cloud illimitata",
           "Cloud Veloce: 20h/mese",
           "Template personalizzati illimitati",
           "Backup cifrato e Archivio Synced 25GB"
@@ -249,8 +249,8 @@
       }
     ],
     "claims": [
-      "Whisper Large-v3-turbo è disponibile su ogni piano, Free incluso: il modello che l'app esegue dipende dal tuo hardware, mai dal prezzo, e puoi forzare Large dalle impostazioni.",
-      "Tutta l'elaborazione cloud gira su Mistral, hosting EU, con Zero Data Retention."
+      "La massima qualità di trascrizione è su ogni piano, Free incluso: il modello che l'app esegue dipende dal tuo hardware, mai dal prezzo, e la qualità massima resta sempre forzabile dalle impostazioni.",
+      "Tutta l'elaborazione cloud gira su infrastruttura europea, con Zero Data Retention."
     ],
     "fullComparison": "Vedi il confronto completo →",
     "comparison": {
@@ -288,12 +288,12 @@
           "label": "Trascrizione",
           "rows": [
             {
-              "feature": "Modello Whisper (auto per hardware, forzabile)",
+              "feature": "Qualità trascrizione (massima, su ogni piano)",
               "values": [
-                "Large-v3-turbo",
-                "Large-v3-turbo",
-                "Large-v3-turbo",
-                "Large-v3-turbo"
+                "✓",
+                "✓",
+                "✓",
+                "✓"
               ]
             },
             {
@@ -306,7 +306,7 @@
               ]
             },
             {
-              "feature": "Cloud Standard (ore/mese)",
+              "feature": "Sintesi cloud (ore/mese)",
               "values": [
                 "3h",
                 "30h",
@@ -329,21 +329,21 @@
           "label": "Sintesi",
           "rows": [
             {
-              "feature": "Modello cloud LLM",
+              "feature": "Qualità sintesi (cloud)",
               "values": [
-                "Mistral Small",
-                "Mistral Large 3",
-                "Mistral Large 3",
-                "Mistral Large 3"
+                "Base",
+                "Avanzata",
+                "Avanzata",
+                "Avanzata"
               ]
             },
             {
-              "feature": "Modello Solo locale",
+              "feature": "Qualità sintesi (Solo locale)",
               "values": [
-                "Llama 3B",
-                "Llama 8B",
-                "A scelta",
-                "A scelta"
+                "Base",
+                "Avanzata",
+                "Avanzata, a scelta",
+                "Avanzata, a scelta"
               ]
             }
           ]
@@ -597,8 +597,8 @@
       ]
     },
     "banners": [
-      "Whisper Large-v3-turbo su ogni piano, Free incluso. Il modello si adatta al tuo hardware, non al prezzo, e Large resta sempre forzabile.",
-      "Tutto l'LLM cloud su Mistral, hosting EU · ZDR attivo · DPA firmato"
+      "Massima qualità di trascrizione su ogni piano, Free incluso. Il modello si adatta al tuo hardware, non al prezzo, e resta sempre forzabile.",
+      "Tutta l'elaborazione cloud su infrastruttura europea · Zero Data Retention attivo · DPA firmato"
     ],
     "enterprise": {
       "heading": "Enterprise",
@@ -632,7 +632,7 @@
         },
         {
           "q": "Posso condividere un account con il mio team?",
-          "a": "Gli account sono personali. Pro Unlimited aggiunge il multi-dispositivo per usare il tuo account su tutte le tue macchine. Per più persone, l'Enterprise offre una configurazione multi-postazione vera: scrivici."
+          "a": "Gli account sono personali. Il multi-dispositivo è incluso in tutti i piani, così usi il tuo account su tutte le tue macchine: serve a te, non a condividere l'accesso con altri. Per più persone, l'Enterprise offre una configurazione multi-postazione vera: scrivici."
         },
         {
           "q": "C'è uno sconto studenti?",
@@ -650,15 +650,15 @@
       },
       {
         "q": "Quali sono le tre modalità di trascrizione?",
-        "a": "Standard trascrive in locale e sintetizza nel cloud europeo. Solo locale tiene tutto sulla tua macchina. Cloud Veloce (Pro e Pro Unlimited) trascrive sui server europei di Mistral a Parigi, veloce su qualsiasi hardware, con audio cifrato in transito e mai salvato. Scegli tu, a ogni riunione."
+        "a": "Standard trascrive in locale e sintetizza nel cloud europeo. Solo locale tiene tutto sulla tua macchina. Cloud Veloce (Pro e Pro Unlimited) trascrive sul nostro cloud europeo, veloce su qualsiasi hardware, con audio cifrato in transito e mai salvato. Scegli tu, a ogni riunione."
       },
       {
         "q": "E se dimentico la passphrase?",
         "a": "Non possiamo recuperarla: è il senso della cifratura zero-knowledge. Durante l'onboarding ricevi 12 parole di recovery (standard BIP39). Scrivile e conservale al sicuro. Se perdi sia la passphrase sia le parole di recovery, il tuo archivio cifrato diventa illeggibile. I compromessi sono reali."
       },
       {
-        "q": "Il vostro LLM cloud è davvero in EU?",
-        "a": "Sì. Usiamo Mistral, un'azienda europea, su infrastruttura con hosting in EU, con Zero Data Retention attivo e un Data Processing Agreement firmato. Dettagli e riferimento al DPA su /security."
+        "q": "L'intelligenza artificiale che usate è davvero in EU?",
+        "a": "Sì. Per la sintesi usiamo Mistral, un'azienda europea, su infrastruttura ospitata in EU, con Zero Data Retention attivo e un accordo sul trattamento dei dati (DPA) firmato. Tutti i dettagli su /security."
       },
       {
         "q": "Perché open source?",
@@ -666,7 +666,7 @@
       },
       {
         "q": "Perché €9/mese e non meno?",
-        "a": "Il piano Free esiste ed è reale, non depotenziato. Il Pro è per chi ha bisogno di cronologia più lunga, qualità LLM migliore e il set di funzionalità completo. Servono ricavi per restare indipendenti e mantenere l'infrastruttura. Semplice."
+        "a": "Il piano Free esiste ed è reale, non depotenziato. Il Pro è per chi ha bisogno di un archivio più lungo, sintesi di qualità migliore e il set di funzionalità completo. Servono ricavi per restare indipendenti e mantenere l'infrastruttura. Semplice."
       },
       {
         "q": "Funziona su mobile?",
