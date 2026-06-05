@@ -8,18 +8,18 @@
   },
   "hero": {
     "h1": "Ein privater Kopf für Ihre Meetings.",
-    "sub": "Sonabrief nimmt Ihre beruflichen Gespräche auf, transkribiert und fasst sie zusammen. Ohne ein einziges Byte Audio in die Cloud zu senden. Niemals.",
+    "sub": "Nehmen Sie Ihre Meetings auf und erhalten Sie eine versandfertige Zusammenfassung. Ihr Audio bleibt auf Ihrem Computer und wird nie gespeichert. Niemals.",
     "cta1": "Sonabrief kostenlos testen →",
     "cta2": "So funktioniert's →",
     "micro": "Kostenloser Plan verfügbar · Keine Kreditkarte · Open Source",
     "pillars": [
       {
         "num": "01",
-        "label": "Audio bleibt lokal"
+        "label": "Audio bleibt bei Ihnen"
       },
       {
         "num": "02",
-        "label": "verschlüsselte Notizen"
+        "label": "geschützte Notizen"
       },
       {
         "num": "03",
@@ -29,7 +29,7 @@
   },
   "problem": {
     "lines": [
-      "Jedes Meeting-Tool sendet Ihr Audio an Server, die Sie nie gesehen haben.",
+      "Jedes andere Meeting-Tool lädt Ihr Audio auf ferne Server.",
       "Für die meisten Menschen ist das in Ordnung.",
       "Für Sie nicht."
     ]
@@ -45,14 +45,14 @@
       {
         "num": "02",
         "title": "Ihre Notizen werden vor der Synchronisierung verschlüsselt.",
-        "body": "Wir können sie nicht lesen. Unser Cloud-LLM auch nicht. Zwölf Wörter schützen Ihr Archiv.",
-        "linkLabel": "Mehr über Zero-Knowledge →"
+        "body": "Wenn Sie synchronisieren, werden Ihre Notizen auf Ihrem Gerät verschlüsselt. Wir können sie nicht lesen, und die KI, die sie verarbeitet, auch nicht: Nur eine Passphrase, die nur Sie kennen, kann sie entschlüsseln.",
+        "linkLabel": "Wie wir Ihre Notizen schützen →"
       },
       {
         "num": "03",
         "title": "Open Source.",
-        "body": "Erklärte Versprechen, Code, der sie beweist. AGPL v3. Alles auf GitHub.",
-        "linkLabel": "Auf GitHub prüfen →"
+        "body": "Versprechen, die sich überprüfen lassen, nicht nur lesen: Der gesamte Code ist öffentlich auf GitHub.",
+        "linkLabel": "Code auf GitHub ansehen →"
       }
     ]
   },
@@ -64,14 +64,14 @@
       },
       {
         "title": "Transkribieren",
-        "desc": "Auf Ihrem Gerät mit Whisper, oder über Cloud Schnell, unsere schnelle EU-Cloud (Pro und Pro Unlimited). So oder so wird nie eine Audiodatei aufbewahrt."
+        "desc": "Auf Ihrem Computer, oder über Cloud Schnell in unserer EU-Cloud (Pro und Pro Unlimited). So oder so wird nie eine Audiodatei aufbewahrt."
       },
       {
         "title": "Zusammenfassen",
-        "desc": "Mistral EU mit Zero Data Retention oder Ollama vollständig lokal. Nur der transkribierte Text, nie das Audio."
+        "desc": "In unserer EU-Cloud oder vollständig lokal auf Ihrem Computer. Verarbeitet wird nur der transkribierte Text, nie das Audio."
       }
     ],
-    "qualityNote": "Die Transkriptionsqualität hängt nicht davon ab, was Sie zahlen. Whisper Large-v3-turbo (dasselbe Modell, das Forschende nutzen) ist in jedem Plan verfügbar, auch im Free, und läuft vollständig auf Ihrem Gerät. Standardmäßig wählt die App das passende Modell für Ihre Hardware; in den Einstellungen können Sie jederzeit Large-v3-turbo erzwingen.",
+    "qualityNote": "Die Transkriptionsqualität hängt nicht davon ab, was Sie zahlen: Sie ist in jedem Plan gleich, auch im Free, und läuft vollständig auf Ihrem Computer. Die App wählt selbst das passende Modell für Ihre Hardware; wann immer Sie möchten, können Sie in den Einstellungen die höchste Qualität erzwingen.",
     "cloudNote": "Bei Pro und Pro Unlimited transkribiert Cloud Schnell in der EU-Cloud: 30 Minuten Audio in 1–2 Minuten, unabhängig von Ihrer Hardware."
   },
   "outputSample": {
@@ -114,17 +114,17 @@
       {
         "name": "Standard",
         "points": [
-          "Mistral, in der EU gehostet, ZDR aktiv, DPA unterzeichnet",
+          "Transkription auf Ihrem Computer, Zusammenfassung in unserer EU-Cloud",
           "Nur der transkribierte Text erreicht den Server, nie das Audio",
           "Ausgezeichnete Zusammenfassungsqualität, hohe Geschwindigkeit",
-          "Free: Mistral Small · Pro und Pro Unlimited: Mistral Large 3"
+          "In allen Plänen verfügbar, auch im Free"
         ]
       },
       {
         "name": "Nur lokal",
         "points": [
-          "Ollama, vollständig auf Ihrem Gerät",
-          "Kein einziges Byte verlässt es: nie, in keinem Modus",
+          "Alles bleibt auf Ihrem Gerät, Transkription und Zusammenfassung",
+          "Nichts verlässt Ihr Gerät: nie, in keinem Modus",
           "Langsamer, erfordert geeignete Hardware",
           "In allen Plänen verfügbar, auch im Free"
         ]
@@ -133,18 +133,18 @@
         "name": "Cloud Schnell",
         "badge": "Pro und Pro Unlimited",
         "points": [
-          "Volle Geschwindigkeit auf jedem Gerät, selbst auf einem älteren Windows-Laptop",
+          "Volle Geschwindigkeit auf jedem Computer, auch auf älteren",
           "30 Minuten Audio, transkribiert in 1–2 Minuten",
-          "Mit Mistral, in Europa in Paris gehostet, Audio bei der Übertragung verschlüsselt, nie gespeichert",
+          "In unserer EU-Cloud, Audio bei der Übertragung verschlüsselt und nie gespeichert",
           "5 Std./Monat inklusive bei Pro · 20 Std./Monat bei Pro Unlimited"
         ]
       }
     ],
-    "positioning": "Das einzige Meeting-Tool mit dreistufiger Datenschutz-Wahl, einem 100 % europäischen Stack und unbegrenzter lokaler Transkription in jedem Plan, auch im Free."
+    "positioning": "Das einzige Meeting-Tool mit dreistufiger Datenschutz-Wahl, vollständig europäischer Infrastruktur und unbegrenzter lokaler Transkription in jedem Plan, auch im Free."
   },
   "memory": {
     "h2": "Ein Gedächtnis, das bleibt.",
-    "lead": "Andere Tools behandeln Ihren Verlauf als ihre Aufbewahrungsrichtlinie und löschen ihn früher oder später. Wir finden, Ihr berufliches Gedächtnis gehört Ihnen. Free ist ein ehrlicher Vorgeschmack darauf. Mit Pro behalten Sie es 12 Monate, mit Pro Unlimited für immer. Sie entscheiden, nicht eine Richtlinie.",
+    "lead": "Andere Tools behandeln Ihr Archiv als ihre Aufbewahrungsrichtlinie und löschen es früher oder später. Wir finden, Ihr berufliches Gedächtnis gehört Ihnen. Free ist ein ehrlicher Vorgeschmack: Sie behalten es 7 Tage. Mit Pro 12 Monate, mit Pro Unlimited für immer. Sie entscheiden, nicht eine Richtlinie.",
     "tiers": [
       {
         "label": "Free",
@@ -160,7 +160,7 @@
         "note": "(ja, wirklich)"
       }
     ],
-    "body": "Mit Ihrer Passphrase verschlüsselt. Über alle Ihre Geräte synchronisiert. Durchsuchbar. Ihres, wirklich Ihres.",
+    "body": "Wenn Sie synchronisieren, ist es mit Ihrer Passphrase verschlüsselt und auf allen Ihren Geräten verfügbar. Durchsuchbar. Ihres, wirklich Ihres.",
     "tradeoff": "Wenn Sie Ihre Passphrase vergessen, können wir sie nicht wiederherstellen. Kompromisse sind real. Wir verbergen sie nicht."
   },
   "professionals": {
@@ -174,7 +174,7 @@
       "Forschende, die qualitative Interviews führen."
     ],
     "close": "Wenn Ihre Meetings Dinge enthalten, die die Cloud nicht sehen sollte, wissen Sie genau, warum wir es gebaut haben.",
-    "aside": "(Und wenn nicht: Sonabrief funktioniert auch für Sie.)"
+    "aside": "Nicht auf dieser Liste? Sonabrief funktioniert genauso gut für Sie."
   },
   "openSource": {
     "h2": "Open Source. Überprüfbar, nicht nur behauptet.",
@@ -182,7 +182,7 @@
     "cta1": "Auf GitHub ansehen →",
     "cta2": "Unsere Sicherheitsarchitektur lesen →",
     "builtWith": "Gebaut mit Whisper · Ollama · Mistral · libsodium · Cloudflare Workers: offene Standards, offener Code.",
-    "contribute": "Mitwirken? Unterschreiben Sie unsere Harmony CLA. Für Enterprise bieten wir Dual-Licensing."
+    "contribute": "Möchten Sie mitwirken? Erfahren Sie wie auf der Open-Source-Seite. Für Enterprise bieten wir zudem eine kommerzielle Lizenz."
   },
   "pricing": {
     "title": "Was es kostet, und warum.",
@@ -199,7 +199,7 @@
         "period": "für immer",
         "highlights": [
           "Unbegrenzte lokale Transkription",
-          "Verarbeitete Meeting-Stunden: 3 Std./Monat",
+          "Cloud-Zusammenfassung: 3 Std./Monat",
           "Archiv 7 Tage",
           "Modus Nur lokal",
           "Markdown-Export"
@@ -213,7 +213,7 @@
         "period": "/Monat",
         "highlights": [
           "Alles aus Free",
-          "Verarbeitete Meeting-Stunden: 30 Std./Monat",
+          "Cloud-Zusammenfassung: 30 Std./Monat",
           "Cloud Schnell: 5 Std./Monat",
           "Archiv 12 Monate",
           "Dashboard, Briefings und Vorlagen"
@@ -228,7 +228,7 @@
         "highlights": [
           "Alles aus Pro, plus:",
           "Archiv für immer",
-          "Unbegrenzte verarbeitete Meeting-Stunden",
+          "Unbegrenzte Cloud-Zusammenfassung",
           "Cloud Schnell: 20 Std./Monat",
           "Unbegrenzte eigene Vorlagen",
           "Verschlüsseltes Backup und Synced-Archiv 25 GB"
@@ -249,8 +249,8 @@
       }
     ],
     "claims": [
-      "Whisper Large-v3-turbo ist in jedem Plan verfügbar, auch im Free: welches Modell die App ausführt, hängt von Ihrer Hardware ab, nie vom Preis, und Large lässt sich in den Einstellungen erzwingen.",
-      "Die gesamte Cloud-Verarbeitung läuft auf Mistral, in der EU gehostet, mit Zero Data Retention."
+      "Die höchste Transkriptionsqualität gibt es in jedem Plan, auch im Free: welches Modell die App ausführt, hängt von Ihrer Hardware ab, nie vom Preis, und die höchste Qualität lässt sich jederzeit in den Einstellungen erzwingen.",
+      "Die gesamte Cloud-Verarbeitung läuft auf europäischer Infrastruktur, mit Zero Data Retention."
     ],
     "fullComparison": "Vollständigen Vergleich ansehen →",
     "comparison": {
@@ -288,12 +288,12 @@
           "label": "Transkription",
           "rows": [
             {
-              "feature": "Whisper-Modell (automatisch je nach Hardware, erzwingbar)",
+              "feature": "Transkriptionsqualität (höchste, in jedem Plan)",
               "values": [
-                "Large-v3-turbo",
-                "Large-v3-turbo",
-                "Large-v3-turbo",
-                "Large-v3-turbo"
+                "✓",
+                "✓",
+                "✓",
+                "✓"
               ]
             },
             {
@@ -306,7 +306,7 @@
               ]
             },
             {
-              "feature": "Cloud Standard (Std./Monat)",
+              "feature": "Cloud-Zusammenfassung (Std./Monat)",
               "values": [
                 "3 Std.",
                 "30 Std.",
@@ -329,21 +329,21 @@
           "label": "Zusammenfassung",
           "rows": [
             {
-              "feature": "Cloud-LLM-Modell",
+              "feature": "Zusammenfassungsqualität (Cloud)",
               "values": [
-                "Mistral Small",
-                "Mistral Large 3",
-                "Mistral Large 3",
-                "Mistral Large 3"
+                "Gut",
+                "Erweitert",
+                "Erweitert",
+                "Erweitert"
               ]
             },
             {
-              "feature": "Modell Nur lokal",
+              "feature": "Zusammenfassungsqualität (Nur lokal)",
               "values": [
-                "Llama 3B",
-                "Llama 8B",
-                "Frei wählbar",
-                "Frei wählbar"
+                "Gut",
+                "Erweitert",
+                "Erweitert, frei wählbar",
+                "Erweitert, frei wählbar"
               ]
             }
           ]
@@ -597,8 +597,8 @@
       ]
     },
     "banners": [
-      "Whisper Large-v3-turbo in jedem Plan, auch im Free. Das Modell richtet sich nach Ihrer Hardware, nicht nach Ihrem Preis, und Large lässt sich jederzeit erzwingen.",
-      "Das gesamte Cloud-LLM auf Mistral, in der EU gehostet · ZDR aktiv · DPA unterzeichnet"
+      "Höchste Transkriptionsqualität in jedem Plan, auch im Free. Das Modell richtet sich nach Ihrer Hardware, nicht nach Ihrem Preis, und lässt sich jederzeit erzwingen.",
+      "Die gesamte Cloud-Verarbeitung auf europäischer Infrastruktur · Zero Data Retention aktiv · DPA unterzeichnet"
     ],
     "enterprise": {
       "heading": "Enterprise",
@@ -632,7 +632,7 @@
         },
         {
           "q": "Kann ich ein Konto mit meinem Team teilen?",
-          "a": "Konten sind persönlich. Pro Unlimited ergänzt die Nutzung auf mehreren Geräten, sodass Sie Ihr Konto auf allen Ihren Rechnern verwenden können. Für mehrere Personen bietet Enterprise eine echte Mehrplatz-Einrichtung: sprechen Sie uns an."
+          "a": "Konten sind persönlich. Die Nutzung auf mehreren Geräten ist in allen Plänen enthalten, sodass Sie Ihr Konto auf allen Ihren Rechnern verwenden können: das ist für Sie gedacht, nicht zum Teilen des Zugangs mit anderen. Für mehrere Personen bietet Enterprise eine echte Mehrplatz-Einrichtung: sprechen Sie uns an."
         },
         {
           "q": "Gibt es einen Studentenrabatt?",
@@ -650,15 +650,15 @@
       },
       {
         "q": "Was sind die drei Transkriptionsmodi?",
-        "a": "Standard transkribiert lokal und fasst in der EU-Cloud zusammen. Nur lokal behält alles auf Ihrem Gerät. Cloud Schnell (Pro und Pro Unlimited) transkribiert auf Mistrals europäischen Servern in Paris, schnell auf jeder Hardware, mit bei der Übertragung verschlüsseltem und nie gespeichertem Audio. Sie wählen pro Meeting."
+        "a": "Standard transkribiert lokal und fasst in der EU-Cloud zusammen. Nur lokal behält alles auf Ihrem Gerät. Cloud Schnell (Pro und Pro Unlimited) transkribiert in unserer EU-Cloud, schnell auf jeder Hardware, mit bei der Übertragung verschlüsseltem und nie gespeichertem Audio. Sie wählen pro Meeting."
       },
       {
         "q": "Was, wenn ich meine Passphrase vergesse?",
         "a": "Wir können sie nicht wiederherstellen: das ist der Sinn der Zero-Knowledge-Verschlüsselung. Beim Einrichten erhalten Sie 12 Wiederherstellungswörter (BIP39-Standard). Notieren Sie sie und bewahren Sie sie sicher auf. Wenn Sie sowohl die Passphrase als auch die Wiederherstellungswörter verlieren, wird Ihr verschlüsseltes Archiv unlesbar. Kompromisse sind real."
       },
       {
-        "q": "Ist Ihr Cloud-LLM wirklich in der EU gehostet?",
-        "a": "Ja. Wir nutzen Mistral, ein europäisches Unternehmen, auf in der EU gehosteter Infrastruktur, mit aktivem Zero Data Retention und einem unterzeichneten Data Processing Agreement. Details und DPA-Referenz auf /security."
+        "q": "Ist die KI, die Sie nutzen, wirklich in der EU gehostet?",
+        "a": "Ja. Für die Zusammenfassung nutzen wir Mistral, ein europäisches Unternehmen, auf in der EU gehosteter Infrastruktur, mit aktivem Zero Data Retention und einem unterzeichneten Auftragsverarbeitungsvertrag (DPA). Alle Details auf /security."
       },
       {
         "q": "Warum Open Source?",
@@ -666,7 +666,7 @@
       },
       {
         "q": "Warum 9 €/Monat und nicht weniger?",
-        "a": "Der Free-Plan existiert und ist echt, nicht beschnitten. Pro ist für alle, die einen längeren Verlauf, bessere LLM-Qualität und den vollen Funktionsumfang brauchen. Wir benötigen Einnahmen, um unabhängig zu bleiben und die Infrastruktur zu betreiben. Ganz einfach."
+        "a": "Der Free-Plan existiert und ist echt, nicht beschnitten. Pro ist für alle, die ein längeres Archiv, bessere Zusammenfassungsqualität und den vollen Funktionsumfang brauchen. Wir benötigen Einnahmen, um unabhängig zu bleiben und die Infrastruktur zu betreiben. Ganz einfach."
       },
       {
         "q": "Funktioniert es auf dem Smartphone?",

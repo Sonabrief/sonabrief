@@ -8,18 +8,18 @@
   },
   "hero": {
     "h1": "A private mind for your meetings.",
-    "sub": "Sonabrief records, transcribes, and summarizes your professional conversations, without sending a single byte of audio to the cloud. Ever.",
+    "sub": "Record your meetings and get a summary ready to send. Your audio stays on your computer and is never saved. Ever.",
     "cta1": "Try Sonabrief free →",
     "cta2": "See how it works →",
     "micro": "Free plan available · No credit card · Open source",
     "pillars": [
       {
         "num": "01",
-        "label": "audio stays local"
+        "label": "audio stays with you"
       },
       {
         "num": "02",
-        "label": "encrypted notes"
+        "label": "protected notes"
       },
       {
         "num": "03",
@@ -29,7 +29,7 @@
   },
   "problem": {
     "lines": [
-      "Every meeting tool sends your audio to servers you've never seen.",
+      "Every other meeting tool uploads your audio to distant servers.",
       "For most people, that's fine.",
       "For you, it isn't."
     ]
@@ -45,14 +45,14 @@
       {
         "num": "02",
         "title": "Your notes are encrypted before sync.",
-        "body": "We can't read them. Neither can our cloud LLM. Twelve words protect your archive.",
-        "linkLabel": "Read about zero-knowledge →"
+        "body": "When you sync, your notes are encrypted on your device. We can't read them, and neither can the AI that processes them: only a passphrase you alone know can unlock them.",
+        "linkLabel": "How we protect your notes →"
       },
       {
         "num": "03",
         "title": "Open source.",
-        "body": "Promises declared, code that proves them. AGPL v3. Everything on GitHub.",
-        "linkLabel": "Inspect on GitHub →"
+        "body": "Promises you can verify, not just read: all the code is public on GitHub.",
+        "linkLabel": "See the code on GitHub →"
       }
     ]
   },
@@ -64,14 +64,14 @@
       },
       {
         "title": "Transcribe",
-        "desc": "On your machine with Whisper, or through Fast Cloud, our fast EU cloud (Pro & Pro Unlimited). Either way, no audio file is ever kept."
+        "desc": "On your computer, or through Fast Cloud on our EU cloud (Pro & Pro Unlimited). Either way, no audio file is ever kept."
       },
       {
         "title": "Summarize",
-        "desc": "Mistral EU with Zero Data Retention, or Ollama fully local. Only transcribed text, never audio."
+        "desc": "On our EU cloud, or entirely local on your computer. Only the transcribed text is processed, never the audio."
       }
     ],
-    "qualityNote": "Transcription quality doesn't depend on what you pay. Whisper Large-v3-turbo (the same model researchers use) is available on every plan, including Free, and runs entirely on your machine. By default the app picks the right model for your hardware; you can force Large-v3-turbo in settings whenever you want.",
+    "qualityNote": "Transcription quality doesn't depend on what you pay: it's the same on every plan, including Free, and runs entirely on your computer. The app picks the right model for your hardware on its own; whenever you want, you can force the highest quality in settings.",
     "cloudNote": "On Pro and Pro Unlimited, Fast Cloud transcribes in the EU cloud: 30 minutes of audio in 1–2 minutes, whatever your hardware."
   },
   "outputSample": {
@@ -114,17 +114,17 @@
       {
         "name": "Standard",
         "points": [
-          "Mistral, EU-hosted, ZDR active, DPA signed",
+          "Transcribed on your computer, summarized on our EU cloud",
           "Only transcribed text reaches the server, never audio",
           "Excellent summary quality, great speed",
-          "Free: Mistral Small · Pro & Pro Unlimited: Mistral Large 3"
+          "Available on every tier, including Free"
         ]
       },
       {
         "name": "Local Only",
         "points": [
-          "Ollama, entirely on your machine",
-          "Zero bytes leave: ever, in any mode",
+          "Everything stays on your machine, transcription and summary",
+          "Nothing leaves your device: ever, in any mode",
           "Slower, requires capable hardware",
           "Available on every tier, including Free"
         ]
@@ -133,18 +133,18 @@
         "name": "Fast Cloud",
         "badge": "Pro & Pro Unlimited",
         "points": [
-          "Full speed on any machine, even an older Windows laptop",
+          "Full speed on any computer, even an older one",
           "30 minutes of audio, transcribed in 1–2 minutes",
-          "Powered by Mistral, EU-hosted in Paris, audio encrypted in transit, never saved",
+          "On our EU cloud, audio encrypted in transit and never saved",
           "5h/mo included on Pro · 20h/mo on Pro Unlimited"
         ]
       }
     ],
-    "positioning": "The only meeting tool with a three-level privacy choice, a 100% EU stack, and unlimited Local transcription on every tier, including Free."
+    "positioning": "The only meeting tool with a three-level privacy choice, fully European infrastructure, and unlimited Local transcription on every tier, including Free."
   },
   "memory": {
     "h2": "A memory built to last.",
-    "lead": "Other tools treat your history as their retention policy, and sooner or later they delete it. We think your professional memory is yours. Free is an honest taste of it. With Pro you keep it for 12 months, with Pro Unlimited forever. You decide, not a policy.",
+    "lead": "Other tools treat your archive as their retention policy, and sooner or later they delete it. We think your professional memory is yours. Free is an honest taste of it: you keep it for 7 days. With Pro, 12 months; with Pro Unlimited, forever. You decide, not a policy.",
     "tiers": [
       {
         "label": "Free",
@@ -160,7 +160,7 @@
         "note": "(yes, really)"
       }
     ],
-    "body": "Encrypted with your passphrase. Synced across your devices. Searchable. Yours, really yours.",
+    "body": "When you sync, it's encrypted with your passphrase and available across all your devices. Searchable. Yours, really yours.",
     "tradeoff": "If you forget your passphrase, we can't recover it. Trade-offs are real. We don't hide them."
   },
   "professionals": {
@@ -174,7 +174,7 @@
       "Researchers conducting qualitative interviews."
     ],
     "close": "If your meetings contain things the cloud shouldn't see, you understand exactly why we built this.",
-    "aside": "(If they don't: Sonabrief works for you too.)"
+    "aside": "Not on this list? Sonabrief works just as well for you."
   },
   "openSource": {
     "h2": "Open source. Verifiable, not declarable.",
@@ -182,7 +182,7 @@
     "cta1": "View on GitHub →",
     "cta2": "Read our security architecture →",
     "builtWith": "Built with Whisper · Ollama · Mistral · libsodium · Cloudflare Workers: open standards, open code.",
-    "contribute": "Contribute? Sign our Harmony CLA. We dual-license for Enterprise."
+    "contribute": "Want to contribute? Find out how on the open source page. For Enterprise, we also offer a commercial license."
   },
   "pricing": {
     "title": "What it costs, and why.",
@@ -199,7 +199,7 @@
         "period": "forever",
         "highlights": [
           "Unlimited local transcription",
-          "Meeting hours processed: 3h/mo",
+          "Cloud summary: 3h/mo",
           "7-day archive",
           "Local Only mode",
           "Markdown export"
@@ -213,7 +213,7 @@
         "period": "/mo",
         "highlights": [
           "Everything in Free",
-          "Meeting hours processed: 30h/mo",
+          "Cloud summary: 30h/mo",
           "Fast Cloud: 5h/mo",
           "12-month archive",
           "Dashboard, briefings & templates"
@@ -228,7 +228,7 @@
         "highlights": [
           "Everything in Pro, plus:",
           "Forever archive",
-          "Unlimited meeting hours processed",
+          "Unlimited cloud summary",
           "Fast Cloud: 20h/mo",
           "Unlimited custom templates",
           "Encrypted backup & 25GB Synced archive"
@@ -249,8 +249,8 @@
       }
     ],
     "claims": [
-      "Whisper Large-v3-turbo is available on every plan, Free included: the model the app runs depends on your hardware, never on your price, and you can force Large in settings.",
-      "All cloud processing runs on Mistral, EU-hosted, with Zero Data Retention."
+      "The highest transcription quality is on every plan, Free included: the model the app runs depends on your hardware, never on your price, and top quality stays forceable in settings.",
+      "All cloud processing runs on European infrastructure, with Zero Data Retention."
     ],
     "fullComparison": "See full comparison →",
     "comparison": {
@@ -288,12 +288,12 @@
           "label": "Transcription",
           "rows": [
             {
-              "feature": "Whisper model (auto by hardware, forceable)",
+              "feature": "Transcription quality (highest, on every plan)",
               "values": [
-                "Large-v3-turbo",
-                "Large-v3-turbo",
-                "Large-v3-turbo",
-                "Large-v3-turbo"
+                "✓",
+                "✓",
+                "✓",
+                "✓"
               ]
             },
             {
@@ -306,7 +306,7 @@
               ]
             },
             {
-              "feature": "Standard Cloud (hours/mo)",
+              "feature": "Cloud summary (hours/mo)",
               "values": [
                 "3h",
                 "30h",
@@ -329,21 +329,21 @@
           "label": "Summarization",
           "rows": [
             {
-              "feature": "Cloud LLM model",
+              "feature": "Summary quality (cloud)",
               "values": [
-                "Mistral Small",
-                "Mistral Large 3",
-                "Mistral Large 3",
-                "Mistral Large 3"
+                "Good",
+                "Advanced",
+                "Advanced",
+                "Advanced"
               ]
             },
             {
-              "feature": "Local Only model",
+              "feature": "Summary quality (Local Only)",
               "values": [
-                "Llama 3B",
-                "Llama 8B",
-                "Your choice",
-                "Your choice"
+                "Good",
+                "Advanced",
+                "Advanced, your choice",
+                "Advanced, your choice"
               ]
             }
           ]
@@ -597,8 +597,8 @@
       ]
     },
     "banners": [
-      "Whisper Large-v3-turbo on every plan, Free included. The model fits your hardware, not your price, and Large is always yours to force.",
-      "All cloud LLM on Mistral, EU-hosted · ZDR active · DPA signed"
+      "Highest transcription quality on every plan, Free included. The model fits your hardware, not your price, and stays yours to force.",
+      "All cloud processing on European infrastructure · Zero Data Retention active · DPA signed"
     ],
     "enterprise": {
       "heading": "Enterprise",
@@ -632,7 +632,7 @@
         },
         {
           "q": "Can I share one account with my team?",
-          "a": "Accounts are personal. Pro Unlimited adds multi-device so you can use your own account across all your machines. For several people, Enterprise offers a proper multi-seat setup: get in touch."
+          "a": "Accounts are personal. Multi-device is included on every plan, so you can use your own account across all your machines: it's for you, not for sharing access with others. For several people, Enterprise offers a proper multi-seat setup: get in touch."
         },
         {
           "q": "Is there a student discount?",
@@ -650,15 +650,15 @@
       },
       {
         "q": "What are the three transcription modes?",
-        "a": "Standard transcribes locally and summarizes in the EU cloud. Local Only keeps everything on your machine. Fast Cloud (Pro and Pro Unlimited) transcribes through Mistral's EU servers in Paris, fast on any hardware, with audio encrypted in transit and never saved. You choose per meeting."
+        "a": "Standard transcribes locally and summarizes in the EU cloud. Local Only keeps everything on your machine. Fast Cloud (Pro and Pro Unlimited) transcribes through our EU cloud, fast on any hardware, with audio encrypted in transit and never saved. You choose per meeting."
       },
       {
         "q": "What if I forget my passphrase?",
         "a": "We can't recover it: that's the point of zero-knowledge encryption. During onboarding you receive 12 recovery words (BIP39 standard). Write them down and store them safely. If you lose both the passphrase and the recovery words, your encrypted archive becomes unreadable. Trade-offs are real."
       },
       {
-        "q": "Is your cloud LLM really EU-hosted?",
-        "a": "Yes. We use Mistral, an EU company, on EU-hosted infrastructure, with Zero Data Retention active and a signed Data Processing Agreement. Details and the DPA reference on /security."
+        "q": "Is the AI you use really EU-hosted?",
+        "a": "Yes. For summarization we use Mistral, an EU company, on EU-hosted infrastructure, with Zero Data Retention active and a signed data processing agreement (DPA). Full details on /security."
       },
       {
         "q": "Why open source?",
@@ -666,7 +666,7 @@
       },
       {
         "q": "Why €9/month and not cheaper?",
-        "a": "The Free plan exists and is real, not crippled. Pro is for people who need longer history, better LLM quality, and the full feature set. We need revenue to stay independent and maintain the infrastructure. Simple."
+        "a": "The Free plan exists and is real, not crippled. Pro is for people who need a longer archive, better summary quality, and the full feature set. We need revenue to stay independent and maintain the infrastructure. Simple."
       },
       {
         "q": "Does it work on mobile?",
