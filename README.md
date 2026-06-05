@@ -2,56 +2,64 @@
 
 > A private mind for your meetings.
 
-An open-source AI meeting assistant for professionals. Records, transcribes, and summarizes your conversations — with one quiet promise: **your audio never leaves your computer**.
+Sonabrief is an open-source AI meeting assistant for professionals who handle confidential conversations — lawyers, therapists, accountants, journalists.
 
-## Status
+It records, transcribes, and summarizes your meetings. With one architectural promise: **your audio never leaves your computer.**
 
-Sonabrief is in pre-development. The product, documentation, and public source code will be released according to the timelines communicated through official channels.
+[**sonabrief.com**](https://sonabrief.com) · [Try the app](https://app.sonabrief.com) · [Security architecture](https://sonabrief.com/security)
 
-For early access to the launch:
-- Visit [sonabrief.com](https://sonabrief.com) and join the waitlist
-- Follow [@sonabrief](https://x.com/sonabrief) on X or [Bluesky](https://bsky.app/profile/sonabrief.bsky.social)
+---
 
-## About this repository
+## Why Sonabrief is different
 
-This repository is the public home of the Sonabrief project. At this stage, it contains:
+Most meeting assistants upload your audio to their servers to transcribe it. You're trusting a privacy policy. With Sonabrief, the audio is transcribed **locally, in your browser**, using Whisper running on WebAssembly. There is no upload step to trust — there's no upload at all.
 
-- [`PROJECT_SPEC.md`](./PROJECT_SPEC.md) — the public Project Specification Document, describing vision, privacy architecture, technical approach, and project direction
-- [`LICENSE`](./LICENSE) — AGPL v3 license terms
+This isn't a marketing claim. It's how the code works, and you can verify it yourself.
 
-The source code will be added here as development progresses.
+- **Audio is processed in memory, never written to disk.** The transcription runs in an isolated Web Worker on a `Float32Array` held in RAM.
+- **Transcripts are encrypted on your device** before any optional cloud sync, using XChaCha20-Poly1305 (libsodium). The encryption key is derived with Argon2id and never sent to the server.
+- **The whole thing is open source**, under AGPL v3. The privacy promise lives in the code below, not in a policy document.
 
-## Read the Project Specification
+## Verify the privacy promise
 
-Start with [PROJECT_SPEC.md](./PROJECT_SPEC.md) to understand:
+Don't trust us — read the code:
 
-- What Sonabrief is and who it's for
-- The privacy promise and how we deliver on it
-- The open-source approach and the commercial model that sustains it
-- Project direction and how to stay informed
+- **Local transcription, no network** — [`apps/web/src/workers/whisper.worker.ts`](https://github.com/Sonabrief/sonabrief/blob/main/apps/web/src/workers/whisper.worker.ts): Whisper runs via `@huggingface/transformers` on WebGPU/WASM. The model is cached in-browser after first load; from then on it works offline. No endpoint receives your audio.
+- **Audio stays in memory** — [`apps/web/src/lib/audio.ts`](https://github.com/Sonabrief/sonabrief/blob/main/apps/web/src/lib/audio.ts): `blobToFloat32Array()` uses `OfflineAudioContext`. No temp files, no `fetch`.
+- **Client-side encryption** — [`apps/web/src/lib/crypto.ts`](https://github.com/Sonabrief/sonabrief/blob/main/apps/web/src/lib/crypto.ts): `encrypt()` uses XChaCha20-Poly1305; the key is derived with Argon2id and never serialized to the server.
+
+There is an optional cloud transcription mode (opt-in, for users who want it). It is never the default, and it's clearly separated in the code.
+
+## Tech stack
+
+- **Frontend** — React 18, TypeScript, Vite, Tailwind, shadcn/ui
+- **Local-first storage** — Dexie (IndexedDB), with client-side encryption for sync
+- **Transcription** — Whisper (Large-v3-turbo) via Transformers.js, running in WebAssembly
+- **Backend** — Cloudflare Workers + D1 + R2 (handles sync, billing, auth — never audio)
+- **Crypto** — libsodium (XChaCha20-Poly1305, Argon2id)
+
+## Run it locally
+
+```bash
+git clone https://github.com/Sonabrief/sonabrief.git
+cd sonabrief
+bun install
+bun run dev:web    # frontend on localhost:5173
+```
 
 ## License
 
 Sonabrief is released under the [GNU Affero General Public License v3.0](./LICENSE).
 
-The Sonabrief name, logo, brand visual identity, and commercially curated content are protected separately and not covered by the open source license.
+The Sonabrief name, logo, and brand visual identity are not covered by the open source license.
 
 ## Contributing
 
-Contributions are welcome — bug reports, feature requests, documentation
-improvements, and pull requests. Please open an issue first for any
-significant change to discuss the approach.
+Contributions are welcome — bug reports, feature requests, documentation, and pull requests. For any significant change, please open an issue first to discuss the approach.
 
-Sonabrief is dual-licensed (AGPL v3 + commercial). To accept external
-contributions while preserving this flexibility, we ask all contributors
-to sign the Contributor License Agreement ([CLA.md](./CLA.md)).
-
-Signing is automatic: when you open a Pull Request, the CLA Assistant
-bot will ask you to confirm by commenting on the PR. Once signed, it
-applies to all your future contributions to the project.
+Sonabrief is dual-licensed (AGPL v3 + commercial). To accept external contributions while preserving this flexibility, we ask contributors to sign the [Contributor License Agreement](./CLA.md). Signing is automatic: when you open a PR, the CLA Assistant bot will ask you to confirm.
 
 ## Contact
 
 - Website: [sonabrief.com](https://sonabrief.com)
 - Email: hello@sonabrief.com
-- Social: [@sonabrief](https://x.com/sonabrief) on X, [Bluesky](https://bsky.app/profile/sonabrief.bsky.social)
