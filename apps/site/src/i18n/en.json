@@ -890,8 +890,9 @@
         "Record for 30 seconds and watch the outbound requests. In Local Only, nothing leaves your device at all; in Standard, only text (the transcription result), never audio. (Fast Cloud is different by design: there, encrypted audio is sent to our EU servers to be transcribed, encrypted in transit and never saved. That's the one mode where seeing audio leave is expected.)"
       ],
       "codeLinks": [
-        "The function that discards audio →",
-        "The encryption function →"
+        "The function that deletes each batch after transcription →",
+        "The function that wipes all audio at session end →",
+        "The encryption function (XChaCha20-Poly1305) →"
       ]
     },
     "early": {

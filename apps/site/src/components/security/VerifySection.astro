@@ -13,12 +13,15 @@ const intro: string = clean(t.security.verify.intro);
 const steps: string[] = (t.security.verify.steps ?? []).map(clean);
 const codeLinks: string[] = (t.security.verify.codeLinks ?? []).map(clean);
 
-// Real paths in the open source repo:
-//  - the function that discards audio after transcription
-//  - the libsodium encryption function
+// Real paths in the open source repo, pinned to an immutable commit SHA so the
+// line ranges never drift (verified against main @ 2adb789):
+//  - deleteTranscribed: discards each batch right after transcription
+//  - deleteAll: wipes all audio at session end
+//  - encrypt: the libsodium XChaCha20-Poly1305 function
 const codeHrefs = [
-  'https://github.com/Sonabrief/sonabrief/blob/main/apps/web/src/lib/chunkStore.ts#L86-L90',
-  'https://github.com/Sonabrief/sonabrief/blob/main/apps/web/src/lib/crypto.ts#L29-L48',
+  'https://github.com/Sonabrief/sonabrief/blob/2adb78975a0f16fac4fb75fe6928327eb3f6f9be/apps/web/src/lib/chunkStore.ts#L70-L75',
+  'https://github.com/Sonabrief/sonabrief/blob/2adb78975a0f16fac4fb75fe6928327eb3f6f9be/apps/web/src/lib/chunkStore.ts#L86-L90',
+  'https://github.com/Sonabrief/sonabrief/blob/2adb78975a0f16fac4fb75fe6928327eb3f6f9be/apps/web/src/lib/crypto.ts#L91-L104',
 ];
 ---
 

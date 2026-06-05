@@ -860,8 +860,9 @@
         "Registra per 30 secondi e osserva le richieste in uscita. In Solo locale non esce nulla dal tuo dispositivo; in Standard esce solo testo (il risultato della trascrizione), mai l'audio. (Cloud Veloce è diversa per scelta: lì l'audio cifrato viene inviato di proposito ai nostri server europei per essere trascritto, cifrato in transito e mai salvato. È l'unica modalità in cui vedere audio in uscita è atteso.)"
       ],
       "codeLinks": [
-        "La funzione che scarta l'audio →",
-        "La funzione di cifratura →"
+        "La funzione che cancella ogni batch dopo la trascrizione →",
+        "La funzione che elimina tutto l'audio a fine sessione →",
+        "La funzione di cifratura (XChaCha20-Poly1305) →"
       ]
     },
     "early": {

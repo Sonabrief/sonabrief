@@ -860,8 +860,9 @@
         "Nehmen Sie 30 Sekunden auf und beobachten Sie die ausgehenden Anfragen. Bei Nur lokal verlässt nichts Ihr Gerät; bei Standard verlässt es nur Text (das Transkriptionsergebnis), nie das Audio. (Cloud Schnell ist bewusst anders: Dort wird verschlüsseltes Audio absichtlich an unsere europäischen Server gesendet, um es dort zu transkribieren, bei der Übertragung verschlüsselt und nie gespeichert. Das ist der einzige Modus, in dem ausgehendes Audio zu erwarten ist.)"
       ],
       "codeLinks": [
-        "Die Funktion, die Audio verwirft →",
-        "Die Verschlüsselungsfunktion →"
+        "Die Funktion, die jeden Batch nach der Transkription löscht →",
+        "Die Funktion, die alle Audiodaten am Sitzungsende löscht →",
+        "Die Verschlüsselungsfunktion (XChaCha20-Poly1305) →"
       ]
     },
     "early": {

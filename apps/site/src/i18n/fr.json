@@ -860,8 +860,9 @@
         "Enregistrez 30 secondes et observez les requêtes sortantes. En Local uniquement, rien ne quitte votre appareil ; en Standard, seul du texte sort (le résultat de la transcription), jamais l'audio. (Cloud Rapide est différent par conception : l'audio chiffré y est envoyé volontairement à nos serveurs européens pour être transcrit, chiffré en transit et jamais enregistré. C'est le seul mode où voir de l'audio sortir est attendu.)"
       ],
       "codeLinks": [
-        "La fonction qui élimine l'audio →",
-        "La fonction de chiffrement →"
+        "La fonction qui supprime chaque lot après transcription →",
+        "La fonction qui efface tout l'audio en fin de session →",
+        "La fonction de chiffrement (XChaCha20-Poly1305) →"
       ]
     },
     "early": {

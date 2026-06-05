@@ -860,8 +860,9 @@
         "Graba 30 segundos y observa las peticiones salientes. En Solo local no sale nada de tu dispositivo; en Standard solo sale texto (el resultado de la transcripción), nunca el audio. (Cloud Rápido es distinto a propósito: ahí el audio cifrado se envía deliberadamente a nuestros servidores europeos para transcribirlo, cifrado en tránsito y nunca guardado. Es el único modo en el que ver audio saliente es lo esperado.)"
       ],
       "codeLinks": [
-        "La función que descarta el audio →",
-        "La función de cifrado →"
+        "La función que elimina cada lote tras la transcripción →",
+        "La función que borra todo el audio al final de la sesión →",
+        "La función de cifrado (XChaCha20-Poly1305) →"
       ]
     },
     "early": {
