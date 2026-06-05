@@ -8,18 +8,18 @@
   },
   "hero": {
     "h1": "Una mente privata per le tue riunioni.",
-    "sub": "Sonabrief registra, trascrive e sintetizza le tue conversazioni professionali, senza inviare un solo byte di audio al cloud. Mai.",
+    "sub": "Registra le tue riunioni e ottieni una sintesi pronta da inviare. L'audio resta sul tuo computer e non viene mai salvato. Mai.",
     "cta1": "Prova Sonabrief gratis →",
     "cta2": "Scopri come funziona →",
     "micro": "Piano gratuito disponibile · Nessuna carta di credito · Open source",
     "pillars": [
       {
         "num": "01",
-        "label": "audio in locale"
+        "label": "l'audio resta da te"
       },
       {
         "num": "02",
-        "label": "note cifrate"
+        "label": "note protette"
       },
       {
         "num": "03",
@@ -29,7 +29,7 @@
   },
   "problem": {
     "lines": [
-      "Ogni strumento per riunioni invia il tuo audio a server che non hai mai visto.",
+      "Ogni altro strumento per riunioni carica il tuo audio su server lontani.",
       "Per la maggior parte delle persone va bene così.",
       "Per te, no."
     ]
@@ -45,14 +45,14 @@
       {
         "num": "02",
         "title": "Le tue note sono cifrate prima della sincronizzazione.",
-        "body": "Non possiamo leggerle noi. Né il nostro LLM cloud. Dodici parole proteggono il tuo archivio.",
-        "linkLabel": "Leggi sullo zero-knowledge →"
+        "body": "Quando sincronizzi, le tue note vengono cifrate sul tuo dispositivo. Non possiamo leggerle noi, né l'intelligenza artificiale che le elabora: a proteggerle è una passphrase che conosci solo tu.",
+        "linkLabel": "Come proteggiamo le tue note →"
       },
       {
         "num": "03",
         "title": "Open source.",
-        "body": "Promesse dichiarate, codice che le dimostra. AGPL v3. Tutto su GitHub.",
-        "linkLabel": "Ispeziona su GitHub →"
+        "body": "Le promesse si possono verificare, non solo leggere: tutto il codice è pubblico su GitHub.",
+        "linkLabel": "Guarda il codice su GitHub →"
       }
     ]
   },
@@ -64,14 +64,14 @@
       },
       {
         "title": "Trascrivi",
-        "desc": "Sul tuo computer con Whisper, oppure con Cloud Veloce, il nostro cloud europeo veloce (Pro e Pro Unlimited). In entrambi i casi, nessun file audio viene mai conservato."
+        "desc": "Sul tuo computer, oppure con Cloud Veloce sul nostro cloud europeo (Pro e Pro Unlimited). In entrambi i casi, nessun file audio viene mai conservato."
       },
       {
         "title": "Sintetizza",
-        "desc": "Mistral EU con Zero Data Retention, oppure Ollama tutto in locale. Solo il testo trascritto, mai l'audio."
+        "desc": "Nel nostro cloud europeo, oppure tutto in locale sul tuo computer. Viene elaborato solo il testo trascritto, mai l'audio."
       }
     ],
-    "qualityNote": "La qualità della trascrizione non dipende da quanto paghi. Whisper Large-v3-turbo (lo stesso modello usato dai ricercatori) è disponibile su ogni piano, Free incluso, e gira interamente sul tuo computer. Di default l'app sceglie il modello adatto al tuo hardware; quando vuoi, puoi forzare Large-v3-turbo dalle impostazioni.",
+    "qualityNote": "La qualità della trascrizione non dipende da quanto paghi: è la stessa su ogni piano, Free incluso, e gira interamente sul tuo computer. L'app sceglie da sola il modello adatto al tuo hardware; quando vuoi, puoi forzare la massima qualità dalle impostazioni.",
     "cloudNote": "Su Pro e Pro Unlimited, Cloud Veloce trascrive nel cloud europeo: 30 minuti di audio in 1–2 minuti, indipendentemente dal tuo hardware."
   },
   "outputSample": {
@@ -114,17 +114,17 @@
       {
         "name": "Standard",
         "points": [
-          "Mistral, hosting EU, ZDR attivo, DPA firmato",
+          "Trascrizione sul tuo computer, sintesi nel nostro cloud europeo",
           "Al server arriva solo il testo trascritto, mai l'audio",
           "Sintesi di qualità eccellente, ottima velocità",
-          "Free: Mistral Small · Pro e Pro Unlimited: Mistral Large 3"
+          "Disponibile su tutti i piani, incluso il Free"
         ]
       },
       {
         "name": "Solo locale",
         "points": [
-          "Ollama, interamente sulla tua macchina",
-          "Zero byte in uscita: mai, in nessuna modalità",
+          "Tutto resta sulla tua macchina, trascrizione e sintesi",
+          "Niente esce dal tuo dispositivo: mai, in nessuna modalità",
           "Più lento, richiede hardware idoneo",
           "Disponibile su tutti i piani, incluso il Free"
         ]
@@ -133,14 +133,14 @@
         "name": "Cloud Veloce",
         "badge": "Pro e Pro Unlimited",
         "points": [
-          "Piena velocità su qualsiasi macchina, anche un portatile Windows datato",
+          "Piena velocità su qualsiasi computer, anche datato",
           "30 minuti di audio, trascritti in 1–2 minuti",
-          "Con Mistral, hosting europeo a Parigi, audio cifrato in transito, mai salvato",
+          "Sul nostro cloud europeo, audio cifrato in transito e mai salvato",
           "5h/mese incluse nel Pro · 20h/mese nel Pro Unlimited"
         ]
       }
     ],
-    "positioning": "L'unico strumento per riunioni con scelta privacy a tre livelli, stack 100% europeo e trascrizione locale illimitata su ogni piano, incluso il Free."
+    "positioning": "L'unico strumento per riunioni con scelta privacy a tre livelli, infrastruttura tutta europea e trascrizione locale illimitata su ogni piano, incluso il Free."
   },
   "memory": {
     "h2": "Una memoria fatta per durare.",
