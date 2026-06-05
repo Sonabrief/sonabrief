@@ -3,6 +3,7 @@
     "security": "Sécurité",
     "openSource": "Open source",
     "pricing": "Tarifs",
+    "about": "À propos",
     "github": "GitHub",
     "cta": "Essayer gratuitement"
   },
@@ -706,9 +707,7 @@
           "À propos",
           "Open source",
           "Contact",
-          "GitHub →",
-          "X →",
-          "Bluesky →"
+          "GitHub →"
         ]
       }
     },

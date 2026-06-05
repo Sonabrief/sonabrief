@@ -228,13 +228,11 @@ const badge = 'Pro & Pro Unlimited';
     .hiw-marker::before {
       display: none;
     }
+    /* in verticale la freccia orizzontale non funziona: ancorata in cima alla
+       tappa, finiva per sovrapporsi al titolo. La sequenza è già resa dallo
+       stack verticale e dai pallini, quindi la nascondo su schermi stretti. */
     .hiw-arrow {
-      right: auto;
-      left: 0;
-      top: auto;
-      bottom: -28px;
-      transform: rotate(90deg);
-      background-color: transparent;
+      display: none;
     }
   }
 </style>
