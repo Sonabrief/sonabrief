@@ -144,7 +144,7 @@
   },
   "memory": {
     "h2": "Una memoria fatta per durare.",
-    "lead": "Gli altri strumenti trattano la tua cronologia come una loro policy di conservazione, e prima o poi la cancellano. Per noi la tua memoria professionale è tua. Il Free è un assaggio onesto. Con Pro la tieni 12 mesi, con Pro Unlimited per sempre. Decidi tu, non una policy.",
+    "lead": "Gli altri strumenti trattano il tuo archivio come una loro policy di conservazione, e prima o poi lo cancellano. Per noi la tua memoria professionale è tua. Il Free è un assaggio onesto: la tieni 7 giorni. Con Pro 12 mesi, con Pro Unlimited per sempre. Decidi tu, non una policy.",
     "tiers": [
       {
         "label": "Free",
@@ -160,7 +160,7 @@
         "note": "(sì, davvero)"
       }
     ],
-    "body": "Cifrata con la tua passphrase. Sincronizzata su tutti i tuoi dispositivi. Ricercabile. Tua, davvero tua.",
+    "body": "Quando sincronizzi, è cifrata con la tua passphrase e disponibile su tutti i tuoi dispositivi. Ricercabile. Tua, davvero tua.",
     "tradeoff": "Se dimentichi la passphrase, non possiamo recuperarla. I compromessi sono reali. Non li nascondiamo."
   },
   "professionals": {
@@ -174,7 +174,7 @@
       "Ricercatori che conducono interviste qualitative."
     ],
     "close": "Se nelle tue riunioni ci sono cose che il cloud non dovrebbe vedere, capisci esattamente perché lo abbiamo costruito.",
-    "aside": "(Se non è il tuo caso, Sonabrief funziona anche per te.)"
+    "aside": "Non sei in questo elenco? Sonabrief lavora altrettanto bene per te."
   },
   "openSource": {
     "h2": "Open source. Verificabile, non solo dichiarabile.",
@@ -182,7 +182,7 @@
     "cta1": "Guarda su GitHub →",
     "cta2": "Leggi la nostra architettura di sicurezza →",
     "builtWith": "Costruito con Whisper · Ollama · Mistral · libsodium · Cloudflare Workers: standard aperti, codice aperto.",
-    "contribute": "Vuoi contribuire? Firma la nostra Harmony CLA. Per l'Enterprise offriamo dual-license."
+    "contribute": "Vuoi contribuire? Scopri come, nella pagina open source. Per l'Enterprise offriamo anche una licenza commerciale."
   },
   "pricing": {
     "title": "Quanto costa, e perché.",
