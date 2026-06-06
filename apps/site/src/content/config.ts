@@ -36,6 +36,11 @@ const differentiatorCell = z.object({
 
 /** Per-language copy block. `intro` is long-form markdown (300+ words). */
 const localizedCopy = z.object({
+  // Per-language for `for/` entries. Optional on the schema so `compare/`
+  // entries (which don't use them) still validate; the `for` renderer reads
+  // copy.profession / copy.painPoints with a top-level fallback.
+  profession: z.string().optional(),
+  painPoints: z.array(z.string()).optional(),
   title: z.string(),
   description: z.string(),
   intro: z.string(), // markdown, rendered with `marked` at the page level
@@ -103,8 +108,9 @@ const forCollection = defineCollection({
   loader: glob({ pattern: '**/*.yaml', base: './src/content/for' }),
   schema: z.object({
     slug: z.string(),
-    profession: z.string(),
-    painPoints: z.array(z.string()).default([]),
+    // Legacy top-level fallback; canonical values now live per-language in i18n.
+    profession: z.string().optional(),
+    painPoints: z.array(z.string()).optional(),
     draft: z.boolean().default(false),
     secondaryCta,
     i18n: i18nCopy,

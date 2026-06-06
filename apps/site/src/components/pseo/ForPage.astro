@@ -14,13 +14,17 @@ interface Props {
 }
 
 const { entry, lang } = Astro.props;
-const { slug, profession, painPoints, draft, secondaryCta, i18n } = entry;
+const { slug, draft, secondaryCta, i18n } = entry;
 
 const t = await getTranslations(lang);
 const pseo = t.pseo ?? {};
 const cta = pseo.cta ?? {};
 
 const { copy, isFallback } = resolveCopy(i18n, lang);
+
+// profession + painPoints now live per-language inside copy, with top-level fallback.
+const profession = copy.profession ?? entry.profession;
+const painPoints = copy.painPoints ?? entry.painPoints;
 
 const pathWithoutLang = `for/${slug}`;
 const currentPath = pathWithoutLang;

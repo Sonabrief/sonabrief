@@ -1,91 +1,73 @@
-# ⚠️ PLACEHOLDER DATA — DO NOT SHIP. Copy is invented and must be replaced with
-# verified content in the dedicated copy session.
-# Translations: only EN + IT present on purpose (fr/es/de intentionally absent).
+# Verified copy session (Sessione 62). EN + IT only by design.
+# fr/es/de intentionally absent → routes not generated, no indexable fallback.
+# profession + painPoints live per-language inside each i18n block.
 
 slug: lawyers
-profession: "[PLACEHOLDER] Lawyers"
-# Explicit draft flag → draft banner + noindex. Drop to false (or remove) once
-# real, verified copy lands. No longer inferred from the title text.
-draft: true
-
-painPoints:
-  - "[PLACEHOLDER] Client confidentiality and privilege"
-  - "[PLACEHOLDER] Accurate records of consultations"
-  - "[PLACEHOLDER] Time spent writing up meeting notes"
+draft: false
 
 i18n:
   en:
-    title: "[PLACEHOLDER] Sonabrief for Lawyers — Confidential Meeting Notes"
-    description: "[PLACEHOLDER] A meeting assistant for lawyers that keeps client audio on your device. Local transcription, no cloud uploads of the raw recording."
+    profession: "For lawyers"
+    painPoints:
+      - "Professional secrecy covers the recording of the consultation, not just your notes"
+      - "Client data falls under the GDPR, and the raw audio is the most sensitive part of it"
+      - "Hours spent writing up meetings instead of advising clients"
+    title: "Sonabrief for lawyers: meeting notes that stay confidential"
+    description: "A meeting assistant for lawyers built around confidentiality. You choose, before each recording, whether the audio is transcribed on your own device or on European servers. The raw recording is never kept."
     intro: |
-      **[PLACEHOLDER — replace with verified, original copy. ~300+ words.]**
+      A legal consultation produces one especially sensitive thing: the recording itself. It can hold privileged information, a client's personal data, sometimes the details of an ongoing matter. Most general purpose transcription tools treat that recording as ordinary content to upload, process on servers abroad, and in several cases reuse to train their models. For a lawyer, that is a data handling question that is hard to answer to a client, to a supervisory authority, or to the bar.
 
-      Lawyers operate under confidentiality obligations that most generic
-      productivity tools were never designed to respect. When a transcription
-      service uploads raw client audio to a third-party cloud, it introduces a
-      data-handling question that can be difficult to answer to a client, a
-      regulator, or a bar association. This placeholder paragraph stands in for
-      the researched argument we will write later and makes no verified claims.
+      Sonabrief starts from a different assumption. Before each recording you decide how it will be handled. You can transcribe entirely **on your own device**, so the audio is never uploaded anywhere. Or you can choose to transcribe on **European servers** when you need more speed, in which case the recording is processed in the EU and not retained afterwards. It is an explicit, case by case choice, not something that happens to your client's voice without you deciding it.
 
-      The core idea is simple to state: the sensitive artifact in a legal
-      consultation is the recording itself. If that recording is processed on
-      the practitioner's own machine and never uploaded, the surface area for a
-      confidentiality incident shrinks dramatically. Sonabrief is built around
-      that principle, and this page will eventually explain — honestly and
-      specifically — how that maps to a legal professional's day-to-day work.
+      ## What the workflow looks like
 
-      We will cover the realistic workflow: capturing a consultation, generating
-      a usable written summary, and keeping a defensible record, without the raw
-      audio ever leaving the device. We will also be candid about what the tool
-      does not do and where a firm's own compliance review is still required.
-      Nothing here is legal advice, and that disclaimer will appear in the final
-      copy as well.
+      You record a consultation, a call, or an internal meeting. Sonabrief produces a clean written transcript and a structured summary you can drop into a file note or a memo. The written record stays under your control, and the original audio is not stored as a file once it has been transcribed. The aim is a defensible written record without leaving a trail of raw recordings sitting in a third party cloud.
 
-      The remaining sentences exist to comfortably clear the minimum word count
-      so the rendering pipeline, typography, and markdown-to-HTML path can be
-      validated before any real copy is written. Replace this entire block with
-      original, profession-specific prose during the dedicated copy session.
+      ## What it does not do, and what stays with you
+
+      Sonabrief is a tool, not a compliance program. It does not decide for you whether a given conversation may be recorded, whether a client has consented, or whether your professional obligations allow it in a specific situation. Those judgements remain yours, and your firm's own data protection assessment still applies. The software is open source, so your IT advisor or DPO can inspect exactly how it handles audio rather than taking a marketing claim on trust.
+
+      None of this is legal advice. It is a description of how the tool works, so you can decide whether it fits the way you are required to work.
     faq:
-      - q: "[PLACEHOLDER] Does client audio get uploaded to the cloud?"
-        a: "[PLACEHOLDER] Placeholder answer about local processing, to be verified."
-      - q: "[PLACEHOLDER] Is this suitable for privileged conversations?"
-        a: "[PLACEHOLDER] Placeholder; final copy will include an appropriate disclaimer."
+      - q: "Is the client audio uploaded to the cloud?"
+        a: "It depends on the choice you make before you start recording. If you select on-device transcription, the audio stays on your computer and is never uploaded. If you choose transcription on European servers for extra speed, the recording is processed in the EU and is not retained once transcribed."
+      - q: "Can I use it for privileged conversations?"
+        a: "Sonabrief is designed to keep the raw recording off third party clouds when you transcribe on your device, which reduces the surface area for a confidentiality incident. Whether a specific conversation may be recorded, and under what conditions, remains your professional judgement and your firm's responsibility. This is not legal advice."
+      - q: "If I use the European servers, where does my data go?"
+        a: "Transcription on European servers runs inside the EU, and the recording is not kept after it has been transcribed. The written transcript and summary remain yours. On-device transcription avoids the upload entirely if you prefer never to send the audio anywhere."
+      - q: "Can my IT advisor verify these claims?"
+        a: "Yes. Sonabrief is open source, so the code that handles audio can be inspected directly rather than relying on a promise. Your DPO or IT advisor can review how recording, transcription, and storage actually behave."
 
   it:
-    title: "[PLACEHOLDER] Sonabrief per Avvocati — Note riunioni riservate"
-    description: "[PLACEHOLDER] Un assistente riunioni per avvocati che tiene l'audio dei clienti sul tuo dispositivo. Trascrizione locale, nessun upload della registrazione grezza."
+    profession: "Per avvocati"
+    painPoints:
+      - "Il segreto professionale copre anche la registrazione del colloquio, non solo gli appunti"
+      - "I dati dei clienti rientrano nel GDPR, e l'audio grezzo è il dato più sensibile"
+      - "Ore spese a verbalizzare incontri invece di assistere i clienti"
+    title: "Sonabrief per avvocati: note dei colloqui che restano riservate"
+    description: "Un assistente per le riunioni pensato per la riservatezza. Prima di ogni registrazione scegli tu se l'audio viene trascritto sul tuo dispositivo o su server europei. La registrazione grezza non viene conservata."
     intro: |
-      **[PLACEHOLDER — sostituire con copy verificato e originale. ~300+ parole.]**
+      Un colloquio legale produce una cosa particolarmente sensibile: la registrazione stessa. Può contenere informazioni coperte dal segreto, dati personali del cliente, a volte i dettagli di una causa in corso. La maggior parte degli strumenti di trascrizione generici tratta quella registrazione come un contenuto qualsiasi da caricare, elaborare su server all'estero e, in diversi casi, riutilizzare per addestrare i propri modelli. Per un avvocato questa è una questione di trattamento dei dati difficile da spiegare a un cliente, a un'autorità di controllo o all'ordine.
 
-      Gli avvocati operano sotto obblighi di riservatezza che la maggior parte
-      degli strumenti di produttività generici non è mai stata progettata per
-      rispettare. Quando un servizio di trascrizione carica l'audio grezzo del
-      cliente su un cloud di terze parti, introduce una questione di trattamento
-      dei dati difficile da spiegare a un cliente, a un'autorità o all'ordine.
-      Questo paragrafo segnaposto rappresenta l'argomentazione che scriveremo in
-      seguito e non contiene affermazioni verificate.
+      Sonabrief parte da un presupposto diverso. Prima di ogni registrazione sei tu a decidere come verrà gestita. Puoi trascrivere interamente **sul tuo dispositivo**, così l'audio non viene caricato da nessuna parte. Oppure puoi scegliere di trascrivere su **server europei** quando ti serve più velocità, e in quel caso la registrazione viene elaborata nell'Unione Europea e non conservata in seguito. È una scelta esplicita, caso per caso, non qualcosa che capita alla voce del tuo cliente senza che tu lo decida.
 
-      L'idea di fondo è semplice: l'elemento sensibile in una consulenza legale è
-      la registrazione stessa. Se viene elaborata sul computer del professionista
-      e mai caricata, la superficie di rischio per un incidente di riservatezza
-      si riduce drasticamente. Sonabrief è costruito attorno a questo principio,
-      e questa pagina spiegherà — in modo onesto e specifico — come si traduce
-      nel lavoro quotidiano di un professionista legale.
+      ## Come funziona, in pratica
 
-      Tratteremo il flusso realistico: registrare una consulenza, generare un
-      riepilogo scritto utilizzabile e mantenere un record difendibile, senza che
-      l'audio grezzo lasci mai il dispositivo. Saremo anche chiari su ciò che lo
-      strumento non fa e dove resta necessaria una valutazione di conformità
-      dello studio. Nulla qui costituisce consulenza legale, e questo avviso
-      comparirà anche nel copy finale.
+      Registri un colloquio, una chiamata o una riunione interna. Sonabrief produce una trascrizione scritta pulita e un riepilogo strutturato che puoi inserire in una nota a fascicolo o in un memo. Il documento scritto resta sotto il tuo controllo, e l'audio originale non viene salvato come file una volta trascritto. L'obiettivo è un record scritto difendibile senza lasciare una scia di registrazioni grezze depositate nel cloud di terzi.
 
-      Le frasi rimanenti servono a superare con margine il conteggio minimo di
-      parole, così da validare il rendering, la tipografia e il percorso da
-      markdown a HTML prima di scrivere il copy reale.
+      ## Cosa non fa, e cosa resta in capo a te
+
+      Sonabrief è uno strumento, non un programma di conformità. Non decide al posto tuo se una determinata conversazione può essere registrata, se il cliente ha prestato il consenso, o se i tuoi obblighi professionali lo consentono in una situazione specifica. Queste valutazioni restano tue, e la valutazione sulla protezione dei dati del tuo studio continua ad applicarsi. Il software è open source, quindi il tuo consulente IT o il DPO può ispezionare esattamente come tratta l'audio invece di fidarsi di un'affermazione di marketing.
+
+      Nulla di tutto questo costituisce consulenza legale. È una descrizione di come funziona lo strumento, perché tu possa decidere se è adatto al modo in cui sei tenuto a lavorare.
     faq:
-      - q: "[PLACEHOLDER] L'audio del cliente viene caricato nel cloud?"
-        a: "[PLACEHOLDER] Risposta segnaposto sull'elaborazione locale, da verificare."
-      - q: "[PLACEHOLDER] È adatto a conversazioni coperte da segreto professionale?"
-        a: "[PLACEHOLDER] Segnaposto; il copy finale includerà un disclaimer adeguato."
+      - q: "L'audio del cliente viene caricato nel cloud?"
+        a: "Dipende dalla scelta che fai prima di avviare la registrazione. Se selezioni la trascrizione sul dispositivo, l'audio resta sul tuo computer e non viene mai caricato. Se scegli la trascrizione su server europei per avere più velocità, la registrazione viene elaborata nell'Unione Europea e non viene conservata una volta trascritta."
+      - q: "Posso usarlo per conversazioni coperte dal segreto professionale?"
+        a: "Sonabrief è pensato per tenere la registrazione grezza fuori dai cloud di terzi quando trascrivi sul dispositivo, riducendo la superficie di rischio per un incidente di riservatezza. Se una specifica conversazione possa essere registrata, e a quali condizioni, resta una tua valutazione professionale e una responsabilità del tuo studio. Questa non è consulenza legale."
+      - q: "Se uso i server europei, dove vanno i miei dati?"
+        a: "La trascrizione su server europei avviene all'interno dell'Unione Europea, e la registrazione non viene conservata dopo essere stata trascritta. La trascrizione scritta e il riepilogo restano tuoi. La trascrizione sul dispositivo evita del tutto il caricamento, se preferisci non inviare mai l'audio da nessuna parte."
+      - q: "Il mio consulente IT può verificare queste affermazioni?"
+        a: "Sì. Sonabrief è open source, quindi il codice che gestisce l'audio può essere ispezionato direttamente invece di affidarsi a una promessa. Il tuo DPO o consulente IT può verificare come si comportano davvero la registrazione, la trascrizione e l'archiviazione."
 
   # fr / es / de intentionally absent → not translated yet.
