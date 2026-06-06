@@ -4,6 +4,9 @@
 
 slug: lawyers
 profession: "[PLACEHOLDER] Lawyers"
+# Explicit draft flag → draft banner + noindex. Drop to false (or remove) once
+# real, verified copy lands. No longer inferred from the title text.
+draft: true
 
 painPoints:
   - "[PLACEHOLDER] Client confidentiality and privilege"

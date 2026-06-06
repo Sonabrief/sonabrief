@@ -104,7 +104,10 @@
         "items": [
           "Bis Freitag ein Angebot mit Umfang und Preis des Audits senden",
           "Der Kunde teilt Lesezugriff auf Google Analytics und die E-Commerce-Plattform",
-          { "text": "Mit dem Entwicklungsteam die Machbarkeit eines teilweisen Rollbacks des Checkouts prüfen", "note": "aus persönlichen Notizen: dem Kunden ist wichtig, die internen Entwickler nicht zu verärgern — das Thema im Angebot behutsam ansprechen" }
+          {
+            "text": "Mit dem Entwicklungsteam die Machbarkeit eines teilweisen Rollbacks des Checkouts prüfen",
+            "note": "aus persönlichen Notizen: dem Kunden ist wichtig, die internen Entwickler nicht zu verärgern — das Thema im Angebot behutsam ansprechen"
+          }
         ]
       }
     ]
@@ -932,5 +935,22 @@
     "title": "Diese Seite gibt es nicht.",
     "subtitle": "Vielleicht hat es sie nie gegeben.",
     "cta": "← Zurück zu Sonabrief"
+  },
+  "pseo": {
+    "compareLabels": {
+      "audio_processing": "Audioverarbeitung",
+      "data_for_training": "Für KI-Training genutzte Daten",
+      "hosting": "Hosting & Infrastruktur",
+      "pricing": "Preise",
+      "languages": "Unterstützte Sprachen"
+    },
+    "comparedToColumn": "Sonabrief",
+    "faqHeading": "Häufige Fragen",
+    "cta": {
+      "title": "Sonabrief kostenlos testen",
+      "body": "Lokale Transkription, kein gespeichertes Audio, Open Source. Überzeugen Sie sich selbst — ohne Kreditkarte.",
+      "primary": "Kostenlos starten",
+      "secondary": "Wie wir Ihre Daten schützen"
+    }
   }
 }

@@ -104,7 +104,10 @@
         "items": [
           "Inviare una proposta con scope e prezzo dell'audit entro venerdì",
           "Il cliente condivide accesso in sola lettura a Google Analytics e alla piattaforma e-commerce",
-          { "text": "Verificare col team di sviluppo la fattibilità di un rollback parziale del checkout", "note": "da note personali: il cliente tiene a non scontentare gli sviluppatori interni — toccare il tema con cautela nella proposta" }
+          {
+            "text": "Verificare col team di sviluppo la fattibilità di un rollback parziale del checkout",
+            "note": "da note personali: il cliente tiene a non scontentare gli sviluppatori interni — toccare il tema con cautela nella proposta"
+          }
         ]
       }
     ]
@@ -932,5 +935,22 @@
     "title": "Questa pagina non esiste.",
     "subtitle": "Forse non è mai esistita.",
     "cta": "← Torna a Sonabrief"
+  },
+  "pseo": {
+    "compareLabels": {
+      "audio_processing": "Elaborazione dell'audio",
+      "data_for_training": "Dati usati per l'addestramento AI",
+      "hosting": "Hosting e infrastruttura",
+      "pricing": "Prezzi",
+      "languages": "Lingue supportate"
+    },
+    "comparedToColumn": "Sonabrief",
+    "faqHeading": "Domande frequenti",
+    "cta": {
+      "title": "Prova Sonabrief gratis",
+      "body": "Trascrizione locale, nessun audio salvato, open source. Verifica di persona — senza carta di credito.",
+      "primary": "Inizia gratis",
+      "secondary": "Come proteggiamo la privacy"
+    }
   }
 }

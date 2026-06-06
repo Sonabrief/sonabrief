@@ -24,6 +24,16 @@ import { glob } from 'astro/loaders';
 
 const SUPPORTED_LANGS = ['en', 'it', 'fr', 'es', 'de'] as const;
 
+/**
+ * Localized text for ONE comparison row, keyed by the neutral differentiator
+ * key at the entry's top level (e.g. `pricing`). Both sides optional so a row
+ * can carry only the half we've verified.
+ */
+const differentiatorCell = z.object({
+  sonabrief: z.string().optional(),
+  competitor: z.string().optional(),
+});
+
 /** Per-language copy block. `intro` is long-form markdown (300+ words). */
 const localizedCopy = z.object({
   title: z.string(),
@@ -37,6 +47,10 @@ const localizedCopy = z.object({
       })
     )
     .default([]),
+  // Compare-only: localized cell text per differentiator key. Optional so a
+  // language can be translated for prose but not (yet) for the table, and so
+  // `for` entries simply omit it. Keys must match the top-level neutral order.
+  differentiators: z.record(z.string(), differentiatorCell).optional(),
 });
 
 /**
@@ -51,6 +65,19 @@ const i18nCopy = z.object({
   de: localizedCopy.optional(),
 });
 
+/**
+ * Optional secondary CTA on a pSEO page. `href` is an absolute path WITHOUT the
+ * language prefix (e.g. "security"); the renderer prepends the current lang.
+ * `labelKey` selects which pre-translated label to show from t.pseo.cta.*. When
+ * the whole field is absent the renderer defaults to the /security CTA.
+ */
+const secondaryCta = z
+  .object({
+    href: z.string(),
+    labelKey: z.string().optional(),
+  })
+  .optional();
+
 const compare = defineCollection({
   loader: glob({ pattern: '**/*.yaml', base: './src/content/compare' }),
   schema: z.object({
@@ -60,16 +87,14 @@ const compare = defineCollection({
     // Provenance: only set once a human has verified the comparison facts.
     verified: z.coerce.date().optional(),
     sources: z.array(z.string().url()).optional(),
-    // Feature-by-feature rows. EVERYTHING optional — we only fill verified rows.
-    differentiators: z
-      .array(
-        z.object({
-          label: z.string(),
-          sonabrief: z.string().optional(),
-          competitor: z.string().optional(),
-        })
-      )
-      .optional(),
+    // Explicit draft flag: when true the page shows the draft banner and is
+    // noindex'd. Independent of title text — robust for the copy pipeline.
+    draft: z.boolean().default(false),
+    secondaryCta,
+    // Neutral differentiator keys, in display order — the single source of
+    // truth for which rows exist and their order. The localized cell text lives
+    // in i18n.{lang}.differentiators keyed by these strings.
+    differentiators: z.array(z.string()).optional(),
     i18n: i18nCopy,
   }),
 });
@@ -80,6 +105,8 @@ const forCollection = defineCollection({
     slug: z.string(),
     profession: z.string(),
     painPoints: z.array(z.string()).default([]),
+    draft: z.boolean().default(false),
+    secondaryCta,
     i18n: i18nCopy,
   }),
 });

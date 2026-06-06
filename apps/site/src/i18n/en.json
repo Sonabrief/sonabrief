@@ -134,7 +134,10 @@
         "items": [
           "Send a proposal with the audit's scope and price by Friday",
           "The client shares read-only access to Google Analytics and the e-commerce platform",
-          { "text": "Check with the dev team whether a partial rollback of the checkout is feasible", "note": "from personal notes: the client cares about not upsetting the in-house developers — touch on this carefully in the proposal" }
+          {
+            "text": "Check with the dev team whether a partial rollback of the checkout is feasible",
+            "note": "from personal notes: the client cares about not upsetting the in-house developers — touch on this carefully in the proposal"
+          }
         ]
       }
     ]
@@ -962,5 +965,22 @@
     "title": "This page doesn't exist.",
     "subtitle": "Maybe it never did.",
     "cta": "← Back to Sonabrief"
+  },
+  "pseo": {
+    "compareLabels": {
+      "audio_processing": "Audio processing",
+      "data_for_training": "Data used for AI training",
+      "hosting": "Hosting & infrastructure",
+      "pricing": "Pricing",
+      "languages": "Supported languages"
+    },
+    "comparedToColumn": "Sonabrief",
+    "faqHeading": "Frequently asked questions",
+    "cta": {
+      "title": "Try Sonabrief free",
+      "body": "Local transcription, no stored audio, open source. See for yourself — no credit card.",
+      "primary": "Get started free",
+      "secondary": "How we keep it private"
+    }
   }
 }

@@ -104,7 +104,10 @@
         "items": [
           "Envoyer une proposition avec le périmètre et le prix de l'audit avant vendredi",
           "Le client partage un accès en lecture seule à Google Analytics et à la plateforme e-commerce",
-          { "text": "Vérifier avec l'équipe de développement la faisabilité d'un rollback partiel du checkout", "note": "d'après des notes personnelles : le client tient à ne pas contrarier les développeurs internes — aborder le sujet avec précaution dans la proposition" }
+          {
+            "text": "Vérifier avec l'équipe de développement la faisabilité d'un rollback partiel du checkout",
+            "note": "d'après des notes personnelles : le client tient à ne pas contrarier les développeurs internes — aborder le sujet avec précaution dans la proposition"
+          }
         ]
       }
     ]
@@ -932,5 +935,22 @@
     "title": "Cette page n'existe pas.",
     "subtitle": "Peut-être n'a-t-elle jamais existé.",
     "cta": "← Retour à Sonabrief"
+  },
+  "pseo": {
+    "compareLabels": {
+      "audio_processing": "Traitement de l'audio",
+      "data_for_training": "Données utilisées pour l'entraînement de l'IA",
+      "hosting": "Hébergement et infrastructure",
+      "pricing": "Tarifs",
+      "languages": "Langues prises en charge"
+    },
+    "comparedToColumn": "Sonabrief",
+    "faqHeading": "Questions fréquentes",
+    "cta": {
+      "title": "Essayez Sonabrief gratuitement",
+      "body": "Transcription locale, aucun audio stocké, open source. Constatez par vous-même — sans carte bancaire.",
+      "primary": "Commencer gratuitement",
+      "secondary": "Comment nous protégeons votre vie privée"
+    }
   }
 }

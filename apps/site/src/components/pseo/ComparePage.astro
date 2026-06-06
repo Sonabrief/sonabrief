@@ -1,38 +1,66 @@
 ---
 // Shared renderer for /compare/[slug] across all 5 languages.
-// The 5 route wrappers stay thin: they resolve `lang` and hand the entry here.
+// Design language matches the rest of the site (pricing/security): brand
+// palette, Newsreader serif for editorial headings, the shared .reveal motion,
+// the AccordionFAQ pattern, and a calm closing CTA — no FOMO, no fake proof.
 import { marked } from 'marked';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import AccordionFAQ from '../AccordionFAQ.astro';
+import { getTranslations } from '../../i18n/utils';
 import { resolveCopy, buildAvailableHreflangs, getAvailableLangs } from '../../content/pseo-utils';
 import type { LangCode } from '../../content/pseo-utils';
 
 interface Props {
-  // The collection entry's `data` object (already validated by the schema).
   entry: any;
   lang: LangCode;
 }
 
 const { entry, lang } = Astro.props;
+const { slug, competitor, category, draft, secondaryCta, differentiators, i18n } = entry;
 
-const { slug, competitor, category, verified, differentiators, i18n } = entry;
+// UI strings (labels, CTA, FAQ heading) live in the i18n bundle, not per-entry.
+const t = await getTranslations(lang);
+const pseo = t.pseo ?? {};
+const labels: Record<string, string> = pseo.compareLabels ?? {};
+const cta = pseo.cta ?? {};
 
-// Resolve copy for this language; fall back to EN if untranslated.
+// Per-language copy; fall back to EN if untranslated (page then goes noindex).
 const { copy, isFallback } = resolveCopy(i18n, lang);
 
-// Section path WITHOUT language prefix. BaseLayout prepends the lang itself
-// for canonical/OG (en → root, others → /{lang}/…), matching the convention
-// used by the hand-written localized pages (they pass e.g. "pricing").
 const pathWithoutLang = `compare/${slug}`;
 const currentPath = pathWithoutLang;
-
-// hreflang + footer switcher: only languages this entry is translated into.
 const hreflangAlternates = buildAvailableHreflangs(i18n, pathWithoutLang);
 const availableLangs = getAvailableLangs(i18n);
-
-// If we're showing EN fallback on a non-EN URL, the page must not be indexed.
-const noindex = isFallback;
+// noindex when the entry is a draft OR we're serving an EN fallback on a non-EN URL.
+const noindex = draft === true || isFallback;
 
 const introHtml = marked(copy.intro) as string;
+
+// Resolve each differentiator's technical key into a localized, human label.
+// Unknown keys fall back to a de-underscored version so we never ship raw keys.
+function labelFor(key: string): string {
+  return labels[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+// Localized cell text lives per-language under copy.differentiators, keyed by
+// the neutral top-level key. Falls back to EN cells if this language hasn't
+// translated the table yet (prose may be translated while the table is not).
+const cells: Record<string, { sonabrief?: string; competitor?: string }> =
+  copy.differentiators ?? i18n.en?.differentiators ?? {};
+function cellFor(key: string) {
+  return cells[key] ?? i18n.en?.differentiators?.[key] ?? {};
+}
+
+const faqItems = (copy.faq ?? []).map((f: { q: string; a: string }) => ({
+  question: f.q,
+  answer: f.a,
+}));
+
+// Secondary CTA: entry override (href without lang prefix) or default /security.
+const cta2Href = secondaryCta?.href ?? 'security';
+const secondaryHref = lang === 'en' ? `/${cta2Href}` : `/${lang}/${cta2Href}`;
+const secondaryLabel =
+  (secondaryCta?.labelKey && cta[secondaryCta.labelKey]) || cta.secondary || 'How we keep it private';
 ---
 
 <BaseLayout
@@ -44,148 +72,290 @@ const introHtml = marked(copy.intro) as string;
   availableLangs={availableLangs}
   noindex={noindex}
 >
-  <main class="pseo-wrapper">
-    <article class="pseo-article">
-      {!verified && (
-        <div class="pseo-draft-banner" role="note">
-          ⚠️ Placeholder / unverified comparison — not for production.
+  <main class="cmp">
+    {draft && (
+      <div class="cmp-draft" role="note">
+        ⚠️ Draft / unverified comparison — not for production.
+      </div>
+    )}
+
+    <!-- ── Header ── -->
+    <header class="cmp-head">
+      <p class="cmp-eyebrow reveal" data-reveal style="--i: 0">{category.replace(/-/g, ' ')}</p>
+      <h1 class="cmp-h1 reveal" data-reveal style="--i: 1">{copy.title}</h1>
+    </header>
+
+    <!-- ── Intro prose ── -->
+    <div class="cmp-intro reveal" data-reveal style="--i: 2" set:html={introHtml} />
+
+    <!-- ── Side-by-side comparison ── -->
+    {differentiators && differentiators.length > 0 && (
+      <section class="cmp-table-section" aria-label="Comparison">
+        <div class="cmp-cols-head" aria-hidden="true">
+          <span class="cmp-col-label cmp-col-label--us">{pseo.comparedToColumn ?? 'Sonabrief'}</span>
+          <span class="cmp-col-label">{competitor}</span>
         </div>
-      )}
 
-      <p class="pseo-eyebrow">{category}</p>
-      <h1 class="pseo-h1">{copy.title}</h1>
+        <div class="cmp-rows">
+          {differentiators.map((key: string, i: number) => {
+            const cell = cellFor(key);
+            return (
+              <div class="cmp-row reveal" data-reveal style={`--i: ${i}`}>
+                <p class="cmp-row-label">
+                  <span class="cmp-row-dot" aria-hidden="true"></span>
+                  {labelFor(key)}
+                </p>
+                <div class="cmp-row-cells">
+                  <div class="cmp-cell cmp-cell--us">
+                    <span class="cmp-cell-tag">{pseo.comparedToColumn ?? 'Sonabrief'}</span>
+                    <p>{cell.sonabrief ?? '—'}</p>
+                  </div>
+                  <div class="cmp-cell cmp-cell--them">
+                    <span class="cmp-cell-tag">{competitor}</span>
+                    <p>{cell.competitor ?? '—'}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    )}
 
-      <div class="pseo-intro" set:html={introHtml} />
+    <!-- ── FAQ ── -->
+    {faqItems.length > 0 && (
+      <section class="cmp-faq" aria-label="FAQ">
+        <h2 class="cmp-h2 reveal" data-reveal style="--i: 0">{pseo.faqHeading ?? 'FAQ'}</h2>
+        <AccordionFAQ items={faqItems} />
+      </section>
+    )}
 
-      {differentiators && differentiators.length > 0 && (
-        <section class="pseo-table-section" aria-label="Comparison">
-          <table class="pseo-table">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Sonabrief</th>
-                <th>{competitor}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {differentiators.map((row: any) => (
-                <tr>
-                  <th scope="row">{row.label}</th>
-                  <td>{row.sonabrief ?? '—'}</td>
-                  <td>{row.competitor ?? '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      )}
-
-      {copy.faq && copy.faq.length > 0 && (
-        <section class="pseo-faq" aria-label="FAQ">
-          <h2 class="pseo-h2">FAQ</h2>
-          {copy.faq.map((item: { q: string; a: string }) => (
-            <details class="pseo-faq-item">
-              <summary>{item.q}</summary>
-              <p>{item.a}</p>
-            </details>
-          ))}
-        </section>
-      )}
-    </article>
+    <!-- ── Closing CTA — calm, no urgency ── -->
+    <section class="cmp-cta reveal" data-reveal aria-label="Get started">
+      <p class="cmp-cta-title">{cta.title ?? 'Try Sonabrief free'}</p>
+      <p class="cmp-cta-body">{cta.body ?? ''}</p>
+      <div class="cmp-cta-actions">
+        <a class="cmp-cta-primary" href="https://app.sonabrief.com/" plausible-event-name="CTA: Try free">
+          {cta.primary ?? 'Get started free'}
+        </a>
+        <a class="cmp-cta-secondary" href={secondaryHref}>
+          {secondaryLabel} <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </section>
   </main>
 </BaseLayout>
 
 <style>
-  .pseo-wrapper {
-    background-color: var(--color-cream);
-    min-height: 100vh;
-    padding: 80px var(--gutter) 120px;
+  .cmp {
+    max-width: var(--container-prose);
+    margin-inline: auto;
+    padding: clamp(72px, 9vw, 112px) var(--gutter) clamp(80px, 10vw, 128px);
   }
-  @media (max-width: 767px) {
-    .pseo-wrapper { padding: 48px 20px 80px; }
-  }
-  .pseo-article {
-    max-width: var(--container-prose, 760px);
-    margin: 0 auto;
-  }
-  .pseo-draft-banner {
-    border: 1px solid var(--color-amber, #c98a2b);
-    background: color-mix(in srgb, var(--color-amber, #c98a2b) 14%, transparent);
+
+  .cmp-draft {
+    border: 1px solid var(--color-amber);
+    background: color-mix(in srgb, var(--color-amber) 12%, transparent);
     padding: 12px 16px;
-    border-radius: 8px;
+    border-radius: 10px;
     font-family: "Manrope", sans-serif;
     font-size: 13px;
     color: var(--color-charcoal);
-    margin-bottom: 32px;
+    margin-bottom: 40px;
   }
-  .pseo-eyebrow {
-    font-family: "Manrope", sans-serif;
+
+  /* ── Header ── */
+  .cmp-eyebrow {
+    font-family: var(--font-mono);
     font-size: 12px;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--color-stone);
-    margin-bottom: 8px;
+    letter-spacing: 0.16em;
+    color: var(--color-amber);
+    margin: 0 0 16px;
   }
-  .pseo-h1 {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 32px;
-    font-weight: 700;
+  .cmp-h1 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: clamp(34px, 5vw, 52px);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
     color: var(--color-deep-teal);
-    letter-spacing: -0.02em;
-    line-height: 1.15;
-    margin-bottom: 24px;
+    margin: 0 0 40px;
+    max-width: 18ch;
   }
-  .pseo-h2 {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 22px;
-    font-weight: 600;
-    color: var(--color-charcoal);
-    margin: 48px 0 20px;
+
+  /* ── Intro prose ── */
+  .cmp-intro :global(h2) {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: clamp(22px, 3vw, 28px);
+    color: var(--color-deep-teal);
+    line-height: 1.25;
+    margin: 0 0 24px;
   }
-  .pseo-intro :global(p) {
+  .cmp-intro :global(p) {
     font-family: "Manrope", sans-serif;
-    font-size: 16px;
+    font-size: 17px;
     line-height: 1.75;
     color: var(--color-charcoal);
-    margin-bottom: 20px;
+    margin: 0 0 22px;
     max-width: 65ch;
   }
-  .pseo-table {
-    font-family: "Manrope", sans-serif;
-    font-size: 14px;
-    border-collapse: collapse;
-    width: 100%;
-    margin: 32px 0;
-    display: block;
-    overflow-x: auto;
+  .cmp-intro :global(strong) {
+    color: var(--color-deep-teal);
+    font-weight: 600;
   }
-  .pseo-table th,
-  .pseo-table td {
-    padding: 10px 12px;
+
+  /* ── Comparison ── */
+  .cmp-table-section {
+    margin: clamp(48px, 7vw, 80px) 0;
+  }
+  .cmp-cols-head {
+    display: none; /* per-row tags carry the labels; this is a desktop affordance */
+  }
+  .cmp-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .cmp-row {
+    border-top: 1px solid var(--color-mist);
+    padding-top: 14px;
+  }
+  .cmp-row-label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: 17px;
+    color: var(--color-deep-teal);
+    margin: 0 0 9px;
+  }
+  .cmp-row-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-amber);
+    flex-shrink: 0;
+  }
+  .cmp-row-cells {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .cmp-cell {
     border: 1px solid var(--color-mist);
-    text-align: left;
-    vertical-align: top;
+    border-radius: 12px;
+    padding: 11px 14px;
+  }
+  /* Sonabrief column: warm teal tint, ours. Competitor: neutral cream/mist. */
+  .cmp-cell--us {
+    border-color: color-mix(in srgb, var(--color-deep-teal) 35%, var(--color-mist));
+    background: color-mix(in srgb, var(--color-deep-teal) 5%, transparent);
+  }
+  .cmp-cell--them {
+    background: color-mix(in srgb, var(--color-mist) 22%, transparent);
+  }
+  .cmp-cell-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+    color: var(--color-stone);
+  }
+  .cmp-cell--us .cmp-cell-tag {
+    color: var(--color-deep-teal);
+  }
+  .cmp-cell p {
+    font-family: "Manrope", sans-serif;
+    font-size: 14.5px;
+    line-height: 1.6;
     color: var(--color-charcoal);
+    margin: 0;
   }
-  .pseo-table thead th {
-    background: color-mix(in srgb, var(--color-mist) 40%, transparent);
-    font-weight: 600;
+
+  /* ── FAQ ── */
+  .cmp-faq {
+    margin: clamp(56px, 8vw, 88px) 0 0;
   }
-  .pseo-faq-item {
-    border-bottom: 1px solid var(--color-mist);
-    padding: 12px 0;
+  .cmp-h2 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: clamp(24px, 3.5vw, 32px);
+    color: var(--color-deep-teal);
+    line-height: 1.2;
+    margin: 0 0 12px;
   }
-  .pseo-faq-item summary {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-weight: 600;
-    cursor: pointer;
-    color: var(--color-charcoal);
+
+  /* ── Closing CTA ── */
+  .cmp-cta {
+    margin-top: clamp(56px, 8vw, 88px);
+    border: 1px solid var(--color-mist);
+    border-radius: 20px;
+    background: color-mix(in srgb, var(--color-deep-teal) 4%, transparent);
+    padding: clamp(32px, 5vw, 48px);
+    text-align: center;
   }
-  .pseo-faq-item p {
+  .cmp-cta-title {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    font-size: clamp(22px, 3vw, 28px);
+    color: var(--color-deep-teal);
+    margin: 0 0 10px;
+  }
+  .cmp-cta-body {
     font-family: "Manrope", sans-serif;
     font-size: 15px;
-    line-height: 1.7;
-    color: var(--color-charcoal);
-    margin-top: 8px;
+    line-height: 1.65;
+    color: var(--color-stone);
+    margin: 0 auto 24px;
+    max-width: 46ch;
+  }
+  .cmp-cta-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px 24px;
+    flex-wrap: wrap;
+  }
+  .cmp-cta-primary {
+    font-family: "Manrope", sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-cream);
+    background: var(--color-deep-teal);
+    border: 1.5px solid var(--color-deep-teal);
+    padding: 13px 28px;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: opacity 150ms ease, transform 150ms ease;
+  }
+  .cmp-cta-primary:hover {
+    opacity: 0.92;
+  }
+  .cmp-cta-primary:active {
+    transform: translateY(1px);
+  }
+  .cmp-cta-secondary {
+    font-family: "Manrope", sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-deep-teal);
+    text-decoration: none;
+    transition: color 150ms ease;
+  }
+  .cmp-cta-secondary:hover {
+    color: color-mix(in srgb, var(--color-deep-teal) 75%, var(--color-amber));
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 560px) {
+    .cmp-row-cells {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
