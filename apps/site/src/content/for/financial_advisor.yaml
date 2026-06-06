@@ -1,0 +1,77 @@
+# Verified copy session. EN + IT only for now.
+# fr/es/de intentionally absent → routes not generated. Translation phase later.
+# draft:true held until founder validates IT + EN rendering visually.
+
+slug: financial_advisor
+draft: false
+
+i18n:
+  en:
+    profession: "For financial advisors"
+    painPoints:
+      - "A client review holds a full picture of someone's wealth, risk profile and plans"
+      - "Regulators require confidentiality, while a general purpose cloud tool stores that data abroad"
+      - "Time lost writing up suitability meetings instead of advising"
+    title: "Sonabrief for financial advisors: client meetings that stay confidential"
+    description: "A meeting assistant for financial advisors built around confidentiality. You choose, before each recording, whether the audio is transcribed on your own device or on European servers. The recording is never kept as a file."
+    intro: |
+      A meeting with a client lays out a complete picture of their financial life: their assets, their income, their risk tolerance, their goals for the family. A financial advisor is bound to keep that information confidential, and the supervisory framework treats it as information that may only be used for strictly professional purposes. The recording of such a meeting is the most complete version of that picture, and the most exposed. Most general purpose transcription tools treat the recording as ordinary content to upload, process on servers abroad, and in several cases reuse to improve their models. For an advisor under a duty of confidentiality and a watchful regulator, that is a hard thing to explain to a client.
+
+      Sonabrief starts from a different assumption. Before each recording you decide how the audio is handled. You can transcribe entirely **on your own device**, so the recording is never uploaded anywhere. Or you can choose to transcribe on **European servers** when you need more speed, in which case the audio is processed in the EU and not retained afterwards. It is an explicit choice you make each time, never something that happens to a client's financial profile without you deciding it.
+
+      ## What the workflow looks like
+
+      You record a suitability review or a planning meeting, and Sonabrief hands you a clean, structured written draft: you review it, finish it in your own words, and use it for the client file. You start from a ready text instead of a blank page, and the version that counts stays yours, so a figure or a stated objective is checked before it is acted on, never trusted simply because it was transcribed. The original audio is not stored as a file once transcribed, so nothing is left on a third party's server.
+
+      ## What it does not do, and what stays with you
+
+      Sonabrief is a tool, not a compliance program or a regulatory judgement. It does not decide whether a meeting may be recorded, whether your client has consented, or what your professional and supervisory obligations require in a given case. Those decisions remain yours and your firm's. The software is open source, so a colleague, a compliance officer or a data protection advisor can inspect exactly how it handles audio rather than trusting a marketing claim.
+
+      None of this is legal, financial or compliance advice. It is a description of how the tool works, so you can decide whether it fits the way you are required, and have chosen, to practise.
+    faq:
+      - q: "Is the meeting audio uploaded to the cloud?"
+        a: "It depends on the choice you make before each recording. If you select on-device transcription, the audio stays on your computer and is never uploaded. If you choose transcription on European servers for extra speed, the audio is processed in the EU and is not retained once transcribed."
+      - q: "How does Sonabrief protect confidential client financial data?"
+        a: "On-device transcription keeps the recording off any third party server, which is the most protective option for sensitive financial data. If you choose European cloud transcription, processing happens in the EU and nothing is retained afterwards. Whether and how to record a client meeting, and what your firm's policy requires, remains your responsibility. This is not compliance advice."
+      - q: "Can I rely on the transcript for figures and stated objectives?"
+        a: "Sonabrief produces a faithful, structured draft fast, and you review it before it goes into the client file. As with any note, a figure or an objective is checked before it is acted on. You start from a ready text instead of a blank page, and the version that counts stays yours."
+      - q: "Will my client meetings be used to train AI models?"
+        a: "No. Your meetings are never used to train any model. When you ask for a written summary, it runs either on your own device or on European servers that keep nothing once the request is processed."
+      - q: "Can a compliance officer verify these claims?"
+        a: "Yes. Sonabrief is open source, so the code that handles audio can be inspected directly rather than relying on a promise. A compliance officer or DPO can review how recording, transcription and storage actually behave."
+
+  it:
+    profession: "Per consulenti finanziari"
+    painPoints:
+      - "Un incontro di revisione contiene il quadro completo del patrimonio, del profilo di rischio e dei progetti del cliente"
+      - "La vigilanza impone riservatezza, mentre uno strumento cloud generico archivia quei dati all'estero"
+      - "Tempo perso a verbalizzare gli incontri di adeguatezza invece di fare consulenza"
+    title: "Sonabrief per consulenti finanziari: incontri con i clienti che restano riservati"
+    description: "Un assistente per gli incontri pensato per la riservatezza. Prima di ogni registrazione scegli tu se l'audio viene trascritto sul tuo dispositivo o su server europei. La registrazione non viene mai conservata come file."
+    intro: |
+      Un incontro con un cliente mette in chiaro il quadro completo della sua vita finanziaria: il patrimonio, i redditi, la tolleranza al rischio, gli obiettivi per la famiglia. Il consulente finanziario è tenuto a mantenere riservate quelle informazioni, e il quadro di vigilanza le tratta come informazioni utilizzabili solo per finalità strettamente professionali. La registrazione di un incontro del genere ne è la versione più completa, e la più esposta. La maggior parte degli strumenti di trascrizione generici tratta la registrazione come un contenuto qualsiasi da caricare, elaborare su server all'estero e, in diversi casi, riutilizzare per migliorare i propri modelli. Per un consulente vincolato dalla riservatezza e sotto l'occhio di un'autorità di vigilanza, è una cosa difficile da spiegare a un cliente.
+
+      Sonabrief parte da un presupposto diverso. Prima di ogni registrazione decidi tu come viene gestito l'audio. Puoi trascrivere interamente **sul tuo dispositivo**, così la registrazione non viene caricata da nessuna parte. Oppure puoi scegliere di trascrivere su **server europei** quando ti serve più velocità, e in quel caso l'audio viene elaborato nell'Unione Europea e non conservato in seguito. È una scelta esplicita che fai ogni volta, mai qualcosa che capita al profilo finanziario di un cliente senza che tu lo decida.
+
+      ## Come funziona, in pratica
+
+      Registri una revisione di adeguatezza o un incontro di pianificazione, e Sonabrief ti consegna una bozza scritta pulita e strutturata: tu la rivedi, la chiudi con parole tue, e la usi per il fascicolo cliente. Parti da un testo già pronto invece che dal foglio bianco, e la versione che conta resta la tua, così una cifra o un obiettivo dichiarato lo verifichi prima di agire, mai dato per buono solo perché trascritto. L'audio originale non viene salvato come file una volta trascritto, quindi non resta nulla sul server di terzi.
+
+      ## Cosa non fa, e cosa resta in capo a te
+
+      Sonabrief è uno strumento, non un programma di conformità né un giudizio in materia di vigilanza. Non decide se un incontro possa essere registrato, se il tuo cliente ha prestato il consenso, o cosa richiedono i tuoi obblighi professionali e di vigilanza in un dato caso. Queste decisioni restano tue e della tua struttura. Il software è open source, quindi un collega, un responsabile compliance o un consulente per la protezione dei dati può ispezionare esattamente come tratta l'audio invece di fidarsi di un'affermazione di marketing.
+
+      Nulla di tutto questo costituisce consulenza legale, finanziaria o di compliance. È una descrizione di come funziona lo strumento, perché tu possa decidere se è adatto al modo in cui sei tenuto, e hai scelto, di lavorare.
+    faq:
+      - q: "L'audio dell'incontro viene caricato nel cloud?"
+        a: "Dipende dalla scelta che fai prima di ogni registrazione. Se selezioni la trascrizione sul dispositivo, l'audio resta sul tuo computer e non viene mai caricato. Se scegli la trascrizione su server europei per avere più velocità, l'audio viene elaborato nell'Unione Europea e non viene conservato una volta trascritto."
+      - q: "Come protegge Sonabrief i dati finanziari riservati del cliente?"
+        a: "La trascrizione sul dispositivo tiene la registrazione fuori da qualsiasi server di terzi, che è l'opzione più protettiva per i dati finanziari sensibili. Se scegli la trascrizione cloud europea, l'elaborazione avviene nell'Unione Europea e nulla viene conservato in seguito. Se e come registrare un incontro con il cliente, e cosa richiede la policy della tua struttura, resta una tua responsabilità. Questa non è consulenza di compliance."
+      - q: "Posso fidarmi della trascrizione per cifre e obiettivi dichiarati?"
+        a: "Sonabrief produce una bozza fedele e strutturata in fretta, e tu la rivedi prima che vada nel fascicolo cliente. Come per qualsiasi nota, una cifra o un obiettivo lo verifichi prima di agire. Parti da un testo già pronto invece che dal foglio bianco, e la versione che conta resta la tua."
+      - q: "I miei incontri con i clienti verranno usati per addestrare modelli AI?"
+        a: "No. I tuoi incontri non vengono mai usati per addestrare alcun modello. Quando chiedi un riepilogo scritto, viene elaborato sul tuo dispositivo oppure su server europei che non conservano nulla una volta elaborata la richiesta."
+      - q: "Un responsabile compliance può verificare queste affermazioni?"
+        a: "Sì. Sonabrief è open source, quindi il codice che gestisce l'audio può essere ispezionato direttamente invece di affidarsi a una promessa. Un responsabile compliance o un DPO può verificare come si comportano davvero la registrazione, la trascrizione e l'archiviazione."
+
+  # fr / es / de intentionally absent → translation phase later.

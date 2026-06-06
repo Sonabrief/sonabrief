@@ -1,0 +1,77 @@
+# Verified copy session. EN + IT only for now.
+# fr/es/de intentionally absent → routes not generated. Translation phase later.
+# draft:true held until founder validates IT + EN rendering visually.
+
+slug: social_worker
+draft: false
+
+i18n:
+  en:
+    profession: "For social workers"
+    painPoints:
+      - "A case recording holds sensitive data about vulnerable people, often children and families"
+      - "A general purpose cloud tool stores that data abroad, outside your control"
+      - "Time spent writing up interviews instead of being present with the person"
+    title: "Sonabrief for social workers: case notes that protect vulnerable people"
+    description: "A meeting assistant for social workers built around confidentiality. You choose, before each recording, whether the audio is transcribed on your own device or on European servers. The recording is never kept as a file."
+    intro: |
+      The conversations a social worker has are among the most sensitive anywhere: a family in difficulty, a child at risk, a person at their most exposed. Professional secrecy here is a duty set out in the professional code and backed by criminal sanction, and the data involved is about people who often cannot protect themselves. A recorded interview is the most complete record of that, and the most exposed. Most general purpose transcription tools treat that recording as ordinary content to upload, process on servers abroad, and in several cases reuse to improve their models. For a practitioner responsible for vulnerable people, that is hard to reconcile with the duty of care you owe them.
+
+      Sonabrief starts from a different assumption. Before each recording you decide how the audio is handled. You can transcribe entirely **on your own device**, so the recording is never uploaded anywhere. Or you can choose to transcribe on **European servers** when you need more speed, in which case the audio is processed in the EU and not retained afterwards. It is an explicit choice you make each time, never something that happens to a vulnerable person's words without you deciding it.
+
+      ## What the workflow looks like
+
+      You record an interview or a home visit, and Sonabrief hands you a clean, structured written draft you can use for the case file. You review it, finish it in your own words, and the version that counts stays yours. The original audio is not stored as a file once transcribed, so you get back the time you spend writing instead of being present with the person, without leaving a trail of raw recordings on a third party's server.
+
+      ## What it does not do, and what stays with you
+
+      Sonabrief is a tool, not a professional or ethical judgement. It does not decide whether an interview may be recorded, whether the person has consented, or how to weigh confidentiality against the duty to act when someone is at serious risk. Those judgements, including the difficult ones about protecting a child or a vulnerable adult, remain yours and your service's. The software is open source, so a supervisor or a data protection advisor can inspect exactly how it handles audio rather than trusting a marketing claim.
+
+      None of this is legal advice. It is a description of how the tool works, so you can decide whether it fits the way you are required, and have chosen, to practise.
+    faq:
+      - q: "Is the interview audio uploaded to the cloud?"
+        a: "It depends on the choice you make before each recording. If you select on-device transcription, the audio stays on your computer and is never uploaded. If you choose transcription on European servers for extra speed, the audio is processed in the EU and is not retained once transcribed."
+      - q: "How does Sonabrief protect data about vulnerable people?"
+        a: "On-device transcription keeps the recording off any third party server, which is the most protective option for sensitive data about people who may not be able to protect themselves. If you choose European cloud transcription, processing happens in the EU and nothing is retained afterwards. Whether and how to record an interview remains your professional responsibility. This is not legal advice."
+      - q: "What if I have a duty to disclose to protect someone at risk?"
+        a: "That judgement is yours, set by your professional code and the law, and Sonabrief does not change it. The tool keeps your written record under your control; what you must disclose to protect a child or a vulnerable adult, and to whom, remains your decision and your service's. This is not legal advice."
+      - q: "Will my interviews be used to train AI models?"
+        a: "No. Your interviews are never used to train any model. When you ask for a written summary, it runs either on your own device or on European servers that keep nothing once the request is processed."
+      - q: "Can a supervisor verify these claims?"
+        a: "Yes. Sonabrief is open source, so the code that handles audio can be inspected directly rather than relying on a promise. A supervisor or DPO can review how recording, transcription and storage actually behave."
+
+  it:
+    profession: "Per assistenti sociali"
+    painPoints:
+      - "La registrazione di un caso contiene dati sensibili su persone vulnerabili, spesso minori e famiglie"
+      - "Uno strumento cloud generico archivia quei dati all'estero, fuori dal tuo controllo"
+      - "Tempo speso a verbalizzare i colloqui invece di essere presente con la persona"
+    title: "Sonabrief per assistenti sociali: note dei casi che proteggono le persone vulnerabili"
+    description: "Un assistente per i colloqui pensato per la riservatezza. Prima di ogni registrazione scegli tu se l'audio viene trascritto sul tuo dispositivo o su server europei. La registrazione non viene mai conservata come file."
+    intro: |
+      I colloqui di un assistente sociale sono tra i più delicati che esistano: una famiglia in difficoltà, un minore a rischio, una persona nel suo momento più fragile. Qui il segreto professionale è un dovere sancito dal codice deontologico e sostenuto dalla sanzione penale, e i dati coinvolti riguardano persone che spesso non possono proteggersi da sole. La registrazione di un colloquio ne è il documento più completo, e il più esposto. La maggior parte degli strumenti di trascrizione generici tratta quella registrazione come un contenuto qualsiasi da caricare, elaborare su server all'estero e, in diversi casi, riutilizzare per migliorare i propri modelli. Per un professionista responsabile di persone vulnerabili è difficile conciliarlo con il dovere di cura che hai verso di loro.
+
+      Sonabrief parte da un presupposto diverso. Prima di ogni registrazione decidi tu come viene gestito l'audio. Puoi trascrivere interamente **sul tuo dispositivo**, così la registrazione non viene caricata da nessuna parte. Oppure puoi scegliere di trascrivere su **server europei** quando ti serve più velocità, e in quel caso l'audio viene elaborato nell'Unione Europea e non conservato in seguito. È una scelta esplicita che fai ogni volta, mai qualcosa che capita alle parole di una persona vulnerabile senza che tu lo decida.
+
+      ## Come funziona, in pratica
+
+      Registri un colloquio o una visita domiciliare, e Sonabrief ti consegna una bozza scritta pulita e strutturata che puoi usare per il fascicolo del caso. La rivedi, la chiudi con parole tue, e la versione che conta resta la tua. L'audio originale non viene salvato come file una volta trascritto, così ti restituisce il tempo che passi a scrivere invece di essere presente con la persona, senza lasciare una scia di registrazioni grezze sul server di terzi.
+
+      ## Cosa non fa, e cosa resta in capo a te
+
+      Sonabrief è uno strumento, non un giudizio professionale o etico. Non decide se un colloquio possa essere registrato, se la persona ha prestato il consenso, o come bilanciare la riservatezza con il dovere di intervenire quando qualcuno è a grave rischio. Queste valutazioni, comprese quelle difficili sulla protezione di un minore o di un adulto vulnerabile, restano tue e del tuo servizio. Il software è open source, quindi un supervisore o un consulente per la protezione dei dati può ispezionare esattamente come tratta l'audio invece di fidarsi di un'affermazione di marketing.
+
+      Nulla di tutto questo costituisce consulenza legale. È una descrizione di come funziona lo strumento, perché tu possa decidere se è adatto al modo in cui sei tenuto, e hai scelto, di lavorare.
+    faq:
+      - q: "L'audio del colloquio viene caricato nel cloud?"
+        a: "Dipende dalla scelta che fai prima di ogni registrazione. Se selezioni la trascrizione sul dispositivo, l'audio resta sul tuo computer e non viene mai caricato. Se scegli la trascrizione su server europei per avere più velocità, l'audio viene elaborato nell'Unione Europea e non viene conservato una volta trascritto."
+      - q: "Come protegge Sonabrief i dati delle persone vulnerabili?"
+        a: "La trascrizione sul dispositivo tiene la registrazione fuori da qualsiasi server di terzi, che è l'opzione più protettiva per i dati sensibili di persone che potrebbero non essere in grado di proteggersi. Se scegli la trascrizione cloud europea, l'elaborazione avviene nell'Unione Europea e nulla viene conservato in seguito. Se e come registrare un colloquio resta una tua responsabilità professionale. Questa non è consulenza legale."
+      - q: "E se ho il dovere di segnalare per proteggere qualcuno a rischio?"
+        a: "Quella valutazione è tua, stabilita dal tuo codice deontologico e dalla legge, e Sonabrief non la cambia. Lo strumento tiene il tuo documento scritto sotto il tuo controllo; cosa devi segnalare per proteggere un minore o un adulto vulnerabile, e a chi, resta una tua decisione e del tuo servizio. Questa non è consulenza legale."
+      - q: "I miei colloqui verranno usati per addestrare modelli AI?"
+        a: "No. I tuoi colloqui non vengono mai usati per addestrare alcun modello. Quando chiedi un riepilogo scritto, viene elaborato sul tuo dispositivo oppure su server europei che non conservano nulla una volta elaborata la richiesta."
+      - q: "Un supervisore può verificare queste affermazioni?"
+        a: "Sì. Sonabrief è open source, quindi il codice che gestisce l'audio può essere ispezionato direttamente invece di affidarsi a una promessa. Un supervisore o un DPO può verificare come si comportano davvero la registrazione, la trascrizione e l'archiviazione."
+
+  # fr / es / de intentionally absent → translation phase later.

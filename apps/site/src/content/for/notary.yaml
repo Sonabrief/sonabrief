@@ -1,0 +1,77 @@
+# Verified copy session. EN + IT only for now.
+# fr/es/de intentionally absent → routes not generated. Translation phase later.
+# draft:true held until founder validates IT + EN rendering visually.
+
+slug: notary
+draft: false
+
+i18n:
+  en:
+    profession: "For notaries"
+    painPoints:
+      - "A notary holds confidential information about clients' personal, family and financial affairs"
+      - "A general purpose cloud tool stores that information abroad, outside your control"
+      - "Time spent writing up what was agreed instead of preparing the deed"
+    title: "Sonabrief for notaries: confidential meetings, kept under your seal"
+    description: "A meeting assistant for notaries built around professional secrecy. You choose, before each recording, whether the audio is transcribed on your own device or on European servers. The recording is never kept as a file."
+    intro: |
+      A notary is a public officer entrusted with public faith, and with confidential information about the most private corners of a client's life: their property, their inheritance, their family arrangements, their business. Professional secrecy here is not a courtesy. It is a duty rooted in the law that governs the profession and reinforced by criminal sanction. The recording of a meeting where those matters are discussed is the most complete record of them, and the most exposed. Most general purpose transcription tools treat that recording as ordinary content to upload, process on servers abroad, and in several cases reuse to improve their models. For a public officer, that is difficult to square with the trust the public places in the office.
+
+      Sonabrief starts from a different assumption. Before each recording you decide how the audio is handled. You can transcribe entirely **on your own device**, so the recording is never uploaded anywhere. Or you can choose to transcribe on **European servers** when you need more speed, in which case the audio is processed in the EU and not retained afterwards. It is an explicit choice you make each time.
+
+      ## What the workflow looks like
+
+      You record a meeting where the parties discuss what they want the deed to say. Sonabrief hands you a clean, structured written draft of that discussion: you review it, finish it in your own words, and use it to prepare the act. You start from a ready text instead of a blank page, and the version that counts stays yours, so what was agreed is checked before it shapes the deed, never trusted simply because it was transcribed. The original audio is not stored as a file once transcribed, so nothing is left on a third party's server.
+
+      ## What it does not do, and what stays with you
+
+      Sonabrief is a tool, not a professional or legal judgement. It does not decide whether a meeting may be recorded, whether the parties have consented, or what your duties as a public officer require in a given case. Those decisions remain yours. The software is open source, so a colleague or a data protection advisor can inspect exactly how it handles audio rather than trusting a marketing claim.
+
+      None of this is legal advice. It is a description of how the tool works, so you can decide whether it fits the way you are required, and have chosen, to practise.
+    faq:
+      - q: "Is the meeting audio uploaded to the cloud?"
+        a: "It depends on the choice you make before each recording. If you select on-device transcription, the audio stays on your computer and is never uploaded. If you choose transcription on European servers for extra speed, the audio is processed in the EU and is not retained once transcribed."
+      - q: "How does Sonabrief protect information covered by professional secrecy?"
+        a: "On-device transcription keeps the recording off any third party server, which is the most protective option for confidential client information. If you choose European cloud transcription, processing happens in the EU and nothing is retained afterwards. Whether and how to record a meeting remains your professional responsibility. This is not legal advice."
+      - q: "Can I rely on the transcript when preparing a deed?"
+        a: "Sonabrief produces a faithful, structured draft of the discussion, and you review it before it shapes the act. As with any note, what was agreed is checked before it is relied on. You start from a ready text instead of a blank page, and the version that counts stays yours."
+      - q: "Will my meetings be used to train AI models?"
+        a: "No. Your meetings are never used to train any model. When you ask for a written summary, it runs either on your own device or on European servers that keep nothing once the request is processed."
+      - q: "Can a colleague verify these claims?"
+        a: "Yes. Sonabrief is open source, so the code that handles audio can be inspected directly rather than relying on a promise. A colleague or DPO can review how recording, transcription and storage actually behave."
+
+  it:
+    profession: "Per notai"
+    painPoints:
+      - "Il notaio custodisce informazioni riservate sulla vita personale, familiare e patrimoniale dei clienti"
+      - "Uno strumento cloud generico archivia quelle informazioni all'estero, fuori dal tuo controllo"
+      - "Tempo speso a verbalizzare quanto concordato invece di preparare l'atto"
+    title: "Sonabrief per notai: incontri riservati, custoditi sotto il tuo sigillo"
+    description: "Un assistente per gli incontri pensato per il segreto professionale. Prima di ogni registrazione scegli tu se l'audio viene trascritto sul tuo dispositivo o su server europei. La registrazione non viene mai conservata come file."
+    intro: |
+      Il notaio è un pubblico ufficiale investito della pubblica fede, e custodisce informazioni riservate sugli angoli più privati della vita di un cliente: il patrimonio, le successioni, gli assetti familiari, l'impresa. Qui il segreto professionale non è una cortesia. È un dovere radicato nella legge che disciplina la professione e rafforzato dalla sanzione penale. La registrazione di un incontro in cui si discutono quelle materie ne è il documento più completo, e il più esposto. La maggior parte degli strumenti di trascrizione generici tratta quella registrazione come un contenuto qualsiasi da caricare, elaborare su server all'estero e, in diversi casi, riutilizzare per migliorare i propri modelli. Per un pubblico ufficiale è difficile conciliarlo con la fiducia che la collettività ripone nella funzione.
+
+      Sonabrief parte da un presupposto diverso. Prima di ogni registrazione decidi tu come viene gestito l'audio. Puoi trascrivere interamente **sul tuo dispositivo**, così la registrazione non viene caricata da nessuna parte. Oppure puoi scegliere di trascrivere su **server europei** quando ti serve più velocità, e in quel caso l'audio viene elaborato nell'Unione Europea e non conservato in seguito. È una scelta esplicita che fai ogni volta.
+
+      ## Come funziona, in pratica
+
+      Registri un incontro in cui le parti discutono cosa vogliono che l'atto stabilisca. Sonabrief ti consegna una bozza scritta pulita e strutturata di quella discussione: tu la rivedi, la chiudi con parole tue, e la usi per preparare l'atto. Parti da un testo già pronto invece che dal foglio bianco, e la versione che conta resta la tua, così quanto concordato lo verifichi prima che dia forma all'atto, mai dato per buono solo perché trascritto. L'audio originale non viene salvato come file una volta trascritto, quindi non resta nulla sul server di terzi.
+
+      ## Cosa non fa, e cosa resta in capo a te
+
+      Sonabrief è uno strumento, non un giudizio professionale o legale. Non decide se un incontro possa essere registrato, se le parti hanno prestato il consenso, o cosa richiedono i tuoi doveri di pubblico ufficiale in un dato caso. Queste decisioni restano tue. Il software è open source, quindi un collega o un consulente per la protezione dei dati può ispezionare esattamente come tratta l'audio invece di fidarsi di un'affermazione di marketing.
+
+      Nulla di tutto questo costituisce consulenza legale. È una descrizione di come funziona lo strumento, perché tu possa decidere se è adatto al modo in cui sei tenuto, e hai scelto, di lavorare.
+    faq:
+      - q: "L'audio dell'incontro viene caricato nel cloud?"
+        a: "Dipende dalla scelta che fai prima di ogni registrazione. Se selezioni la trascrizione sul dispositivo, l'audio resta sul tuo computer e non viene mai caricato. Se scegli la trascrizione su server europei per avere più velocità, l'audio viene elaborato nell'Unione Europea e non viene conservato una volta trascritto."
+      - q: "Come protegge Sonabrief le informazioni coperte dal segreto professionale?"
+        a: "La trascrizione sul dispositivo tiene la registrazione fuori da qualsiasi server di terzi, che è l'opzione più protettiva per le informazioni riservate del cliente. Se scegli la trascrizione cloud europea, l'elaborazione avviene nell'Unione Europea e nulla viene conservato in seguito. Se e come registrare un incontro resta una tua responsabilità professionale. Questa non è consulenza legale."
+      - q: "Posso fidarmi della trascrizione quando preparo un atto?"
+        a: "Sonabrief produce una bozza fedele e strutturata della discussione, e tu la rivedi prima che dia forma all'atto. Come per qualsiasi nota, quanto concordato lo verifichi prima di farci affidamento. Parti da un testo già pronto invece che dal foglio bianco, e la versione che conta resta la tua."
+      - q: "I miei incontri verranno usati per addestrare modelli AI?"
+        a: "No. I tuoi incontri non vengono mai usati per addestrare alcun modello. Quando chiedi un riepilogo scritto, viene elaborato sul tuo dispositivo oppure su server europei che non conservano nulla una volta elaborata la richiesta."
+      - q: "Un collega può verificare queste affermazioni?"
+        a: "Sì. Sonabrief è open source, quindi il codice che gestisce l'audio può essere ispezionato direttamente invece di affidarsi a una promessa. Un collega o un DPO può verificare come si comportano davvero la registrazione, la trascrizione e l'archiviazione."
+
+  # fr / es / de intentionally absent → translation phase later.
