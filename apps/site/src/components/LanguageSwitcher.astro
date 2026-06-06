@@ -2,9 +2,16 @@
 interface Props {
   currentLang: string;
   currentPath?: string;
+  /**
+   * Restrict the switcher to a subset of languages. Defaults to all 5 site
+   * languages (standard pages). pSEO pages pass only the languages the current
+   * entry is translated into, so we never link to a non-existent localized URL.
+   * EN is always kept (canonical), even if omitted from the list.
+   */
+  availableLangs?: string[];
 }
 
-const { currentLang, currentPath = '' } = Astro.props;
+const { currentLang, currentPath = '', availableLangs } = Astro.props;
 
 // Strip leading lang prefix from path (e.g. "/it/pricing" → "pricing")
 const langPrefixes = ['it', 'fr', 'es', 'de'];
@@ -16,13 +23,18 @@ for (const prefix of langPrefixes) {
   }
 }
 
-const langs = [
+const allLangs = [
   { code: 'en', label: 'EN', href: strippedPath ? `/${strippedPath}` : '/en/' },
   { code: 'it', label: 'IT', href: strippedPath ? `/it/${strippedPath}` : '/it/' },
   { code: 'fr', label: 'FR', href: strippedPath ? `/fr/${strippedPath}` : '/fr/' },
   { code: 'es', label: 'ES', href: strippedPath ? `/es/${strippedPath}` : '/es/' },
   { code: 'de', label: 'DE', href: strippedPath ? `/de/${strippedPath}` : '/de/' },
 ];
+
+// When a subset is given, keep only those langs (EN always retained as canonical).
+const langs = availableLangs
+  ? allLangs.filter((l) => l.code === 'en' || availableLangs.includes(l.code))
+  : allLangs;
 ---
 
 <nav class="lang-switcher" aria-label="Language switcher">

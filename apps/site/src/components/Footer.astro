@@ -5,8 +5,10 @@ import LanguageSwitcher from './LanguageSwitcher.astro';
 interface Props {
   currentLang?: string;
   currentPath?: string;
+  /** Forwarded to LanguageSwitcher; omit on standard pages for all 5 langs. */
+  availableLangs?: string[];
 }
-const { currentLang = 'en', currentPath = '' } = Astro.props;
+const { currentLang = 'en', currentPath = '', availableLangs } = Astro.props;
 const t = await getTranslations(currentLang);
 
 const prefix = currentLang === 'en' ? '' : `/${currentLang}`;
@@ -139,7 +141,7 @@ function isExternal(href: string | null): boolean {
       </form>
 
       <!-- Language switcher -->
-      <LanguageSwitcher currentLang={currentLang} currentPath={currentPath} />
+      <LanguageSwitcher currentLang={currentLang} currentPath={currentPath} availableLangs={availableLangs} />
 
       <!-- Copyright -->
       <p class="footer-copyright">{t.footer.legal}</p>

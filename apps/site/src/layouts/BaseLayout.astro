@@ -21,6 +21,12 @@ interface Props {
    * x-default is derived from whichever entry has lang === 'en'.
    */
   hreflangAlternates?: { lang: string; href: string }[];
+  /**
+   * Restrict the footer language switcher to a subset of languages. Defaults to
+   * all 5. pSEO pages pass only the languages the current entry is translated
+   * into, so the footer never links to a non-existent localized URL.
+   */
+  availableLangs?: string[];
 }
 
 const {
@@ -32,6 +38,7 @@ const {
   ogType = 'website',
   noindex = false,
   hreflangAlternates,
+  availableLangs,
 } = Astro.props;
 
 const base = 'https://sonabrief.com';
@@ -141,7 +148,7 @@ const jsonLd = {
   <body class="grain-texture">
     <Navbar lang={lang} />
     <slot />
-    <Footer currentLang={lang} currentPath={currentPath} />
+    <Footer currentLang={lang} currentPath={currentPath} availableLangs={availableLangs} />
 
     <script>
       // Observer reveal globale: aggancia ogni .reveal[data-reveal] della pagina

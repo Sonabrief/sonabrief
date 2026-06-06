@@ -3,7 +3,7 @@
 // The 5 route wrappers stay thin: they resolve `lang` and hand the entry here.
 import { marked } from 'marked';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { resolveCopy, buildAvailableHreflangs } from '../../content/pseo-utils';
+import { resolveCopy, buildAvailableHreflangs, getAvailableLangs } from '../../content/pseo-utils';
 import type { LangCode } from '../../content/pseo-utils';
 
 interface Props {
@@ -25,8 +25,9 @@ const { copy, isFallback } = resolveCopy(i18n, lang);
 const pathWithoutLang = `compare/${slug}`;
 const currentPath = pathWithoutLang;
 
-// hreflang: only languages this entry is actually translated into.
+// hreflang + footer switcher: only languages this entry is translated into.
 const hreflangAlternates = buildAvailableHreflangs(i18n, pathWithoutLang);
+const availableLangs = getAvailableLangs(i18n);
 
 // If we're showing EN fallback on a non-EN URL, the page must not be indexed.
 const noindex = isFallback;
@@ -40,6 +41,7 @@ const introHtml = marked(copy.intro) as string;
   description={copy.description}
   currentPath={currentPath}
   hreflangAlternates={hreflangAlternates}
+  availableLangs={availableLangs}
   noindex={noindex}
 >
   <main class="pseo-wrapper">
