@@ -105,3 +105,138 @@ i18n:
         a: "Sonabrief usa infrastruttura europea, e le sintesi cloud girano su server europei. La Privacy Policy di Otter dice invece che usa Amazon Web Services, negli Stati Uniti."
       - q: "Sonabrief è adatto ad avvocati, terapeuti o giornalisti?"
         a: "Sì. Sono le persone per cui è nato. La trascrizione sul proprio dispositivo, senza alcun file audio conservato, si adatta al lavoro regolato da segreto professionale, riservatezza o protezione delle fonti."
+
+  fr:
+    title: "L'alternative à Otter.ai qui place la confidentialité au premier plan — Sonabrief"
+    description: "Sonabrief est une alternative privée à Otter.ai : la transcription se fait sur votre propre appareil, votre audio n'est jamais enregistré sous forme de fichier, et vos données n'entraînent jamais aucun modèle d'IA."
+    intro: |
+      ## Une alternative privée à Otter.ai
+
+      Otter.ai est un assistant de réunion compétent, mais sa conception est bâtie autour du cloud. Les propres conditions de service d'Otter indiquent que l'audio est téléversé et traité sur des serveurs cloud. Sa politique de confidentialité indique que les enregistrements et les transcriptions servent à entraîner les modèles d'IA d'Otter, et que le stockage et le traitement ont lieu sur Amazon Web Services aux États-Unis.
+
+      Pour la plupart des gens, ce compromis est invisible. Pour les avocats, les thérapeutes, les journalistes et les consultants, c'est toute la question. Lorsqu'une conversation est couverte par le secret professionnel, confidentielle ou protégée, "téléversée vers un cloud américain et utilisée pour entraîner des modèles" n'est pas un détail en petits caractères. C'est une raison de ne pas enregistrer du tout.
+
+      Sonabrief a été conçu dans l'autre sens. La transcription se fait sur votre propre appareil, et votre audio n'est jamais enregistré sous forme de fichier. Il n'y a aucun enregistrement sur un serveur, en attente d'être réquisitionné, divulgué ou réutilisé. Lorsque vous voulez qu'une IA résume une réunion, vous décidez comment : par une synthèse via Mistral sur des serveurs européens, qui ne conservent rien une fois votre requête traitée, ou entièrement sur votre propre machine, d'où rien ne sort jamais. Dans les deux cas, vos données ne servent jamais à entraîner un modèle. Ni le nôtre, ni celui de quiconque.
+
+      Les différences pratiques découlent toutes de cette seule décision. Le plan gratuit d'Otter cesse d'enregistrer au bout de 30 minutes et ne vous laisse importer qu'une poignée de fichiers en tout. Les prix de Sonabrief sont en euros, avec un plan gratuit et deux plans payants (Pro à 9 €/mois ou 89 €/an, Pro Unlimited à 19 €/mois ou 189 €/an). La principale différence entre les plans payants est la durée de conservation de votre archive, pas le nombre de minutes pendant lesquelles vous avez le droit de réfléchir.
+
+      Sonabrief est aussi open source. Vous n'avez pas à nous croire sur parole quant au traitement de votre audio. Vous pouvez lire le code vous-même. Pour un produit dont toute la promesse est la confidentialité, cette transparence est l'essentiel.
+
+      Si vous voulez un assistant de réunion qui fonctionne simplement dans le cloud, Otter est un choix raisonnable. Si vous traitez des conversations qui ne peuvent pas quitter votre contrôle, Sonabrief a été conçu exactement pour cela.
+    differentiators:
+      audio_processing:
+        sonabrief: "La transcription se fait sur votre propre appareil. Votre audio n'est jamais enregistré sous forme de fichier."
+        competitor: "L'audio est téléversé et traité sur des serveurs cloud."
+      data_for_training:
+        sonabrief: "Vos données ne servent jamais à entraîner aucun modèle."
+        competitor: "Les enregistrements et les transcriptions servent à entraîner les modèles d'IA d'Otter."
+      hosting:
+        sonabrief: "Infrastructure européenne. Les synthèses dans le cloud tournent sur les serveurs européens de Mistral, qui ne conservent rien une fois la requête traitée (Zero Data Retention), ou vous pouvez tout garder entièrement en local."
+        competitor: "Stockage et traitement sur Amazon Web Services, États-Unis."
+      pricing:
+        sonabrief: "Gratuit, Pro 9 €/mois (89 €/an), Pro Unlimited 19 €/mois (189 €/an). Prix en euros."
+        competitor: "Gratuit (300 min/mois), Pro 8,33 $/mois en annuel, Business 19,99 $/utilisateur/mois en annuel. Prix en USD."
+      languages:
+        sonabrief: "99 langues, avec la meilleure précision sur les principales langues européennes et professionnelles."
+        competitor: "Une sélection de langues plus restreinte."
+    faq:
+      - q: "Sonabrief est-il vraiment privé, ou est-ce seulement du marketing ?"
+        a: "La transcription se fait sur votre propre appareil et votre audio n'est jamais enregistré sous forme de fichier. Sonabrief est open source : n'importe qui peut donc vérifier comment les données sont traitées en lisant le code, plutôt que de le prendre sur parole."
+      - q: "Sonabrief téléverse-t-il mon audio dans le cloud, comme le fait Otter ?"
+        a: "Non. Votre audio est transcrit sur votre appareil et n'est jamais écrit dans un fichier ni téléversé. Ce n'est que si vous choisissez les synthèses dans le cloud qu'un texte (jamais l'audio) part vers les serveurs européens de Mistral, qui ne conservent rien une fois la requête traitée. Vous pouvez aussi garder tout le processus sur votre propre machine."
+      - q: "Mes réunions serviront-elles à entraîner des modèles d'IA ?"
+        a: "Non. Vos données ne servent jamais à entraîner aucun modèle. La politique de confidentialité d'Otter, à l'inverse, indique que les enregistrements et les transcriptions servent à entraîner sa propre IA."
+      - q: "Où mes données sont-elles hébergées ?"
+        a: "Sonabrief utilise une infrastructure européenne, et les synthèses dans le cloud tournent sur des serveurs européens. La politique de confidentialité d'Otter indique qu'il utilise Amazon Web Services aux États-Unis."
+      - q: "Sonabrief convient-il aux avocats, aux thérapeutes ou aux journalistes ?"
+        a: "Oui. Ce sont les personnes pour qui il a été conçu. La transcription sur votre propre appareil, sans fichier audio conservé, convient à un travail régi par le secret professionnel, la confidentialité ou la protection des sources."
+
+  es:
+    title: "La alternativa a Otter.ai que pone la privacidad primero — Sonabrief"
+    description: "Sonabrief es una alternativa privada a Otter.ai: la transcripción se realiza en tu propio dispositivo, tu audio nunca se guarda como archivo, y tus datos nunca entrenan ningún modelo de IA."
+    intro: |
+      ## Una alternativa privada a Otter.ai
+
+      Otter.ai es un asistente de reuniones competente, pero su diseño está construido en torno a la nube. Las propias condiciones del servicio de Otter dicen que el audio se sube y se procesa en servidores en la nube. Su política de privacidad dice que las grabaciones y las transcripciones se usan para entrenar los modelos de IA de Otter, y que el almacenamiento y el procesamiento se realizan en Amazon Web Services en Estados Unidos.
+
+      Para la mayoría de la gente esa contrapartida es invisible. Para abogados, terapeutas, periodistas y consultores, es toda la cuestión. Cuando una conversación está amparada por el secreto profesional, es confidencial o está protegida, "subida a una nube estadounidense y usada para entrenar modelos" no es un detalle en letra pequeña. Es un motivo para no grabar en absoluto.
+
+      Sonabrief se construyó al revés. La transcripción se realiza en tu propio dispositivo, y tu audio nunca se guarda como archivo. No hay ninguna grabación alojada en un servidor, a la espera de ser requerida judicialmente, filtrada o reutilizada. Cuando quieres que una IA resuma una reunión, decides cómo: con una síntesis a través de Mistral en servidores europeos, que no conservan nada una vez procesada tu petición, o por completo en tu propia máquina, de donde nada sale jamás. En cualquier caso, tus datos nunca se usan para entrenar un modelo. Ni el nuestro, ni el de nadie.
+
+      Las diferencias prácticas se derivan todas de esa única decisión. El plan gratuito de Otter deja de grabar a los 30 minutos y solo te deja importar un puñado de archivos en total. Los precios de Sonabrief están en euros, con un plan gratuito y dos planes de pago (Pro a 9 €/mes o 89 €/año, Pro Unlimited a 19 €/mes o 189 €/año). La principal diferencia entre los planes de pago es cuánto tiempo se conserva tu archivo, no cuántos minutos se te permite pensar.
+
+      Sonabrief es además de código abierto. No tienes que creer en nuestra palabra sobre cómo se trata tu audio. Puedes leer el código tú mismo. Para un producto cuya promesa entera es la privacidad, esa transparencia es lo esencial.
+
+      Si quieres un asistente de reuniones que simplemente funcione en la nube, Otter es una opción razonable. Si manejas conversaciones que no pueden salir de tu control, Sonabrief se construyó exactamente para eso.
+    differentiators:
+      audio_processing:
+        sonabrief: "La transcripción se realiza en tu propio dispositivo. Tu audio nunca se guarda como archivo."
+        competitor: "El audio se sube y se procesa en servidores en la nube."
+      data_for_training:
+        sonabrief: "Tus datos nunca se usan para entrenar ningún modelo."
+        competitor: "Las grabaciones y las transcripciones se usan para entrenar los modelos de IA de Otter."
+      hosting:
+        sonabrief: "Infraestructura europea. Los resúmenes en la nube se ejecutan en los servidores europeos de Mistral, que no conservan nada una vez procesada la petición (Zero Data Retention), o puedes mantenerlo todo por completo en local."
+        competitor: "Almacenamiento y procesamiento en Amazon Web Services, Estados Unidos."
+      pricing:
+        sonabrief: "Gratis, Pro 9 €/mes (89 €/año), Pro Unlimited 19 €/mes (189 €/año). Precios en euros."
+        competitor: "Gratis (300 min/mes), Pro 8,33 $/mes en anual, Business 19,99 $/usuario/mes en anual. Precios en USD."
+      languages:
+        sonabrief: "99 idiomas, con la máxima precisión en las principales lenguas europeas y de negocios."
+        competitor: "Una selección de idiomas más reducida."
+    faq:
+      - q: "¿Sonabrief es realmente privado, o es solo marketing?"
+        a: "La transcripción se realiza en tu propio dispositivo y tu audio nunca se guarda como archivo. Sonabrief es de código abierto, así que cualquiera puede comprobar cómo se tratan los datos leyendo el código, en lugar de tomarlo por buena fe."
+      - q: "¿Sonabrief sube mi audio a la nube, como hace Otter?"
+        a: "No. Tu audio se transcribe en tu dispositivo y nunca se escribe en un archivo ni se sube. Solo si eliges los resúmenes en la nube se envía algún texto (nunca el audio) a los servidores europeos de Mistral, que no conservan nada una vez procesada la petición. También puedes mantener todo el proceso en tu propia máquina."
+      - q: "¿Se usarán mis reuniones para entrenar modelos de IA?"
+        a: "No. Tus datos nunca se usan para entrenar ningún modelo. La política de privacidad de Otter, en cambio, dice que las grabaciones y las transcripciones se usan para entrenar su propia IA."
+      - q: "¿Dónde se alojan mis datos?"
+        a: "Sonabrief usa infraestructura europea, y los resúmenes en la nube se ejecutan en servidores europeos. La política de privacidad de Otter dice que usa Amazon Web Services en Estados Unidos."
+      - q: "¿Es Sonabrief adecuado para abogados, terapeutas o periodistas?"
+        a: "Sí. Son las personas para quienes se creó. La transcripción en tu propio dispositivo, sin ningún archivo de audio conservado, encaja con el trabajo regido por el secreto profesional, la confidencialidad o la protección de las fuentes."
+
+  de:
+    title: "Die datenschutzorientierte Alternative zu Otter.ai — Sonabrief"
+    description: "Sonabrief ist eine private Alternative zu Otter.ai: Die Transkription läuft auf Ihrem eigenen Gerät, Ihr Audio wird nie als Datei gespeichert, und Ihre Daten trainieren nie ein KI-Modell."
+    intro: |
+      ## Eine private Alternative zu Otter.ai
+
+      Otter.ai ist ein fähiger Meeting-Assistent, aber sein Design ist um die Cloud herum gebaut. Otters eigene Nutzungsbedingungen besagen, dass das Audio hochgeladen und auf Cloud-Servern verarbeitet wird. Seine Datenschutzrichtlinie besagt, dass Aufnahmen und Abschriften zum Trainieren von Otters eigenen KI-Modellen verwendet werden und dass Speicherung und Verarbeitung auf Amazon Web Services in den Vereinigten Staaten laufen.
+
+      Für die meisten Menschen ist dieser Kompromiss unsichtbar. Für Anwälte, Therapeuten, Journalisten und Berater ist er die ganze Frage. Wenn ein Gespräch der Verschwiegenheitspflicht unterliegt, vertraulich oder geschützt ist, ist "in eine US-Cloud hochgeladen und zum Trainieren von Modellen verwendet" kein Detail im Kleingedruckten. Es ist ein Grund, gar nicht erst aufzunehmen.
+
+      Sonabrief ist andersherum gebaut. Die Transkription geschieht auf Ihrem eigenen Gerät, und Ihr Audio wird nie als Datei gespeichert. Es gibt keine Aufnahme auf einem Server, die darauf wartet, angeordnet, durchgesickert oder erneut verwendet zu werden. Wenn Sie möchten, dass eine KI eine Besprechung zusammenfasst, entscheiden Sie, wie: durch eine Synthese über Mistral auf europäischen Servern, die nichts aufbewahren, sobald Ihre Anfrage verarbeitet ist, oder vollständig auf Ihrer eigenen Maschine, von der nie etwas weggeht. So oder so werden Ihre Daten nie zum Trainieren eines Modells verwendet. Weder unseres noch das von irgendjemandem.
+
+      Die praktischen Unterschiede folgen alle aus dieser einen Entscheidung. Otters kostenloser Plan hört nach 30 Minuten auf aufzunehmen und lässt Sie insgesamt nur eine Handvoll Dateien importieren. Die Preise von Sonabrief sind in Euro, mit einem kostenlosen Plan und zwei bezahlten Plänen (Pro für 9 €/Monat oder 89 €/Jahr, Pro Unlimited für 19 €/Monat oder 189 €/Jahr). Der wesentliche Unterschied zwischen den bezahlten Plänen ist, wie lange Ihr Archiv aufbewahrt wird, nicht wie viele Minuten Sie denken dürfen.
+
+      Sonabrief ist außerdem quelloffen. Sie müssen uns nicht aufs Wort glauben, wie Ihr Audio behandelt wird. Sie können den Code selbst lesen. Für ein Produkt, dessen ganzes Versprechen Datenschutz ist, ist diese Offenheit der Kern.
+
+      Wenn Sie einen Meeting-Assistenten wollen, der einfach in der Cloud funktioniert, ist Otter eine vernünftige Wahl. Wenn Sie Gespräche führen, die Ihre Kontrolle nicht verlassen dürfen, wurde Sonabrief genau dafür gebaut.
+    differentiators:
+      audio_processing:
+        sonabrief: "Die Transkription geschieht auf Ihrem eigenen Gerät. Ihr Audio wird nie als Datei gespeichert."
+        competitor: "Das Audio wird hochgeladen und auf Cloud-Servern verarbeitet."
+      data_for_training:
+        sonabrief: "Ihre Daten werden nie zum Trainieren irgendeines Modells verwendet."
+        competitor: "Aufnahmen und Abschriften werden zum Trainieren von Otters eigenen KI-Modellen verwendet."
+      hosting:
+        sonabrief: "Europäische Infrastruktur. Cloud-Zusammenfassungen laufen auf den europäischen Servern von Mistral, die nach der Verarbeitung einer Anfrage nichts aufbewahren (Zero Data Retention), oder Sie können alles vollständig lokal halten."
+        competitor: "Speicherung und Verarbeitung auf Amazon Web Services, Vereinigte Staaten."
+      pricing:
+        sonabrief: "Kostenlos, Pro 9 €/Monat (89 €/Jahr), Pro Unlimited 19 €/Monat (189 €/Jahr). Preise in Euro."
+        competitor: "Kostenlos (300 Min./Monat), Pro 8,33 $/Monat jährlich, Business 19,99 $/Nutzer/Monat jährlich. Preise in USD."
+      languages:
+        sonabrief: "99 Sprachen, mit der höchsten Genauigkeit bei den wichtigsten europäischen und geschäftlichen Sprachen."
+        competitor: "Eine engere Auswahl an Sprachen."
+    faq:
+      - q: "Ist Sonabrief wirklich privat, oder ist das nur Marketing?"
+        a: "Die Transkription geschieht auf Ihrem eigenen Gerät, und Ihr Audio wird nie als Datei gespeichert. Sonabrief ist quelloffen, sodass jeder überprüfen kann, wie die Daten behandelt werden, indem er den Code liest, statt es auf Treu und Glauben hinzunehmen."
+      - q: "Lädt Sonabrief mein Audio in die Cloud hoch, so wie Otter es tut?"
+        a: "Nein. Ihr Audio wird auf Ihrem Gerät transkribiert und nie in eine Datei geschrieben oder hochgeladen. Nur wenn Sie Cloud-Zusammenfassungen wählen, geht ein Text (nie das Audio) an die europäischen Server von Mistral, die nach der Verarbeitung der Anfrage nichts aufbewahren. Sie können den gesamten Vorgang auch auf Ihrer eigenen Maschine halten."
+      - q: "Werden meine Besprechungen zum Trainieren von KI-Modellen verwendet?"
+        a: "Nein. Ihre Daten werden nie zum Trainieren irgendeines Modells verwendet. Otters Datenschutzrichtlinie besagt dagegen, dass Aufnahmen und Abschriften zum Trainieren seiner eigenen KI verwendet werden."
+      - q: "Wo werden meine Daten gehostet?"
+        a: "Sonabrief nutzt europäische Infrastruktur, und Cloud-Zusammenfassungen laufen auf europäischen Servern. Otters Datenschutzrichtlinie besagt, dass es Amazon Web Services in den Vereinigten Staaten nutzt."
+      - q: "Ist Sonabrief für Anwälte, Therapeuten oder Journalisten geeignet?"
+        a: "Ja. Das sind die Menschen, für die es gebaut wurde. Die Transkription auf Ihrem eigenen Gerät, ohne gespeicherte Audiodatei, passt zu Arbeit, die der Verschwiegenheitspflicht, der Vertraulichkeit oder dem Quellenschutz unterliegt."

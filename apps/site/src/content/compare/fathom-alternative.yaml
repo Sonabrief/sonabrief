@@ -102,3 +102,132 @@ i18n:
         a: "No. Fathom invia un partecipante visibile, il Fathom Notetaker, nella chiamata. Sonabrief cattura e trascrive sul tuo dispositivo, quindi non c'è nessun bot nella lista partecipanti e nessuna registrazione depositata sul server di qualcun altro."
       - q: "Sonabrief è adatto ad avvocati, terapeuti o giornalisti?"
         a: "Sì. Sono le persone per cui è nato. La trascrizione sul proprio dispositivo, senza alcun file audio conservato e senza addestramento predefinito sui tuoi contenuti, si adatta al lavoro regolato da segreto professionale, riservatezza o protezione delle fonti."
+
+  fr:
+    title: "L'alternative à Fathom qui place la confidentialité au premier plan — Sonabrief"
+    description: "Sonabrief est une alternative privée à Fathom : la transcription se fait sur votre propre appareil, votre audio n'est jamais enregistré sous forme de fichier, et vos réunions ne servent jamais à entraîner aucun modèle d'IA."
+    intro: |
+      ## Une alternative privée à Fathom
+
+      Fathom est réellement bon, et son plan gratuit est réellement généreux. Enregistrement, transcription et stockage illimités sans frais, c'est rare, et si la confidentialité n'est pas votre principale préoccupation, Fathom est un choix raisonnable. Il serait malhonnête de prétendre le contraire, et une comparaison qui ne ferait qu'attaquer Fathom ne vaudrait pas la peine d'être lue.
+
+      Mais "gratuit" a une conception derrière lui, et cette conception vaut la peine d'être comprise. Fathom rejoint votre appel en tant que participant visible, le "Fathom Notetaker", et téléverse l'enregistrement vers les centres de données d'Amazon Web Services aux États-Unis et au Canada. Ses propres conditions de service indiquent que, selon les paramètres de votre compte, Fathom peut utiliser des données dépersonnalisées issues du contenu de vos réunions pour entraîner et améliorer ses modèles d'IA internes. Vous pouvez le désactiver, mais c'est à vous de penser à le faire, et c'est activé par défaut. Pour un appel commercial ordinaire, c'est peut-être un échange équitable. Pour une conversation couverte par le secret professionnel, c'est une décision que vous devez prendre activement, chaque fois que vous oubliez de vérifier un réglage.
+
+      Sonabrief est conçu dans l'autre sens. La transcription se fait sur votre propre appareil, et votre audio n'est jamais enregistré sous forme de fichier. Il n'y a aucun enregistrement téléversé vers un cloud américain ou canadien, et il n'y a aucune option de retrait à se rappeler, parce qu'il n'y a rien à refuser : vos réunions ne servent jamais à entraîner aucun modèle, ni le nôtre ni celui de quiconque. Lorsque vous voulez une synthèse, vous choisissez comment : via Mistral sur des serveurs européens, qui ne conservent rien une fois une requête traitée, ou entièrement sur votre propre machine.
+
+      Soyons francs sur le prix, car c'est là que Fathom l'emporte sur le volume. Le plan gratuit de Fathom enregistre et transcrit sans limites, tandis que ses synthèses IA avancées sont plafonnées à cinq appels par mois avant de retomber sur un modèle de base. Le plan gratuit de Sonabrief conserve votre archive pendant sept jours, ce qui est moins généreux en quantité brute. Nous ne sommes pas l'outil le moins cher pour qui veut simplement un enregistrement cloud illimité. Nous sommes l'outil pour qui ne peut pas se permettre que ses enregistrements se trouvent sur le serveur d'un tiers, dès le départ. Les prix de Sonabrief sont en euros (Pro à 9 €/mois ou 89 €/an, Pro Unlimited à 19 €/mois ou 189 €/an), et la différence entre les plans payants est la durée de conservation de votre archive.
+
+      Sonabrief est aussi open source, vous n'avez donc pas à nous croire sur parole quant au traitement de l'audio. Vous pouvez lire le code. Si vous voulez un enregistrement cloud gratuit et généreux et que les questions de confidentialité ne s'appliquent pas à votre travail, Fathom est un très bon choix. Si vos conversations ne peuvent pas quitter votre contrôle, Sonabrief a été conçu exactement pour cela.
+    differentiators:
+      audio_processing:
+        sonabrief: "La transcription se fait sur votre propre appareil. Votre audio n'est jamais enregistré sous forme de fichier."
+        competitor: "Un bot visible rejoint l'appel ; l'enregistrement est téléversé et stocké sur des serveurs cloud."
+      data_for_training:
+        sonabrief: "Vos réunions ne servent jamais à entraîner aucun modèle. Il n'y a aucune option de retrait à se rappeler."
+        competitor: "Par défaut, le contenu dépersonnalisé des réunions peut servir à entraîner les modèles d'IA internes de Fathom. Le retrait est disponible dans les paramètres du compte."
+      hosting:
+        sonabrief: "Infrastructure européenne. Les synthèses dans le cloud tournent sur les serveurs européens de Mistral, qui ne conservent rien une fois la requête traitée (Zero Data Retention), ou vous pouvez tout garder entièrement en local."
+        competitor: "Stockage et traitement sur Amazon Web Services aux États-Unis et au Canada."
+      pricing:
+        sonabrief: "Gratuit, Pro 9 €/mois (89 €/an), Pro Unlimited 19 €/mois (189 €/an). Prix en euros, sans frais par utilisateur."
+        competitor: "Gratuit (enregistrement illimité, synthèses IA avancées plafonnées à 5 appels/mois), plans payants à partir d'environ 16 $/mois. Prix en USD, par utilisateur."
+      open_source:
+        sonabrief: "Open source. Vous pouvez lire le code qui traite votre audio."
+        competitor: "Propriétaire."
+    faq:
+      - q: "Fathom entraîne-t-il son IA sur mes réunions ?"
+        a: "Selon ses propres conditions de service, Fathom peut utiliser des données dépersonnalisées issues du contenu de vos réunions pour entraîner et améliorer ses modèles d'IA internes, selon les paramètres de votre compte, et vous pouvez vous y opposer dans ces paramètres. Ses accords interdisent par ailleurs à des prestataires comme OpenAI et Anthropic de s'entraîner sur les données Fathom. Avec Sonabrief, vos réunions ne servent jamais à entraîner aucun modèle, et il n'y a aucun réglage à se rappeler."
+      - q: "Où Fathom stocke-t-il mes enregistrements ?"
+        a: "La propre documentation de Fathom indique que toutes les données sont stockées dans les centres de données d'Amazon Web Services aux États-Unis et au Canada. Sonabrief transcrit sur votre appareil, l'audio n'est donc jamais téléversé ; les synthèses dans le cloud, si vous les choisissez, tournent sur des serveurs européens qui ne conservent rien une fois la requête traitée."
+      - q: "Sonabrief est-il moins cher que Fathom ?"
+        a: "Pas sur le volume brut. Le plan gratuit de Fathom offre un enregistrement et une transcription illimités, ce que le plan gratuit de Sonabrief n'égale pas. L'avantage de Sonabrief n'est pas le prix, c'est que votre audio ne quitte jamais votre appareil, dès le départ. Le choix porte sur l'endroit où résident vos données, pas sur le nombre de minutes obtenues."
+      - q: "Un bot rejoint-il ma réunion avec Sonabrief ?"
+        a: "Non. Fathom envoie un participant visible, le Fathom Notetaker, dans l'appel. Sonabrief capture et transcrit sur votre propre appareil, il n'y a donc aucun bot dans la liste des participants et aucun enregistrement posé sur le serveur de quelqu'un d'autre."
+      - q: "Sonabrief convient-il aux avocats, aux thérapeutes ou aux journalistes ?"
+        a: "Oui. Ce sont les personnes pour qui il a été conçu. La transcription sur votre propre appareil, sans fichier audio conservé et sans entraînement par défaut sur votre contenu, convient à un travail régi par le secret professionnel, la confidentialité ou la protection des sources."
+
+  es:
+    title: "La alternativa a Fathom que pone la privacidad primero — Sonabrief"
+    description: "Sonabrief es una alternativa privada a Fathom: la transcripción se realiza en tu propio dispositivo, tu audio nunca se guarda como archivo, y tus reuniones nunca se usan para entrenar ningún modelo de IA."
+    intro: |
+      ## Una alternativa privada a Fathom
+
+      Fathom es realmente bueno, y su plan gratuito es realmente generoso. Grabación, transcripción y almacenamiento ilimitados sin coste es algo raro, y si la privacidad no es tu preocupación principal, Fathom es una opción razonable. Sería deshonesto fingir lo contrario, y una comparación que solo atacara a Fathom no valdría la pena leerse.
+
+      Pero "gratis" tiene un diseño detrás, y ese diseño vale la pena entenderlo. Fathom se une a tu llamada como participante visible, el "Fathom Notetaker", y sube la grabación a los centros de datos de Amazon Web Services en Estados Unidos y Canadá. Sus propias condiciones del servicio dicen que, según los ajustes de tu cuenta, Fathom puede usar datos anonimizados procedentes del contenido de tus reuniones para entrenar y mejorar sus modelos de IA internos. Puedes desactivarlo, pero el interruptor es cosa tuya recordarlo, y está activado por defecto. Para una llamada comercial corriente puede ser un trato justo. Para una conversación amparada por el secreto profesional es una decisión que tienes que tomar activamente, cada vez que olvidas revisar un ajuste.
+
+      Sonabrief está construido al revés. La transcripción se realiza en tu propio dispositivo, y tu audio nunca se guarda como archivo. No hay ninguna grabación subida a una nube estadounidense o canadiense, y no hay ninguna opción de exclusión que recordar, porque no hay nada de lo que excluirse: tus reuniones nunca se usan para entrenar ningún modelo, ni el nuestro ni el de nadie. Cuando quieres un resumen, eliges cómo: a través de Mistral en servidores europeos, que no conservan nada una vez procesada una petición, o por completo en tu propia máquina.
+
+      Seamos claros con el precio, porque es aquí donde Fathom gana en volumen. El plan gratuito de Fathom graba y transcribe sin límites, mientras que sus resúmenes de IA avanzados están limitados a cinco llamadas al mes antes de reducirse a una plantilla básica. El plan gratuito de Sonabrief conserva tu archivo durante siete días, lo que es menos generoso en cantidad pura. No somos la herramienta más barata para quien solo quiere grabación en la nube ilimitada. Somos la herramienta para quien no puede permitirse que sus grabaciones estén en el servidor de un tercero, desde el principio. Los precios de Sonabrief están en euros (Pro a 9 €/mes o 89 €/año, Pro Unlimited a 19 €/mes o 189 €/año), y la diferencia entre los planes de pago es cuánto tiempo se conserva tu archivo.
+
+      Sonabrief es además de código abierto, así que no tienes que creer en nuestra palabra sobre cómo se trata el audio. Puedes leer el código. Si quieres una grabación en la nube gratuita y generosa y las cuestiones de privacidad no aplican a tu trabajo, Fathom es una opción estupenda. Si tus conversaciones no pueden salir de tu control, Sonabrief se construyó exactamente para eso.
+    differentiators:
+      audio_processing:
+        sonabrief: "La transcripción se realiza en tu propio dispositivo. Tu audio nunca se guarda como archivo."
+        competitor: "Un bot visible se une a la llamada; la grabación se sube y se almacena en servidores en la nube."
+      data_for_training:
+        sonabrief: "Tus reuniones nunca se usan para entrenar ningún modelo. No hay ninguna opción de exclusión que recordar."
+        competitor: "Por defecto, el contenido anonimizado de las reuniones puede usarse para entrenar los modelos de IA internos de Fathom. La exclusión está disponible en los ajustes de la cuenta."
+      hosting:
+        sonabrief: "Infraestructura europea. Los resúmenes en la nube se ejecutan en los servidores europeos de Mistral, que no conservan nada una vez procesada la petición (Zero Data Retention), o puedes mantenerlo todo por completo en local."
+        competitor: "Almacenamiento y procesamiento en Amazon Web Services en Estados Unidos y Canadá."
+      pricing:
+        sonabrief: "Gratis, Pro 9 €/mes (89 €/año), Pro Unlimited 19 €/mes (189 €/año). Precios en euros, sin coste por usuario."
+        competitor: "Gratis (grabación ilimitada, resúmenes de IA avanzados limitados a 5 llamadas/mes), planes de pago desde alrededor de 16 $/mes. Precios en USD, por usuario."
+      open_source:
+        sonabrief: "Código abierto. Puedes leer el código que trata tu audio."
+        competitor: "Propietario."
+    faq:
+      - q: "¿Fathom entrena su IA con mis reuniones?"
+        a: "Según sus propias condiciones del servicio, Fathom puede usar datos anonimizados procedentes del contenido de tus reuniones para entrenar y mejorar sus modelos de IA internos, según los ajustes de la cuenta, y puedes excluirte desde esos ajustes. Por separado, sus acuerdos prohíben a proveedores como OpenAI y Anthropic entrenarse con los datos de Fathom. Con Sonabrief, tus reuniones nunca se usan para entrenar ningún modelo, y no hay ningún ajuste que recordar."
+      - q: "¿Dónde almacena Fathom mis grabaciones?"
+        a: "La documentación oficial de Fathom dice que todos los datos se almacenan en los centros de datos de Amazon Web Services en Estados Unidos y Canadá. Sonabrief transcribe en tu dispositivo, así que el audio nunca se sube; los resúmenes en la nube, si los eliges, se ejecutan en servidores europeos que no conservan nada una vez procesada la petición."
+      - q: "¿Sonabrief es más barato que Fathom?"
+        a: "No en volumen puro. El plan gratuito de Fathom ofrece grabación y transcripción ilimitadas, algo que el plan gratuito de Sonabrief no iguala. La ventaja de Sonabrief no es el precio, es que tu audio nunca sale de tu dispositivo, desde el principio. La elección es sobre dónde residen tus datos, no sobre cuántos minutos obtienes."
+      - q: "¿Se une un bot a mi reunión con Sonabrief?"
+        a: "No. Fathom envía un participante visible, el Fathom Notetaker, a la llamada. Sonabrief captura y transcribe en tu propio dispositivo, así que no hay ningún bot en la lista de participantes ni ninguna grabación alojada en el servidor de otra persona."
+      - q: "¿Es Sonabrief adecuado para abogados, terapeutas o periodistas?"
+        a: "Sí. Son las personas para quienes se creó. La transcripción en tu propio dispositivo, sin ningún archivo de audio conservado y sin entrenamiento por defecto sobre tu contenido, encaja con el trabajo regido por el secreto profesional, la confidencialidad o la protección de las fuentes."
+
+  de:
+    title: "Die datenschutzorientierte Alternative zu Fathom — Sonabrief"
+    description: "Sonabrief ist eine private Alternative zu Fathom: Die Transkription läuft auf Ihrem eigenen Gerät, Ihr Audio wird nie als Datei gespeichert, und Ihre Besprechungen werden nie zum Trainieren eines KI-Modells verwendet."
+    intro: |
+      ## Eine private Alternative zu Fathom
+
+      Fathom ist wirklich gut, und sein kostenloser Plan ist wirklich großzügig. Unbegrenztes Aufnehmen, Transkribieren und Speichern ohne Kosten ist selten, und wenn Datenschutz nicht Ihr Hauptanliegen ist, ist Fathom eine vernünftige Wahl. Es wäre unredlich, etwas anderes vorzugeben, und ein Vergleich, der Fathom nur angreift, wäre nicht lesenswert.
+
+      Aber hinter "kostenlos" steckt ein Entwurf, und dieser Entwurf ist es wert, verstanden zu werden. Fathom tritt Ihrem Anruf als sichtbarer Teilnehmer bei, der "Fathom Notetaker", und lädt die Aufnahme in die Rechenzentren von Amazon Web Services in den Vereinigten Staaten und Kanada hoch. Seine eigenen Nutzungsbedingungen besagen, dass Fathom je nach Ihren Kontoeinstellungen anonymisierte Daten aus dem Inhalt Ihrer Besprechungen verwenden kann, um seine internen KI-Modelle zu trainieren und zu verbessern. Sie können das abschalten, aber den Schalter müssen Sie sich selbst merken, und er ist standardmäßig aktiv. Für einen gewöhnlichen Vertriebsanruf mag das ein fairer Tausch sein. Für ein der Verschwiegenheitspflicht unterliegendes Gespräch ist es eine Entscheidung, die Sie aktiv treffen müssen, jedes Mal, wenn Sie vergessen, eine Einstellung zu prüfen.
+
+      Sonabrief ist andersherum gebaut. Die Transkription geschieht auf Ihrem eigenen Gerät, und Ihr Audio wird nie als Datei gespeichert. Es gibt keine Aufnahme, die in eine US- oder kanadische Cloud hochgeladen wird, und kein Opt-out, an das man denken müsste, weil es nichts gibt, dem man widersprechen könnte: Ihre Besprechungen werden nie zum Trainieren irgendeines Modells verwendet, weder unseres noch das von irgendjemandem. Wenn Sie eine Zusammenfassung möchten, wählen Sie, wie: über Mistral auf europäischen Servern, die nach der Verarbeitung einer Anfrage nichts aufbewahren, oder vollständig auf Ihrer eigenen Maschine.
+
+      Wir sollten beim Preis ehrlich sein, denn hier gewinnt Fathom beim Volumen. Der kostenlose Plan von Fathom nimmt unbegrenzt auf und transkribiert, während seine fortgeschrittenen KI-Zusammenfassungen auf fünf Anrufe pro Monat begrenzt sind, bevor sie auf eine einfache Vorlage zurückfallen. Der kostenlose Plan von Sonabrief bewahrt Ihr Archiv sieben Tage lang auf, was in reiner Menge weniger großzügig ist. Wir sind nicht das günstigere Werkzeug für jemanden, der einfach nur unbegrenzte Cloud-Aufnahmen will. Wir sind das Werkzeug für jemanden, dessen Aufnahmen von vornherein nicht auf dem Server eines Dritten liegen dürfen. Die Preise von Sonabrief sind in Euro (Pro für 9 €/Monat oder 89 €/Jahr, Pro Unlimited für 19 €/Monat oder 189 €/Jahr), und der Unterschied zwischen den bezahlten Plänen ist, wie lange Ihr Archiv aufbewahrt wird.
+
+      Sonabrief ist außerdem quelloffen, sodass Sie uns nicht aufs Wort glauben müssen, wie das Audio behandelt wird. Sie können den Code lesen. Wenn Sie großzügige kostenlose Cloud-Aufnahmen wollen und die Datenschutzfragen für Ihre Arbeit nicht gelten, ist Fathom eine gute Wahl. Wenn Ihre Gespräche Ihre Kontrolle nicht verlassen dürfen, wurde Sonabrief genau dafür gebaut.
+    differentiators:
+      audio_processing:
+        sonabrief: "Die Transkription geschieht auf Ihrem eigenen Gerät. Ihr Audio wird nie als Datei gespeichert."
+        competitor: "Ein sichtbarer Bot tritt dem Anruf bei; die Aufnahme wird hochgeladen und auf Cloud-Servern gespeichert."
+      data_for_training:
+        sonabrief: "Ihre Besprechungen werden nie zum Trainieren irgendeines Modells verwendet. Es gibt kein Opt-out, an das man denken müsste."
+        competitor: "Standardmäßig können anonymisierte Besprechungsinhalte zum Trainieren der internen KI-Modelle von Fathom verwendet werden. Ein Opt-out ist in den Kontoeinstellungen verfügbar."
+      hosting:
+        sonabrief: "Europäische Infrastruktur. Cloud-Zusammenfassungen laufen auf den europäischen Servern von Mistral, die nach der Verarbeitung einer Anfrage nichts aufbewahren (Zero Data Retention), oder Sie können alles vollständig lokal halten."
+        competitor: "Speicherung und Verarbeitung auf Amazon Web Services in den Vereinigten Staaten und Kanada."
+      pricing:
+        sonabrief: "Kostenlos, Pro 9 €/Monat (89 €/Jahr), Pro Unlimited 19 €/Monat (189 €/Jahr). Preise in Euro, keine Gebühr pro Nutzer."
+        competitor: "Kostenlos (unbegrenzte Aufnahme, fortgeschrittene KI-Zusammenfassungen auf 5 Anrufe/Monat begrenzt), bezahlte Pläne ab etwa 16 $/Monat. Preise in USD, pro Nutzer."
+      open_source:
+        sonabrief: "Quelloffen. Sie können den Code lesen, der Ihr Audio verarbeitet."
+        competitor: "Proprietär."
+    faq:
+      - q: "Trainiert Fathom KI mit meinen Besprechungen?"
+        a: "Nach seinen eigenen Nutzungsbedingungen kann Fathom je nach Ihren Kontoeinstellungen anonymisierte Daten aus dem Inhalt Ihrer Besprechungen verwenden, um seine internen KI-Modelle zu trainieren und zu verbessern, und Sie können dem in diesen Einstellungen widersprechen. Seine Vereinbarungen untersagen Anbietern wie OpenAI und Anthropic gesondert, mit Fathom-Daten zu trainieren. Bei Sonabrief werden Ihre Besprechungen nie zum Trainieren irgendeines Modells verwendet, und es gibt keine Einstellung, an die man denken müsste."
+      - q: "Wo speichert Fathom meine Aufnahmen?"
+        a: "Die eigene Dokumentation von Fathom besagt, dass alle Daten in den Rechenzentren von Amazon Web Services in den Vereinigten Staaten und Kanada gespeichert werden. Sonabrief transkribiert auf Ihrem Gerät, sodass das Audio nie hochgeladen wird; Cloud-Zusammenfassungen laufen, wenn Sie sie wählen, auf europäischen Servern, die nach der Verarbeitung der Anfrage nichts aufbewahren."
+      - q: "Ist Sonabrief günstiger als Fathom?"
+        a: "Nicht beim reinen Volumen. Der kostenlose Plan von Fathom bietet unbegrenzte Aufnahme und Transkription, was der kostenlose Plan von Sonabrief nicht erreicht. Der Vorteil von Sonabrief ist nicht der Preis, sondern dass Ihr Audio von vornherein nie Ihr Gerät verlässt. Die Wahl betrifft, wo Ihre Daten liegen, nicht wie viele Minuten Sie bekommen."
+      - q: "Tritt bei Sonabrief ein Bot meiner Besprechung bei?"
+        a: "Nein. Fathom schickt einen sichtbaren Teilnehmer, den Fathom Notetaker, in den Anruf. Sonabrief erfasst und transkribiert auf Ihrem eigenen Gerät, sodass es keinen Bot in der Teilnehmerliste und keine Aufnahme auf dem Server eines anderen gibt."
+      - q: "Ist Sonabrief für Anwälte, Therapeuten oder Journalisten geeignet?"
+        a: "Ja. Das sind die Menschen, für die es gebaut wurde. Die Transkription auf Ihrem eigenen Gerät, ohne gespeicherte Audiodatei und ohne standardmäßiges Training mit Ihren Inhalten, passt zu Arbeit, die der Verschwiegenheitspflicht, der Vertraulichkeit oder dem Quellenschutz unterliegt."

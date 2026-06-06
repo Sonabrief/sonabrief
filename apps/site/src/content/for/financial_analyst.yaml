@@ -74,4 +74,104 @@ i18n:
       - q: "Dove vengono ospitati i miei dati?"
         a: "Sonabrief usa infrastruttura europea, e le sintesi cloud girano su server europei che non conservano nulla una volta elaborata la richiesta. La trascrizione sul dispositivo evita del tutto il caricamento, se preferisci che nulla lasci la tua macchina."
 
-  # fr / es / de intentionally absent → translation phase later.
+  fr:
+    profession: "Pour les analystes financiers"
+    painPoints:
+      - "Les réunions et les appels peuvent contenir des informations non publiques et sensibles sur les cours"
+      - "Les régulateurs attendent que ce flux d'informations soit maîtrisé, et non laissé dans un canal non contrôlé"
+      - "Du temps perdu à rédiger les appels au lieu d'analyser"
+    title: "Sonabrief pour les analystes financiers : gardez la maîtrise des informations sensibles sur les cours"
+    description: "Un assistant de réunion pensé pour un traitement maîtrisé des informations sensibles. Avant chaque enregistrement, vous choisissez si l'audio est transcrit sur votre propre appareil ou sur des serveurs européens. L'enregistrement n'est jamais conservé sous forme de fichier."
+    intro: |
+      Les réunions et les appels d'un analyste peuvent contenir des informations qui n'ont pas été rendues publiques et qui feraient bouger un cours si elles l'étaient : un appel avec la direction, une session d'expert network, une discussion interne sur une position. En vertu du règlement sur les abus de marché (MAR), l'information privilégiée est précisément ce type d'élément non public et sensible pour les cours, et les sociétés sont tenues d'en maîtriser le flux plutôt que de le disperser dans des canaux non contrôlés. L'enregistrement d'une telle conversation en est la copie la plus complète. La plupart des outils de transcription génériques traitent cet enregistrement comme un contenu ordinaire : ils le téléversent, le traitent sur des serveurs à l'étranger et, dans plusieurs cas, le réutilisent pour améliorer leurs modèles, ce qui est exactement le canal non contrôlé qu'une fonction conformité cherche à fermer.
+
+      Sonabrief part d'un présupposé différent. Avant chaque enregistrement, vous décidez de la manière dont l'audio est traité. Vous pouvez transcrire entièrement **sur votre propre appareil**, et l'enregistrement n'est alors téléversé nulle part et reste dans votre environnement maîtrisé. Ou vous pouvez choisir de transcrire sur **des serveurs européens** lorsque vous avez besoin de plus de rapidité : l'audio est alors traité dans l'Union européenne et n'est pas conservé ensuite. C'est un choix explicite que vous faites à chaque fois.
+
+      ## Comment cela se passe en pratique
+
+      Vous enregistrez un appel ou une réunion, et Sonabrief vous remet un brouillon écrit propre et structuré : vous le relisez, vous le finalisez avec vos propres mots, et vous l'utilisez pour vos notes. Vous partez d'un texte prêt plutôt que d'une page blanche, et la version qui compte reste la vôtre. L'audio d'origine n'est pas conservé sous forme de fichier une fois transcrit, de sorte qu'une conversation pouvant contenir une information privilégiée ne se retrouve pas sur le serveur d'un tiers, hors du contrôle de votre société.
+
+      ## Ce que l'outil ne fait pas, et ce qui reste de votre ressort
+
+      Sonabrief est un outil, pas un programme de conformité. Il ne décide pas si un appel peut être enregistré, si une conversation contient une information privilégiée, ou ce qu'exigent les politiques de votre société et les règles applicables sur les abus de marché. Ces appréciations restent les vôtres et celles de votre fonction conformité. Le logiciel est open source : votre équipe conformité ou sécurité peut donc inspecter exactement comment l'audio est traité, plutôt que de se fier à une promesse marketing.
+
+      Rien de tout cela ne constitue un conseil juridique ou de conformité. C'est une description du fonctionnement de l'outil, pour que vous puissiez décider s'il convient à la manière dont vous êtes tenu, et avez choisi, de travailler.
+    faq:
+      - q: "L'audio de l'appel est-il téléversé dans le cloud ?"
+        a: "Cela dépend du choix que vous faites avant chaque enregistrement. Si vous optez pour la transcription sur l'appareil, l'audio reste sur votre ordinateur et n'est jamais téléversé. Si vous choisissez la transcription sur des serveurs européens pour plus de rapidité, l'audio est traité dans l'Union européenne et n'est pas conservé une fois transcrit."
+      - q: "En quoi cela aide-t-il à maîtriser les informations sensibles ?"
+        a: "La transcription sur l'appareil garde l'enregistrement dans votre environnement maîtrisé, hors de tout serveur tiers, ce qui est la bonne posture lorsqu'une conversation peut contenir une information sensible pour les cours ou privilégiée. Si vous choisissez la transcription sur le cloud européen, le traitement a lieu dans l'Union européenne et rien n'est conservé ensuite. Ce qu'exigent vos obligations en matière d'abus de marché reste la responsabilité de votre société. Ceci n'est pas un conseil de conformité."
+      - q: "Mon équipe conformité peut-elle vérifier ces affirmations ?"
+        a: "Oui. Sonabrief est open source : le code qui traite l'audio peut donc être inspecté directement, sans avoir à se fier à une promesse. Votre équipe conformité ou sécurité peut vérifier comment se comportent réellement l'enregistrement, la transcription et le stockage."
+      - q: "Mes appels serviront-ils à entraîner des modèles d'IA ?"
+        a: "Non. Vos appels ne servent jamais à entraîner un quelconque modèle. Lorsque vous demandez une synthèse écrite, elle est traitée soit sur votre propre appareil, soit sur des serveurs européens qui ne conservent rien une fois la requête traitée."
+      - q: "Où mes données sont-elles hébergées ?"
+        a: "Sonabrief utilise une infrastructure européenne, et les synthèses dans le cloud tournent sur des serveurs européens qui ne conservent rien une fois la requête traitée. La transcription sur l'appareil évite tout téléversement si vous préférez que rien ne quitte votre machine."
+
+  es:
+    profession: "Para analistas financieros"
+    painPoints:
+      - "Las reuniones y las llamadas pueden contener información no pública y sensible para la cotización"
+      - "Los reguladores esperan que ese flujo de información esté controlado, no en un canal sin control"
+      - "Tiempo perdido redactando las llamadas en lugar de analizar"
+    title: "Sonabrief para analistas financieros: mantén controlada la información sensible para la cotización"
+    description: "Un asistente de reuniones pensado para un tratamiento controlado de la información sensible. Antes de cada grabación, eliges si el audio se transcribe en tu propio dispositivo o en servidores europeos. La grabación nunca se conserva como archivo."
+    intro: |
+      Las reuniones y las llamadas de un analista pueden contener información que no se ha hecho pública y que movería una cotización si lo fuera: una llamada con la dirección, una sesión de expert network, una discusión interna sobre una posición. Conforme al Reglamento sobre Abuso de Mercado (MAR), la información privilegiada es precisamente este tipo de material no público y sensible para la cotización, y se espera que las entidades mantengan controlado su flujo en lugar de dispersarlo por canales sin control. La grabación de una conversación así es su copia más completa. La mayoría de las herramientas de transcripción genéricas tratan esa grabación como contenido cualquiera: la suben, la procesan en servidores en el extranjero y, en varios casos, la reutilizan para mejorar sus modelos, que es exactamente el canal sin control que una función de cumplimiento trata de cerrar.
+
+      Sonabrief parte de un planteamiento distinto. Antes de cada grabación decides cómo se trata el audio. Puedes transcribir por completo **en tu propio dispositivo**, de modo que la grabación no se sube a ninguna parte y permanece dentro de tu entorno controlado. O puedes optar por transcribir en **servidores europeos** cuando necesites más rapidez: en ese caso el audio se procesa en la Unión Europea y no se conserva después. Es una decisión explícita que tomas cada vez.
+
+      ## Cómo funciona en la práctica
+
+      Grabas una llamada o una reunión, y Sonabrief te entrega un borrador escrito limpio y estructurado: lo revisas, lo cierras con tus propias palabras y lo usas para tus notas. Partes de un texto listo en lugar de una página en blanco, y la versión que cuenta sigue siendo tuya. El audio original no se guarda como archivo una vez transcrito, así que una conversación que pueda contener información privilegiada no acaba en el servidor de un tercero, fuera del control de tu entidad.
+
+      ## Lo que no hace, y lo que sigue siendo tuyo
+
+      Sonabrief es una herramienta, no un programa de cumplimiento. No decide si una llamada puede grabarse, si una conversación contiene información privilegiada, o qué exigen las políticas de tu entidad y las normas aplicables sobre abuso de mercado. Esas valoraciones siguen siendo tuyas y de tu función de cumplimiento. El software es de código abierto, así que tu equipo de cumplimiento o de seguridad puede inspeccionar exactamente cómo trata el audio, en lugar de fiarse de una afirmación de marketing.
+
+      Nada de esto constituye asesoramiento jurídico ni de cumplimiento. Es una descripción de cómo funciona la herramienta, para que decidas si encaja con la forma en que estás obligado, y has elegido, a trabajar.
+    faq:
+      - q: "¿Se sube al cloud el audio de la llamada?"
+        a: "Depende de la opción que elijas antes de cada grabación. Si seleccionas la transcripción en el dispositivo, el audio permanece en tu ordenador y nunca se sube. Si eliges la transcripción en servidores europeos para mayor rapidez, el audio se procesa en la Unión Europea y no se conserva una vez transcrito."
+      - q: "¿Cómo ayuda a mantener controlada la información sensible?"
+        a: "La transcripción en el dispositivo mantiene la grabación dentro de tu entorno controlado, fuera de cualquier servidor de terceros, que es la postura adecuada cuando una conversación puede contener información sensible para la cotización o privilegiada. Si eliges la transcripción en el cloud europeo, el procesamiento ocurre en la Unión Europea y no se conserva nada después. Lo que exigen tus obligaciones sobre abuso de mercado sigue siendo responsabilidad de tu entidad. Esto no es asesoramiento de cumplimiento."
+      - q: "¿Puede mi equipo de cumplimiento verificar estas afirmaciones?"
+        a: "Sí. Sonabrief es de código abierto, así que el código que trata el audio puede inspeccionarse directamente, sin tener que fiarse de una promesa. Tu equipo de cumplimiento o de seguridad puede comprobar cómo se comportan realmente la grabación, la transcripción y el almacenamiento."
+      - q: "¿Se usarán mis llamadas para entrenar modelos de IA?"
+        a: "No. Tus llamadas nunca se usan para entrenar ningún modelo. Cuando pides un resumen escrito, se procesa en tu propio dispositivo o en servidores europeos que no conservan nada una vez procesada la petición."
+      - q: "¿Dónde se alojan mis datos?"
+        a: "Sonabrief usa infraestructura europea, y los resúmenes en la nube se ejecutan en servidores europeos que no conservan nada una vez procesada la petición. La transcripción en el dispositivo evita por completo la subida si prefieres que nada salga de tu máquina."
+
+  de:
+    profession: "Für Finanzanalysten"
+    painPoints:
+      - "Besprechungen und Telefonate können nicht öffentliche, kursrelevante Informationen enthalten"
+      - "Aufsichtsbehörden erwarten, dass dieser Informationsfluss kontrolliert wird und nicht in einem unkontrollierten Kanal liegt"
+      - "Verlorene Zeit für das Verfassen von Telefonaten statt für die Analyse"
+    title: "Sonabrief für Finanzanalysten: kursrelevante Informationen unter Kontrolle halten"
+    description: "Ein Meeting-Assistent, der auf den kontrollierten Umgang mit sensiblen Informationen ausgelegt ist. Vor jeder Aufnahme entscheiden Sie, ob das Audio auf Ihrem eigenen Gerät oder auf europäischen Servern transkribiert wird. Die Aufnahme wird nie als Datei gespeichert."
+    intro: |
+      Die Besprechungen und Telefonate eines Analysten können Informationen enthalten, die nicht öffentlich gemacht wurden und einen Kurs bewegen würden, wenn sie es wären: ein Telefonat mit dem Management, eine Expert-Network-Sitzung, eine interne Erörterung einer Position. Nach der Marktmissbrauchsverordnung (MAR) ist eine Insiderinformation genau diese Art von nicht öffentlichem, kursrelevantem Material, und von Unternehmen wird erwartet, dass sie deren Fluss kontrolliert halten, statt ihn über unkontrollierte Kanäle zu verstreuen. Die Aufnahme eines solchen Gesprächs ist dessen vollständigste Kopie. Die meisten allgemeinen Transkriptionswerkzeuge behandeln diese Aufnahme wie beliebigen Inhalt: Sie laden sie hoch, verarbeiten sie auf Servern im Ausland und verwenden sie in mehreren Fällen erneut, um ihre Modelle zu verbessern, was genau der unkontrollierte Kanal ist, den eine Compliance-Funktion zu schließen versucht.
+
+      Sonabrief geht von einer anderen Grundannahme aus. Vor jeder Aufnahme entscheiden Sie, wie das Audio behandelt wird. Sie können vollständig **auf Ihrem eigenen Gerät** transkribieren, sodass die Aufnahme nirgendwo hochgeladen wird und in Ihrer kontrollierten Umgebung bleibt. Oder Sie wählen die Transkription auf **europäischen Servern**, wenn Sie mehr Geschwindigkeit brauchen: Dann wird das Audio in der EU verarbeitet und danach nicht aufbewahrt. Es ist eine bewusste Entscheidung, die Sie jedes Mal treffen.
+
+      ## So sieht der Ablauf aus
+
+      Sie nehmen ein Telefonat oder eine Besprechung auf, und Sonabrief übergibt Ihnen einen sauberen, strukturierten schriftlichen Entwurf: Sie prüfen ihn, vollenden ihn mit Ihren eigenen Worten und nutzen ihn für Ihre Notizen. Sie beginnen mit einem fertigen Text statt mit einem leeren Blatt, und die Fassung, die zählt, bleibt Ihre. Das ursprüngliche Audio wird nach der Transkription nicht als Datei gespeichert, sodass ein Gespräch, das eine Insiderinformation enthalten könnte, nicht auf dem Server eines Dritten außerhalb der Kontrolle Ihres Unternehmens landet.
+
+      ## Was das Werkzeug nicht tut, und was bei Ihnen bleibt
+
+      Sonabrief ist ein Werkzeug, kein Compliance-Programm. Es entscheidet nicht, ob ein Telefonat aufgenommen werden darf, ob ein Gespräch eine Insiderinformation enthält oder was die Richtlinien Ihres Unternehmens und die anwendbaren Marktmissbrauchsregeln verlangen. Diese Beurteilungen bleiben Ihre und die Ihrer Compliance-Funktion. Die Software ist quelloffen, sodass Ihr Compliance- oder Sicherheitsteam genau prüfen kann, wie das Audio verarbeitet wird, statt sich auf ein Marketingversprechen zu verlassen.
+
+      Nichts davon ist eine Rechts- oder Compliance-Beratung. Es ist eine Beschreibung der Funktionsweise des Werkzeugs, damit Sie entscheiden können, ob es zu der Arbeitsweise passt, zu der Sie verpflichtet sind und für die Sie sich entschieden haben.
+    faq:
+      - q: "Wird das Audio des Telefonats in die Cloud hochgeladen?"
+        a: "Das hängt von der Entscheidung ab, die Sie vor jeder Aufnahme treffen. Wenn Sie die Transkription auf dem Gerät wählen, bleibt das Audio auf Ihrem Computer und wird nie hochgeladen. Wenn Sie für mehr Geschwindigkeit die Transkription auf europäischen Servern wählen, wird das Audio in der EU verarbeitet und nach der Transkription nicht aufbewahrt."
+      - q: "Wie hilft das, sensible Informationen unter Kontrolle zu halten?"
+        a: "Die Transkription auf dem Gerät hält die Aufnahme in Ihrer kontrollierten Umgebung, fern von jedem Server Dritter, was die richtige Haltung ist, wenn ein Gespräch kursrelevante Informationen oder eine Insiderinformation enthalten kann. Wenn Sie die Transkription in der europäischen Cloud wählen, findet die Verarbeitung in der EU statt und danach wird nichts aufbewahrt. Was Ihre Pflichten zum Marktmissbrauch verlangen, bleibt die Verantwortung Ihres Unternehmens. Dies ist keine Compliance-Beratung."
+      - q: "Kann mein Compliance-Team diese Angaben überprüfen?"
+        a: "Ja. Sonabrief ist quelloffen, sodass der Code, der das Audio verarbeitet, direkt geprüft werden kann, statt sich auf ein Versprechen zu verlassen. Ihr Compliance- oder Sicherheitsteam kann überprüfen, wie sich Aufnahme, Transkription und Speicherung tatsächlich verhalten."
+      - q: "Werden meine Telefonate zum Trainieren von KI-Modellen verwendet?"
+        a: "Nein. Ihre Telefonate werden nie zum Trainieren irgendeines Modells verwendet. Wenn Sie eine schriftliche Zusammenfassung anfordern, läuft sie entweder auf Ihrem eigenen Gerät oder auf europäischen Servern, die nach der Verarbeitung der Anfrage nichts aufbewahren."
+      - q: "Wo werden meine Daten gehostet?"
+        a: "Sonabrief nutzt europäische Infrastruktur, und Cloud-Zusammenfassungen laufen auf europäischen Servern, die nach der Verarbeitung einer Anfrage nichts aufbewahren. Die Transkription auf dem Gerät vermeidet das Hochladen vollständig, wenn Sie lieber möchten, dass nichts Ihre Maschine verlässt."

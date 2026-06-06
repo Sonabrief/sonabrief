@@ -74,4 +74,104 @@ i18n:
       - q: "Dove vengono ospitati i miei dati?"
         a: "Sonabrief usa infrastruttura europea, e le sintesi cloud girano su server europei che non conservano nulla una volta elaborata la richiesta. La trascrizione sul dispositivo evita del tutto il caricamento, se preferisci che nulla lasci la tua macchina."
 
-  # fr / es / de intentionally absent → translation phase later.
+  fr:
+    profession: "Pour les nutritionnistes et kinésithérapeutes"
+    painPoints:
+      - "Une consultation contient des informations de santé que le client attend de vous garder privées"
+      - "Un outil cloud générique stocke ces données à l'étranger, hors de votre contrôle"
+      - "Du temps perdu à rédiger les séances au lieu de travailler avec la personne"
+    title: "Sonabrief pour les nutritionnistes et kinésithérapeutes : des séances clients qui restent privées"
+    description: "Un assistant de séance pensé pour la confidentialité, à destination des professionnels de la nutrition et de la kinésithérapie. Avant chaque enregistrement, vous choisissez si l'audio est transcrit sur votre propre appareil ou sur des serveurs européens. L'enregistrement n'est jamais conservé sous forme de fichier."
+    intro: |
+      Une consultation avec un client touche à sa santé : ses habitudes, son corps, son histoire, les objectifs dont il a parfois honte de parler. Ce sont des informations qu'il partage parce qu'il vous fait confiance pour les garder privées, et beaucoup d'entre elles relèvent des données de santé au sens du droit de la protection des données. Un enregistrement en est le témoignage le plus complet et le plus personnel. La plupart des outils de transcription génériques traitent cet enregistrement comme un contenu ordinaire : ils le téléversent, le traitent sur des serveurs à l'étranger et, dans plusieurs cas, le réutilisent pour améliorer leurs modèles, ce qui n'est pas ce qu'un client se représente d'un rendez-vous privé.
+
+      Sonabrief part d'un présupposé différent. Avant chaque enregistrement, vous décidez de la manière dont l'audio est traité. Vous pouvez transcrire entièrement **sur votre propre appareil**, et l'enregistrement n'est alors téléversé nulle part. Ou vous pouvez choisir de transcrire sur **des serveurs européens** lorsque vous avez besoin de plus de rapidité : l'audio est alors traité dans l'Union européenne et n'est pas conservé ensuite. C'est un choix explicite que vous faites à chaque fois.
+
+      ## Comment cela se passe en pratique
+
+      Vous enregistrez une séance, et Sonabrief vous remet un brouillon écrit propre et structuré : vous le relisez, vous le finalisez avec vos propres mots, et vous l'utilisez pour le dossier du client ou pour bâtir un plan. Vous partez d'un texte prêt plutôt que d'une page blanche, et la version qui compte reste la vôtre, de sorte que tout ce qui oriente un conseil est vérifié avant qu'on s'y fie, jamais tenu pour acquis simplement parce qu'il a été transcrit. L'audio d'origine n'est pas conservé sous forme de fichier une fois transcrit, de sorte que les informations de santé d'un client ne restent pas sur le serveur d'un tiers.
+
+      ## Ce que l'outil ne fait pas, et ce qui reste de votre ressort
+
+      Sonabrief est un outil, pas un jugement clinique. Il ne décide pas si une séance peut être enregistrée, si le client a consenti, ou ce qu'exigent vos règles professionnelles. Ces décisions restent les vôtres. Le logiciel est open source : un confrère ou un conseil en protection des données peut donc inspecter exactement comment l'audio est traité, plutôt que de se fier à une promesse marketing.
+
+      Rien de tout cela ne constitue un conseil médical ou juridique. C'est une description du fonctionnement de l'outil, pour que vous puissiez décider s'il convient à la manière dont vous êtes tenu, et avez choisi, d'exercer.
+    faq:
+      - q: "L'audio de la séance est-il téléversé dans le cloud ?"
+        a: "Cela dépend du choix que vous faites avant chaque enregistrement. Si vous optez pour la transcription sur l'appareil, l'audio reste sur votre ordinateur et n'est jamais téléversé. Si vous choisissez la transcription sur des serveurs européens pour plus de rapidité, l'audio est traité dans l'Union européenne et n'est pas conservé une fois transcrit."
+      - q: "Comment Sonabrief traite-t-il les informations de santé des clients ?"
+        a: "La transcription sur l'appareil garde l'enregistrement hors de tout serveur tiers, ce qui est l'option la plus protectrice pour des informations de santé personnelles. Si vous choisissez la transcription sur le cloud européen, le traitement a lieu dans l'Union européenne et rien n'est conservé ensuite. Savoir si et comment enregistrer une séance reste votre responsabilité professionnelle. Ceci n'est pas un conseil médical ou juridique."
+      - q: "Puis-je me fier à la transcription pour bâtir un plan ?"
+        a: "Sonabrief produit vite un brouillon fidèle et structuré, et vous le relisez avant qu'il ne donne forme à un plan. Comme pour toute note, tout ce qui oriente votre conseil est vérifié avant qu'on s'y fie. Vous partez d'un texte prêt plutôt que d'une page blanche, et la version qui compte reste la vôtre."
+      - q: "Mes séances serviront-elles à entraîner des modèles d'IA ?"
+        a: "Non. Vos séances ne servent jamais à entraîner un quelconque modèle. Lorsque vous demandez une synthèse écrite, elle est traitée soit sur votre propre appareil, soit sur des serveurs européens qui ne conservent rien une fois la requête traitée."
+      - q: "Où mes données sont-elles hébergées ?"
+        a: "Sonabrief utilise une infrastructure européenne, et les synthèses dans le cloud tournent sur des serveurs européens qui ne conservent rien une fois la requête traitée. La transcription sur l'appareil évite tout téléversement si vous préférez que rien ne quitte votre machine."
+
+  es:
+    profession: "Para nutricionistas y fisioterapeutas"
+    painPoints:
+      - "Una consulta contiene información de salud que el cliente espera que mantengas privada"
+      - "Una herramienta cloud genérica almacena esos datos en el extranjero, fuera de tu control"
+      - "Tiempo perdido redactando las sesiones en lugar de trabajar con la persona"
+    title: "Sonabrief para nutricionistas y fisioterapeutas: sesiones con clientes que siguen siendo privadas"
+    description: "Un asistente de sesiones pensado para la confidencialidad, para profesionales de la nutrición y la fisioterapia. Antes de cada grabación, eliges si el audio se transcribe en tu propio dispositivo o en servidores europeos. La grabación nunca se conserva como archivo."
+    intro: |
+      Una consulta con un cliente toca su salud: sus hábitos, su cuerpo, su historia, los objetivos de los que a veces le da vergüenza hablar. Es información que comparte porque confía en que la mantendrás privada, y buena parte de ella cuenta como dato de salud conforme al derecho de protección de datos. Una grabación es su documento más completo y más personal. La mayoría de las herramientas de transcripción genéricas tratan esa grabación como contenido cualquiera: la suben, la procesan en servidores en el extranjero y, en varios casos, la reutilizan para mejorar sus modelos, que no es lo que tiene en mente un cliente que se imagina una cita privada.
+
+      Sonabrief parte de un planteamiento distinto. Antes de cada grabación decides cómo se trata el audio. Puedes transcribir por completo **en tu propio dispositivo**, de modo que la grabación no se sube a ninguna parte. O puedes optar por transcribir en **servidores europeos** cuando necesites más rapidez: en ese caso el audio se procesa en la Unión Europea y no se conserva después. Es una decisión explícita que tomas cada vez.
+
+      ## Cómo funciona en la práctica
+
+      Grabas una sesión, y Sonabrief te entrega un borrador escrito limpio y estructurado: lo revisas, lo cierras con tus propias palabras y lo usas para la ficha del cliente o para diseñar un plan. Partes de un texto listo en lugar de una página en blanco, y la versión que cuenta sigue siendo tuya, de modo que todo lo que orienta un consejo se comprueba antes de actuar, nunca se da por bueno solo porque se haya transcrito. El audio original no se guarda como archivo una vez transcrito, así que la información de salud de un cliente no queda alojada en el servidor de un tercero.
+
+      ## Lo que no hace, y lo que sigue siendo tuyo
+
+      Sonabrief es una herramienta, no un juicio clínico. No decide si una sesión puede grabarse, si el cliente ha consentido, o qué exigen tus estándares profesionales. Esas decisiones siguen siendo tuyas. El software es de código abierto, así que un colega o un asesor de protección de datos puede inspeccionar exactamente cómo trata el audio, en lugar de fiarse de una afirmación de marketing.
+
+      Nada de esto constituye asesoramiento médico ni jurídico. Es una descripción de cómo funciona la herramienta, para que decidas si encaja con la forma en que estás obligado, y has elegido, a ejercer.
+    faq:
+      - q: "¿Se sube al cloud el audio de la sesión?"
+        a: "Depende de la opción que elijas antes de cada grabación. Si seleccionas la transcripción en el dispositivo, el audio permanece en tu ordenador y nunca se sube. Si eliges la transcripción en servidores europeos para mayor rapidez, el audio se procesa en la Unión Europea y no se conserva una vez transcrito."
+      - q: "¿Cómo trata Sonabrief la información de salud de los clientes?"
+        a: "La transcripción en el dispositivo mantiene la grabación fuera de cualquier servidor de terceros, que es la opción más protectora para la información de salud personal. Si eliges la transcripción en el cloud europeo, el procesamiento ocurre en la Unión Europea y no se conserva nada después. Si grabar una sesión, y cómo, sigue siendo tu responsabilidad profesional. Esto no es asesoramiento médico ni jurídico."
+      - q: "¿Puedo fiarme de la transcripción al construir un plan?"
+        a: "Sonabrief produce rápido un borrador fiel y estructurado, y tú lo revisas antes de que dé forma a un plan. Como con cualquier nota, todo lo que orienta un consejo se comprueba antes de actuar. Partes de un texto listo en lugar de una página en blanco, y la versión que cuenta sigue siendo tuya."
+      - q: "¿Se usarán mis sesiones para entrenar modelos de IA?"
+        a: "No. Tus sesiones nunca se usan para entrenar ningún modelo. Cuando pides un resumen escrito, se procesa en tu propio dispositivo o en servidores europeos que no conservan nada una vez procesada la petición."
+      - q: "¿Dónde se alojan mis datos?"
+        a: "Sonabrief usa infraestructura europea, y los resúmenes en la nube se ejecutan en servidores europeos que no conservan nada una vez procesada la petición. La transcripción en el dispositivo evita por completo la subida si prefieres que nada salga de tu máquina."
+
+  de:
+    profession: "Für Ernährungsberater und Physiotherapeuten"
+    painPoints:
+      - "Eine Beratung enthält Gesundheitsinformationen, von denen der Klient erwartet, dass Sie sie vertraulich behandeln"
+      - "Ein allgemeines Cloud-Werkzeug speichert diese Daten im Ausland, außerhalb Ihrer Kontrolle"
+      - "Verlorene Zeit für das Verfassen von Sitzungen statt für die Arbeit mit dem Menschen"
+    title: "Sonabrief für Ernährungsberater und Physiotherapeuten: Klientensitzungen, die privat bleiben"
+    description: "Ein Sitzungsassistent, der auf Vertraulichkeit ausgelegt ist, für Fachkräfte in Ernährungsberatung und Physiotherapie. Vor jeder Aufnahme entscheiden Sie, ob das Audio auf Ihrem eigenen Gerät oder auf europäischen Servern transkribiert wird. Die Aufnahme wird nie als Datei gespeichert."
+    intro: |
+      Eine Beratung mit einem Klienten berührt seine Gesundheit: seine Gewohnheiten, seinen Körper, seine Vorgeschichte, die Ziele, über die er manchmal nur ungern spricht. Es sind Informationen, die er teilt, weil er darauf vertraut, dass Sie sie vertraulich behandeln, und vieles davon zählt nach dem Datenschutzrecht als Gesundheitsdatum. Eine Aufnahme ist deren vollständigster und persönlichster Beleg. Die meisten allgemeinen Transkriptionswerkzeuge behandeln diese Aufnahme wie beliebigen Inhalt: Sie laden sie hoch, verarbeiten sie auf Servern im Ausland und verwenden sie in mehreren Fällen erneut, um ihre Modelle zu verbessern, was nicht das ist, was sich ein Klient unter einem privaten Termin vorstellt.
+
+      Sonabrief geht von einer anderen Grundannahme aus. Vor jeder Aufnahme entscheiden Sie, wie das Audio behandelt wird. Sie können vollständig **auf Ihrem eigenen Gerät** transkribieren, sodass die Aufnahme nirgendwo hochgeladen wird. Oder Sie wählen die Transkription auf **europäischen Servern**, wenn Sie mehr Geschwindigkeit brauchen: Dann wird das Audio in der EU verarbeitet und danach nicht aufbewahrt. Es ist eine bewusste Entscheidung, die Sie jedes Mal treffen.
+
+      ## So sieht der Ablauf aus
+
+      Sie nehmen eine Sitzung auf, und Sonabrief übergibt Ihnen einen sauberen, strukturierten schriftlichen Entwurf: Sie prüfen ihn, vollenden ihn mit Ihren eigenen Worten und nutzen ihn für die Klientenakte oder zur Ausarbeitung eines Plans. Sie beginnen mit einem fertigen Text statt mit einem leeren Blatt, und die Fassung, die zählt, bleibt Ihre, sodass alles, was eine Empfehlung leitet, geprüft wird, bevor man danach handelt, und nie nur deshalb für wahr gehalten wird, weil es transkribiert wurde. Das ursprüngliche Audio wird nach der Transkription nicht als Datei gespeichert, sodass die Gesundheitsinformationen eines Klienten nicht auf dem Server eines Dritten zurückbleiben.
+
+      ## Was das Werkzeug nicht tut, und was bei Ihnen bleibt
+
+      Sonabrief ist ein Werkzeug, kein klinisches Urteil. Es entscheidet nicht, ob eine Sitzung aufgenommen werden darf, ob der Klient eingewilligt hat oder was Ihre Berufsstandards verlangen. Diese Entscheidungen bleiben Ihre. Die Software ist quelloffen, sodass ein Kollege oder ein Datenschutzberater genau prüfen kann, wie das Audio verarbeitet wird, statt sich auf ein Marketingversprechen zu verlassen.
+
+      Nichts davon ist eine medizinische oder rechtliche Beratung. Es ist eine Beschreibung der Funktionsweise des Werkzeugs, damit Sie entscheiden können, ob es zu der Arbeitsweise passt, zu der Sie verpflichtet sind und für die Sie sich entschieden haben.
+    faq:
+      - q: "Wird das Audio der Sitzung in die Cloud hochgeladen?"
+        a: "Das hängt von der Entscheidung ab, die Sie vor jeder Aufnahme treffen. Wenn Sie die Transkription auf dem Gerät wählen, bleibt das Audio auf Ihrem Computer und wird nie hochgeladen. Wenn Sie für mehr Geschwindigkeit die Transkription auf europäischen Servern wählen, wird das Audio in der EU verarbeitet und nach der Transkription nicht aufbewahrt."
+      - q: "Wie geht Sonabrief mit den Gesundheitsinformationen der Klienten um?"
+        a: "Die Transkription auf dem Gerät hält die Aufnahme von jedem Server Dritter fern, was die schützendste Option für persönliche Gesundheitsinformationen ist. Wenn Sie die Transkription in der europäischen Cloud wählen, findet die Verarbeitung in der EU statt und danach wird nichts aufbewahrt. Ob und wie eine Sitzung aufgenommen wird, bleibt Ihre berufliche Verantwortung. Dies ist keine medizinische oder rechtliche Beratung."
+      - q: "Kann ich mich bei der Ausarbeitung eines Plans auf die Abschrift verlassen?"
+        a: "Sonabrief erstellt schnell einen getreuen, strukturierten Entwurf, und Sie prüfen ihn, bevor er einen Plan prägt. Wie bei jedem Vermerk wird alles, was Ihre Empfehlung leitet, geprüft, bevor man danach handelt. Sie beginnen mit einem fertigen Text statt mit einem leeren Blatt, und die Fassung, die zählt, bleibt Ihre."
+      - q: "Werden meine Sitzungen zum Trainieren von KI-Modellen verwendet?"
+        a: "Nein. Ihre Sitzungen werden nie zum Trainieren irgendeines Modells verwendet. Wenn Sie eine schriftliche Zusammenfassung anfordern, läuft sie entweder auf Ihrem eigenen Gerät oder auf europäischen Servern, die nach der Verarbeitung der Anfrage nichts aufbewahren."
+      - q: "Wo werden meine Daten gehostet?"
+        a: "Sonabrief nutzt europäische Infrastruktur, und Cloud-Zusammenfassungen laufen auf europäischen Servern, die nach der Verarbeitung einer Anfrage nichts aufbewahren. Die Transkription auf dem Gerät vermeidet das Hochladen vollständig, wenn Sie lieber möchten, dass nichts Ihre Maschine verlässt."

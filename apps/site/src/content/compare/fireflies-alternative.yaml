@@ -107,4 +107,137 @@ i18n:
       - q: "Sonabrief è adatto ad avvocati, terapeuti o giornalisti?"
         a: "Sì. Sono le persone per cui è nato. La trascrizione sul dispositivo, senza alcun file audio conservato, si adatta al lavoro regolato da segreto professionale, riservatezza o protezione delle fonti, dove una copia cloud della registrazione è essa stessa il rischio."
 
-  # fr / es / de intentionally absent → not translated yet.
+  fr:
+    title: "L'alternative à Fireflies.ai qui place la confidentialité au premier plan — Sonabrief"
+    description: "Sonabrief est une alternative privée à Fireflies.ai : la transcription se fait sur votre propre appareil et votre audio n'est jamais enregistré sous forme de fichier, au lieu d'être téléversé et stocké sur des serveurs cloud."
+    intro: |
+      ## Une alternative privée à Fireflies.ai
+
+      Fireflies.ai est un assistant de réunion compétent, et sur un point il est réellement bon : sa propre politique de confidentialité indique qu'il n'utilise pas le contenu de vos réunions pour entraîner des modèles d'IA, et qu'il l'interdit contractuellement à ses prestataires. C'est important, et cela mérite d'être dit clairement plutôt que de prétendre le contraire.
+
+      La vraie différence entre Fireflies et Sonabrief n'est pas ce qu'il advient de vos données, mais où vos données résident. Fireflies est bâti autour du cloud. Sa propre documentation indique que l'audio est téléversé et stocké, chiffré, sur ses serveurs, et que pour quiconque s'inscrit via le parcours self-service habituel, les données sont stockées et traitées sur une infrastructure cloud américaine par défaut. Un stockage européen existe en option, mais même dans ce cas le traitement a lieu aux États-Unis. Le stockage privé et le bring-your-own-storage sont réservés à l'offre Enterprise.
+
+      Pour la plupart des équipes, c'est invisible. Pour un avocat, un thérapeute, un journaliste ou un consultant, l'emplacement de l'enregistrement est toute la question. Une conversation confidentielle téléversée et conservée sur un serveur à l'étranger est un enregistrement qui peut être réquisitionné, demandé ou exposé dans une fuite, aussi bon que soit le chiffrement. L'enregistrement le plus sûr est celui qui n'a jamais été téléversé.
+
+      C'est le présupposé dont part Sonabrief. La transcription se fait sur votre propre appareil, et votre audio n'est jamais enregistré sous forme de fichier. Il n'y a aucune copie sur un serveur en attente de devenir un problème. Lorsque vous voulez une synthèse, vous décidez comment : une synthèse sur des serveurs européens qui ne conservent rien une fois votre requête traitée, ou entièrement sur votre propre machine, d'où rien ne sort jamais. Comme Fireflies, Sonabrief n'utilise jamais vos données pour entraîner un modèle. Contrairement à Fireflies, votre audio n'a pas besoin de quitter votre ordinateur pour que le produit fonctionne.
+
+      Sonabrief est aussi open source. Vous n'avez pas à faire confiance à une promesse de confidentialité écrite sur une page marketing. Vous pouvez lire le code qui traite votre audio. Ses prix sont en euros, avec un plan gratuit et deux plans payants (Pro à 9 €/mois ou 89 €/an, Pro Unlimited à 19 €/mois ou 189 €/an), sans facturation par utilisateur ni système de crédits d'IA à surveiller.
+
+      Si votre équipe a surtout besoin de la commodité du cloud et d'une automatisation CRM poussée, Fireflies est un choix raisonnable. Si vous traitez des conversations qui ne devraient pas quitter votre contrôle, Sonabrief a été conçu exactement pour cela.
+    differentiators:
+      audio_processing:
+        sonabrief: "La transcription se fait sur votre propre appareil. Votre audio n'est jamais enregistré sous forme de fichier."
+        competitor: "L'audio est téléversé et stocké, chiffré, sur des serveurs cloud."
+      hosting:
+        sonabrief: "Infrastructure européenne, ou entièrement en local. Les synthèses dans le cloud tournent sur des serveurs européens qui ne conservent rien une fois la requête traitée."
+        competitor: "Infrastructure cloud américaine par défaut en self-service. Le stockage UE est optionnel, mais le traitement a toujours lieu aux États-Unis."
+      data_ownership:
+        sonabrief: "Vos données ne servent jamais à entraîner aucun modèle, et votre audio ne quitte pas votre appareil sauf si vous choisissez une synthèse dans le cloud."
+        competitor: "Indique ne pas utiliser votre contenu pour entraîner des modèles d'IA, mais votre contenu est tout de même téléversé et conservé sur ses serveurs."
+      pricing:
+        sonabrief: "Gratuit, Pro 9 €/mois (89 €/an), Pro Unlimited 19 €/mois (189 €/an). Prix en euros, sans facturation par utilisateur."
+        competitor: "Gratuit (800 min de stockage), Pro 10 $/utilisateur/mois en annuel, Business 19 $/utilisateur/mois en annuel. Par utilisateur, en USD, avec un système de crédits d'IA."
+      open_source:
+        sonabrief: "Open source. Le code qui traite votre audio peut être inspecté directement."
+        competitor: "Propriétaire. Vous vous en remettez à la politique de confidentialité publiée."
+    faq:
+      - q: "Fireflies entraîne-t-il son IA sur mes réunions ?"
+        a: "Non. La propre politique de confidentialité de Fireflies indique qu'il n'utilise pas le contenu de vos réunions pour entraîner des modèles d'IA et qu'il l'interdit contractuellement à ses prestataires. Sonabrief ne s'entraîne pas non plus sur vos données. La différence entre les deux est l'endroit où réside votre audio, pas le fait d'entraîner un modèle."
+      - q: "Alors pourquoi choisir Sonabrief plutôt que Fireflies ?"
+        a: "Parce que Sonabrief transcrit sur votre propre appareil et n'enregistre jamais votre audio sous forme de fichier, tandis que Fireflies téléverse et stocke votre audio sur ses serveurs cloud. Pour un travail confidentiel, un enregistrement qui n'a jamais été téléversé est plus sûr qu'un enregistrement chiffré posé sur un serveur à l'étranger."
+      - q: "Où mes données sont-elles hébergées avec chaque outil ?"
+        a: "Avec Sonabrief, la transcription est sur votre appareil et les synthèses dans le cloud tournent sur des serveurs européens qui ne conservent rien après traitement. La propre documentation de Fireflies indique que les comptes self-service stockent et traitent les données sur une infrastructure cloud américaine par défaut ; le stockage UE est optionnel mais le traitement reste aux États-Unis."
+      - q: "Sonabrief est-il vraiment privé, ou est-ce seulement du marketing ?"
+        a: "Sonabrief est open source : le code qui traite votre audio peut donc être lu et vérifié plutôt que pris sur parole. La transcription sur votre appareil, sans fichier audio conservé, est quelque chose que vous pouvez vérifier plutôt que devoir croire."
+      - q: "Sonabrief convient-il aux avocats, aux thérapeutes ou aux journalistes ?"
+        a: "Oui. Ce sont les personnes pour qui il a été conçu. La transcription sur l'appareil, sans fichier audio conservé, convient à un travail régi par le secret professionnel, la confidentialité ou la protection des sources, où une copie de l'enregistrement dans le cloud est en soi le risque."
+
+  es:
+    title: "La alternativa a Fireflies.ai que pone la privacidad primero — Sonabrief"
+    description: "Sonabrief es una alternativa privada a Fireflies.ai: la transcripción se realiza en tu propio dispositivo y tu audio nunca se guarda como archivo, en lugar de subirse y almacenarse en servidores en la nube."
+    intro: |
+      ## Una alternativa privada a Fireflies.ai
+
+      Fireflies.ai es un asistente de reuniones competente, y en un punto es honestamente bueno: su propia política de privacidad dice que no usa el contenido de tus reuniones para entrenar modelos de IA, y que se lo prohíbe contractualmente a sus proveedores. Eso importa, y vale la pena decirlo con claridad en lugar de fingir lo contrario.
+
+      La verdadera diferencia entre Fireflies y Sonabrief no es qué ocurre con tus datos, sino dónde residen. Fireflies está construido en torno a la nube. Su propia documentación dice que el audio se sube y se almacena, cifrado, en sus servidores, y que para cualquiera que se registre por el flujo self-service habitual los datos se almacenan y procesan en infraestructura cloud estadounidense por defecto. El almacenamiento europeo existe como opción, pero incluso entonces el procesamiento ocurre en Estados Unidos. El almacenamiento privado y el bring-your-own-storage están reservados al plan Enterprise.
+
+      Para la mayoría de los equipos eso es invisible. Para un abogado, un terapeuta, un periodista o un consultor, la ubicación de la grabación es toda la cuestión. Una conversación confidencial subida y conservada en un servidor en el extranjero es una grabación que puede ser requerida judicialmente, solicitada o expuesta en una brecha, por buena que sea la cifrado. La grabación más segura es la que nunca se subió.
+
+      Ese es el planteamiento del que parte Sonabrief. La transcripción se realiza en tu propio dispositivo, y tu audio nunca se guarda como archivo. No hay ninguna copia alojada en un servidor a la espera de convertirse en un problema. Cuando quieres un resumen, decides cómo: una síntesis en servidores europeos que no conservan nada una vez procesada tu petición, o por completo en tu propia máquina, de donde nada sale jamás. Como Fireflies, Sonabrief nunca usa tus datos para entrenar un modelo. A diferencia de Fireflies, tu audio no tiene que salir de tu ordenador para que el producto funcione.
+
+      Sonabrief es además de código abierto. No tienes que confiar en una promesa de privacidad escrita en una página de marketing. Puedes leer el código que trata tu audio. Sus precios están en euros, con un plan gratuito y dos planes de pago (Pro a 9 €/mes o 89 €/año, Pro Unlimited a 19 €/mes o 189 €/año), sin facturación por usuario ni sistema de créditos de IA que vigilar.
+
+      Si tu equipo necesita sobre todo la comodidad de la nube y una automatización profunda del CRM, Fireflies es una opción razonable. Si manejas conversaciones que no deberían salir de tu control, Sonabrief se construyó exactamente para eso.
+    differentiators:
+      audio_processing:
+        sonabrief: "La transcripción se realiza en tu propio dispositivo. Tu audio nunca se guarda como archivo."
+        competitor: "El audio se sube y se almacena, cifrado, en servidores en la nube."
+      hosting:
+        sonabrief: "Infraestructura europea, o por completo en local. Los resúmenes en la nube se ejecutan en servidores europeos que no conservan nada una vez procesada la petición."
+        competitor: "Infraestructura cloud estadounidense por defecto en self-service. El almacenamiento en la UE es opcional, pero el procesamiento sigue ocurriendo en Estados Unidos."
+      data_ownership:
+        sonabrief: "Tus datos nunca se usan para entrenar ningún modelo, y tu audio no sale de tu dispositivo salvo que elijas un resumen en la nube."
+        competitor: "Declara no usar tu contenido para entrenar modelos de IA, pero tu contenido se sube y se conserva igualmente en sus servidores."
+      pricing:
+        sonabrief: "Gratis, Pro 9 €/mes (89 €/año), Pro Unlimited 19 €/mes (189 €/año). Precios en euros, sin facturación por usuario."
+        competitor: "Gratis (800 min de almacenamiento), Pro 10 $/usuario/mes en anual, Business 19 $/usuario/mes en anual. Por usuario, en USD, con un sistema de créditos de IA."
+      open_source:
+        sonabrief: "Código abierto. El código que trata tu audio puede inspeccionarse directamente."
+        competitor: "Propietario. Dependes de la política de privacidad publicada."
+    faq:
+      - q: "¿Fireflies entrena su IA con mis reuniones?"
+        a: "No. La propia política de privacidad de Fireflies dice que no usa el contenido de tus reuniones para entrenar modelos de IA y que se lo prohíbe contractualmente a sus proveedores. Sonabrief tampoco se entrena con tus datos. La diferencia entre ambos es dónde reside tu audio, no si entrena un modelo."
+      - q: "Entonces, ¿por qué elegir Sonabrief en lugar de Fireflies?"
+        a: "Porque Sonabrief transcribe en tu propio dispositivo y nunca guarda tu audio como archivo, mientras que Fireflies sube y almacena tu audio en sus servidores en la nube. Para el trabajo confidencial, una grabación que nunca se subió es más segura que una cifrada alojada en un servidor en el extranjero."
+      - q: "¿Dónde se alojan mis datos con cada herramienta?"
+        a: "Con Sonabrief, la transcripción es en tu dispositivo y los resúmenes en la nube se ejecutan en servidores europeos que no conservan nada tras el procesamiento. La propia documentación de Fireflies dice que las cuentas self-service almacenan y procesan los datos en infraestructura cloud estadounidense por defecto; el almacenamiento en la UE es opcional pero el procesamiento sigue en Estados Unidos."
+      - q: "¿Sonabrief es realmente privado, o es solo marketing?"
+        a: "Sonabrief es de código abierto, así que el código que trata tu audio puede leerse y comprobarse en lugar de tomarse por buena fe. La transcripción en tu dispositivo, sin ningún archivo de audio conservado, es algo que puedes verificar en lugar de algo que tienes que creer."
+      - q: "¿Es Sonabrief adecuado para abogados, terapeutas o periodistas?"
+        a: "Sí. Son las personas para quienes se creó. La transcripción en el dispositivo, sin ningún archivo de audio conservado, encaja con el trabajo regido por el secreto profesional, la confidencialidad o la protección de las fuentes, donde una copia en la nube de la grabación es en sí misma el riesgo."
+
+  de:
+    title: "Die datenschutzorientierte Alternative zu Fireflies.ai — Sonabrief"
+    description: "Sonabrief ist eine private Alternative zu Fireflies.ai: Die Transkription läuft auf Ihrem eigenen Gerät und Ihr Audio wird nie als Datei gespeichert, statt auf Cloud-Servern hochgeladen und gespeichert zu werden."
+    intro: |
+      ## Eine private Alternative zu Fireflies.ai
+
+      Fireflies.ai ist ein fähiger Meeting-Assistent, und in einem Punkt ist er wirklich gut: Seine eigene Datenschutzrichtlinie besagt, dass er die Inhalte Ihrer Besprechungen nicht zum Trainieren von KI-Modellen verwendet und dies seinen Auftragsverarbeitern vertraglich untersagt. Das ist wichtig, und es ist es wert, klar gesagt zu werden, statt das Gegenteil vorzugeben.
+
+      Der wahre Unterschied zwischen Fireflies und Sonabrief ist nicht, was mit Ihren Daten geschieht, sondern wo Ihre Daten liegen. Fireflies ist um die Cloud herum gebaut. Seine eigene Dokumentation besagt, dass das Audio hochgeladen und verschlüsselt auf seinen Servern gespeichert wird, und dass für jeden, der sich über den üblichen Self-Service-Weg anmeldet, die Daten standardmäßig auf US-Cloud-Infrastruktur gespeichert und verarbeitet werden. Europäische Speicherung gibt es als Option, aber selbst dann findet die Verarbeitung in den USA statt. Privater Speicher und Bring-your-own-Storage sind dem Enterprise-Plan vorbehalten.
+
+      Für die meisten Teams ist das unsichtbar. Für einen Anwalt, einen Therapeuten, einen Journalisten oder einen Berater ist der Speicherort der Aufnahme die ganze Frage. Ein vertrauliches Gespräch, das hochgeladen und auf einem Server im Ausland aufbewahrt wird, ist eine Aufnahme, die angeordnet, angefragt oder in einem Datenleck offengelegt werden kann, so gut die Verschlüsselung auch sein mag. Die sicherste Aufnahme ist die, die nie hochgeladen wurde.
+
+      Das ist die Grundannahme, von der Sonabrief ausgeht. Die Transkription geschieht auf Ihrem eigenen Gerät, und Ihr Audio wird nie als Datei gespeichert. Es gibt keine Kopie auf einem Server, die darauf wartet, zum Problem zu werden. Wenn Sie eine Zusammenfassung möchten, entscheiden Sie, wie: eine Synthese auf europäischen Servern, die nach der Verarbeitung Ihrer Anfrage nichts aufbewahren, oder vollständig auf Ihrer eigenen Maschine, von der nie etwas weggeht. Wie Fireflies verwendet Sonabrief Ihre Daten nie zum Trainieren eines Modells. Anders als bei Fireflies muss Ihr Audio Ihren Computer nicht verlassen, damit das Produkt funktioniert.
+
+      Sonabrief ist außerdem quelloffen. Sie müssen keinem Datenschutzversprechen auf einer Marketingseite vertrauen. Sie können den Code lesen, der Ihr Audio verarbeitet. Seine Preise sind in Euro, mit einem kostenlosen Plan und zwei bezahlten Plänen (Pro für 9 €/Monat oder 89 €/Jahr, Pro Unlimited für 19 €/Monat oder 189 €/Jahr), ohne Abrechnung pro Nutzer und ohne KI-Guthabensystem, das man im Auge behalten muss.
+
+      Wenn Ihr Team vor allem Cloud-Komfort und eine tiefe CRM-Automatisierung braucht, ist Fireflies eine vernünftige Wahl. Wenn Sie Gespräche führen, die Ihre Kontrolle nicht verlassen sollten, wurde Sonabrief genau dafür gebaut.
+    differentiators:
+      audio_processing:
+        sonabrief: "Die Transkription geschieht auf Ihrem eigenen Gerät. Ihr Audio wird nie als Datei gespeichert."
+        competitor: "Das Audio wird hochgeladen und verschlüsselt auf Cloud-Servern gespeichert."
+      hosting:
+        sonabrief: "Europäische Infrastruktur oder vollständig lokal. Cloud-Zusammenfassungen laufen auf europäischen Servern, die nach der Verarbeitung einer Anfrage nichts aufbewahren."
+        competitor: "US-Cloud-Infrastruktur standardmäßig im Self-Service. EU-Speicherung ist optional, aber die Verarbeitung findet weiterhin in den USA statt."
+      data_ownership:
+        sonabrief: "Ihre Daten werden nie zum Trainieren irgendeines Modells verwendet, und Ihr Audio verlässt Ihr Gerät nicht, es sei denn, Sie wählen eine Cloud-Zusammenfassung."
+        competitor: "Gibt an, Ihre Inhalte nicht zum Trainieren von KI-Modellen zu verwenden, aber Ihre Inhalte werden dennoch hochgeladen und auf seinen Servern aufbewahrt."
+      pricing:
+        sonabrief: "Kostenlos, Pro 9 €/Monat (89 €/Jahr), Pro Unlimited 19 €/Monat (189 €/Jahr). Preise in Euro, keine Abrechnung pro Nutzer."
+        competitor: "Kostenlos (800 Min. Speicher), Pro 10 $/Nutzer/Monat jährlich, Business 19 $/Nutzer/Monat jährlich. Pro Nutzer, in USD, mit einem KI-Guthabensystem."
+      open_source:
+        sonabrief: "Quelloffen. Der Code, der Ihr Audio verarbeitet, kann direkt geprüft werden."
+        competitor: "Proprietär. Sie verlassen sich auf die veröffentlichte Datenschutzrichtlinie."
+    faq:
+      - q: "Trainiert Fireflies seine KI mit meinen Besprechungen?"
+        a: "Nein. Die eigene Datenschutzrichtlinie von Fireflies besagt, dass es die Inhalte Ihrer Besprechungen nicht zum Trainieren von KI-Modellen verwendet und dies seinen Auftragsverarbeitern vertraglich untersagt. Auch Sonabrief trainiert nicht mit Ihren Daten. Der Unterschied zwischen beiden ist, wo Ihr Audio liegt, nicht ob es ein Modell trainiert."
+      - q: "Warum also Sonabrief statt Fireflies wählen?"
+        a: "Weil Sonabrief auf Ihrem eigenen Gerät transkribiert und Ihr Audio nie als Datei speichert, während Fireflies Ihr Audio auf seine Cloud-Server hochlädt und dort speichert. Für vertrauliche Arbeit ist eine nie hochgeladene Aufnahme sicherer als eine verschlüsselte, die auf einem Server im Ausland liegt."
+      - q: "Wo werden meine Daten bei jedem Werkzeug gehostet?"
+        a: "Bei Sonabrief erfolgt die Transkription auf Ihrem Gerät, und Cloud-Zusammenfassungen laufen auf europäischen Servern, die nach der Verarbeitung nichts aufbewahren. Die eigene Dokumentation von Fireflies besagt, dass Self-Service-Konten Daten standardmäßig auf US-Cloud-Infrastruktur speichern und verarbeiten; EU-Speicherung ist optional, aber die Verarbeitung bleibt in den USA."
+      - q: "Ist Sonabrief wirklich privat, oder ist das nur Marketing?"
+        a: "Sonabrief ist quelloffen, sodass der Code, der Ihr Audio verarbeitet, gelesen und überprüft werden kann, statt auf Treu und Glauben hingenommen zu werden. Die Transkription auf Ihrem Gerät, ohne gespeicherte Audiodatei, ist etwas, das Sie überprüfen können, statt es glauben zu müssen."
+      - q: "Ist Sonabrief für Anwälte, Therapeuten oder Journalisten geeignet?"
+        a: "Ja. Das sind die Menschen, für die es gebaut wurde. Die Transkription auf dem Gerät, ohne gespeicherte Audiodatei, passt zu Arbeit, die der Verschwiegenheitspflicht, der Vertraulichkeit oder dem Quellenschutz unterliegt, wo eine Cloud-Kopie der Aufnahme selbst das Risiko ist."

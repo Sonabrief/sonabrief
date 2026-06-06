@@ -74,4 +74,104 @@ i18n:
       - q: "Dove vengono ospitati i miei dati?"
         a: "Sonabrief usa infrastruttura europea, e le sintesi cloud girano su server europei che non conservano nulla una volta elaborata la richiesta. La trascrizione sul dispositivo evita del tutto il caricamento, se preferisci che nulla lasci la tua macchina."
 
-  # fr / es / de intentionally absent → translation phase later.
+  fr:
+    profession: "Pour les consultants IT"
+    painPoints:
+      - "Les rendez-vous clients exposent l'architecture des systèmes, des détails de sécurité et des accès à des données sensibles"
+      - "Envoyer cet audio vers un cloud générique est précisément le risque que vous déconseillez à vos clients"
+      - "Du temps perdu à rédiger les sessions techniques au lieu de construire"
+    title: "Sonabrief pour les consultants IT : des sessions techniques qui restent confidentielles"
+    description: "Un assistant de réunion pensé pour la confidentialité du client. Avant chaque enregistrement, vous choisissez si l'audio est transcrit sur votre propre appareil ou sur des serveurs européens. L'enregistrement n'est jamais conservé sous forme de fichier."
+    intro: |
+      Les réunions que mène un consultant IT sont une carte des systèmes les plus sensibles d'un client : son architecture, ses vulnérabilités, la manière dont les accès sont accordés, l'endroit où vivent les données importantes. La majeure partie est couverte par un accord de confidentialité, et l'enregistrement d'une telle discussion est un cadeau pour quiconque ne devrait pas l'avoir. Il y a aussi une question de crédibilité. Téléverser cet audio vers un cloud générique, où il est traité à l'étranger et, dans plusieurs cas, réutilisé pour améliorer les modèles d'un fournisseur, est exactement le type de flux de données non maîtrisé que vous signaleriez dans la revue de sécurité d'un client. Utiliser un outil qui le fait serait difficile à défendre.
+
+      Sonabrief part d'un présupposé différent. Avant chaque enregistrement, vous décidez de la manière dont l'audio est traité. Vous pouvez transcrire entièrement **sur votre propre appareil**, et l'enregistrement n'est alors téléversé nulle part. Ou vous pouvez choisir de transcrire sur **des serveurs européens** lorsque vous avez besoin de plus de rapidité : l'audio est alors traité dans l'Union européenne et n'est pas conservé ensuite. C'est un choix explicite que vous faites à chaque fois, et qui résiste au même examen que celui que vous appliquez à la stack d'un client.
+
+      ## Comment cela se passe en pratique
+
+      Vous enregistrez un atelier technique ou un appel de cadrage, et Sonabrief vous remet un brouillon écrit propre et structuré : vous le relisez, vous le finalisez avec vos propres mots, et vous le transformez en documentation ou en énoncé des travaux. Vous partez d'un texte prêt plutôt que d'une page blanche, et la version qui compte reste la vôtre. L'audio d'origine n'est pas conservé sous forme de fichier une fois transcrit, de sorte qu'un enregistrement décrivant les systèmes d'un client ne reste pas sur le serveur d'un tiers.
+
+      ## Ce que l'outil ne fait pas, et ce qui reste de votre ressort
+
+      Sonabrief est un outil, pas un jugement de sécurité ou contractuel. Il ne décide pas si une réunion peut être enregistrée, si le client y a consenti, ou ce qu'autorisent votre mission et les politiques du client. Ces décisions restent les vôtres et celles du client. Le logiciel est open source : vous ou l'équipe sécurité du client pouvez donc lire exactement comment l'audio est traité, plutôt que de vous fier à une promesse marketing, ce qui est la norme que vous attendriez de tout outil touchant à du matériel sensible.
+
+      Rien de tout cela ne constitue un conseil juridique. C'est une description du fonctionnement de l'outil, pour que vous puissiez décider s'il convient à la manière dont vous et vos clients attendez de travailler.
+    faq:
+      - q: "L'audio de la réunion est-il téléversé dans le cloud ?"
+        a: "Cela dépend du choix que vous faites avant chaque enregistrement. Si vous optez pour la transcription sur l'appareil, l'audio reste sur votre ordinateur et n'est jamais téléversé. Si vous choisissez la transcription sur des serveurs européens pour plus de rapidité, l'audio est traité dans l'Union européenne et n'est pas conservé une fois transcrit."
+      - q: "Puis-je vérifier comment l'audio est traité, plutôt que de me fier à une affirmation ?"
+        a: "Oui, et pour ce public c'est l'essentiel. Sonabrief est open source : vous ou l'équipe sécurité d'un client pouvez lire directement le code qui traite l'audio. La transcription sur l'appareil garde l'enregistrement entièrement hors de tout serveur tiers ; la transcription sur le cloud européen traite dans l'Union européenne et ne conserve rien ensuite."
+      - q: "Cela résiste-t-il à la revue de sécurité d'un client ?"
+        a: "C'est l'objectif de conception. La transcription sur l'appareil signifie qu'un enregistrement des systèmes d'un client ne quitte jamais votre machine, et le code open source peut être inspecté dans le cadre de toute due diligence. Ce qu'exige une mission ou une politique précise reste entre vous et le client. Ceci n'est pas un conseil juridique."
+      - q: "Mes sessions clients serviront-elles à entraîner des modèles d'IA ?"
+        a: "Non. Vos sessions ne servent jamais à entraîner un quelconque modèle. Lorsque vous demandez une synthèse écrite, elle est traitée soit sur votre propre appareil, soit sur des serveurs européens qui ne conservent rien une fois la requête traitée."
+      - q: "Où mes données sont-elles hébergées ?"
+        a: "Sonabrief utilise une infrastructure européenne, et les synthèses dans le cloud tournent sur des serveurs européens qui ne conservent rien une fois la requête traitée. La transcription sur l'appareil évite tout téléversement si vous préférez que rien ne quitte votre machine."
+
+  es:
+    profession: "Para consultores IT"
+    painPoints:
+      - "Las reuniones con clientes exponen la arquitectura de los sistemas, detalles de seguridad y accesos a datos sensibles"
+      - "Enviar ese audio a una nube genérica es justo el riesgo que desaconsejas a tus clientes"
+      - "Tiempo perdido redactando las sesiones técnicas en lugar de construir"
+    title: "Sonabrief para consultores IT: sesiones técnicas que siguen siendo confidenciales"
+    description: "Un asistente de reuniones pensado para la confidencialidad del cliente. Antes de cada grabación, eliges si el audio se transcribe en tu propio dispositivo o en servidores europeos. La grabación nunca se conserva como archivo."
+    intro: |
+      Las reuniones que dirige un consultor IT son un mapa de los sistemas más sensibles de un cliente: su arquitectura, sus vulnerabilidades, cómo se conceden los accesos, dónde viven los datos importantes. Gran parte está cubierta por un acuerdo de confidencialidad, y la grabación de una discusión así es un regalo para quien no debería tenerla. Hay además una cuestión de credibilidad. Subir ese audio a una nube genérica, donde se procesa en el extranjero y, en varios casos, se reutiliza para mejorar los modelos de un proveedor, es exactamente el tipo de flujo de datos sin control que señalarías en la revisión de seguridad de un cliente. Usar una herramienta que lo hace sería difícil de defender.
+
+      Sonabrief parte de un planteamiento distinto. Antes de cada grabación decides cómo se trata el audio. Puedes transcribir por completo **en tu propio dispositivo**, de modo que la grabación no se sube a ninguna parte. O puedes optar por transcribir en **servidores europeos** cuando necesites más rapidez: en ese caso el audio se procesa en la Unión Europea y no se conserva después. Es una decisión explícita que tomas cada vez, y que resiste el mismo escrutinio que aplicas al stack de un cliente.
+
+      ## Cómo funciona en la práctica
+
+      Grabas un taller técnico o una llamada de alcance, y Sonabrief te entrega un borrador escrito limpio y estructurado: lo revisas, lo cierras con tus propias palabras y lo conviertes en documentación o en un enunciado de trabajo. Partes de un texto listo en lugar de una página en blanco, y la versión que cuenta sigue siendo tuya. El audio original no se guarda como archivo una vez transcrito, así que una grabación que describe los sistemas de un cliente no queda en el servidor de un tercero.
+
+      ## Lo que no hace, y lo que sigue siendo tuyo
+
+      Sonabrief es una herramienta, no un juicio de seguridad ni contractual. No decide si una reunión puede grabarse, si el cliente ha accedido, o qué permiten tu encargo y las políticas del cliente. Esas decisiones siguen siendo tuyas y del cliente. El software es de código abierto, así que tú o el equipo de seguridad del cliente podéis leer exactamente cómo trata el audio, en lugar de fiaros de una afirmación de marketing, que es el estándar que esperarías de cualquier herramienta que toca material sensible.
+
+      Nada de esto constituye asesoramiento jurídico. Es una descripción de cómo funciona la herramienta, para que decidas si encaja con la forma en que tú y tus clientes esperáis trabajar.
+    faq:
+      - q: "¿Se sube al cloud el audio de la reunión?"
+        a: "Depende de la opción que elijas antes de cada grabación. Si seleccionas la transcripción en el dispositivo, el audio permanece en tu ordenador y nunca se sube. Si eliges la transcripción en servidores europeos para mayor rapidez, el audio se procesa en la Unión Europea y no se conserva una vez transcrito."
+      - q: "¿Puedo verificar cómo se trata el audio, en lugar de fiarme de una afirmación?"
+        a: "Sí, y para este público ese es el punto central. Sonabrief es de código abierto, así que tú o el equipo de seguridad de un cliente podéis leer directamente el código que trata el audio. La transcripción en el dispositivo mantiene la grabación por completo fuera de cualquier servidor de terceros; la transcripción en el cloud europeo procesa en la Unión Europea y no conserva nada después."
+      - q: "¿Resiste en la revisión de seguridad de un cliente?"
+        a: "Es el objetivo de diseño. La transcripción en el dispositivo significa que una grabación de los sistemas de un cliente nunca sale de tu máquina, y el código de código abierto puede inspeccionarse como parte de cualquier due diligence. Lo que exige un encargo o una política concreta sigue siendo un asunto entre tú y el cliente. Esto no es asesoramiento jurídico."
+      - q: "¿Se usarán mis sesiones con clientes para entrenar modelos de IA?"
+        a: "No. Tus sesiones nunca se usan para entrenar ningún modelo. Cuando pides un resumen escrito, se procesa en tu propio dispositivo o en servidores europeos que no conservan nada una vez procesada la petición."
+      - q: "¿Dónde se alojan mis datos?"
+        a: "Sonabrief usa infraestructura europea, y los resúmenes en la nube se ejecutan en servidores europeos que no conservan nada una vez procesada la petición. La transcripción en el dispositivo evita por completo la subida si prefieres que nada salga de tu máquina."
+
+  de:
+    profession: "Für IT-Berater"
+    painPoints:
+      - "Kundengespräche legen Systemarchitektur, Sicherheitsdetails und Zugänge zu sensiblen Daten offen"
+      - "Dieses Audio in eine allgemeine Cloud zu senden, ist genau das Risiko, von dem Sie Ihren Kunden abraten"
+      - "Verlorene Zeit für das Verfassen technischer Sitzungen statt für das Bauen"
+    title: "Sonabrief für IT-Berater: technische Sitzungen, die vertraulich bleiben"
+    description: "Ein Meeting-Assistent, der auf die Vertraulichkeit des Kunden ausgelegt ist. Vor jeder Aufnahme entscheiden Sie, ob das Audio auf Ihrem eigenen Gerät oder auf europäischen Servern transkribiert wird. Die Aufnahme wird nie als Datei gespeichert."
+    intro: |
+      Die Besprechungen, die ein IT-Berater leitet, sind eine Karte der sensibelsten Systeme eines Kunden: seine Architektur, seine Schwachstellen, wie Zugänge gewährt werden, wo die wichtigen Daten liegen. Das meiste davon unterliegt einer Vertraulichkeitsvereinbarung, und die Aufnahme einer solchen Besprechung ist ein Geschenk an jeden, der sie nicht haben sollte. Es gibt zudem eine Frage der Glaubwürdigkeit. Dieses Audio in eine allgemeine Cloud hochzuladen, wo es im Ausland verarbeitet und in mehreren Fällen erneut verwendet wird, um die Modelle eines Anbieters zu verbessern, ist genau die Art von unkontrolliertem Datenfluss, die Sie in der Sicherheitsprüfung eines Kunden anmerken würden. Ein Werkzeug zu nutzen, das das tut, wäre schwer zu rechtfertigen.
+
+      Sonabrief geht von einer anderen Grundannahme aus. Vor jeder Aufnahme entscheiden Sie, wie das Audio behandelt wird. Sie können vollständig **auf Ihrem eigenen Gerät** transkribieren, sodass die Aufnahme nirgendwo hochgeladen wird. Oder Sie wählen die Transkription auf **europäischen Servern**, wenn Sie mehr Geschwindigkeit brauchen: Dann wird das Audio in der EU verarbeitet und danach nicht aufbewahrt. Es ist eine bewusste Entscheidung, die Sie jedes Mal treffen, und die derselben Prüfung standhält, die Sie an den Stack eines Kunden anlegen.
+
+      ## So sieht der Ablauf aus
+
+      Sie nehmen einen technischen Workshop oder ein Scoping-Gespräch auf, und Sonabrief übergibt Ihnen einen sauberen, strukturierten schriftlichen Entwurf: Sie prüfen ihn, vollenden ihn mit Ihren eigenen Worten und machen daraus eine Dokumentation oder ein Leistungsverzeichnis. Sie beginnen mit einem fertigen Text statt mit einem leeren Blatt, und die Fassung, die zählt, bleibt Ihre. Das ursprüngliche Audio wird nach der Transkription nicht als Datei gespeichert, sodass eine Aufnahme, die die Systeme eines Kunden beschreibt, nicht auf dem Server eines Dritten zurückbleibt.
+
+      ## Was das Werkzeug nicht tut, und was bei Ihnen bleibt
+
+      Sonabrief ist ein Werkzeug, kein Sicherheits- oder Vertragsurteil. Es entscheidet nicht, ob eine Besprechung aufgenommen werden darf, ob der Kunde zugestimmt hat oder was Ihr Mandat und die Richtlinien des Kunden zulassen. Diese Entscheidungen bleiben Ihre und die des Kunden. Die Software ist quelloffen, sodass Sie oder das Sicherheitsteam des Kunden genau nachlesen können, wie das Audio verarbeitet wird, statt sich auf ein Marketingversprechen zu verlassen, was der Standard ist, den Sie von jedem Werkzeug erwarten würden, das sensibles Material berührt.
+
+      Nichts davon ist eine Rechtsberatung. Es ist eine Beschreibung der Funktionsweise des Werkzeugs, damit Sie entscheiden können, ob es zu der Arbeitsweise passt, die Sie und Ihre Kunden erwarten.
+    faq:
+      - q: "Wird das Audio der Besprechung in die Cloud hochgeladen?"
+        a: "Das hängt von der Entscheidung ab, die Sie vor jeder Aufnahme treffen. Wenn Sie die Transkription auf dem Gerät wählen, bleibt das Audio auf Ihrem Computer und wird nie hochgeladen. Wenn Sie für mehr Geschwindigkeit die Transkription auf europäischen Servern wählen, wird das Audio in der EU verarbeitet und nach der Transkription nicht aufbewahrt."
+      - q: "Kann ich überprüfen, wie das Audio verarbeitet wird, statt einer Aussage zu vertrauen?"
+        a: "Ja, und für dieses Publikum ist das der Kern. Sonabrief ist quelloffen, sodass Sie oder das Sicherheitsteam eines Kunden den Code, der das Audio verarbeitet, direkt nachlesen können. Die Transkription auf dem Gerät hält die Aufnahme vollständig von jedem Server Dritter fern; die Transkription in der europäischen Cloud verarbeitet in der EU und bewahrt danach nichts auf."
+      - q: "Hält das der Sicherheitsprüfung eines Kunden stand?"
+        a: "Das ist das Designziel. Die Transkription auf dem Gerät bedeutet, dass eine Aufnahme der Systeme eines Kunden Ihre Maschine nie verlässt, und der quelloffene Code kann im Rahmen jeder Due Diligence geprüft werden. Was ein konkretes Mandat oder eine Richtlinie verlangt, bleibt eine Sache zwischen Ihnen und dem Kunden. Dies ist keine Rechtsberatung."
+      - q: "Werden meine Kundensitzungen zum Trainieren von KI-Modellen verwendet?"
+        a: "Nein. Ihre Sitzungen werden nie zum Trainieren irgendeines Modells verwendet. Wenn Sie eine schriftliche Zusammenfassung anfordern, läuft sie entweder auf Ihrem eigenen Gerät oder auf europäischen Servern, die nach der Verarbeitung der Anfrage nichts aufbewahren."
+      - q: "Wo werden meine Daten gehostet?"
+        a: "Sonabrief nutzt europäische Infrastruktur, und Cloud-Zusammenfassungen laufen auf europäischen Servern, die nach der Verarbeitung einer Anfrage nichts aufbewahren. Die Transkription auf dem Gerät vermeidet das Hochladen vollständig, wenn Sie lieber möchten, dass nichts Ihre Maschine verlässt."

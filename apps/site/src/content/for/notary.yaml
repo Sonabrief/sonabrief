@@ -74,4 +74,104 @@ i18n:
       - q: "Un collega può verificare queste affermazioni?"
         a: "Sì. Sonabrief è open source, quindi il codice che gestisce l'audio può essere ispezionato direttamente invece di affidarsi a una promessa. Un collega o un DPO può verificare come si comportano davvero la registrazione, la trascrizione e l'archiviazione."
 
-  # fr / es / de intentionally absent → translation phase later.
+  fr:
+    profession: "Pour les notaires"
+    painPoints:
+      - "Le notaire détient des informations confidentielles sur la vie personnelle, familiale et patrimoniale de ses clients"
+      - "Un outil cloud générique stocke ces informations à l'étranger, hors de votre contrôle"
+      - "Du temps passé à rédiger ce qui a été convenu au lieu de préparer l'acte"
+    title: "Sonabrief pour les notaires : des rendez-vous confidentiels, gardés sous votre sceau"
+    description: "Un assistant de réunion pensé pour le secret professionnel. Avant chaque enregistrement, vous choisissez si l'audio est transcrit sur votre propre appareil ou sur des serveurs européens. L'enregistrement n'est jamais conservé sous forme de fichier."
+    intro: |
+      Le notaire est un officier public dépositaire de l'authenticité, et détenteur d'informations confidentielles sur les recoins les plus privés de la vie d'un client : son patrimoine, sa succession, ses dispositions familiales, son entreprise. Ici, le secret professionnel n'est pas une courtoisie. C'est un devoir ancré dans la loi qui régit la profession et renforcé par la sanction pénale. L'enregistrement d'un rendez-vous où ces sujets sont abordés en est le témoignage le plus complet, et le plus exposé. La plupart des outils de transcription génériques traitent cet enregistrement comme un contenu ordinaire : ils le téléversent, le traitent sur des serveurs à l'étranger et, dans plusieurs cas, le réutilisent pour améliorer leurs modèles. Pour un officier public, c'est difficile à concilier avec la confiance que le public place dans la fonction.
+
+      Sonabrief part d'un présupposé différent. Avant chaque enregistrement, vous décidez de la manière dont l'audio est traité. Vous pouvez transcrire entièrement **sur votre propre appareil**, et l'enregistrement n'est alors téléversé nulle part. Ou vous pouvez choisir de transcrire sur **des serveurs européens** lorsque vous avez besoin de plus de rapidité : l'audio est alors traité dans l'Union européenne et n'est pas conservé ensuite. C'est un choix explicite que vous faites à chaque fois.
+
+      ## Comment cela se passe en pratique
+
+      Vous enregistrez un rendez-vous où les parties exposent ce qu'elles veulent voir figurer dans l'acte. Sonabrief vous remet un brouillon écrit propre et structuré de cet échange : vous le relisez, vous le finalisez avec vos propres mots, et vous l'utilisez pour préparer l'acte. Vous partez d'un texte prêt plutôt que d'une page blanche, et la version qui compte reste la vôtre, de sorte que ce qui a été convenu est vérifié avant de donner forme à l'acte, jamais tenu pour acquis simplement parce qu'il a été transcrit. L'audio d'origine n'est pas conservé sous forme de fichier une fois transcrit : rien ne reste donc sur le serveur d'un tiers.
+
+      ## Ce que l'outil ne fait pas, et ce qui reste de votre ressort
+
+      Sonabrief est un outil, pas un jugement professionnel ou juridique. Il ne décide pas si un rendez-vous peut être enregistré, si les parties ont consenti, ou ce que vos devoirs d'officier public exigent dans un cas précis. Ces décisions restent les vôtres. Le logiciel est open source : un confrère ou un conseil en protection des données peut donc inspecter exactement comment l'audio est traité, plutôt que de se fier à une promesse marketing.
+
+      Rien de tout cela ne constitue un conseil juridique. C'est une description du fonctionnement de l'outil, pour que vous puissiez décider s'il convient à la manière dont vous êtes tenu, et avez choisi, d'exercer.
+    faq:
+      - q: "L'audio du rendez-vous est-il téléversé dans le cloud ?"
+        a: "Cela dépend du choix que vous faites avant chaque enregistrement. Si vous optez pour la transcription sur l'appareil, l'audio reste sur votre ordinateur et n'est jamais téléversé. Si vous choisissez la transcription sur des serveurs européens pour plus de rapidité, l'audio est traité dans l'Union européenne et n'est pas conservé une fois transcrit."
+      - q: "Comment Sonabrief protège-t-il les informations couvertes par le secret professionnel ?"
+        a: "La transcription sur l'appareil garde l'enregistrement hors de tout serveur tiers, ce qui est l'option la plus protectrice pour des informations confidentielles de client. Si vous choisissez la transcription sur le cloud européen, le traitement a lieu dans l'Union européenne et rien n'est conservé ensuite. Savoir si et comment enregistrer un rendez-vous reste votre responsabilité professionnelle. Ceci n'est pas un conseil juridique."
+      - q: "Puis-je me fier à la transcription pour préparer un acte ?"
+        a: "Sonabrief produit un brouillon fidèle et structuré de l'échange, et vous le relisez avant qu'il ne donne forme à l'acte. Comme pour toute note, ce qui a été convenu est vérifié avant qu'on s'y fie. Vous partez d'un texte prêt plutôt que d'une page blanche, et la version qui compte reste la vôtre."
+      - q: "Mes rendez-vous serviront-ils à entraîner des modèles d'IA ?"
+        a: "Non. Vos rendez-vous ne servent jamais à entraîner un quelconque modèle. Lorsque vous demandez une synthèse écrite, elle est traitée soit sur votre propre appareil, soit sur des serveurs européens qui ne conservent rien une fois la requête traitée."
+      - q: "Un confrère peut-il vérifier ces affirmations ?"
+        a: "Oui. Sonabrief est open source : le code qui traite l'audio peut donc être inspecté directement, sans avoir à se fier à une promesse. Un confrère ou un DPO peut vérifier comment se comportent réellement l'enregistrement, la transcription et le stockage."
+
+  es:
+    profession: "Para notarios"
+    painPoints:
+      - "El notario custodia información confidencial sobre la vida personal, familiar y patrimonial de sus clientes"
+      - "Una herramienta cloud genérica almacena esa información en el extranjero, fuera de tu control"
+      - "Tiempo dedicado a redactar lo acordado en lugar de preparar la escritura"
+    title: "Sonabrief para notarios: reuniones confidenciales, guardadas bajo tu fe pública"
+    description: "Un asistente de reuniones pensado para el secreto profesional. Antes de cada grabación, eliges si el audio se transcribe en tu propio dispositivo o en servidores europeos. La grabación nunca se conserva como archivo."
+    intro: |
+      El notario es un funcionario público investido de fe pública, y custodio de información confidencial sobre los rincones más privados de la vida de un cliente: su patrimonio, su herencia, sus disposiciones familiares, su empresa. Aquí el secreto profesional no es una cortesía. Es un deber arraigado en la ley que regula la profesión y reforzado por la sanción penal. La grabación de una reunión en la que se tratan esas materias es el documento más completo de todo ello, y el más expuesto. La mayoría de las herramientas de transcripción genéricas tratan esa grabación como contenido cualquiera: la suben, la procesan en servidores en el extranjero y, en varios casos, la reutilizan para mejorar sus modelos. Para un funcionario público, es difícil de conciliar con la confianza que la sociedad deposita en la función.
+
+      Sonabrief parte de un planteamiento distinto. Antes de cada grabación decides cómo se trata el audio. Puedes transcribir por completo **en tu propio dispositivo**, de modo que la grabación no se sube a ninguna parte. O puedes optar por transcribir en **servidores europeos** cuando necesites más rapidez: en ese caso el audio se procesa en la Unión Europea y no se conserva después. Es una decisión explícita que tomas cada vez.
+
+      ## Cómo funciona en la práctica
+
+      Grabas una reunión en la que las partes exponen lo que quieren que recoja la escritura. Sonabrief te entrega un borrador escrito limpio y estructurado de esa conversación: lo revisas, lo cierras con tus propias palabras y lo usas para preparar el acto. Partes de un texto listo en lugar de una página en blanco, y la versión que cuenta sigue siendo tuya, de modo que lo acordado se comprueba antes de dar forma a la escritura, nunca se da por bueno solo porque se haya transcrito. El audio original no se guarda como archivo una vez transcrito, así que no queda nada en el servidor de un tercero.
+
+      ## Lo que no hace, y lo que sigue siendo tuyo
+
+      Sonabrief es una herramienta, no un juicio profesional ni jurídico. No decide si una reunión puede grabarse, si las partes han consentido, o qué exigen tus deberes como funcionario público en un caso dado. Esas decisiones siguen siendo tuyas. El software es de código abierto, así que un colega o un asesor de protección de datos puede inspeccionar exactamente cómo trata el audio, en lugar de fiarse de una afirmación de marketing.
+
+      Nada de esto constituye asesoramiento jurídico. Es una descripción de cómo funciona la herramienta, para que decidas si encaja con la forma en que estás obligado, y has elegido, a ejercer.
+    faq:
+      - q: "¿Se sube al cloud el audio de la reunión?"
+        a: "Depende de la opción que elijas antes de cada grabación. Si seleccionas la transcripción en el dispositivo, el audio permanece en tu ordenador y nunca se sube. Si eliges la transcripción en servidores europeos para mayor rapidez, el audio se procesa en la Unión Europea y no se conserva una vez transcrito."
+      - q: "¿Cómo protege Sonabrief la información cubierta por el secreto profesional?"
+        a: "La transcripción en el dispositivo mantiene la grabación fuera de cualquier servidor de terceros, que es la opción más protectora para la información confidencial del cliente. Si eliges la transcripción en el cloud europeo, el procesamiento ocurre en la Unión Europea y no se conserva nada después. Si grabar una reunión, y cómo, sigue siendo tu responsabilidad profesional. Esto no es asesoramiento jurídico."
+      - q: "¿Puedo fiarme de la transcripción al preparar una escritura?"
+        a: "Sonabrief produce un borrador fiel y estructurado de la conversación, y tú lo revisas antes de que dé forma al acto. Como con cualquier nota, lo acordado se comprueba antes de hacerlo valer. Partes de un texto listo en lugar de una página en blanco, y la versión que cuenta sigue siendo tuya."
+      - q: "¿Se usarán mis reuniones para entrenar modelos de IA?"
+        a: "No. Tus reuniones nunca se usan para entrenar ningún modelo. Cuando pides un resumen escrito, se procesa en tu propio dispositivo o en servidores europeos que no conservan nada una vez procesada la petición."
+      - q: "¿Puede un colega verificar estas afirmaciones?"
+        a: "Sí. Sonabrief es de código abierto, así que el código que trata el audio puede inspeccionarse directamente, sin tener que fiarse de una promesa. Un colega o un DPD puede comprobar cómo se comportan realmente la grabación, la transcripción y el almacenamiento."
+
+  de:
+    profession: "Für Notare"
+    painPoints:
+      - "Der Notar verwahrt vertrauliche Informationen über die persönlichen, familiären und vermögensrechtlichen Verhältnisse der Mandanten"
+      - "Ein allgemeines Cloud-Werkzeug speichert diese Informationen im Ausland, außerhalb Ihrer Kontrolle"
+      - "Zeit für das Verfassen des Vereinbarten statt für die Vorbereitung der Urkunde"
+    title: "Sonabrief für Notare: vertrauliche Gespräche, unter Ihrem Siegel verwahrt"
+    description: "Ein Meeting-Assistent, der auf die Verschwiegenheitspflicht ausgelegt ist. Vor jeder Aufnahme entscheiden Sie, ob das Audio auf Ihrem eigenen Gerät oder auf europäischen Servern transkribiert wird. Die Aufnahme wird nie als Datei gespeichert."
+    intro: |
+      Der Notar ist ein Träger eines öffentlichen Amtes, dem der öffentliche Glaube anvertraut ist, und Verwahrer vertraulicher Informationen über die privatesten Bereiche im Leben eines Mandanten: sein Vermögen, seine Erbfolge, seine familiären Verhältnisse, sein Unternehmen. Die Verschwiegenheitspflicht ist hier keine Höflichkeit. Sie ist eine im Berufsrecht verankerte und durch Strafandrohung bekräftigte Pflicht. Die Aufnahme eines Gesprächs, in dem diese Angelegenheiten erörtert werden, ist deren vollständigster und am stärksten exponierter Beleg. Die meisten allgemeinen Transkriptionswerkzeuge behandeln diese Aufnahme wie beliebigen Inhalt: Sie laden sie hoch, verarbeiten sie auf Servern im Ausland und verwenden sie in mehreren Fällen erneut, um ihre Modelle zu verbessern. Für einen Amtsträger lässt sich das kaum mit dem Vertrauen vereinbaren, das die Allgemeinheit in das Amt setzt.
+
+      Sonabrief geht von einer anderen Grundannahme aus. Vor jeder Aufnahme entscheiden Sie, wie das Audio behandelt wird. Sie können vollständig **auf Ihrem eigenen Gerät** transkribieren, sodass die Aufnahme nirgendwo hochgeladen wird. Oder Sie wählen die Transkription auf **europäischen Servern**, wenn Sie mehr Geschwindigkeit brauchen: Dann wird das Audio in der EU verarbeitet und danach nicht aufbewahrt. Es ist eine bewusste Entscheidung, die Sie jedes Mal treffen.
+
+      ## So sieht der Ablauf aus
+
+      Sie nehmen ein Gespräch auf, in dem die Beteiligten darlegen, was die Urkunde regeln soll. Sonabrief übergibt Ihnen einen sauberen, strukturierten schriftlichen Entwurf dieses Gesprächs: Sie prüfen ihn, vollenden ihn mit Ihren eigenen Worten und nutzen ihn zur Vorbereitung der Urkunde. Sie beginnen mit einem fertigen Text statt mit einem leeren Blatt, und die Fassung, die zählt, bleibt Ihre, sodass das Vereinbarte geprüft wird, bevor es die Urkunde prägt, und nie nur deshalb für wahr gehalten wird, weil es transkribiert wurde. Das ursprüngliche Audio wird nach der Transkription nicht als Datei gespeichert, sodass nichts auf dem Server eines Dritten zurückbleibt.
+
+      ## Was das Werkzeug nicht tut, und was bei Ihnen bleibt
+
+      Sonabrief ist ein Werkzeug, kein berufliches oder rechtliches Urteil. Es entscheidet nicht, ob ein Gespräch aufgenommen werden darf, ob die Beteiligten eingewilligt haben oder was Ihre Pflichten als Amtsträger im Einzelfall verlangen. Diese Entscheidungen bleiben Ihre. Die Software ist quelloffen, sodass ein Kollege oder ein Datenschutzbeauftragter genau prüfen kann, wie das Audio verarbeitet wird, statt sich auf ein Marketingversprechen zu verlassen.
+
+      Nichts davon ist eine Rechtsberatung. Es ist eine Beschreibung der Funktionsweise des Werkzeugs, damit Sie entscheiden können, ob es zu der Arbeitsweise passt, zu der Sie verpflichtet sind und für die Sie sich entschieden haben.
+    faq:
+      - q: "Wird das Audio des Gesprächs in die Cloud hochgeladen?"
+        a: "Das hängt von der Entscheidung ab, die Sie vor jeder Aufnahme treffen. Wenn Sie die Transkription auf dem Gerät wählen, bleibt das Audio auf Ihrem Computer und wird nie hochgeladen. Wenn Sie für mehr Geschwindigkeit die Transkription auf europäischen Servern wählen, wird das Audio in der EU verarbeitet und nach der Transkription nicht aufbewahrt."
+      - q: "Wie schützt Sonabrief Informationen, die der Verschwiegenheitspflicht unterliegen?"
+        a: "Die Transkription auf dem Gerät hält die Aufnahme von jedem Server Dritter fern, was die schützendste Option für vertrauliche Mandanteninformationen ist. Wenn Sie die Transkription in der europäischen Cloud wählen, findet die Verarbeitung in der EU statt und danach wird nichts aufbewahrt. Ob und wie ein Gespräch aufgenommen wird, bleibt Ihre berufliche Verantwortung. Dies ist keine Rechtsberatung."
+      - q: "Kann ich mich bei der Vorbereitung einer Urkunde auf die Abschrift verlassen?"
+        a: "Sonabrief erstellt einen getreuen, strukturierten Entwurf des Gesprächs, und Sie prüfen ihn, bevor er die Urkunde prägt. Wie bei jedem Vermerk wird das Vereinbarte geprüft, bevor man sich darauf verlässt. Sie beginnen mit einem fertigen Text statt mit einem leeren Blatt, und die Fassung, die zählt, bleibt Ihre."
+      - q: "Werden meine Gespräche zum Trainieren von KI-Modellen verwendet?"
+        a: "Nein. Ihre Gespräche werden nie zum Trainieren irgendeines Modells verwendet. Wenn Sie eine schriftliche Zusammenfassung anfordern, läuft sie entweder auf Ihrem eigenen Gerät oder auf europäischen Servern, die nach der Verarbeitung der Anfrage nichts aufbewahren."
+      - q: "Kann ein Kollege diese Angaben überprüfen?"
+        a: "Ja. Sonabrief ist quelloffen, sodass der Code, der das Audio verarbeitet, direkt geprüft werden kann, statt sich auf ein Versprechen zu verlassen. Ein Kollege oder ein DPO kann überprüfen, wie sich Aufnahme, Transkription und Speicherung tatsächlich verhalten."

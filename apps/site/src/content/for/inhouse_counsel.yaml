@@ -74,4 +74,104 @@ i18n:
       - q: "Il mio team di sicurezza può verificare queste affermazioni?"
         a: "Sì. Sonabrief è open source, quindi il codice che gestisce l'audio può essere ispezionato direttamente invece di affidarsi a una promessa. Il tuo team di sicurezza o un DPO può verificare come si comportano davvero la registrazione, la trascrizione e l'archiviazione."
 
-  # fr / es / de intentionally absent → translation phase later.
+  fr:
+    profession: "Pour les juristes d'entreprise"
+    painPoints:
+      - "Les discussions juridiques internes contiennent des avis confidentiels, des secrets d'entreprise et des affaires sous enquête"
+      - "Dans l'UE, le secret professionnel ne protège pas les juristes d'entreprise comme les avocats externes, d'où l'importance accrue du contrôle technique"
+      - "Un outil cloud générique stocke tout cela à l'étranger, hors de votre contrôle"
+    title: "Sonabrief pour les juristes d'entreprise : des discussions confidentielles, gardées en interne"
+    description: "Un assistant de réunion pensé pour les équipes juridiques internes et la confidentialité. Avant chaque enregistrement, vous choisissez si l'audio est transcrit sur votre propre appareil ou sur des serveurs européens. L'enregistrement n'est jamais conservé sous forme de fichier."
+    intro: |
+      Les réunions que mènent les juristes d'entreprise sont pleines des éléments les plus sensibles de la société : le risque juridique, une enquête interne, une discussion sur une opération de fusion-acquisition, l'analyse franche dont l'entreprise dépend. Il y a une raison particulière d'être prudent avec le compte rendu de ces échanges. En droit de l'Union, le secret professionnel de l'avocat ne s'étend pas aux communications avec les juristes d'entreprise comme il le fait pour les avocats externes, à la suite de l'arrêt Akzo de la Cour de justice. Autrement dit, la protection juridique entourant vos propres discussions est plus mince qu'on ne le suppose, ce qui rend le traitement technique de l'enregistrement plus important, et non moins. La plupart des outils de transcription génériques traitent cet enregistrement comme un contenu ordinaire : ils le téléversent, le traitent sur des serveurs à l'étranger et, dans plusieurs cas, le réutilisent pour améliorer leurs modèles. Pour une équipe juridique, c'est précisément le mauvais endroit où voir aboutir une discussion interne franche.
+
+      Sonabrief part d'un présupposé différent. Avant chaque enregistrement, vous décidez de la manière dont l'audio est traité. Vous pouvez transcrire entièrement **sur votre propre appareil**, et l'enregistrement n'est alors téléversé nulle part. Ou vous pouvez choisir de transcrire sur **des serveurs européens** lorsque vous avez besoin de plus de rapidité : l'audio est alors traité dans l'Union européenne et n'est pas conservé ensuite. C'est un choix explicite que vous faites à chaque fois.
+
+      ## Comment cela se passe en pratique
+
+      Vous enregistrez une réunion juridique interne, et Sonabrief vous remet un brouillon écrit propre et structuré : vous le relisez, vous le finalisez avec vos propres mots, et vous le gardez là où il doit être. Vous partez d'un texte prêt plutôt que d'une page blanche, et la version qui compte reste la vôtre. L'audio d'origine n'est pas conservé sous forme de fichier une fois transcrit : il n'y a donc aucun enregistrement d'une discussion juridique franche sur le serveur d'un tiers, où son statut de protection plus faible représenterait une véritable exposition.
+
+      ## Ce que l'outil ne fait pas, et ce qui reste de votre ressort
+
+      Sonabrief est un outil, pas un jugement juridique. Il ne décide pas si une réunion peut être enregistrée, si la protection s'applique dans votre juridiction, ou comment structurer une discussion pour qu'elle soit protégée. Ces décisions restent les vôtres et celles de votre avocat externe. Le logiciel est open source : votre équipe sécurité ou un conseil en protection des données peut donc inspecter exactement comment l'audio est traité, plutôt que de se fier à une promesse marketing.
+
+      Rien de tout cela ne constitue un conseil juridique. C'est une description du fonctionnement de l'outil, pour que vous puissiez décider s'il convient à la manière dont vous êtes tenu, et avez choisi, de travailler.
+    faq:
+      - q: "L'audio de la réunion est-il téléversé dans le cloud ?"
+        a: "Cela dépend du choix que vous faites avant chaque enregistrement. Si vous optez pour la transcription sur l'appareil, l'audio reste sur votre ordinateur et n'est jamais téléversé. Si vous choisissez la transcription sur des serveurs européens pour plus de rapidité, l'audio est traité dans l'Union européenne et n'est pas conservé une fois transcrit."
+      - q: "Pourquoi cela compte-t-il davantage pour les juristes d'entreprise en particulier ?"
+        a: "Parce qu'en droit de l'Union, à la suite de l'arrêt Akzo de la Cour de justice, le secret professionnel ne protège pas les communications avec les juristes d'entreprise comme il protège les avocats externes. Avec une protection juridique plus mince, garder l'enregistrement hors d'un serveur tiers, où il pourrait être atteint, est une protection plus concrète. Ceci n'est pas un conseil juridique."
+      - q: "Où vont mes données si j'utilise les serveurs européens ?"
+        a: "La transcription sur serveurs européens a lieu au sein de l'Union européenne, et l'audio n'est pas conservé une fois transcrit. Le compte rendu écrit reste le vôtre. La transcription sur l'appareil évite tout téléversement si vous préférez que rien ne quitte votre machine."
+      - q: "Mes réunions internes serviront-elles à entraîner des modèles d'IA ?"
+        a: "Non. Vos réunions ne servent jamais à entraîner un quelconque modèle. Lorsque vous demandez une synthèse écrite, elle est traitée soit sur votre propre appareil, soit sur des serveurs européens qui ne conservent rien une fois la requête traitée."
+      - q: "Mon équipe sécurité peut-elle vérifier ces affirmations ?"
+        a: "Oui. Sonabrief est open source : le code qui traite l'audio peut donc être inspecté directement, sans avoir à se fier à une promesse. Votre équipe sécurité ou votre DPO peut vérifier comment se comportent réellement l'enregistrement, la transcription et le stockage."
+
+  es:
+    profession: "Para abogados de empresa"
+    painPoints:
+      - "Las discusiones jurídicas internas contienen dictámenes confidenciales, secretos societarios y asuntos bajo investigación"
+      - "En la UE, el secreto profesional no protege a los abogados de empresa como a los abogados externos, por lo que el control técnico importa más"
+      - "Una herramienta cloud genérica almacena todo eso en el extranjero, fuera de tu control"
+    title: "Sonabrief para abogados de empresa: discusiones confidenciales, guardadas en casa"
+    description: "Un asistente de reuniones pensado para los equipos jurídicos internos y la confidencialidad. Antes de cada grabación, eliges si el audio se transcribe en tu propio dispositivo o en servidores europeos. La grabación nunca se conserva como archivo."
+    intro: |
+      Las reuniones que dirige un abogado de empresa están llenas del material más sensible de la compañía: el riesgo jurídico, una investigación interna, una discusión sobre una operación de fusión o adquisición, el análisis franco del que depende el negocio. Hay una razón particular para ser prudente con el acta de estas reuniones. Conforme al derecho de la Unión, el secreto profesional del abogado no se extiende a las comunicaciones con los abogados de empresa como sí ocurre con los abogados externos, tras la sentencia Akzo del Tribunal de Justicia. Dicho de otro modo, el escudo jurídico en torno a tus propias discusiones es más fino de lo que se supone, lo que hace que el tratamiento técnico de la grabación importe más, no menos. La mayoría de las herramientas de transcripción genéricas tratan esa grabación como contenido cualquiera: la suben, la procesan en servidores en el extranjero y, en varios casos, la reutilizan para mejorar sus modelos. Para un equipo jurídico, es precisamente el lugar equivocado donde acabe una discusión interna franca.
+
+      Sonabrief parte de un planteamiento distinto. Antes de cada grabación decides cómo se trata el audio. Puedes transcribir por completo **en tu propio dispositivo**, de modo que la grabación no se sube a ninguna parte. O puedes optar por transcribir en **servidores europeos** cuando necesites más rapidez: en ese caso el audio se procesa en la Unión Europea y no se conserva después. Es una decisión explícita que tomas cada vez.
+
+      ## Cómo funciona en la práctica
+
+      Grabas una reunión jurídica interna, y Sonabrief te entrega un borrador escrito limpio y estructurado: lo revisas, lo cierras con tus propias palabras y lo guardas donde corresponde. Partes de un texto listo en lugar de una página en blanco, y la versión que cuenta sigue siendo tuya. El audio original no se guarda como archivo una vez transcrito, así que no hay ninguna grabación de una discusión jurídica franca alojada en el servidor de un tercero, donde su condición de protección más débil sería una exposición real.
+
+      ## Lo que no hace, y lo que sigue siendo tuyo
+
+      Sonabrief es una herramienta, no un juicio jurídico. No decide si una reunión puede grabarse, si la protección se aplica en tu jurisdicción, o cómo estructurar una discusión para que quede protegida. Esas decisiones siguen siendo tuyas y de tu abogado externo. El software es de código abierto, así que tu equipo de seguridad o un asesor de protección de datos puede inspeccionar exactamente cómo trata el audio, en lugar de fiarse de una afirmación de marketing.
+
+      Nada de esto constituye asesoramiento jurídico. Es una descripción de cómo funciona la herramienta, para que decidas si encaja con la forma en que estás obligado, y has elegido, a trabajar.
+    faq:
+      - q: "¿Se sube al cloud el audio de la reunión?"
+        a: "Depende de la opción que elijas antes de cada grabación. Si seleccionas la transcripción en el dispositivo, el audio permanece en tu ordenador y nunca se sube. Si eliges la transcripción en servidores europeos para mayor rapidez, el audio se procesa en la Unión Europea y no se conserva una vez transcrito."
+      - q: "¿Por qué importa esto más para los abogados de empresa en concreto?"
+        a: "Porque conforme al derecho de la Unión, tras la sentencia Akzo del Tribunal de Justicia, el secreto profesional no protege las comunicaciones con los abogados de empresa como protege a los abogados externos. Con un escudo jurídico más fino, mantener la grabación fuera del servidor de un tercero, donde podría ser alcanzada, es una protección más concreta. Esto no es asesoramiento jurídico."
+      - q: "¿Adónde van mis datos si uso los servidores europeos?"
+        a: "La transcripción en servidores europeos se realiza dentro de la Unión Europea, y el audio no se conserva una vez transcrito. El registro escrito sigue siendo tuyo. La transcripción en el dispositivo evita por completo la subida si prefieres que nada salga de tu máquina."
+      - q: "¿Se usarán mis reuniones internas para entrenar modelos de IA?"
+        a: "No. Tus reuniones nunca se usan para entrenar ningún modelo. Cuando pides un resumen escrito, se procesa en tu propio dispositivo o en servidores europeos que no conservan nada una vez procesada la petición."
+      - q: "¿Puede mi equipo de seguridad verificar estas afirmaciones?"
+        a: "Sí. Sonabrief es de código abierto, así que el código que trata el audio puede inspeccionarse directamente, sin tener que fiarse de una promesa. Tu equipo de seguridad o tu DPD puede comprobar cómo se comportan realmente la grabación, la transcripción y el almacenamiento."
+
+  de:
+    profession: "Für Unternehmensjuristen"
+    painPoints:
+      - "Interne juristische Besprechungen enthalten vertrauliche Stellungnahmen, Geschäftsgeheimnisse und Angelegenheiten unter Ermittlung"
+      - "In der EU schützt das anwaltliche Vertraulichkeitsprivileg Unternehmensjuristen schwächer als externe Anwälte, weshalb technische Kontrolle umso mehr zählt"
+      - "Ein allgemeines Cloud-Werkzeug speichert all dies im Ausland, außerhalb Ihrer Kontrolle"
+    title: "Sonabrief für Unternehmensjuristen: vertrauliche Besprechungen, im Haus gehalten"
+    description: "Ein Meeting-Assistent, der auf interne Rechtsabteilungen und Vertraulichkeit ausgelegt ist. Vor jeder Aufnahme entscheiden Sie, ob das Audio auf Ihrem eigenen Gerät oder auf europäischen Servern transkribiert wird. Die Aufnahme wird nie als Datei gespeichert."
+    intro: |
+      Die Besprechungen, die Unternehmensjuristen leiten, sind voll des sensibelsten Materials des Unternehmens: das rechtliche Risiko, eine interne Untersuchung, eine Erörterung zu einer M&A-Transaktion, die offene Analyse, auf die sich das Geschäft verlässt. Es gibt einen besonderen Grund, beim Protokoll dieser Besprechungen vorsichtig zu sein. Nach dem Unionsrecht erstreckt sich das anwaltliche Vertraulichkeitsprivileg nicht in gleicher Weise auf die Kommunikation mit Unternehmensjuristen wie auf externe Anwälte, im Anschluss an das Akzo-Urteil des Gerichtshofs. Mit anderen Worten: Der rechtliche Schutz um Ihre eigenen Besprechungen ist dünner, als man annimmt, was den technischen Umgang mit der Aufnahme wichtiger macht, nicht weniger wichtig. Die meisten allgemeinen Transkriptionswerkzeuge behandeln diese Aufnahme wie beliebigen Inhalt: Sie laden sie hoch, verarbeiten sie auf Servern im Ausland und verwenden sie in mehreren Fällen erneut, um ihre Modelle zu verbessern. Für eine Rechtsabteilung ist das genau der falsche Ort, an dem eine offene interne Besprechung landen sollte.
+
+      Sonabrief geht von einer anderen Grundannahme aus. Vor jeder Aufnahme entscheiden Sie, wie das Audio behandelt wird. Sie können vollständig **auf Ihrem eigenen Gerät** transkribieren, sodass die Aufnahme nirgendwo hochgeladen wird. Oder Sie wählen die Transkription auf **europäischen Servern**, wenn Sie mehr Geschwindigkeit brauchen: Dann wird das Audio in der EU verarbeitet und danach nicht aufbewahrt. Es ist eine bewusste Entscheidung, die Sie jedes Mal treffen.
+
+      ## So sieht der Ablauf aus
+
+      Sie nehmen eine interne juristische Besprechung auf, und Sonabrief übergibt Ihnen einen sauberen, strukturierten schriftlichen Entwurf: Sie prüfen ihn, vollenden ihn mit Ihren eigenen Worten und bewahren ihn dort auf, wo er hingehört. Sie beginnen mit einem fertigen Text statt mit einem leeren Blatt, und die Fassung, die zählt, bleibt Ihre. Das ursprüngliche Audio wird nach der Transkription nicht als Datei gespeichert, sodass es keine Aufnahme einer offenen juristischen Besprechung auf dem Server eines Dritten gibt, wo ihr schwächerer Schutzstatus eine echte Exposition wäre.
+
+      ## Was das Werkzeug nicht tut, und was bei Ihnen bleibt
+
+      Sonabrief ist ein Werkzeug, kein rechtliches Urteil. Es entscheidet nicht, ob eine Besprechung aufgenommen werden darf, ob der Schutz in Ihrer Gerichtsbarkeit greift oder wie eine Besprechung zu strukturieren ist, damit sie geschützt ist. Diese Entscheidungen bleiben Ihre und die Ihres externen Anwalts. Die Software ist quelloffen, sodass Ihr Sicherheitsteam oder ein Datenschutzbeauftragter genau prüfen kann, wie das Audio verarbeitet wird, statt sich auf ein Marketingversprechen zu verlassen.
+
+      Nichts davon ist eine Rechtsberatung. Es ist eine Beschreibung der Funktionsweise des Werkzeugs, damit Sie entscheiden können, ob es zu der Arbeitsweise passt, zu der Sie verpflichtet sind und für die Sie sich entschieden haben.
+    faq:
+      - q: "Wird das Audio der Besprechung in die Cloud hochgeladen?"
+        a: "Das hängt von der Entscheidung ab, die Sie vor jeder Aufnahme treffen. Wenn Sie die Transkription auf dem Gerät wählen, bleibt das Audio auf Ihrem Computer und wird nie hochgeladen. Wenn Sie für mehr Geschwindigkeit die Transkription auf europäischen Servern wählen, wird das Audio in der EU verarbeitet und nach der Transkription nicht aufbewahrt."
+      - q: "Warum zählt das gerade für Unternehmensjuristen mehr?"
+        a: "Weil nach dem Unionsrecht, im Anschluss an das Akzo-Urteil des Gerichtshofs, das anwaltliche Vertraulichkeitsprivileg die Kommunikation mit Unternehmensjuristen nicht in gleicher Weise schützt wie die mit externen Anwälten. Bei einem dünneren rechtlichen Schutz ist es ein konkreterer Schutz, die Aufnahme von einem Server eines Dritten fernzuhalten, wo sie erreicht werden könnte. Dies ist keine Rechtsberatung."
+      - q: "Wohin gehen meine Daten, wenn ich die europäischen Server nutze?"
+        a: "Die Transkription auf europäischen Servern findet innerhalb der Europäischen Union statt, und das Audio wird nach der Transkription nicht aufbewahrt. Der schriftliche Vermerk bleibt Ihrer. Die Transkription auf dem Gerät vermeidet das Hochladen vollständig, wenn Sie lieber möchten, dass nichts Ihre Maschine verlässt."
+      - q: "Werden meine internen Besprechungen zum Trainieren von KI-Modellen verwendet?"
+        a: "Nein. Ihre Besprechungen werden nie zum Trainieren irgendeines Modells verwendet. Wenn Sie eine schriftliche Zusammenfassung anfordern, läuft sie entweder auf Ihrem eigenen Gerät oder auf europäischen Servern, die nach der Verarbeitung der Anfrage nichts aufbewahren."
+      - q: "Kann mein Sicherheitsteam diese Angaben überprüfen?"
+        a: "Ja. Sonabrief ist quelloffen, sodass der Code, der das Audio verarbeitet, direkt geprüft werden kann, statt sich auf ein Versprechen zu verlassen. Ihr Sicherheitsteam oder Ihr DPO kann überprüfen, wie sich Aufnahme, Transkription und Speicherung tatsächlich verhalten."

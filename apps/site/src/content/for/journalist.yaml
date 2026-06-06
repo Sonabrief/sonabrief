@@ -78,4 +78,110 @@ i18n:
       - q: "Un collega può verificare queste affermazioni sulla privacy?"
         a: "Sì. Sonabrief è open source, quindi il codice che gestisce l'audio può essere ispezionato direttamente invece di affidarsi a una promessa. Un collega attento alla sicurezza può verificare come si comportano davvero la registrazione, la trascrizione e l'archiviazione, cosa che conta quando dipende l'incolumità di una fonte."
 
-  # fr / es / de intentionally absent → translation phase later.
+  fr:
+    profession: "Pour les journalistes"
+    painPoints:
+      - "L'enregistrement d'une interview peut exposer une source confidentielle si l'audio se trouve sur un serveur à l'étranger"
+      - "Les outils de transcription dans le cloud peuvent être atteints par une réquisition judiciaire, une fuite ou une demande légale étrangère"
+      - "Des heures à retranscrire des interviews à la main au lieu d'enquêter"
+    title: "Sonabrief pour les journalistes : des interviews qui protègent vos sources"
+    description: "Un outil de transcription pensé pour la protection des sources. Avant chaque enregistrement, vous choisissez si l'audio est transcrit sur votre propre appareil ou sur des serveurs européens. L'enregistrement n'est jamais conservé sous forme de fichier."
+    intro: |
+      Protéger une source n'est pas une préférence, en journalisme. C'est un devoir, et dans de nombreux pays une protection légale. L'enregistrement d'une interview confidentielle est le point où ce devoir est le plus exposé : c'est la voix sans filtre d'une personne qui a accepté de parler en comptant sur votre protection. La plupart des outils de transcription génériques traitent cet enregistrement comme un contenu ordinaire à téléverser sur des serveurs à l'étranger, où il peut être atteint par une réquisition judiciaire, une fuite de données ou une demande légale étrangère longtemps après la fin de la conversation. Pour un journaliste, ce n'est pas un petit risque. C'est la différence entre tenir une promesse et la trahir.
+
+      Sonabrief a été conçu dans l'autre sens. Avant chaque enregistrement, vous décidez de la manière dont l'audio est traité. Vous pouvez transcrire entièrement **sur votre propre appareil**, et l'enregistrement n'est alors téléversé nulle part : il n'y a rien sur un serveur tiers que quiconque puisse réclamer ou dérober. Ou vous pouvez choisir de transcrire sur **des serveurs européens** lorsque vous avez besoin de plus de rapidité : l'audio est alors traité dans l'Union européenne et n'est pas conservé ensuite. C'est un choix explicite que vous faites à chaque fois.
+
+      ## La protection des sources
+
+      Lorsque vous interviewez une source confidentielle, la transcription sur l'appareil signifie que l'audio ne quitte jamais votre machine. Il n'y a aucune copie dans un cloud américain en attente d'une réquisition, aucun enregistrement dans le stockage d'un fournisseur à compromettre, aucune juridiction étrangère pouvant revendiquer la voix de votre source. La protection que vous avez promise reste technique, et pas seulement contractuelle. Sonabrief est open source : un confrère soucieux de sécurité peut donc vérifier exactement comment l'audio est traité, plutôt que de s'en remettre à une promesse, ce qui compte quand la sécurité d'une source en dépend.
+
+      ## Reportage de terrain et vérification des éléments
+
+      Pour le travail quotidien, Sonabrief transforme les interviews en un brouillon écrit net que vous relisez et finalisez vous-même. Vous partez d'un texte prêt plutôt que d'une page blanche, et la version qui compte reste la vôtre : une citation est ainsi vérifiée sur l'enregistrement avant publication, jamais tenue pour acquise simplement parce qu'elle a été transcrite. L'audio d'origine n'est pas conservé sous forme de fichier une fois transcrit, et votre compte rendu écrit reste sous votre contrôle.
+
+      ## Ce que l'outil ne fait pas, et ce qui reste de votre ressort
+
+      Sonabrief est un outil, pas un jugement éditorial ou juridique. Il ne décide pas si une conversation peut être enregistrée, si votre source a consenti, ou ce que la loi exige dans votre juridiction. Ces décisions restent les vôtres et celles de votre rédaction. Rien de tout cela ne constitue un conseil juridique. C'est une description du fonctionnement de l'outil, pour que vous puissiez décider s'il convient à la manière dont vous êtes tenu, et avez choisi, de travailler.
+    faq:
+      - q: "L'audio de l'interview est-il téléversé dans le cloud ?"
+        a: "Cela dépend du choix que vous faites avant chaque enregistrement. Si vous optez pour la transcription sur l'appareil, l'audio reste sur votre ordinateur et n'est jamais téléversé. Si vous choisissez la transcription sur des serveurs européens pour plus de rapidité, l'audio est traité dans l'Union européenne et n'est pas conservé une fois transcrit."
+      - q: "Une transcription de ma source peut-elle être réquisitionnée ou compromise ?"
+        a: "Si vous transcrivez sur votre propre appareil, il n'y a aucun enregistrement sur un serveur tiers à réquisitionner, à compromettre ou à atteindre par une demande légale étrangère, car l'audio ne quitte jamais votre machine. C'est l'option la plus protectrice pour une source confidentielle. Savoir si et comment enregistrer une interview reste votre responsabilité éditoriale et juridique. Ceci n'est pas un conseil juridique."
+      - q: "Mes interviews serviront-elles à entraîner des modèles d'IA ?"
+        a: "Non. Vos interviews ne servent jamais à entraîner un quelconque modèle. Lorsque vous demandez une synthèse écrite, elle est traitée soit sur votre propre appareil, soit sur des serveurs européens qui ne conservent rien une fois la requête traitée."
+      - q: "Dois-je vérifier la transcription avant de publier une citation ?"
+        a: "Oui, et c'est là tout l'intérêt : Sonabrief vous amène vite à un brouillon fidèle, et vous vérifiez chaque citation sur l'enregistrement avant publication. Vous partez d'un texte prêt plutôt que d'une page blanche, et la version qui compte reste la vôtre."
+      - q: "Un confrère peut-il vérifier ces affirmations sur la confidentialité ?"
+        a: "Oui. Sonabrief est open source : le code qui traite l'audio peut donc être inspecté directement, sans avoir à se fier à une promesse. Un confrère soucieux de sécurité peut vérifier comment se comportent réellement l'enregistrement, la transcription et le stockage, ce qui compte quand la sécurité d'une source en dépend."
+
+  es:
+    profession: "Para periodistas"
+    painPoints:
+      - "La grabación de una entrevista puede exponer a una fuente confidencial si el audio queda en un servidor en el extranjero"
+      - "Las herramientas de transcripción en la nube pueden ser alcanzadas por un requerimiento judicial, una brecha o una solicitud legal extranjera"
+      - "Horas transcribiendo entrevistas a mano en lugar de informar"
+    title: "Sonabrief para periodistas: entrevistas que protegen tus fuentes"
+    description: "Una herramienta de transcripción pensada para la protección de las fuentes. Antes de cada grabación, eliges si el audio se transcribe en tu propio dispositivo o en servidores europeos. La grabación nunca se conserva como archivo."
+    intro: |
+      Proteger a una fuente no es una preferencia en periodismo. Es un deber, y en muchos países una protección jurídica. La grabación de una entrevista confidencial es el punto donde ese deber queda más expuesto: es la voz sin filtros de una persona que aceptó hablar contando con que la protegerías. La mayoría de las herramientas de transcripción genéricas tratan esa grabación como contenido cualquiera para subir a servidores en el extranjero, donde puede ser alcanzada por un requerimiento judicial, una brecha de datos o una solicitud legal extranjera mucho después de terminada la conversación. Para un reportero, eso no es un riesgo menor. Es la diferencia entre cumplir una promesa y romperla.
+
+      Sonabrief se construyó al revés. Antes de cada grabación decides cómo se trata el audio. Puedes transcribir por completo **en tu propio dispositivo**, de modo que la grabación no se sube a ninguna parte y no hay nada en un servidor de terceros que alguien pueda exigir o robar. O puedes optar por transcribir en **servidores europeos** cuando necesites más rapidez: en ese caso el audio se procesa en la Unión Europea y no se conserva después. Es una decisión explícita que tomas cada vez.
+
+      ## La protección de las fuentes
+
+      Cuando entrevistas a una fuente confidencial, la transcripción en el dispositivo significa que el audio nunca sale de tu máquina. No hay copia en una nube estadounidense a la espera de un requerimiento, ni grabación en el almacenamiento de un proveedor que pueda sufrir una brecha, ni jurisdicción extranjera con un derecho sobre la voz de tu fuente. La protección que prometiste sigue siendo técnica, no solo contractual. Sonabrief es de código abierto, así que un colega con criterio de seguridad puede verificar exactamente cómo se trata el audio, en lugar de fiarse de la palabra, algo que importa cuando de ello depende la seguridad de una fuente.
+
+      ## Entrevistas sobre el terreno y verificación de materiales
+
+      Para el trabajo diario, Sonabrief convierte las entrevistas en un borrador escrito limpio que revisas y cierras tú. Partes de un texto listo en lugar de una página en blanco, y la versión que cuenta sigue siendo tuya, de modo que una cita se contrasta con la grabación antes de publicarse, nunca se da por buena solo porque se haya transcrito. El audio original no se guarda como archivo una vez transcrito, y tu registro escrito permanece bajo tu control.
+
+      ## Lo que no hace, y lo que sigue siendo tuyo
+
+      Sonabrief es una herramienta, no un juicio editorial ni jurídico. No decide si una conversación puede grabarse, si tu fuente ha consentido, o qué exige la ley en tu jurisdicción. Esas decisiones siguen siendo tuyas y de tu redacción. Nada de esto constituye asesoramiento jurídico. Es una descripción de cómo funciona la herramienta, para que decidas si encaja con la forma en que estás obligado, y has elegido, a trabajar.
+    faq:
+      - q: "¿Se sube al cloud el audio de la entrevista?"
+        a: "Depende de la opción que elijas antes de cada grabación. Si seleccionas la transcripción en el dispositivo, el audio permanece en tu ordenador y nunca se sube. Si eliges la transcripción en servidores europeos para mayor rapidez, el audio se procesa en la Unión Europea y no se conserva una vez transcrito."
+      - q: "¿Pueden requerir o vulnerar una transcripción de mi fuente?"
+        a: "Si transcribes en tu propio dispositivo, no hay ninguna grabación en un servidor de terceros que requerir, vulnerar o alcanzar con una solicitud legal extranjera, porque el audio nunca sale de tu máquina. Es la opción más protectora para una fuente confidencial. Si grabar una entrevista, y cómo, sigue siendo tu responsabilidad editorial y jurídica. Esto no es asesoramiento jurídico."
+      - q: "¿Se usarán mis entrevistas para entrenar modelos de IA?"
+        a: "No. Tus entrevistas nunca se usan para entrenar ningún modelo. Cuando pides un resumen escrito, se procesa en tu propio dispositivo o en servidores europeos que no conservan nada una vez procesada la petición."
+      - q: "¿Necesito comprobar la transcripción antes de publicar una cita?"
+        a: "Sí, y ese es el sentido: Sonabrief te lleva rápido a un borrador fiel, y tú contrastas cada cita con la grabación antes de publicarla. Partes de un texto listo en lugar de una página en blanco, y la versión que cuenta sigue siendo tuya."
+      - q: "¿Puede un colega verificar estas afirmaciones de privacidad?"
+        a: "Sí. Sonabrief es de código abierto, así que el código que trata el audio puede inspeccionarse directamente, sin tener que fiarse de una promesa. Un colega con criterio de seguridad puede comprobar cómo se comportan realmente la grabación, la transcripción y el almacenamiento, algo que importa cuando de ello depende la seguridad de una fuente."
+
+  de:
+    profession: "Für Journalisten"
+    painPoints:
+      - "Die Aufnahme eines Interviews kann eine vertrauliche Quelle gefährden, wenn das Audio auf einem Server im Ausland liegt"
+      - "Cloud-Transkriptionswerkzeuge können von einer gerichtlichen Anordnung, einem Datenleck oder einem ausländischen Rechtsersuchen erreicht werden"
+      - "Stunden für das Abtippen von Interviews von Hand statt für die Recherche"
+    title: "Sonabrief für Journalisten: Interviews, die Ihre Quellen schützen"
+    description: "Ein Transkriptionswerkzeug, das auf den Quellenschutz ausgelegt ist. Vor jeder Aufnahme entscheiden Sie, ob das Audio auf Ihrem eigenen Gerät oder auf europäischen Servern transkribiert wird. Die Aufnahme wird nie als Datei gespeichert."
+    intro: |
+      Eine Quelle zu schützen ist im Journalismus keine Vorliebe. Es ist eine Pflicht und in vielen Ländern ein rechtlich geschützter Anspruch. Die Aufnahme eines vertraulichen Interviews ist der Punkt, an dem diese Pflicht am stärksten exponiert ist: Es ist die ungefilterte Stimme eines Menschen, der zu sprechen einwilligte in dem Verständnis, dass Sie ihn schützen. Die meisten allgemeinen Transkriptionswerkzeuge behandeln diese Aufnahme wie beliebigen Inhalt, der auf Server im Ausland hochzuladen ist, wo er noch lange nach Ende des Gesprächs von einer gerichtlichen Anordnung, einem Datenleck oder einem ausländischen Rechtsersuchen erreicht werden kann. Für einen Reporter ist das kein kleines Risiko. Es ist der Unterschied zwischen dem Halten und dem Brechen eines Versprechens.
+
+      Sonabrief ist andersherum gebaut. Vor jeder Aufnahme entscheiden Sie, wie das Audio behandelt wird. Sie können vollständig **auf Ihrem eigenen Gerät** transkribieren, sodass die Aufnahme nirgendwo hochgeladen wird und es nichts auf einem Server eines Dritten gibt, das jemand verlangen oder stehlen könnte. Oder Sie wählen die Transkription auf **europäischen Servern**, wenn Sie mehr Geschwindigkeit brauchen: Dann wird das Audio in der EU verarbeitet und danach nicht aufbewahrt. Es ist eine bewusste Entscheidung, die Sie jedes Mal treffen.
+
+      ## Der Quellenschutz
+
+      Wenn Sie eine vertrauliche Quelle interviewen, bedeutet die Transkription auf dem Gerät, dass das Audio Ihre Maschine nie verlässt. Es gibt keine Kopie in einer US-Cloud, die auf eine Anordnung wartet, keine Aufnahme im Speicher eines Anbieters, die kompromittiert werden könnte, keine ausländische Gerichtsbarkeit mit einem Anspruch auf die Stimme Ihrer Quelle. Der Schutz, den Sie versprochen haben, bleibt technisch, nicht nur vertraglich. Sonabrief ist quelloffen, sodass ein sicherheitsbewusster Kollege genau überprüfen kann, wie das Audio verarbeitet wird, statt darauf zu vertrauen, was zählt, wenn die Sicherheit einer Quelle davon abhängt.
+
+      ## Feldinterviews und Materialprüfung
+
+      Für die tägliche Arbeit verwandelt Sonabrief Interviews in einen sauberen schriftlichen Entwurf, den Sie selbst prüfen und vollenden. Sie beginnen mit einem fertigen Text statt mit einem leeren Blatt, und die Fassung, die zählt, bleibt Ihre, sodass ein Zitat vor der Veröffentlichung gegen die Aufnahme geprüft wird und nie nur deshalb für wahr gehalten wird, weil es transkribiert wurde. Das ursprüngliche Audio wird nach der Transkription nicht als Datei gespeichert, und Ihr schriftlicher Vermerk bleibt unter Ihrer Kontrolle.
+
+      ## Was das Werkzeug nicht tut, und was bei Ihnen bleibt
+
+      Sonabrief ist ein Werkzeug, kein redaktionelles oder rechtliches Urteil. Es entscheidet nicht, ob ein Gespräch aufgenommen werden darf, ob Ihre Quelle eingewilligt hat oder was das Recht in Ihrer Gerichtsbarkeit verlangt. Diese Entscheidungen bleiben Ihre und die Ihrer Redaktion. Nichts davon ist eine Rechtsberatung. Es ist eine Beschreibung der Funktionsweise des Werkzeugs, damit Sie entscheiden können, ob es zu der Arbeitsweise passt, zu der Sie verpflichtet sind und für die Sie sich entschieden haben.
+    faq:
+      - q: "Wird das Audio des Interviews in die Cloud hochgeladen?"
+        a: "Das hängt von der Entscheidung ab, die Sie vor jeder Aufnahme treffen. Wenn Sie die Transkription auf dem Gerät wählen, bleibt das Audio auf Ihrem Computer und wird nie hochgeladen. Wenn Sie für mehr Geschwindigkeit die Transkription auf europäischen Servern wählen, wird das Audio in der EU verarbeitet und nach der Transkription nicht aufbewahrt."
+      - q: "Kann eine Abschrift meiner Quelle angeordnet oder kompromittiert werden?"
+        a: "Wenn Sie auf Ihrem eigenen Gerät transkribieren, gibt es keine Aufnahme auf einem Server eines Dritten, die angeordnet, kompromittiert oder mit einem ausländischen Rechtsersuchen erreicht werden könnte, weil das Audio Ihre Maschine nie verlässt. Das ist die schützendste Option für eine vertrauliche Quelle. Ob und wie ein Interview aufgenommen wird, bleibt Ihre redaktionelle und rechtliche Verantwortung. Dies ist keine Rechtsberatung."
+      - q: "Werden meine Interviews zum Trainieren von KI-Modellen verwendet?"
+        a: "Nein. Ihre Interviews werden nie zum Trainieren irgendeines Modells verwendet. Wenn Sie eine schriftliche Zusammenfassung anfordern, läuft sie entweder auf Ihrem eigenen Gerät oder auf europäischen Servern, die nach der Verarbeitung der Anfrage nichts aufbewahren."
+      - q: "Muss ich die Abschrift prüfen, bevor ich ein Zitat veröffentliche?"
+        a: "Ja, und genau darum geht es: Sonabrief bringt Sie schnell zu einem getreuen Entwurf, und Sie prüfen jedes Zitat vor der Veröffentlichung gegen die Aufnahme. Sie beginnen mit einem fertigen Text statt mit einem leeren Blatt, und die Fassung, die zählt, bleibt Ihre."
+      - q: "Kann ein Kollege diese Datenschutzangaben überprüfen?"
+        a: "Ja. Sonabrief ist quelloffen, sodass der Code, der das Audio verarbeitet, direkt geprüft werden kann, statt sich auf ein Versprechen zu verlassen. Ein sicherheitsbewusster Kollege kann überprüfen, wie sich Aufnahme, Transkription und Speicherung tatsächlich verhalten, was zählt, wenn die Sicherheit einer Quelle davon abhängt."

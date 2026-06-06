@@ -74,4 +74,104 @@ i18n:
       - q: "Un supervisore o un consulente per la protezione dei dati può verificarlo?"
         a: "Sì. Sonabrief è open source, quindi il codice che gestisce l'audio può essere ispezionato direttamente invece di affidarsi a una promessa. Un collega, un supervisore o un DPO può verificare come si comportano davvero la registrazione, la trascrizione e l'archiviazione."
 
-  # fr / es / de intentionally absent → translation phase later.
+  fr:
+    profession: "Pour les psychologues"
+    painPoints:
+      - "L'enregistrement d'une séance fait partie des données les plus sensibles qui soient, et relève de la catégorie particulière des données de santé"
+      - "Le cadre thérapeutique repose sur la confiance, et un patient qui soupçonne que sa voix part dans un cloud peut cesser de parler librement"
+      - "Des heures à reconstituer les notes de séance de mémoire une fois le patient parti"
+    title: "Sonabrief pour les psychologues : des notes de séance qui ne quittent jamais votre contrôle"
+    description: "Un assistant de séance pensé pour la confidentialité. Avant chaque séance, vous choisissez si l'audio est transcrit sur votre propre appareil ou sur des serveurs européens. L'enregistrement n'est jamais conservé sous forme de fichier."
+    intro: |
+      Une séance de thérapie produit quelque chose de plus sensible que presque tout autre enregistrement : la voix sans filtre d'une personne décrivant sa vie intérieure. Au regard du droit de la protection des données, ce n'est pas un contenu ordinaire. C'est une donnée de santé, une catégorie particulière soumise aux obligations les plus strictes, et l'audio brut d'une séance en est la forme la plus exposée. La plupart des outils de transcription génériques traitent cet audio comme un contenu à téléverser, à traiter sur des serveurs à l'étranger et, dans plusieurs cas, à réutiliser pour améliorer leurs modèles. Pour un clinicien, c'est difficile à concilier avec le secret professionnel et avec ce que le patient croit qu'il se passe dans la pièce.
+
+      Il y a aussi le cadre lui-même. La thérapie fonctionne parce que la personne a confiance que ce qu'elle dit reste entre vous deux. Un patient qui soupçonne que la séance est diffusée vers le cloud d'un tiers peut tout simplement cesser de parler librement, et le travail clinique en souffre. La gestion de l'enregistrement n'est pas un détail administratif. Elle fait partie du cadre.
+
+      Sonabrief est construit autour de cette réalité. Avant chaque séance, vous décidez de la manière dont l'audio est traité. Vous pouvez transcrire entièrement **sur votre propre appareil**, et l'enregistrement n'est alors téléversé nulle part. Ou vous pouvez choisir de transcrire sur **des serveurs européens** lorsque vous avez besoin de plus de rapidité : l'audio est alors traité dans l'Union européenne et n'est pas conservé ensuite. C'est un choix explicite que vous faites à chaque fois, jamais quelque chose qui arrive aux mots d'un patient sans que vous l'ayez décidé.
+
+      ## Comment cela se passe en pratique
+
+      Vous enregistrez une séance. Sonabrief produit une transcription écrite nette et une synthèse structurée que vous pouvez utiliser pour vos notes cliniques. Le compte rendu écrit reste sous votre contrôle, et l'audio d'origine n'est pas conservé sous forme de fichier une fois la transcription faite. L'objectif est de vous rendre le temps que vous passeriez à reconstituer vos notes de mémoire, sans laisser traîner d'enregistrements bruts de séances sur le serveur d'un tiers.
+
+      ## Ce que l'outil ne fait pas, et ce qui reste de votre ressort
+
+      Sonabrief est un outil, pas un jugement clinique ou déontologique. Il ne décide pas si une séance donnée peut être enregistrée, si votre patient a donné un consentement éclairé, ou si votre code de déontologie l'autorise dans un cas précis. Ces décisions restent les vôtres. Le logiciel est open source : un confrère, un superviseur ou un conseil en protection des données peut donc inspecter exactement comment l'audio est traité, plutôt que de se fier à une promesse marketing.
+
+      Rien de tout cela ne constitue un conseil juridique ou clinique. C'est une description du fonctionnement de l'outil, pour que vous puissiez décider s'il convient à la manière dont vous êtes tenu, et avez choisi, d'exercer.
+    faq:
+      - q: "L'audio de la séance est-il téléversé dans le cloud ?"
+        a: "Cela dépend du choix que vous faites avant chaque séance. Si vous optez pour la transcription sur l'appareil, l'audio reste sur votre ordinateur et n'est jamais téléversé. Si vous choisissez la transcription sur des serveurs européens pour plus de rapidité, l'audio est traité dans l'Union européenne et n'est pas conservé une fois transcrit."
+      - q: "Comment Sonabrief traite-t-il les données de santé ?"
+        a: "La transcription sur l'appareil garde l'enregistrement hors de tout serveur tiers, ce qui est l'option la plus protectrice pour une donnée de catégorie particulière. Si vous choisissez la transcription sur le cloud européen, le traitement a lieu dans l'Union européenne et rien n'est conservé ensuite. Savoir si et comment enregistrer une séance, et sur quelle base légale, reste votre responsabilité professionnelle. Ceci n'est pas un conseil juridique."
+      - q: "Mes séances serviront-elles à entraîner des modèles d'IA ?"
+        a: "Non. Vos séances ne servent jamais à entraîner un quelconque modèle. Lorsque vous demandez une synthèse écrite, elle est traitée soit sur votre propre appareil, soit sur des serveurs européens qui ne conservent rien une fois la requête traitée."
+      - q: "Un superviseur ou un conseil en protection des données peut-il le vérifier ?"
+        a: "Oui. Sonabrief est open source : le code qui traite l'audio peut donc être inspecté directement, sans avoir à se fier à une promesse. Un confrère, un superviseur ou un DPO peut vérifier comment se comportent réellement l'enregistrement, la transcription et le stockage."
+
+  es:
+    profession: "Para psicólogos"
+    painPoints:
+      - "La grabación de una sesión está entre los datos más sensibles que existen, y pertenece a la categoría especial de los datos de salud"
+      - "El encuadre terapéutico se sostiene sobre la confianza, y un paciente que sospecha que su voz va a parar a una nube puede dejar de hablar con libertad"
+      - "Horas reconstruyendo de memoria las notas de la sesión cuando el paciente ya se ha ido"
+    title: "Sonabrief para psicólogos: notas de sesión que nunca dejan tu control"
+    description: "Un asistente de sesiones pensado para la confidencialidad. Antes de cada sesión, eliges si el audio se transcribe en tu propio dispositivo o en servidores europeos. La grabación nunca se conserva como archivo."
+    intro: |
+      Una sesión de terapia produce algo más sensible que casi cualquier otra grabación: la voz sin filtros de una persona describiendo su vida interior. Para el derecho de protección de datos, esto no es un contenido cualquiera. Es un dato de salud, una categoría especial sujeta a las obligaciones más estrictas, y el audio en bruto de una sesión es su forma más expuesta. La mayoría de las herramientas de transcripción genéricas tratan ese audio como algo que subir, procesar en servidores en el extranjero y, en varios casos, reutilizar para mejorar sus modelos. Para un clínico, es difícil de conciliar con el secreto profesional y con lo que el paciente cree que ocurre en la consulta.
+
+      Está también el encuadre en sí. La terapia funciona porque la persona confía en que lo que dice queda entre los dos. Un paciente que sospecha que la sesión se está transmitiendo a la nube de un tercero puede sencillamente dejar de hablar con libertad, y el trabajo clínico se resiente. El tratamiento de la grabación no es un detalle administrativo. Forma parte del encuadre.
+
+      Sonabrief está construido en torno a esa realidad. Antes de cada sesión decides cómo se trata el audio. Puedes transcribir por completo **en tu propio dispositivo**, de modo que la grabación no se sube a ninguna parte. O puedes optar por transcribir en **servidores europeos** cuando necesites más rapidez: en ese caso el audio se procesa en la Unión Europea y no se conserva después. Es una decisión explícita que tomas cada vez, nunca algo que le ocurre a las palabras de un paciente sin que tú lo hayas decidido.
+
+      ## Cómo funciona en la práctica
+
+      Grabas una sesión. Sonabrief produce una transcripción escrita limpia y un resumen estructurado que puedes usar para tus notas clínicas. El registro escrito permanece bajo tu control, y el audio original no se guarda como archivo una vez transcrito. El objetivo es devolverte el tiempo que pasarías reconstruyendo las notas de memoria, sin dejar un rastro de grabaciones en bruto de las sesiones en el servidor de un tercero.
+
+      ## Lo que no hace, y lo que sigue siendo tuyo
+
+      Sonabrief es una herramienta, no un juicio clínico ni deontológico. No decide si una sesión concreta puede grabarse, si tu paciente ha dado su consentimiento informado, o si tu código deontológico lo permite en un caso dado. Esas decisiones siguen siendo tuyas. El software es de código abierto, así que un colega, un supervisor o un asesor de protección de datos puede inspeccionar exactamente cómo trata el audio, en lugar de fiarse de una afirmación de marketing.
+
+      Nada de esto constituye asesoramiento jurídico ni clínico. Es una descripción de cómo funciona la herramienta, para que decidas si encaja con la forma en que estás obligado, y has elegido, a ejercer.
+    faq:
+      - q: "¿Se sube al cloud el audio de la sesión?"
+        a: "Depende de la opción que elijas antes de cada sesión. Si seleccionas la transcripción en el dispositivo, el audio permanece en tu ordenador y nunca se sube. Si eliges la transcripción en servidores europeos para mayor rapidez, el audio se procesa en la Unión Europea y no se conserva una vez transcrito."
+      - q: "¿Cómo trata Sonabrief los datos de salud?"
+        a: "La transcripción en el dispositivo mantiene la grabación fuera de cualquier servidor de terceros, que es la opción más protectora para un dato de categoría especial. Si eliges la transcripción en el cloud europeo, el procesamiento ocurre en la Unión Europea y no se conserva nada después. Si grabar una sesión, y cómo, y sobre qué base jurídica, sigue siendo tu responsabilidad profesional. Esto no es asesoramiento jurídico."
+      - q: "¿Se usarán mis sesiones para entrenar modelos de IA?"
+        a: "No. Tus sesiones nunca se usan para entrenar ningún modelo. Cuando pides un resumen escrito, se procesa en tu propio dispositivo o en servidores europeos que no conservan nada una vez procesada la petición."
+      - q: "¿Puede verificarlo un supervisor o un asesor de protección de datos?"
+        a: "Sí. Sonabrief es de código abierto, así que el código que trata el audio puede inspeccionarse directamente, sin tener que fiarse de una promesa. Un colega, un supervisor o un DPD puede comprobar cómo se comportan realmente la grabación, la transcripción y el almacenamiento."
+
+  de:
+    profession: "Für Psychologen"
+    painPoints:
+      - "Die Aufnahme einer Sitzung gehört zu den sensibelsten Daten überhaupt und fällt unter die besondere Kategorie der Gesundheitsdaten"
+      - "Der therapeutische Rahmen beruht auf Vertrauen, und ein Patient, der vermutet, dass seine Stimme in eine Cloud gelangt, kann aufhören, frei zu sprechen"
+      - "Stunden, um die Sitzungsnotizen aus dem Gedächtnis zu rekonstruieren, nachdem der Patient gegangen ist"
+    title: "Sonabrief für Psychologen: Sitzungsnotizen, die nie Ihre Kontrolle verlassen"
+    description: "Ein Sitzungsassistent, der auf Vertraulichkeit ausgelegt ist. Vor jeder Sitzung entscheiden Sie, ob das Audio auf Ihrem eigenen Gerät oder auf europäischen Servern transkribiert wird. Die Aufnahme wird nie als Datei gespeichert."
+    intro: |
+      Eine Therapiesitzung bringt etwas Sensibleres hervor als fast jede andere Aufnahme: die ungefilterte Stimme eines Menschen, der sein Innenleben beschreibt. Im Datenschutzrecht ist das kein gewöhnlicher Inhalt. Es ist ein Gesundheitsdatum, eine besondere Kategorie mit den strengsten Pflichten, und das Rohaudio einer Sitzung ist dessen am stärksten exponierte Form. Die meisten allgemeinen Transkriptionswerkzeuge behandeln dieses Audio als etwas zum Hochladen, zum Verarbeiten auf Servern im Ausland und in mehreren Fällen zum erneuten Verwenden, um ihre Modelle zu verbessern. Für einen Behandelnden lässt sich das kaum mit der Schweigepflicht und mit dem vereinbaren, was der Patient glaubt, das im Raum geschieht.
+
+      Da ist auch der Rahmen selbst. Therapie wirkt, weil die Person darauf vertraut, dass das Gesagte zwischen Ihnen beiden bleibt. Ein Patient, der vermutet, dass die Sitzung in die Cloud eines Dritten übertragen wird, kann schlicht aufhören, frei zu sprechen, und die klinische Arbeit leidet darunter. Der Umgang mit der Aufnahme ist kein Verwaltungsdetail. Er ist Teil des Rahmens.
+
+      Sonabrief ist um diese Realität herum gebaut. Vor jeder Sitzung entscheiden Sie, wie das Audio behandelt wird. Sie können vollständig **auf Ihrem eigenen Gerät** transkribieren, sodass die Aufnahme nirgendwo hochgeladen wird. Oder Sie wählen die Transkription auf **europäischen Servern**, wenn Sie mehr Geschwindigkeit brauchen: Dann wird das Audio in der EU verarbeitet und danach nicht aufbewahrt. Es ist eine bewusste Entscheidung, die Sie jedes Mal treffen, nie etwas, das mit den Worten eines Patienten geschieht, ohne dass Sie es entschieden haben.
+
+      ## So sieht der Ablauf aus
+
+      Sie nehmen eine Sitzung auf. Sonabrief erstellt eine saubere schriftliche Abschrift und eine strukturierte Zusammenfassung, die Sie für Ihre klinischen Notizen verwenden können. Der schriftliche Vermerk bleibt unter Ihrer Kontrolle, und das ursprüngliche Audio wird nach der Transkription nicht als Datei gespeichert. Ziel ist es, Ihnen die Zeit zurückzugeben, die Sie damit verbringen würden, Notizen aus dem Gedächtnis zu rekonstruieren, ohne dass Rohaufnahmen von Sitzungen auf dem Server eines Dritten zurückbleiben.
+
+      ## Was das Werkzeug nicht tut, und was bei Ihnen bleibt
+
+      Sonabrief ist ein Werkzeug, kein klinisches oder berufsethisches Urteil. Es entscheidet nicht, ob eine bestimmte Sitzung aufgenommen werden darf, ob Ihr Patient eine informierte Einwilligung erteilt hat oder ob Ihre Berufsordnung es im Einzelfall zulässt. Diese Entscheidungen bleiben Ihre. Die Software ist quelloffen, sodass ein Kollege, ein Supervisor oder ein Datenschutzbeauftragter genau prüfen kann, wie das Audio verarbeitet wird, statt sich auf ein Marketingversprechen zu verlassen.
+
+      Nichts davon ist eine Rechts- oder Behandlungsberatung. Es ist eine Beschreibung der Funktionsweise des Werkzeugs, damit Sie entscheiden können, ob es zu der Arbeitsweise passt, zu der Sie verpflichtet sind und für die Sie sich entschieden haben.
+    faq:
+      - q: "Wird das Audio der Sitzung in die Cloud hochgeladen?"
+        a: "Das hängt von der Entscheidung ab, die Sie vor jeder Sitzung treffen. Wenn Sie die Transkription auf dem Gerät wählen, bleibt das Audio auf Ihrem Computer und wird nie hochgeladen. Wenn Sie für mehr Geschwindigkeit die Transkription auf europäischen Servern wählen, wird das Audio in der EU verarbeitet und nach der Transkription nicht aufbewahrt."
+      - q: "Wie geht Sonabrief mit Gesundheitsdaten um?"
+        a: "Die Transkription auf dem Gerät hält die Aufnahme von jedem Server Dritter fern, was die schützendste Option für ein Datum der besonderen Kategorie ist. Wenn Sie die Transkription in der europäischen Cloud wählen, findet die Verarbeitung in der EU statt und danach wird nichts aufbewahrt. Ob und wie eine Sitzung aufgenommen wird und auf welcher Rechtsgrundlage, bleibt Ihre berufliche Verantwortung. Dies ist keine Rechtsberatung."
+      - q: "Werden meine Sitzungen zum Trainieren von KI-Modellen verwendet?"
+        a: "Nein. Ihre Sitzungen werden nie zum Trainieren irgendeines Modells verwendet. Wenn Sie eine schriftliche Zusammenfassung anfordern, läuft sie entweder auf Ihrem eigenen Gerät oder auf europäischen Servern, die nach der Verarbeitung der Anfrage nichts aufbewahren."
+      - q: "Kann ein Supervisor oder ein Datenschutzbeauftragter dies überprüfen?"
+        a: "Ja. Sonabrief ist quelloffen, sodass der Code, der das Audio verarbeitet, direkt geprüft werden kann, statt sich auf ein Versprechen zu verlassen. Ein Kollege, ein Supervisor oder ein DPO kann überprüfen, wie sich Aufnahme, Transkription und Speicherung tatsächlich verhalten."
