@@ -1,0 +1,89 @@
+# Verified copy session. EN + IT only for now.
+# fr/es/de intentionally absent → routes not generated. Translation phase later.
+# draft:true held until founder validates IT + EN rendering visually.
+
+slug: doctor
+draft: false
+
+i18n:
+  en:
+    profession: "For doctors"
+    painPoints:
+      - "A consultation recording holds a patient's health data, the special category that carries the strictest legal duties"
+      - "Clinical case discussions hold the data of several patients at once, often shared with colleagues"
+      - "Time spent writing up the encounter instead of looking at the patient in front of you"
+    title: "Sonabrief for doctors: consultation and case notes that stay confidential"
+    description: "A meeting assistant for doctors built around medical confidentiality. You choose, before each recording, whether the audio is transcribed on your own device or on European servers. The recording is never kept as a file."
+    intro: |
+      A medical encounter produces some of the most protected information there is. The recording of a consultation contains a patient's health data, which data protection law treats as a special category carrying the strictest obligations, and the raw audio is the most exposed form that data can take. Most general purpose transcription tools treat that recording as ordinary content to upload, process on servers abroad, and in several cases reuse to improve their models. For a clinician bound by medical confidentiality, that is hard to reconcile with the duty you owe the person in front of you.
+
+      Sonabrief starts from a different assumption. Before each recording you decide how the audio is handled. You can transcribe entirely **on your own device**, so the recording is never uploaded anywhere. Or you can choose to transcribe on **European servers** when you need more speed, in which case the audio is processed in the EU and not retained afterwards. It is an explicit choice you make each time, never something that happens to a patient's words without you deciding it.
+
+      ## The patient consultation
+
+      You record a visit, and Sonabrief hands you a clean, structured written draft: you review it, finish it in your own style, and it goes into the record. You skip the writing from scratch and keep the last word on every line. The original audio is not stored as a file once it has been transcribed, so you get the minutes back that you spend writing instead of listening, without leaving a trail of raw consultation recordings on a third party's server.
+
+      ## Clinical case discussions
+
+      Internal case conferences and multidisciplinary meetings are a different kind of sensitive. A single recording can hold the data of several patients at once, discussed openly among colleagues. When that audio is captured on your own device rather than uploaded to a shared cloud, the exposure stays inside the room where the discussion happened. You decide, for each session, whether anything leaves your machine at all.
+
+      ## What it does not do, and what stays with you
+
+      Sonabrief is a tool, not a clinical or legal judgement. It does not decide whether a particular encounter may be recorded, whether the patient has consented, or whether your professional and ethical duties allow it in a given case. Those decisions remain yours. The software is open source, so a colleague, a clinical lead or a data protection advisor can inspect exactly how it handles audio rather than trusting a marketing claim.
+
+      None of this is legal or medical advice. It is a description of how the tool works, so you can decide whether it fits the way you are required, and have chosen, to practise.
+    faq:
+      - q: "Is the consultation audio uploaded to the cloud?"
+        a: "It depends on the choice you make before each recording. If you select on-device transcription, the audio stays on your computer and is never uploaded. If you choose transcription on European servers for extra speed, the audio is processed in the EU and is not retained once transcribed."
+      - q: "How does Sonabrief handle patient health data?"
+        a: "On-device transcription keeps the recording off any third party server, which is the most protective option for special category health data. If you choose European cloud transcription, processing happens in the EU and nothing is retained afterwards. Whether and how to record a patient encounter, and on what legal basis, remains your professional responsibility. This is not legal advice."
+      - q: "Can I use it for multidisciplinary case discussions?"
+        a: "Yes. Those recordings often contain several patients' data at once, which makes on-device transcription especially relevant: the audio need never leave your machine. You decide, for each session, whether anything is sent anywhere."
+      - q: "Do I need to review the transcript before using it?"
+        a: "Yes, and that is the point: Sonabrief gets you to a faithful, tidy draft in seconds, and you refine it however you like. You start from a ready text instead of a blank page, and the version that counts stays yours."
+      - q: "Will my recordings be used to train AI models?"
+        a: "No. Your recordings are never used to train any model. When you ask for a written summary, it runs either on your own device or on European servers that keep nothing once the request is processed."
+      - q: "Can a clinical lead or data protection advisor verify this?"
+        a: "Yes. Sonabrief is open source, so the code that handles audio can be inspected directly rather than relying on a promise. A colleague, clinical lead or DPO can review how recording, transcription and storage actually behave."
+
+  it:
+    profession: "Per medici"
+    painPoints:
+      - "La registrazione di una visita contiene i dati sanitari del paziente, la categoria speciale che porta gli obblighi di legge più stringenti"
+      - "Le discussioni cliniche dei casi contengono i dati di più pazienti insieme, spesso condivisi con i colleghi"
+      - "Tempo speso a verbalizzare la visita invece di guardare il paziente che hai davanti"
+    title: "Sonabrief per medici: note di visite e consulti che restano riservate"
+    description: "Un assistente per le visite pensato per il segreto medico. Prima di ogni registrazione scegli tu se l'audio viene trascritto sul tuo dispositivo o su server europei. La registrazione non viene mai conservata come file."
+    intro: |
+      Un incontro medico produce alcune delle informazioni più protette che esistano. La registrazione di una visita contiene i dati sanitari del paziente, che la normativa sulla protezione dei dati tratta come categoria speciale con gli obblighi più stringenti, e l'audio grezzo ne è la forma più esposta. La maggior parte degli strumenti di trascrizione generici tratta quella registrazione come un contenuto qualsiasi da caricare, elaborare su server all'estero e, in diversi casi, riutilizzare per migliorare i propri modelli. Per un clinico vincolato dal segreto medico è difficile conciliarlo con il dovere che hai verso la persona che ti siede davanti.
+
+      Sonabrief parte da un presupposto diverso. Prima di ogni registrazione decidi tu come viene gestito l'audio. Puoi trascrivere interamente **sul tuo dispositivo**, così la registrazione non viene caricata da nessuna parte. Oppure puoi scegliere di trascrivere su **server europei** quando ti serve più velocità, e in quel caso l'audio viene elaborato nell'Unione Europea e non conservato in seguito. È una scelta esplicita che fai ogni volta, mai qualcosa che capita alle parole di un paziente senza che tu lo decida.
+
+      ## La visita del paziente
+
+      Registri una visita, e Sonabrief ti consegna una bozza scritta già pulita e strutturata: tu la rivedi e la chiudi nel tuo stile, poi entra in cartella. Ti togli la stesura da capo e mantieni l'ultima parola su ogni riga. L'audio originale non viene salvato come file una volta trascritto, così ti restituisce i minuti che passi a scrivere invece di ascoltare, senza lasciare una scia di registrazioni grezze delle visite sul server di terzi.
+
+      ## Le discussioni cliniche dei casi
+
+      I consulti interni e le riunioni multidisciplinari sono un tipo diverso di dato sensibile. Una sola registrazione può contenere i dati di più pazienti insieme, discussi apertamente tra colleghi. Quando quell'audio viene catturato sul tuo dispositivo invece di essere caricato su un cloud condiviso, l'esposizione resta dentro la stanza in cui è avvenuta la discussione. Decidi tu, per ogni sessione, se qualcosa lascia la tua macchina.
+
+      ## Cosa non fa, e cosa resta in capo a te
+
+      Sonabrief è uno strumento, non un giudizio clinico o legale. Non decide se un determinato incontro possa essere registrato, se il paziente ha prestato il consenso, o se i tuoi doveri professionali ed etici lo consentono in un dato caso. Queste decisioni restano tue. Il software è open source, quindi un collega, un responsabile clinico o un consulente per la protezione dei dati può ispezionare esattamente come tratta l'audio invece di fidarsi di un'affermazione di marketing.
+
+      Nulla di tutto questo costituisce consulenza legale o medica. È una descrizione di come funziona lo strumento, perché tu possa decidere se è adatto al modo in cui sei tenuto, e hai scelto, di lavorare.
+    faq:
+      - q: "L'audio della visita viene caricato nel cloud?"
+        a: "Dipende dalla scelta che fai prima di ogni registrazione. Se selezioni la trascrizione sul dispositivo, l'audio resta sul tuo computer e non viene mai caricato. Se scegli la trascrizione su server europei per avere più velocità, l'audio viene elaborato nell'Unione Europea e non viene conservato una volta trascritto."
+      - q: "Come gestisce Sonabrief i dati sanitari del paziente?"
+        a: "La trascrizione sul dispositivo tiene la registrazione fuori da qualsiasi server di terzi, che è l'opzione più protettiva per i dati sanitari di categoria speciale. Se scegli la trascrizione cloud europea, l'elaborazione avviene nell'Unione Europea e nulla viene conservato in seguito. Se e come registrare un incontro con il paziente, e su quale base giuridica, resta una tua responsabilità professionale. Questa non è consulenza legale."
+      - q: "Posso usarlo per le discussioni multidisciplinari dei casi?"
+        a: "Sì. Quelle registrazioni contengono spesso i dati di più pazienti insieme, il che rende la trascrizione sul dispositivo particolarmente rilevante: l'audio non deve mai lasciare la tua macchina. Decidi tu, per ogni sessione, se qualcosa viene inviato da qualche parte."
+      - q: "Devo rivedere la trascrizione prima di usarla?"
+        a: "Sì, ed è il bello: Sonabrief ti porta a una bozza fedele e ordinata in pochi secondi, e tu la rifinisci come preferisci. Parti da un testo già pronto invece che dal foglio bianco, e la versione che conta resta la tua."
+      - q: "Le mie registrazioni verranno usate per addestrare modelli AI?"
+        a: "No. Le tue registrazioni non vengono mai usate per addestrare alcun modello. Quando chiedi un riepilogo scritto, viene elaborato sul tuo dispositivo oppure su server europei che non conservano nulla una volta elaborata la richiesta."
+      - q: "Un responsabile clinico o un consulente per la protezione dei dati può verificarlo?"
+        a: "Sì. Sonabrief è open source, quindi il codice che gestisce l'audio può essere ispezionato direttamente invece di affidarsi a una promessa. Un collega, un responsabile clinico o un DPO può verificare come si comportano davvero la registrazione, la trascrizione e l'archiviazione."
+
+  # fr / es / de intentionally absent → translation phase later.
