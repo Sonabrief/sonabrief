@@ -148,3 +148,6 @@ vite.config.ts.timestamp-*
 # Claude Code agent artifacts
 .agents/
 skills-lock.json
+
+# Astro build cache
+apps/site/.astro/
