@@ -1,0 +1,77 @@
+# Verified copy session. EN + IT only for now.
+# fr/es/de intentionally absent → routes not generated. Translation phase later.
+# draft:true held until founder validates IT + EN rendering visually.
+
+slug: management_consultant
+draft: false
+
+i18n:
+  en:
+    profession: "For management consultants"
+    painPoints:
+      - "Client meetings are full of strategy, numbers and plans covered by an NDA"
+      - "A general purpose cloud tool stores all of it abroad, outside your control"
+      - "Time lost writing up workshops instead of doing the thinking"
+    title: "Sonabrief for management consultants: client strategy that stays under NDA"
+    description: "A meeting assistant for consultants built around client confidentiality. You choose, before each recording, whether the audio is transcribed on your own device or on European servers. The recording is never kept as a file."
+    intro: |
+      A consulting engagement runs on the client's most guarded material: their strategy, their numbers, the plans they have not announced, the problems they would never discuss in public. Almost all of it sits under a non-disclosure agreement you have signed. A recorded workshop or interview is the most complete record of that material, and the most exposed. Most general purpose transcription tools treat that recording as ordinary content to upload, process on servers abroad, and in several cases reuse to improve their models. For a consultant whose entire reputation rests on discretion, that is the wrong place for a client's confidential strategy to end up.
+
+      Sonabrief starts from a different assumption. Before each recording you decide how the audio is handled. You can transcribe entirely **on your own device**, so the recording is never uploaded anywhere. Or you can choose to transcribe on **European servers** when you need more speed, in which case the audio is processed in the EU and not retained afterwards. It is an explicit choice you make each time, and one you can stand behind when a client asks how their information is handled.
+
+      ## What the workflow looks like
+
+      You record a workshop, a stakeholder interview or an internal working session, and Sonabrief hands you a clean, structured written draft: you review it, finish it in your own words, and turn it into the deliverable. You start from a ready text instead of a blank page, and the version that counts stays yours. The original audio is not stored as a file once transcribed, so there is no recording of a client's confidential discussion sitting on a third party's server, in tension with the NDA you signed.
+
+      ## What it does not do, and what stays with you
+
+      Sonabrief is a tool, not a contractual judgement. It does not decide whether a meeting may be recorded, whether the client has agreed to it, or what your engagement terms allow. Those decisions remain yours and the client's. The software is open source, so a client's security team or your own can inspect exactly how it handles audio rather than trusting a marketing claim, which is often what wins the confidentiality conversation in the first place.
+
+      None of this is legal advice. It is a description of how the tool works, so you can decide whether it fits the way you and your clients expect to work.
+    faq:
+      - q: "Is the meeting audio uploaded to the cloud?"
+        a: "It depends on the choice you make before each recording. If you select on-device transcription, the audio stays on your computer and is never uploaded. If you choose transcription on European servers for extra speed, the audio is processed in the EU and is not retained once transcribed."
+      - q: "Does this help me honour an NDA?"
+        a: "On-device transcription keeps the recording off any third party server, so a client's confidential material need never leave your machine, which is the strongest position when an NDA is in play. If you choose European cloud transcription, processing happens in the EU and nothing is retained afterwards. What the NDA permits remains a matter between you and the client. This is not legal advice."
+      - q: "Can a client's security team verify these claims?"
+        a: "Yes. Sonabrief is open source, so the code that handles audio can be inspected directly rather than relying on a promise. A client's security team or your own can review how recording, transcription and storage actually behave, which is often what settles a procurement conversation."
+      - q: "Will my client sessions be used to train AI models?"
+        a: "No. Your sessions are never used to train any model. When you ask for a written summary, it runs either on your own device or on European servers that keep nothing once the request is processed."
+      - q: "Where is my data hosted?"
+        a: "Sonabrief uses European infrastructure, and cloud summaries run on European servers that keep nothing once a request is processed. On-device transcription avoids the upload entirely if you prefer nothing to leave your machine."
+
+  it:
+    profession: "Per consulenti aziendali"
+    painPoints:
+      - "Gli incontri con i clienti sono pieni di strategia, numeri e piani coperti da un NDA"
+      - "Uno strumento cloud generico archivia tutto questo all'estero, fuori dal tuo controllo"
+      - "Tempo perso a verbalizzare i workshop invece di ragionare sul problema"
+    title: "Sonabrief per consulenti aziendali: la strategia del cliente resta sotto NDA"
+    description: "Un assistente per gli incontri pensato per la riservatezza del cliente. Prima di ogni registrazione scegli tu se l'audio viene trascritto sul tuo dispositivo o su server europei. La registrazione non viene mai conservata come file."
+    intro: |
+      Un incarico di consulenza vive sul materiale più custodito del cliente: la sua strategia, i suoi numeri, i piani che non ha ancora annunciato, i problemi che non discuterebbe mai in pubblico. Quasi tutto è coperto da un accordo di riservatezza che hai firmato. La registrazione di un workshop o di un'intervista ne è il documento più completo, e il più esposto. La maggior parte degli strumenti di trascrizione generici tratta quella registrazione come un contenuto qualsiasi da caricare, elaborare su server all'estero e, in diversi casi, riutilizzare per migliorare i propri modelli. Per un consulente la cui intera reputazione si regge sulla discrezione, è il posto sbagliato dove far finire la strategia riservata di un cliente.
+
+      Sonabrief parte da un presupposto diverso. Prima di ogni registrazione decidi tu come viene gestito l'audio. Puoi trascrivere interamente **sul tuo dispositivo**, così la registrazione non viene caricata da nessuna parte. Oppure puoi scegliere di trascrivere su **server europei** quando ti serve più velocità, e in quel caso l'audio viene elaborato nell'Unione Europea e non conservato in seguito. È una scelta esplicita che fai ogni volta, e che puoi difendere quando un cliente ti chiede come vengono trattate le sue informazioni.
+
+      ## Come funziona, in pratica
+
+      Registri un workshop, un'intervista a uno stakeholder o una sessione di lavoro interna, e Sonabrief ti consegna una bozza scritta pulita e strutturata: tu la rivedi, la chiudi con parole tue, e la trasformi nel deliverable. Parti da un testo già pronto invece che dal foglio bianco, e la versione che conta resta la tua. L'audio originale non viene salvato come file una volta trascritto, quindi non c'è alcuna registrazione di una discussione riservata del cliente depositata sul server di terzi, in tensione con l'NDA che hai firmato.
+
+      ## Cosa non fa, e cosa resta in capo a te
+
+      Sonabrief è uno strumento, non un giudizio contrattuale. Non decide se un incontro possa essere registrato, se il cliente è d'accordo, o cosa consentono i termini del tuo incarico. Queste decisioni restano tue e del cliente. Il software è open source, quindi il team di sicurezza del cliente o il tuo possono ispezionare esattamente come tratta l'audio invece di fidarsi di un'affermazione di marketing, che è spesso ciò che vince la conversazione sulla riservatezza.
+
+      Nulla di tutto questo costituisce consulenza legale. È una descrizione di come funziona lo strumento, perché tu possa decidere se è adatto al modo in cui tu e i tuoi clienti vi aspettate di lavorare.
+    faq:
+      - q: "L'audio dell'incontro viene caricato nel cloud?"
+        a: "Dipende dalla scelta che fai prima di ogni registrazione. Se selezioni la trascrizione sul dispositivo, l'audio resta sul tuo computer e non viene mai caricato. Se scegli la trascrizione su server europei per avere più velocità, l'audio viene elaborato nell'Unione Europea e non viene conservato una volta trascritto."
+      - q: "Mi aiuta a rispettare un NDA?"
+        a: "La trascrizione sul dispositivo tiene la registrazione fuori da qualsiasi server di terzi, quindi il materiale riservato del cliente non deve mai lasciare la tua macchina, che è la posizione più solida quando c'è un NDA in gioco. Se scegli la trascrizione cloud europea, l'elaborazione avviene nell'Unione Europea e nulla viene conservato in seguito. Cosa consente l'NDA resta una questione tra te e il cliente. Questa non è consulenza legale."
+      - q: "Il team di sicurezza del cliente può verificare queste affermazioni?"
+        a: "Sì. Sonabrief è open source, quindi il codice che gestisce l'audio può essere ispezionato direttamente invece di affidarsi a una promessa. Il team di sicurezza del cliente o il tuo possono verificare come si comportano davvero la registrazione, la trascrizione e l'archiviazione, che è spesso ciò che chiude una conversazione di procurement."
+      - q: "Le mie sessioni con i clienti verranno usate per addestrare modelli AI?"
+        a: "No. Le tue sessioni non vengono mai usate per addestrare alcun modello. Quando chiedi un riepilogo scritto, viene elaborato sul tuo dispositivo oppure su server europei che non conservano nulla una volta elaborata la richiesta."
+      - q: "Dove vengono ospitati i miei dati?"
+        a: "Sonabrief usa infrastruttura europea, e le sintesi cloud girano su server europei che non conservano nulla una volta elaborata la richiesta. La trascrizione sul dispositivo evita del tutto il caricamento, se preferisci che nulla lasci la tua macchina."
+
+  # fr / es / de intentionally absent → translation phase later.

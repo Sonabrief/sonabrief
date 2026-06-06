@@ -1,0 +1,77 @@
+# Verified copy session. EN + IT only for now.
+# fr/es/de intentionally absent → routes not generated. Translation phase later.
+# draft:true held until founder validates IT + EN rendering visually.
+
+slug: researcher
+draft: false
+
+i18n:
+  en:
+    profession: "For researchers"
+    painPoints:
+      - "Interview recordings hold participants' data under the consent you promised them"
+      - "A general purpose cloud tool processes that data abroad, beyond what the consent covered"
+      - "Time lost transcribing interviews by hand instead of analysing them"
+    title: "Sonabrief for researchers: interviews that honour your participants' consent"
+    description: "A transcription tool for researchers built around participant confidentiality. You choose, before each recording, whether the audio is transcribed on your own device or on European servers. The recording is never kept as a file."
+    intro: |
+      Informed consent is a promise. Before an interview, you tell a participant what data you will collect and how you will handle it, and they decide on that basis. The recording of that interview is the most identifiable form of their data, and research ethics, the Declaration of Helsinki and the GDPR all treat its confidentiality as your responsibility. Most general purpose transcription tools quietly stretch that promise: they upload the audio to servers abroad and in several cases reuse it to improve their models, which is rarely what the participant agreed to. A common research practice is the opposite, to record locally and de-identify before analysis.
+
+      Sonabrief is built for that practice. Before each recording you decide how the audio is handled. You can transcribe entirely **on your own device**, so the recording never leaves your machine and matches exactly what you told the participant. Or you can choose to transcribe on **European servers** when you need more speed, in which case the audio is processed in the EU and not retained afterwards. It is an explicit choice you make each time.
+
+      ## What the workflow looks like
+
+      You record an interview, and Sonabrief hands you a clean, structured written draft you can de-identify and take into analysis. You review it, finish it in your own words, and the version that counts stays yours. The original audio is not stored as a file once transcribed, so a participant's identifiable voice is not left on a third party's server after you have what you need from it.
+
+      ## What it does not do, and what stays with you
+
+      Sonabrief is a tool, not an ethics committee. It does not decide whether an interview may be recorded, whether your consent covers it, or what your institution's ethics approval requires. Those decisions remain yours. The software is open source, so an ethics board or a data protection advisor can inspect exactly how it handles audio rather than trusting a marketing claim, which is useful when you describe your data handling in an ethics application.
+
+      None of this is legal advice. It is a description of how the tool works, so you can decide whether it fits the way you are required, and have chosen, to work.
+    faq:
+      - q: "Is the interview audio uploaded to the cloud?"
+        a: "It depends on the choice you make before each recording. If you select on-device transcription, the audio stays on your computer and is never uploaded. If you choose transcription on European servers for extra speed, the audio is processed in the EU and is not retained once transcribed."
+      - q: "Does this fit what I told my participants in the consent form?"
+        a: "On-device transcription means the audio never leaves your machine, which matches a consent promise of local handling closely. If you choose European cloud transcription, processing happens in the EU and nothing is retained afterwards. Whether your specific consent and ethics approval cover the recording remains your responsibility. This is not legal advice."
+      - q: "Can an ethics board verify these claims?"
+        a: "Yes. Sonabrief is open source, so the code that handles audio can be inspected directly rather than relying on a promise. An ethics board or data protection advisor can review how recording, transcription and storage actually behave, which helps when you describe data handling in an ethics application."
+      - q: "Will my interviews be used to train AI models?"
+        a: "No. Your interviews are never used to train any model. When you ask for a written summary, it runs either on your own device or on European servers that keep nothing once the request is processed."
+      - q: "Where is my data hosted?"
+        a: "Sonabrief uses European infrastructure, and cloud summaries run on European servers that keep nothing once a request is processed. On-device transcription avoids the upload entirely if you prefer nothing to leave your machine."
+
+  it:
+    profession: "Per ricercatori"
+    painPoints:
+      - "Le registrazioni dei colloqui contengono i dati dei partecipanti, sotto il consenso che hai promesso loro"
+      - "Uno strumento cloud generico elabora quei dati all'estero, oltre quanto copriva il consenso"
+      - "Tempo perso a sbobinare le interviste a mano invece di analizzarle"
+    title: "Sonabrief per ricercatori: interviste che rispettano il consenso dei partecipanti"
+    description: "Uno strumento di trascrizione per ricercatori pensato per la riservatezza dei partecipanti. Prima di ogni registrazione scegli tu se l'audio viene trascritto sul tuo dispositivo o su server europei. La registrazione non viene mai conservata come file."
+    intro: |
+      Il consenso informato è una promessa. Prima di un'intervista, dici al partecipante quali dati raccoglierai e come li tratterai, e lui decide su quella base. La registrazione di quell'intervista è la forma più identificabile dei suoi dati, e l'etica della ricerca, la Dichiarazione di Helsinki e il GDPR ne considerano la riservatezza una tua responsabilità. La maggior parte degli strumenti di trascrizione generici allarga silenziosamente quella promessa: carica l'audio su server all'estero e, in diversi casi, lo riutilizza per migliorare i propri modelli, che raramente è ciò a cui il partecipante ha acconsentito. Una prassi di ricerca diffusa è l'opposto: registrare in locale e de-identificare prima dell'analisi.
+
+      Sonabrief è costruito per quella prassi. Prima di ogni registrazione decidi tu come viene gestito l'audio. Puoi trascrivere interamente **sul tuo dispositivo**, così la registrazione non lascia mai la tua macchina e corrisponde esattamente a ciò che hai detto al partecipante. Oppure puoi scegliere di trascrivere su **server europei** quando ti serve più velocità, e in quel caso l'audio viene elaborato nell'Unione Europea e non conservato in seguito. È una scelta esplicita che fai ogni volta.
+
+      ## Come funziona, in pratica
+
+      Registri un'intervista, e Sonabrief ti consegna una bozza scritta pulita e strutturata che puoi de-identificare e portare in analisi. La rivedi, la chiudi con parole tue, e la versione che conta resta la tua. L'audio originale non viene salvato come file una volta trascritto, quindi la voce identificabile di un partecipante non resta sul server di terzi dopo che ne hai ricavato ciò che ti serve.
+
+      ## Cosa non fa, e cosa resta in capo a te
+
+      Sonabrief è uno strumento, non un comitato etico. Non decide se un'intervista possa essere registrata, se il tuo consenso la copre, o cosa richiede l'approvazione etica della tua istituzione. Queste decisioni restano tue. Il software è open source, quindi un comitato etico o un consulente per la protezione dei dati può ispezionare esattamente come tratta l'audio invece di fidarsi di un'affermazione di marketing, cosa utile quando descrivi la gestione dei dati in una domanda etica.
+
+      Nulla di tutto questo costituisce consulenza legale. È una descrizione di come funziona lo strumento, perché tu possa decidere se è adatto al modo in cui sei tenuto, e hai scelto, di lavorare.
+    faq:
+      - q: "L'audio dell'intervista viene caricato nel cloud?"
+        a: "Dipende dalla scelta che fai prima di ogni registrazione. Se selezioni la trascrizione sul dispositivo, l'audio resta sul tuo computer e non viene mai caricato. Se scegli la trascrizione su server europei per avere più velocità, l'audio viene elaborato nell'Unione Europea e non viene conservato una volta trascritto."
+      - q: "Corrisponde a ciò che ho detto ai partecipanti nel modulo di consenso?"
+        a: "La trascrizione sul dispositivo significa che l'audio non lascia mai la tua macchina, il che corrisponde da vicino a una promessa di consenso di gestione locale. Se scegli la trascrizione cloud europea, l'elaborazione avviene nell'Unione Europea e nulla viene conservato in seguito. Se il tuo specifico consenso e l'approvazione etica coprano la registrazione resta una tua responsabilità. Questa non è consulenza legale."
+      - q: "Un comitato etico può verificare queste affermazioni?"
+        a: "Sì. Sonabrief è open source, quindi il codice che gestisce l'audio può essere ispezionato direttamente invece di affidarsi a una promessa. Un comitato etico o un consulente per la protezione dei dati può verificare come si comportano davvero la registrazione, la trascrizione e l'archiviazione, cosa che aiuta quando descrivi la gestione dei dati in una domanda etica."
+      - q: "Le mie interviste verranno usate per addestrare modelli AI?"
+        a: "No. Le tue interviste non vengono mai usate per addestrare alcun modello. Quando chiedi un riepilogo scritto, viene elaborato sul tuo dispositivo oppure su server europei che non conservano nulla una volta elaborata la richiesta."
+      - q: "Dove vengono ospitati i miei dati?"
+        a: "Sonabrief usa infrastruttura europea, e le sintesi cloud girano su server europei che non conservano nulla una volta elaborata la richiesta. La trascrizione sul dispositivo evita del tutto il caricamento, se preferisci che nulla lasci la tua macchina."
+
+  # fr / es / de intentionally absent → translation phase later.

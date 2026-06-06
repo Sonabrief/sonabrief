@@ -1,0 +1,77 @@
+# Verified copy session. EN + IT only for now.
+# fr/es/de intentionally absent → routes not generated. Translation phase later.
+# draft:true held until founder validates IT + EN rendering visually.
+
+slug: recruiter
+draft: false
+
+i18n:
+  en:
+    profession: "For recruiters"
+    painPoints:
+      - "Interview recordings hold candidates' personal data and candid assessments"
+      - "A general purpose cloud tool stores that data abroad, outside your control"
+      - "Time lost writing up interviews instead of talking to people"
+    title: "Sonabrief for recruiters: candidate interviews handled with care"
+    description: "A meeting assistant for recruiters built around candidate data protection. You choose, before each recording, whether the audio is transcribed on your own device or on European servers. The recording is never kept as a file."
+    intro: |
+      An interview recording is a dense file of someone's personal data: their history, their current situation, sometimes things they would only tell you in confidence, plus the candid assessment that follows. Under data protection law a candidate has rights over all of it, and they have not agreed to have their voice processed on servers abroad or reused to improve someone's model. Most general purpose transcription tools do exactly that. For a recruiter who depends on candidates trusting the process, that is a quiet liability sitting in the background of every conversation.
+
+      Sonabrief starts from a different assumption. Before each recording you decide how the audio is handled. You can transcribe entirely **on your own device**, so the recording is never uploaded anywhere. Or you can choose to transcribe on **European servers** when you need more speed, in which case the audio is processed in the EU and not retained afterwards. It is an explicit choice you make each time, and one you can explain to a candidate who asks what happens to the recording.
+
+      ## What the workflow looks like
+
+      You record an interview, and Sonabrief hands you a clean, structured written draft: you review it, finish it in your own words, and use it for your notes or the scorecard. You start from a ready text instead of a blank page, and the version that counts stays yours. The original audio is not stored as a file once transcribed, so a candidate's personal data is not left sitting in a third party cloud after the conversation is over.
+
+      ## What it does not do, and what stays with you
+
+      Sonabrief is a tool, not a data protection program. It does not decide whether an interview may be recorded, whether the candidate has consented, or what your obligations as a controller require. Those decisions remain yours and your organisation's. The software is open source, so your data protection advisor can inspect exactly how it handles audio rather than trusting a marketing claim.
+
+      None of this is legal advice. It is a description of how the tool works, so you can decide whether it fits the way you are required, and have chosen, to work.
+    faq:
+      - q: "Is the interview audio uploaded to the cloud?"
+        a: "It depends on the choice you make before each recording. If you select on-device transcription, the audio stays on your computer and is never uploaded. If you choose transcription on European servers for extra speed, the audio is processed in the EU and is not retained once transcribed."
+      - q: "How does Sonabrief protect candidate data?"
+        a: "On-device transcription keeps the recording off any third party server, which is the most protective option for a candidate's personal data. If you choose European cloud transcription, processing happens in the EU and nothing is retained afterwards. Whether and how to record an interview, and on what legal basis, remains your responsibility as a controller. This is not legal advice."
+      - q: "What do I tell a candidate who asks how the recording is handled?"
+        a: "You can tell them the truth, and show it: the audio is transcribed on your device and not uploaded, or processed on European servers that keep nothing afterwards, and it is never used to train any model. Because Sonabrief is open source, the claim can be verified rather than taken on trust."
+      - q: "Will my interviews be used to train AI models?"
+        a: "No. Your interviews are never used to train any model. When you ask for a written summary, it runs either on your own device or on European servers that keep nothing once the request is processed."
+      - q: "Where is my data hosted?"
+        a: "Sonabrief uses European infrastructure, and cloud summaries run on European servers that keep nothing once a request is processed. On-device transcription avoids the upload entirely if you prefer nothing to leave your machine."
+
+  it:
+    profession: "Per recruiter"
+    painPoints:
+      - "Le registrazioni dei colloqui contengono dati personali dei candidati e valutazioni riservate"
+      - "Uno strumento cloud generico archivia quei dati all'estero, fuori dal tuo controllo"
+      - "Tempo perso a verbalizzare i colloqui invece di parlare con le persone"
+    title: "Sonabrief per recruiter: colloqui con i candidati trattati con cura"
+    description: "Un assistente per i colloqui pensato per la protezione dei dati dei candidati. Prima di ogni registrazione scegli tu se l'audio viene trascritto sul tuo dispositivo o su server europei. La registrazione non viene mai conservata come file."
+    intro: |
+      La registrazione di un colloquio è un file denso di dati personali di una persona: la sua storia, la sua situazione attuale, a volte cose che ti direbbe solo in confidenza, più la valutazione schietta che ne segue. Per la normativa sulla protezione dei dati il candidato ha diritti su tutto questo, e non ha acconsentito a che la sua voce venga elaborata su server all'estero o riutilizzata per migliorare il modello di qualcuno. La maggior parte degli strumenti di trascrizione generici fa esattamente questo. Per un recruiter che dipende dalla fiducia dei candidati nel processo, è una responsabilità silenziosa sullo sfondo di ogni conversazione.
+
+      Sonabrief parte da un presupposto diverso. Prima di ogni registrazione decidi tu come viene gestito l'audio. Puoi trascrivere interamente **sul tuo dispositivo**, così la registrazione non viene caricata da nessuna parte. Oppure puoi scegliere di trascrivere su **server europei** quando ti serve più velocità, e in quel caso l'audio viene elaborato nell'Unione Europea e non conservato in seguito. È una scelta esplicita che fai ogni volta, e che puoi spiegare a un candidato che ti chiede cosa succede alla registrazione.
+
+      ## Come funziona, in pratica
+
+      Registri un colloquio, e Sonabrief ti consegna una bozza scritta pulita e strutturata: tu la rivedi, la chiudi con parole tue, e la usi per le tue note o per la scorecard. Parti da un testo già pronto invece che dal foglio bianco, e la versione che conta resta la tua. L'audio originale non viene salvato come file una volta trascritto, quindi i dati personali di un candidato non restano depositati in un cloud di terzi dopo la fine della conversazione.
+
+      ## Cosa non fa, e cosa resta in capo a te
+
+      Sonabrief è uno strumento, non un programma di protezione dei dati. Non decide se un colloquio possa essere registrato, se il candidato ha prestato il consenso, o cosa richiedono i tuoi obblighi di titolare del trattamento. Queste decisioni restano tue e della tua organizzazione. Il software è open source, quindi il tuo consulente per la protezione dei dati può ispezionare esattamente come tratta l'audio invece di fidarsi di un'affermazione di marketing.
+
+      Nulla di tutto questo costituisce consulenza legale. È una descrizione di come funziona lo strumento, perché tu possa decidere se è adatto al modo in cui sei tenuto, e hai scelto, di lavorare.
+    faq:
+      - q: "L'audio del colloquio viene caricato nel cloud?"
+        a: "Dipende dalla scelta che fai prima di ogni registrazione. Se selezioni la trascrizione sul dispositivo, l'audio resta sul tuo computer e non viene mai caricato. Se scegli la trascrizione su server europei per avere più velocità, l'audio viene elaborato nell'Unione Europea e non viene conservato una volta trascritto."
+      - q: "Come protegge Sonabrief i dati dei candidati?"
+        a: "La trascrizione sul dispositivo tiene la registrazione fuori da qualsiasi server di terzi, che è l'opzione più protettiva per i dati personali di un candidato. Se scegli la trascrizione cloud europea, l'elaborazione avviene nell'Unione Europea e nulla viene conservato in seguito. Se e come registrare un colloquio, e su quale base giuridica, resta una tua responsabilità di titolare del trattamento. Questa non è consulenza legale."
+      - q: "Cosa dico a un candidato che chiede come viene gestita la registrazione?"
+        a: "Puoi dirgli la verità, e mostrarla: l'audio viene trascritto sul tuo dispositivo e non caricato, oppure elaborato su server europei che non conservano nulla in seguito, e non viene mai usato per addestrare alcun modello. Poiché Sonabrief è open source, l'affermazione può essere verificata invece che presa sulla fiducia."
+      - q: "I miei colloqui verranno usati per addestrare modelli AI?"
+        a: "No. I tuoi colloqui non vengono mai usati per addestrare alcun modello. Quando chiedi un riepilogo scritto, viene elaborato sul tuo dispositivo oppure su server europei che non conservano nulla una volta elaborata la richiesta."
+      - q: "Dove vengono ospitati i miei dati?"
+        a: "Sonabrief usa infrastruttura europea, e le sintesi cloud girano su server europei che non conservano nulla una volta elaborata la richiesta. La trascrizione sul dispositivo evita del tutto il caricamento, se preferisci che nulla lasci la tua macchina."
+
+  # fr / es / de intentionally absent → translation phase later.
