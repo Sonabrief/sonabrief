@@ -1,0 +1,104 @@
+slug: read-ai-alternative
+competitor: Read AI
+category: ai-meeting-assistant
+verified: 2026-06-06
+sources:
+  - https://www.read.ai/termsofservice
+  - https://www.read.ai/privacy-policy
+  - https://support.read.ai/hc/en-us/articles/25702259763091-Security-Privacy-Overview
+  - https://www.read.ai/privacy
+
+# Chiavi neutre: ordine e identità delle righe. I testi stanno in i18n.{lang}.differentiators.
+differentiators:
+  - audio_processing
+  - meeting_sharing
+  - hosting
+  - data_for_training
+  - open_source
+
+i18n:
+  en:
+    title: "The Privacy-First Read AI Alternative — Sonabrief"
+    description: "Sonabrief is a private alternative to Read AI: transcription runs on your own device, your audio is never saved as a file, and nothing is shared with anyone unless you choose to share it."
+    intro: |
+      ## A private alternative to Read AI
+
+      Read AI is a polished meeting assistant, and it deserves credit on one point that trips up many of its rivals: it does not use your meeting content to train its AI by default. Contributing your data to its models is opt-in, switched off until you turn it on. On the single question of training, Read AI behaves better than several better-known tools, and it would be unfair to suggest otherwise.
+
+      The friction for confidential work is elsewhere, in how the product moves through a meeting. Read AI joins your calls as a visible assistant connected to your calendar, and by its own design it sends the meeting report to the invitees afterwards. For an internal sales sync that is a convenience. For a client consultation with an outside party in the room, it means a summary of a privileged conversation can land in an external inbox automatically, as the default behaviour rather than a deliberate act. Read AI also stores recordings and transcripts in its cloud, hosted in the United States by default, with regional data residency offered to enterprise customers.
+
+      Sonabrief is built around a different starting point. The transcription happens on your own device, and your audio is never saved as a file. Nothing is sent to anyone unless you decide to send it. There is no bot in the participant list, no report dispatched to a room full of external addresses, and no recording sitting in a US cloud waiting to be requested or leaked. When you want a summary, you choose how: through Mistral on European servers, which keep nothing once a request is processed, or fully on your own machine.
+
+      On training we are in the same place Read AI is, and we will say so plainly: neither of us uses your meetings to train models by default. The difference is that with Sonabrief there is no toggle to get wrong, because the audio never leaves your device in the first place, so there is nothing there to train on. Sonabrief is also open-source, so you can read the code that handles your audio rather than trusting a policy page.
+
+      If your meetings are routine and shared widely anyway, Read AI is a capable tool. If you handle conversations that must not be broadcast to everyone on the invite, and that cannot sit on a server abroad, Sonabrief was built for exactly that. Sonabrief's prices are in euros (Pro at €9/month or €89/year, Pro Unlimited at €19/month or €189/year), with the difference between paid plans being how long your archive is kept.
+    differentiators:
+      audio_processing:
+        sonabrief: "Transcription happens on your own device. Your audio is never saved as a file."
+        competitor: "A visible assistant joins the call; recordings and transcripts are stored in the cloud."
+      meeting_sharing:
+        sonabrief: "Your summary stays with you. Nothing is shared unless you choose to share it."
+        competitor: "By default, the meeting report is sent to the invitees, including external participants."
+      hosting:
+        sonabrief: "European infrastructure. Cloud summaries run on Mistral's European servers, which keep nothing once a request is processed (Zero Data Retention), or you can keep everything fully local."
+        competitor: "Cloud storage in the United States by default. Regional data residency is offered to enterprise customers."
+      data_for_training:
+        sonabrief: "Your meetings are never used to train any model, and there is no setting to get wrong."
+        competitor: "Training is off by default and opt-in. Read AI deserves credit here; the difference is that Sonabrief has no such option at all."
+      open_source:
+        sonabrief: "Open-source. You can read the code that handles your audio."
+        competitor: "Proprietary."
+    faq:
+      - q: "Does Read AI train its AI on my meetings?"
+        a: "Not by default. Read AI's documentation says contributing your data to its models is opt-in and switched off unless you turn it on, which is to its credit. With Sonabrief your meetings are never used to train any model, and because the audio stays on your device there is no setting to get wrong in the first place."
+      - q: "Will a summary of my meeting be sent to other people?"
+        a: "With Sonabrief, no. Your summary stays with you and nothing is shared unless you choose to share it. Read AI, by its own design, sends the meeting report to the invitees after the call, which can include external participants. For a confidential conversation that automatic dispatch is the concern."
+      - q: "Does a bot join my meeting?"
+        a: "With Read AI, yes; it joins as a visible assistant connected to your calendar. Sonabrief captures and transcribes on your own device, so there is no bot in the participant list and no recording stored on someone else's server."
+      - q: "Where is my data hosted?"
+        a: "Sonabrief uses European infrastructure, and cloud summaries run on European servers that keep nothing once a request is processed. Read AI stores recordings and transcripts in the cloud, hosted in the United States by default, with regional residency offered to enterprise customers."
+      - q: "Is Sonabrief a good fit for lawyers, therapists or journalists?"
+        a: "Yes. Those are the people it was built for. Transcription on your own device, with no stored audio file and nothing shared automatically, fits work governed by professional secrecy, confidentiality or source protection."
+
+  it:
+    title: "L'alternativa a Read AI che mette la privacy al primo posto — Sonabrief"
+    description: "Sonabrief è un'alternativa privata a Read AI: la trascrizione avviene sul tuo dispositivo, il tuo audio non viene mai salvato come file e nulla viene condiviso con nessuno se non lo decidi tu."
+    intro: |
+      ## Un'alternativa privata a Read AI
+
+      Read AI è un assistente per riunioni curato, e gli va riconosciuto un punto su cui molti suoi rivali inciampano: per impostazione predefinita non usa i contenuti delle tue riunioni per addestrare la sua AI. Contribuire i tuoi dati ai suoi modelli è opt-in, disattivato finché non lo attivi tu. Sulla singola questione dell'addestramento, Read AI si comporta meglio di diversi strumenti più noti, e sarebbe scorretto far credere il contrario.
+
+      L'attrito per il lavoro riservato è altrove, in come il prodotto si muove dentro una riunione. Read AI entra nelle tue chiamate come assistente visibile collegato al calendario e, per sua stessa impostazione, invia poi il resoconto della riunione agli invitati. Per un allineamento commerciale interno è una comodità. Per un colloquio con un cliente in presenza di una parte esterna, significa che il riepilogo di una conversazione riservata può finire automaticamente in una casella di posta esterna, come comportamento predefinito e non come gesto deliberato. Read AI inoltre archivia registrazioni e trascrizioni nel proprio cloud, ospitato negli Stati Uniti per impostazione predefinita, con la residenza regionale dei dati offerta ai clienti enterprise.
+
+      Sonabrief parte da un presupposto diverso. La trascrizione avviene sul tuo dispositivo, e il tuo audio non viene mai salvato come file. Nulla viene inviato a nessuno se non lo decidi tu. Non c'è alcun bot nella lista partecipanti, nessun resoconto spedito a una platea di indirizzi esterni, e nessuna registrazione depositata in un cloud statunitense in attesa di essere richiesta o trafugata. Quando vuoi un riepilogo, scegli tu come: con Mistral su server europei, che non conservano nulla una volta elaborata la richiesta, oppure tutto sulla tua macchina.
+
+      Sull'addestramento siamo nella stessa posizione di Read AI, e lo diciamo apertamente: nessuno dei due, per impostazione predefinita, usa le tue riunioni per addestrare i modelli. La differenza è che con Sonabrief non c'è alcun interruttore da sbagliare, perché l'audio non lascia mai il dispositivo, quindi non c'è nulla su cui addestrarsi. Sonabrief è anche open-source, così puoi leggere il codice che gestisce il tuo audio invece di fidarti di una pagina di policy.
+
+      Se le tue riunioni sono di routine e comunque condivise ampiamente, Read AI è uno strumento valido. Se gestisci conversazioni che non devono essere diffuse a tutti gli invitati, e che non possono stare su un server all'estero, Sonabrief è nato esattamente per questo. I prezzi di Sonabrief sono in euro (Pro a 9 €/mese o 89 €/anno, Pro Unlimited a 19 €/mese o 189 €/anno), e la differenza tra i piani a pagamento è per quanto tempo viene conservato il tuo archivio.
+    differentiators:
+      audio_processing:
+        sonabrief: "La trascrizione avviene sul tuo dispositivo. Il tuo audio non viene mai salvato come file."
+        competitor: "Un assistente visibile entra nella chiamata; registrazioni e trascrizioni vengono archiviate nel cloud."
+      meeting_sharing:
+        sonabrief: "Il tuo riepilogo resta con te. Nulla viene condiviso se non lo decidi tu."
+        competitor: "Per impostazione predefinita, il resoconto della riunione viene inviato agli invitati, inclusi i partecipanti esterni."
+      hosting:
+        sonabrief: "Infrastruttura europea. Le sintesi cloud girano sui server europei di Mistral, che non conservano nulla una volta elaborata la richiesta (Zero Data Retention), oppure puoi tenere tutto in locale."
+        competitor: "Archiviazione cloud negli Stati Uniti per impostazione predefinita. La residenza regionale dei dati è offerta ai clienti enterprise."
+      data_for_training:
+        sonabrief: "Le tue riunioni non vengono mai usate per addestrare alcun modello, e non c'è nessuna impostazione da sbagliare."
+        competitor: "L'addestramento è disattivato per impostazione predefinita ed è opt-in. Su questo Read AI merita credito; la differenza è che Sonabrief non ha affatto questa opzione."
+      open_source:
+        sonabrief: "Open-source. Puoi leggere il codice che gestisce il tuo audio."
+        competitor: "Proprietario."
+    faq:
+      - q: "Read AI addestra la sua AI sulle mie riunioni?"
+        a: "Non per impostazione predefinita. La documentazione di Read AI dice che contribuire i tuoi dati ai suoi modelli è opt-in e disattivato finché non lo attivi tu, il che gli va riconosciuto. Con Sonabrief le tue riunioni non vengono mai usate per addestrare alcun modello, e poiché l'audio resta sul tuo dispositivo non c'è nemmeno un'impostazione da sbagliare."
+      - q: "Un riepilogo della mia riunione verrà inviato ad altre persone?"
+        a: "Con Sonabrief, no. Il tuo riepilogo resta con te e nulla viene condiviso se non lo decidi tu. Read AI, per sua stessa impostazione, invia il resoconto della riunione agli invitati dopo la chiamata, e questi possono includere partecipanti esterni. Per una conversazione riservata, quell'invio automatico è il problema."
+      - q: "Un bot entra nella mia riunione?"
+        a: "Con Read AI sì, entra come assistente visibile collegato al tuo calendario. Sonabrief cattura e trascrive sul tuo dispositivo, quindi non c'è nessun bot nella lista partecipanti e nessuna registrazione depositata sul server di qualcun altro."
+      - q: "Dove vengono ospitati i miei dati?"
+        a: "Sonabrief usa infrastruttura europea, e le sintesi cloud girano su server europei che non conservano nulla una volta elaborata la richiesta. Read AI archivia registrazioni e trascrizioni nel cloud, ospitato negli Stati Uniti per impostazione predefinita, con la residenza regionale offerta ai clienti enterprise."
+      - q: "Sonabrief è adatto ad avvocati, terapeuti o giornalisti?"
+        a: "Sì. Sono le persone per cui è nato. La trascrizione sul proprio dispositivo, senza alcun file audio conservato e senza nulla condiviso automaticamente, si adatta al lavoro regolato da segreto professionale, riservatezza o protezione delle fonti."

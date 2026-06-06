@@ -1,0 +1,77 @@
+# Verified copy session. EN + IT only for now.
+# fr/es/de intentionally absent → routes not generated. Translation phase later.
+# draft:true held until founder validates IT + EN rendering visually.
+
+slug: psychologist
+draft: false
+
+i18n:
+  en:
+    profession: "For psychologists"
+    painPoints:
+      - "A recorded session is among the most sensitive data that exists, and it falls under the special category of health data"
+      - "The therapeutic setting rests on trust, and a client who suspects their voice is going to a cloud may stop speaking freely"
+      - "Hours rebuilding session notes from memory after the client has left"
+    title: "Sonabrief for psychologists: session notes that never leave your control"
+    description: "A meeting assistant for psychologists built around confidentiality. You choose, before each session, whether the audio is transcribed on your own device or on European servers. The recording is never kept as a file."
+    intro: |
+      A therapy session produces something more sensitive than almost any other recording: the unedited voice of a person describing their inner life. Under data protection law this is not ordinary content. It is health data, a special category that carries the strictest obligations, and the raw audio of a session is the most exposed form it can take. Most general purpose transcription tools treat that audio as something to upload, process on servers abroad, and in several cases reuse to improve their models. For a clinician, that is difficult to reconcile with the duty of confidentiality and with what the client believes is happening in the room.
+
+      There is also the setting itself. Therapy works because the person trusts that what they say stays between the two of you. A client who suspects the session is being streamed to someone else's cloud may simply stop speaking freely, and the clinical work suffers for it. The handling of the recording is not a back office detail. It is part of the frame.
+
+      Sonabrief is built around that reality. Before each session you decide how the audio is handled. You can transcribe entirely **on your own device**, so the recording is never uploaded anywhere. Or you can choose to transcribe on **European servers** when you need more speed, in which case the audio is processed in the EU and not retained afterwards. It is an explicit choice you make each time, never something that happens to a client's words without you deciding it.
+
+      ## What the workflow looks like
+
+      You record a session. Sonabrief produces a clean written transcript and a structured summary you can use for your clinical notes. The written record stays under your control, and the original audio is not stored as a file once it has been transcribed. The aim is to give you back the time you would spend reconstructing notes from memory, without leaving a trail of raw session recordings on a third party's server.
+
+      ## What it does not do, and what stays with you
+
+      Sonabrief is a tool, not a clinical or ethical judgement. It does not decide whether a particular session may be recorded, whether your client has given informed consent, or whether your professional code allows it in a given case. Those decisions remain yours. The software is open source, so a colleague, a supervisor or a data protection advisor can inspect exactly how it handles audio rather than trusting a marketing claim.
+
+      None of this is legal or clinical advice. It is a description of how the tool works, so you can decide whether it fits the way you are required, and have chosen, to practise.
+    faq:
+      - q: "Is the session audio uploaded to the cloud?"
+        a: "It depends on the choice you make before each session. If you select on-device transcription, the audio stays on your computer and is never uploaded. If you choose transcription on European servers for extra speed, the audio is processed in the EU and is not retained once transcribed."
+      - q: "How does Sonabrief handle health data?"
+        a: "On-device transcription keeps the recording off any third party server, which is the most protective option for special category data. If you choose European cloud transcription, processing happens in the EU and nothing is retained afterwards. Whether and how to record a session, and on what legal basis, remains your professional responsibility. This is not legal advice."
+      - q: "Will my sessions be used to train AI models?"
+        a: "No. Your sessions are never used to train any model. When you ask for a written summary, it runs either on your own device or on European servers that keep nothing once the request is processed."
+      - q: "Can a supervisor or data protection advisor verify this?"
+        a: "Yes. Sonabrief is open source, so the code that handles audio can be inspected directly rather than relying on a promise. A colleague, supervisor or DPO can review how recording, transcription and storage actually behave."
+
+  it:
+    profession: "Per psicologi"
+    painPoints:
+      - "La registrazione di una seduta è tra i dati più sensibili che esistano, e rientra nella categoria speciale dei dati sanitari"
+      - "Il setting terapeutico si regge sulla fiducia, e un paziente che sospetta che la sua voce finisca in un cloud può smettere di parlare liberamente"
+      - "Ore a ricostruire le note della seduta a memoria dopo che il paziente è uscito"
+    title: "Sonabrief per psicologi: note delle sedute che non lasciano mai il tuo controllo"
+    description: "Un assistente per le sedute pensato per la riservatezza. Prima di ogni seduta scegli tu se l'audio viene trascritto sul tuo dispositivo o su server europei. La registrazione non viene mai conservata come file."
+    intro: |
+      Una seduta di terapia produce qualcosa di più sensibile di quasi ogni altra registrazione: la voce non filtrata di una persona che descrive la propria vita interiore. Per la normativa sulla protezione dei dati questo non è un contenuto qualsiasi. È un dato sanitario, una categoria speciale che porta con sé gli obblighi più stringenti, e l'audio grezzo di una seduta ne è la forma più esposta. La maggior parte degli strumenti di trascrizione generici tratta quell'audio come qualcosa da caricare, elaborare su server all'estero e, in diversi casi, riutilizzare per migliorare i propri modelli. Per un clinico è difficile conciliarlo con il dovere di riservatezza e con ciò che il paziente crede stia accadendo nella stanza.
+
+      C'è poi il setting stesso. La terapia funziona perché la persona si fida che ciò che dice resti tra voi due. Un paziente che sospetta che la seduta venga trasmessa al cloud di qualcun altro può semplicemente smettere di parlare liberamente, e il lavoro clinico ne risente. La gestione della registrazione non è un dettaglio amministrativo. Fa parte della cornice.
+
+      Sonabrief è costruito intorno a questa realtà. Prima di ogni seduta decidi tu come viene gestito l'audio. Puoi trascrivere interamente **sul tuo dispositivo**, così la registrazione non viene caricata da nessuna parte. Oppure puoi scegliere di trascrivere su **server europei** quando ti serve più velocità, e in quel caso l'audio viene elaborato nell'Unione Europea e non conservato in seguito. È una scelta esplicita che fai ogni volta, mai qualcosa che capita alle parole di un paziente senza che tu lo decida.
+
+      ## Come funziona, in pratica
+
+      Registri una seduta. Sonabrief produce una trascrizione scritta pulita e un riepilogo strutturato che puoi usare per le tue note cliniche. Il documento scritto resta sotto il tuo controllo, e l'audio originale non viene salvato come file una volta trascritto. L'obiettivo è restituirti il tempo che passeresti a ricostruire le note a memoria, senza lasciare una scia di registrazioni grezze delle sedute sul server di terzi.
+
+      ## Cosa non fa, e cosa resta in capo a te
+
+      Sonabrief è uno strumento, non un giudizio clinico o etico. Non decide se una determinata seduta possa essere registrata, se il tuo paziente ha prestato il consenso informato, o se il tuo codice deontologico lo consente in un dato caso. Queste decisioni restano tue. Il software è open source, quindi un collega, un supervisore o un consulente per la protezione dei dati può ispezionare esattamente come tratta l'audio invece di fidarsi di un'affermazione di marketing.
+
+      Nulla di tutto questo costituisce consulenza legale o clinica. È una descrizione di come funziona lo strumento, perché tu possa decidere se è adatto al modo in cui sei tenuto, e hai scelto, di lavorare.
+    faq:
+      - q: "L'audio della seduta viene caricato nel cloud?"
+        a: "Dipende dalla scelta che fai prima di ogni seduta. Se selezioni la trascrizione sul dispositivo, l'audio resta sul tuo computer e non viene mai caricato. Se scegli la trascrizione su server europei per avere più velocità, l'audio viene elaborato nell'Unione Europea e non viene conservato una volta trascritto."
+      - q: "Come gestisce Sonabrief i dati sanitari?"
+        a: "La trascrizione sul dispositivo tiene la registrazione fuori da qualsiasi server di terzi, che è l'opzione più protettiva per i dati di categoria speciale. Se scegli la trascrizione cloud europea, l'elaborazione avviene nell'Unione Europea e nulla viene conservato in seguito. Se e come registrare una seduta, e su quale base giuridica, resta una tua responsabilità professionale. Questa non è consulenza legale."
+      - q: "Le mie sedute verranno usate per addestrare modelli AI?"
+        a: "No. Le tue sedute non vengono mai usate per addestrare alcun modello. Quando chiedi un riepilogo scritto, viene elaborato sul tuo dispositivo oppure su server europei che non conservano nulla una volta elaborata la richiesta."
+      - q: "Un supervisore o un consulente per la protezione dei dati può verificarlo?"
+        a: "Sì. Sonabrief è open source, quindi il codice che gestisce l'audio può essere ispezionato direttamente invece di affidarsi a una promessa. Un collega, un supervisore o un DPO può verificare come si comportano davvero la registrazione, la trascrizione e l'archiviazione."
+
+  # fr / es / de intentionally absent → translation phase later.
